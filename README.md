@@ -1,28 +1,21 @@
-Ruby Units
-==========
+# Ruby Units
 
 Kevin C. Olbrich, Ph.D. 
 
-kevin.olbrich@gmail.com
+[Sciwerks.com](http://www.sciwerks.com)
 
-http://www.sciwerks.com
+Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/ruby-units)
 
-Project page: http://github.com/olbrich/ruby-units
-
-Introduction
-------------
+## Introduction
 Many technical applications make use of specialized calculations at some point.  Frequently, these calculations require unit conversions to ensure accurate results.  Needless to say, this is a pain to properly keep track of, and is prone to numerous errors.
   
-Solution
---------
+## Solution
 The 'Ruby units' gem is designed so simplify the handling of units for scientific calculations. The units of each quantity are specified when a Unit object is created and the Unit class will handle all subsequent conversions and manipulations to ensure an accurate result.
   
-Installation:
--------------
+## Installation:
 This package may be installed using:  `gem install ruby-units`
   
-Usage:
-------
+## Usage:
     unit = Unit.new("1")             # constant only
     unit = Unit.new("mm")            # unit only (defaults to a value of 1)
     unit = Unit.new("1 mm")          # create a simple unit
@@ -40,20 +33,17 @@ Usage:
     unit = '1/4 cup'.unit            # Rational number 
     unit = '1+1i mm'.unit            # Complex Number
 
-Rules:
-------
+## Rules:
 1. only 1 quantity per unit (with 2 exceptions... 6'5" and '8 lbs 8 oz')
 2. use SI notation when possible
 3. avoid using spaces in unit names
 
-Unit compatability:
--------------------
+## Unit compatability:
 Many methods require that the units of two operands are compatible.  Compatible units are those that can be easily converted into each other, such as 'meters' and 'feet'.
 
     unit1 =~ unit2   #=> true if units are compatible
 
-Unit Math:
-----------
+## Unit Math:
     Unit#+()      # Add. only works if units are compatible
     Unit#-()      # Subtract. only works if units are compatible
     Unit#*()      # Multiply.  
@@ -72,8 +62,7 @@ Unit will coerce other objects into a Unit if used in a formula.  This means tha
  
 This will work as expected so long as you start the formula with a Unit object. 
 
-Conversions & comparisons
--------------------------
+## Conversions & comparisons
 Units can be converted to other units in a couple of ways.
 
     unit1 = unit >> "ft"   # convert to 'feet'
@@ -88,8 +77,7 @@ Units can be converted to other units in a couple of ways.
  
 Any object that defines a 'to_unit' method will be automatically coerced to a unit during calculations.
  
-Text Output
------------
+## Text Output
 Units will display themselves nicely based on the preferred abbreviation for the units and prefixes.
 Since Unit implements a Unit#to_s, all that is needed in most cases is:
     
@@ -104,8 +92,7 @@ The to_s also accepts some options.
     U("100 kg").to_s(:lbs)     # returns 220 lbs, 7 oz
  
  
-Time Helpers
-------------
+## Time Helpers
 Time, Date, and DateTime objects can have time units added or subtracted.
 
     Time.now + "10 min".unit 
@@ -131,17 +118,14 @@ Durations may be entered as 'HH:MM:SS, usec' and will be returned in 'hours'.
 
 If only one ":" is present, it is interpreted as the separator between hours and minutes.
 
-Ranges
-------
+## Ranges
     [U('0 h')..U('10 h')].each {|x| p x}
 works so long as the starting point has an integer scalar
 
-Math functions
---------------
+## Math functions
 All Trig math functions (sin, cos, sinh, hypot...) can take a unit as their parameter.  It will be converted to radians and then used if possible.
 
-Temperatures
-------------
+## Temperatures
 Ruby-units makes a distinction between a temperature (which technically is a property) and degrees of temperature (which temperatures are measured in).
 
 Temperature units (i.e., 'tempK') can be converted back and forth, and will take into account the differences in the zero points of the various scales. Differential temperature (e.g., '100 degC'.unit) units behave like most other units.

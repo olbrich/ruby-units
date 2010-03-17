@@ -1,5 +1,8 @@
 require 'rubygems'
 require 'hoe'
+
+Hoe.plugin :yard
+
 require './lib/ruby_units/units'
 require './lib/ruby_units/ruby-units'
 
@@ -13,6 +16,8 @@ rescue
 end
 
 Hoe.spec('ruby-units') do |p|
+  p.yard_title = "Ruby-Units"
+  p.yard_markup = "markdown"
   p.version = Unit::VERSION
   p.rubyforge_name = 'ruby-units'
   p.summary = %q{A class that performs unit conversions and unit math}

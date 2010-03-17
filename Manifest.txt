@@ -1,6 +1,6 @@
 CHANGELOG.txt
 Manifest.txt
-README.txt
+README.md
 LICENSE.txt
 Rakefile
 lib/ruby-units.rb
