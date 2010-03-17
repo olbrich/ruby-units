@@ -1,5 +1,7 @@
 Change Log for Ruby-units
 =========================
+2010-03-16  1.1.5   * another bugfix, and update url to point to github
+2010-03-15  1.1.4   * fixed a couple of outstanding bugs
 2007-12-13  1.1.3   * fixed a minor bug with string %
 2007-12-12  1.1.2   * fixed a bug with format strings
                     * detect if ruby 1.8.6 is installed and use its' to_date function

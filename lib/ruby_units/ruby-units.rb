@@ -40,7 +40,7 @@ require 'parsedate'
 #  Unit.setup
 class Unit < Numeric
   # pre-generate hashes from unit definitions for performance.  
-  VERSION = '1.1.4'
+  VERSION = '1.1.5'
   @@USER_DEFINITIONS = {}
   @@PREFIX_VALUES = {}
   @@PREFIX_MAP = {}
@@ -132,8 +132,8 @@ class Unit < Numeric
       end
       @@OUTPUT_MAP[key]=value[0][0]        
     end
-    @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| prefix.length}.reverse.join('|')
-    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit| unit.length}.reverse.join('|')
+    @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
+    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit| [unit.length, unit]}.reverse.join('|')
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/    
     Unit.new(1)
   end
@@ -372,11 +372,11 @@ class Unit < Numeric
               "#{$1 % @scalar} #{$2 || self.units}".strip
             end
           rescue
-            (Time.gm(0) + self).strftime(target_units)  
+            (DateTime.new(0) + self).strftime(target_units)  
           end
-        when /(\S+)/       #unit only 'mm' or '1/mm'
+        when /(\S+)/ #unit only 'mm' or '1/mm'
           "#{self.to($1).to_s}"
-        else       #strftotime?
+        else
           raise "unhandled case"
         end
       else
@@ -1044,7 +1044,7 @@ class Unit < Numeric
       @base_scalar *= mult
       return self
     end
-  
+    unit_string.gsub!(/<(#{@@UNIT_REGEX})><(#{@@UNIT_REGEX})>/, '\1*\2')
     unit_string.gsub!(/[<>]/,"")
     
     if unit_string =~ /:/
@@ -1079,7 +1079,6 @@ class Unit < Numeric
     raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
     raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s[02-9]/).size > 0
     @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0]  #parse the string into parts
-    
     top.scan(TOP_REGEX).each do |item|
       n = item[1].to_i
       x = "#{item[0]} "
@@ -1096,8 +1095,10 @@ class Unit < Numeric
     @denominator ||= UNITY_ARRAY
     @numerator = top.scan(@@UNIT_MATCH_REGEX).delete_if {|x| x.empty?}.compact if top
     @denominator = bottom.scan(@@UNIT_MATCH_REGEX).delete_if {|x| x.empty?}.compact if bottom
+    
+    
     us = "#{(top || '' + bottom || '')}".to_s.gsub(@@UNIT_MATCH_REGEX,'').gsub(/[\d\*, "'_^\/\$]/,'')
-    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless us.empty?
+    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized #{us.inspect}") unless us.empty?
 
     @numerator = @numerator.map do |item|
        @@PREFIX_MAP[item[0]] ? [@@PREFIX_MAP[item[0]], @@UNIT_MAP[item[1]]] : [@@UNIT_MAP[item[1]]]

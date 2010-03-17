@@ -527,7 +527,8 @@ class TestRubyUnits < Test::Unit::TestCase
     unit1 = Unit.new("1.1 mm")
     unit2 = Unit.new("2 mm")
     assert_equal unit2, unit1.ceil
-    assert_equal(('1 mm'.unit / '1 mm'.unit).ceil, 1)
+    assert_equal(('1 mm'.unit / '1 mm'.unit).ceil, 1)  
+    assert_equal("11 kg*m".unit, ("1003 kg*m".unit / 100).ceil)
   end
   
   def test_floor
@@ -756,7 +757,7 @@ class TestRubyUnits < Test::Unit::TestCase
       a = '1 +/- 1 mm'.unit
       assert_equal a.to_s, '1 +/- 1 mm' 
     else
-      puts "Can't test Uncertain Units unless 'Uncertain' gem is installed"
+      warn "Can't test Uncertain Units unless 'Uncertain' gem is installed"
     end  
   end
   
@@ -893,7 +894,8 @@ class TestRubyUnits < Test::Unit::TestCase
 
   def test_explicit_init
     assert_equal '1 lbf'.unit, '1 <pound-force>'.unit
-    assert_equal '1 lbs'.unit, '1 <pound>'.unit    
+    assert_equal '1 lbs'.unit, '1 <pound>'.unit
+    assert_equal('1 kg*m'.unit, '1 <kilogram>*<meter>'.unit)
   end
   
   def test_format_nil_string
@@ -912,7 +914,13 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.1.4', Unit::VERSION)
+    assert_equal('1.1.5', Unit::VERSION)
   end
+  
+  def test_negation
+    a = 1.to_unit
+    assert_equal(a.class, (1-a).class)
+  end
+  
 end
 

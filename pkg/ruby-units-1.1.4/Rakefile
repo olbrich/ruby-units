@@ -12,14 +12,13 @@ begin
 rescue
 end
 
-Hoe.new('ruby-units', Unit::VERSION) do |p|
+Hoe.spec('ruby-units') do |p|
+  p.version = Unit::VERSION
   p.rubyforge_name = 'ruby-units'
-  p.summary = %q{A model that performs unit conversions and unit math}
+  p.summary = %q{A class that performs unit conversions and unit math}
   p.email = 'kevin.olbrich+ruby_units@gmail.com'
-  p.url = 'http://rubyforge.org/projects/ruby-units'
+  p.url = 'http://github.com/olbrich/ruby-units'
   p.description = "This library handles unit conversions and unit math"
   p.changes = p.paragraphs_of('CHANGELOG.txt', 0..1).join("\n\n")
   p.author = 'Kevin Olbrich, Ph.D'
 end
-
-# vim: syntax=Ruby

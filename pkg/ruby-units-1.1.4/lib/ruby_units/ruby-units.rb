@@ -33,14 +33,14 @@ require 'parsedate'
 # To add / override a unit definition, add a code block like this..
 #
 #  class Unit < Numeric
-#   UNIT_DEFINITIONS = {
+#   @@USER_DEFINITIONS = {
 #    <name>'  => [%w{prefered_name synonyms}, conversion_to_base, :classification, %w{<base> <units> <in> <numerator>} , %w{<base> <units> <in> <denominator>} ]
 #    }
 #  end
 #  Unit.setup
 class Unit < Numeric
   # pre-generate hashes from unit definitions for performance.  
-  VERSION = '1.1.3'
+  VERSION = '1.1.5'
   @@USER_DEFINITIONS = {}
   @@PREFIX_VALUES = {}
   @@PREFIX_MAP = {}
@@ -90,7 +90,7 @@ class Unit < Numeric
     7959=>:pressure, 
     7962=>:energy, 
     7979=>:viscosity, 
-    7981=>:force, 
+    7961=>:force, 
     7997=>:mass_concentration,
     8000=>:mass, 
     159999=>:magnetism, 
@@ -132,8 +132,8 @@ class Unit < Numeric
       end
       @@OUTPUT_MAP[key]=value[0][0]        
     end
-    @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| prefix.length}.reverse.join('|')
-    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit| unit.length}.reverse.join('|')
+    @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
+    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit| [unit.length, unit]}.reverse.join('|')
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/    
     Unit.new(1)
   end
@@ -159,7 +159,6 @@ class Unit < Numeric
     @is_base = from.is_base?
     @signature = from.signature
     @base_scalar = from.base_scalar
-    @output = from.output rescue nil
     @unit_name = from.unit_name rescue nil
   end
   
@@ -192,7 +191,7 @@ class Unit < Numeric
     @base_scalar = nil
     @unit_name = nil
     @signature = nil
-    @output = nil
+    @output = {}
     if options.size == 2
       begin
         cached = @@cached_units[options[1]] * options[0] 
@@ -232,8 +231,10 @@ class Unit < Numeric
       @scalar = options[0].ajd
       @numerator = ['<day>']
       @denominator = UNITY_ARRAY
-    when "": raise ArgumentError, "No Unit Specified"
-    when String: parse(options[0])   
+    when "": 
+      raise ArgumentError, "No Unit Specified"
+    when String: 
+      parse(options[0])   
     else
       raise ArgumentError, "Invalid Unit Format"
     end
@@ -263,6 +264,7 @@ class Unit < Numeric
   def self.clear_cache
     @@cached_units = {}
     @@base_unit_cache = {}
+    Unit.new(1)
   end
     
   def self.base_unit_cache
@@ -349,23 +351,33 @@ class Unit < Numeric
   # output is cached so subsequent calls for the same format will be fast
   #
   def to_s(target_units=nil)
-    out = @output[target_units] rescue nil
+    out = @output[target_units]
     if out
       return out
     else
       case target_units
-      when :ft:
+      when :ft :
         inches = self.to("in").scalar.to_int
         out = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
-      when :lbs:
+      when :lbs :
         ounces = self.to("oz").scalar.to_int
         out = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
       when String
-        begin #first try a standard format string
-          target_units =~ /(%[\w\d#+-.]*)*\s*(.+)*/
-          out = $2 ? self.to($2).to_s($1) : "#{($1 || '%g') % @scalar || 0} #{self.units}".strip
-        rescue #if that is malformed, try a time string
-          out = (Time.gm(0) + self).strftime(target_units)
+        out = case target_units
+        when /(%[-+\.\w\d#]+)\s*(.+)*/       #format string like '%0.2f in'
+          begin
+            if $2 #unit specified, need to convert
+              self.to($2).to_s($1)
+            else 
+              "#{$1 % @scalar} #{$2 || self.units}".strip
+            end
+          rescue
+            (DateTime.new(0) + self).strftime(target_units)  
+          end
+        when /(\S+)/ #unit only 'mm' or '1/mm'
+          "#{self.to($1).to_s}"
+        else
+          raise "unhandled case"
         end
       else
         out = case @scalar
@@ -375,7 +387,7 @@ class Unit < Numeric
           "#{'%g' % @scalar} #{self.units}"
         end.strip
       end
-      @output = {target_units => out}
+      @output[target_units] = out
       return out
     end    
   end
@@ -785,7 +797,7 @@ class Unit < Numeric
   # convert a duration to a DateTime.  This will work so long as the duration is the duration from the zero date
   # defined by DateTime
   def to_datetime
-    DateTime.new0(self.to('d').scalar)
+    DateTime.new!(self.to('d').scalar)
   end
   
   def to_date
@@ -1032,7 +1044,7 @@ class Unit < Numeric
       @base_scalar *= mult
       return self
     end
-  
+    unit_string.gsub!(/<(#{@@UNIT_REGEX})><(#{@@UNIT_REGEX})>/, '\1*\2')
     unit_string.gsub!(/[<>]/,"")
     
     if unit_string =~ /:/
@@ -1065,10 +1077,8 @@ class Unit < Numeric
     end
     
     raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
-    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s\d+\S*/).size > 0
-    
+    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s[02-9]/).size > 0
     @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0]  #parse the string into parts
-    
     top.scan(TOP_REGEX).each do |item|
       n = item[1].to_i
       x = "#{item[0]} "
@@ -1085,8 +1095,10 @@ class Unit < Numeric
     @denominator ||= UNITY_ARRAY
     @numerator = top.scan(@@UNIT_MATCH_REGEX).delete_if {|x| x.empty?}.compact if top
     @denominator = bottom.scan(@@UNIT_MATCH_REGEX).delete_if {|x| x.empty?}.compact if bottom
+    
+    
     us = "#{(top || '' + bottom || '')}".to_s.gsub(@@UNIT_MATCH_REGEX,'').gsub(/[\d\*, "'_^\/\$]/,'')
-    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless us.empty?
+    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized #{us.inspect}") unless us.empty?
 
     @numerator = @numerator.map do |item|
        @@PREFIX_MAP[item[0]] ? [@@PREFIX_MAP[item[0]], @@UNIT_MAP[item[1]]] : [@@UNIT_MAP[item[1]]]
