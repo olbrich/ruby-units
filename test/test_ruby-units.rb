@@ -64,7 +64,7 @@ class TestRubyUnits < Test::Unit::TestCase
  
   def setup
     @april_fools = Time.at 1143910800
-    @april_fools_datetime = DateTime.parse('2006-4-1 12:00')
+    @april_fools_datetime = DateTime.parse('01/04/2006 12:00:00 -5:00')
     Time.forced_now = @april_fools
     DateTime.forced_now = @april_fools_datetime 
     #Unit.clear_cache
@@ -98,15 +98,16 @@ class TestRubyUnits < Test::Unit::TestCase
   
   def test_time_helpers
     assert_equal @april_fools, Time.now
+    assert_equal @april_fools_datetime, DateTime.now
     assert_equal "1 day".from_now, @april_fools + 86400
     assert_equal "1 day".from("now"), @april_fools + 86400
     assert_equal "1 day".ago, @april_fools - 86400
     assert_equal "1 day".before_now, @april_fools - 86400
     assert_equal '1 days'.before('now'), @april_fools - 86400
     assert_equal 'days'.since(@april_fools - 86400), "1 day".unit
-    assert_equal 'days'.since('3/31/06 12:00'), "1 day".unit
+    assert_equal 'days'.since('31/3/2006 12:00:00 -5:00'), "1 day".unit
     assert_equal 'days'.since(DateTime.parse('2006-3-31 12:00')), "1 day".unit
-    assert_equal 'days'.until('4/2/2006'), '1 day'.unit
+    assert_equal 'days'.until('2/4/2006'), '1 day'.unit
     assert_equal 'now'.time, Time.now
     assert_equal 'now'.datetime, DateTime.now
     assert_raises(ArgumentError) { 'days'.until(1) }

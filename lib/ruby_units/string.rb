@@ -1,3 +1,4 @@
+require 'time'
 # make a string into a unit
 class String
   def to_unit(other = nil)
@@ -66,7 +67,11 @@ class String
       raise(ArgumentError, 'Invalid Time String') unless r
       return r
     rescue
-      Time.local(*ParseDate.parsedate(self))
+      if RUBY_VERSION =~ /1.9/
+        (self == "now") ? Time.now : Time.parse(self)
+      else
+        Time.local(*ParseDate.parsedate(self))
+      end
     end
   end
   
@@ -75,7 +80,11 @@ class String
       # raises an exception if Chronic.parse = nil or if Chronic not defined
       r = Chronic.parse(self,options).to_datetime
     rescue
-      r=DateTime.civil(*ParseDate.parsedate(self)[0..5].compact)
+      r = if RUBY_VERSION =~ /1.9/
+        DateTime.parse(self)
+      else
+        DateTime.civil(*ParseDate.parsedate(self)[0..5].compact)
+      end
     end
     raise RuntimeError, "Invalid Time String" if r == DateTime.new      
     return r
@@ -85,7 +94,11 @@ class String
     begin
       r = Chronic.parse(self,options).to_date
     rescue
-      r = Date.civil(*ParseDate.parsedate(self)[0..5].compact)
+      r = if RUBY_VERSION =~ /1.9/
+        (self == "today") ? Date.today : Date.parse(self)
+      else
+        Date.civil(*ParseDate.parsedate(self)[0..5].compact)
+      end
     end
     raise RuntimeError, 'Invalid Date String' if r == Date.new
     return r

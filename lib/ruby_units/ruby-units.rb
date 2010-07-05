@@ -369,7 +369,7 @@ class Unit < Numeric
         out = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
       when String
         out = case target_units
-        when /(%[\-+\.\w\d#]+)\s*(.+)*/       #format string like '%0.2f in'
+        when /(%[\-+\.\w#]+)\s*(.+)*/       #format string like '%0.2f in'
           begin
             if $2 #unit specified, need to convert
               self.to($2).to_s($1)
