@@ -1,13 +1,13 @@
 require 'test/unit'
 require 'ruby-units'
 require 'rubygems'
-require 'uncertain' if Gem::GemPathSearcher.new.find('uncertain')
+#require 'uncertain' if Gem::GemPathSearcher.new.find('uncertain')
 require 'yaml'
-require 'chronic' if Gem::GemPathSearcher.new.find('chronic')
+#require 'chronic' if Gem::GemPathSearcher.new.find('chronic')
 
 class Unit < Numeric
   @@USER_DEFINITIONS = {'<inchworm>' =>  [%w{inworm inchworm}, 0.0254, :length, %w{<meter>} ],
-                        '<habenero>'   => [%{degH}, 100, :temperature, %w{<celsius>}]}
+                        '<habenero>'   => [%w{degH}, 100, :temperature, %w{<celsius>}]}
   Unit.setup
 end
 
@@ -914,7 +914,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.1.5', Unit::VERSION)
+    assert_equal('1.1.6', Unit::VERSION)
   end
   
   def test_negation

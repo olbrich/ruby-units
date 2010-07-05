@@ -1,11 +1,12 @@
 require 'mathn'
-require 'rational'
 require 'date'
-require 'parsedate'
-
+unless RUBY_VERSION =~ /1.9/
+  require 'parsedate'
+  require 'rational'
+end
 # = Ruby Units
 #
-# Copyright 2006 by Kevin C. Olbrich, Ph.D.
+# Copyright 2006-2010 by Kevin C. Olbrich, Ph.D.
 # 
 # See http://rubyforge.org/ruby-units/
 #
@@ -40,7 +41,7 @@ require 'parsedate'
 #  Unit.setup
 class Unit < Numeric
   # pre-generate hashes from unit definitions for performance.  
-  VERSION = '1.1.5'
+  VERSION = '1.1.6'
   @@USER_DEFINITIONS = {}
   @@PREFIX_VALUES = {}
   @@PREFIX_MAP = {}
@@ -133,7 +134,7 @@ class Unit < Numeric
       @@OUTPUT_MAP[key]=value[0][0]        
     end
     @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
-    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit| [unit.length, unit]}.reverse.join('|')
+    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit]}.reverse.join('|')
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/    
     Unit.new(1)
   end
@@ -164,11 +165,13 @@ class Unit < Numeric
   
   # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
   # before YAML'izing it.
-  def to_yaml( opts = {} )
-    YAML::quick_emit( object_id, opts ) do |out|
-      out.map( taguri, to_yaml_style ) do |map|
-        for m in to_yaml_properties do 
-          map.add( m[1..-1], instance_variable_get( m ) )
+  if RUBY_VERSION =~ /1.8/
+    def to_yaml( opts = {} )
+      YAML::quick_emit( object_id, opts ) do |out|
+        out.map( taguri, to_yaml_style ) do |map|
+          for m in to_yaml_properties do 
+            map.add( m[1..-1], instance_variable_get( m ) )
+          end
         end
       end
     end
@@ -212,28 +215,28 @@ class Unit < Numeric
     end
     
     case options[0]
-    when Hash:
+    when Hash
       @scalar = options[0][:scalar] || 1
       @numerator = options[0][:numerator] || UNITY_ARRAY
       @denominator = options[0][:denominator] || UNITY_ARRAY
       @signature = options[0][:signature]
-    when Array:
+    when Array
       initialize(*options[0])
       return
-    when Numeric:
+    when Numeric
       @scalar = options[0]
       @numerator = @denominator = UNITY_ARRAY
-    when Time:
+    when Time
       @scalar = options[0].to_f
       @numerator = ['<second>']
       @denominator = UNITY_ARRAY
-    when DateTime:
+    when DateTime
       @scalar = options[0].ajd
       @numerator = ['<day>']
       @denominator = UNITY_ARRAY
-    when "": 
+    when ""
       raise ArgumentError, "No Unit Specified"
-    when String: 
+    when String
       parse(options[0])   
     else
       raise ArgumentError, "Invalid Unit Format"
@@ -296,12 +299,14 @@ class Unit < Numeric
   # results of the conversion are cached so subsequent calls to this will be fast
   def to_base
     return self if self.is_base?
-     if self.units =~ /\A(deg|temp)(C|F|K|C)\Z/
+    if self.units =~ /\A(deg|temp)(C|F|K|C)\Z/
       @signature = 400
       base = case self.units
-      when /temp/ : self.to('tempK')
-      when /deg/ : self.to('degK')
-      end
+        when /temp/
+          self.to('tempK')
+        when /deg/
+          self.to('degK')
+        end
       return base
     end
 
@@ -356,15 +361,15 @@ class Unit < Numeric
       return out
     else
       case target_units
-      when :ft :
+      when :ft
         inches = self.to("in").scalar.to_int
         out = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
-      when :lbs :
+      when :lbs
         ounces = self.to("oz").scalar.to_int
         out = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
       when String
         out = case target_units
-        when /(%[-+\.\w\d#]+)\s*(.+)*/       #format string like '%0.2f in'
+        when /(%[\-+\.\w\d#]+)\s*(.+)*/       #format string like '%0.2f in'
           begin
             if $2 #unit specified, need to convert
               self.to($2).to_s($1)
@@ -381,7 +386,7 @@ class Unit < Numeric
         end
       else
         out = case @scalar
-        when Rational : 
+        when Rational
           "#{@scalar} #{self.units}"
         else
           "#{'%g' % @scalar} #{self.units}"
@@ -421,8 +426,9 @@ class Unit < Numeric
   # Comparisons are done based on the value of the unit in base SI units.
   def <=>(other)
     case other
-    when 0: self.base_scalar <=> 0
-    when Unit:
+    when 0
+      self.base_scalar <=> 0
+    when Unit
       raise ArgumentError, "Incompatible Units" unless self =~ other
       self.base_scalar <=> other.base_scalar
     else
@@ -441,7 +447,8 @@ class Unit < Numeric
   def =~(other)
     return true if self == 0 || other == 0
     case other
-    when Unit : self.signature == other.signature
+    when Unit
+      self.signature == other.signature
     else
       x,y = coerce(other)
       x =~ y
@@ -457,7 +464,8 @@ class Unit < Numeric
   # Unit("100 cm") === Unit("1 m")      # => false
   def ===(other)
     case other
-    when Unit: (self.scalar == other.scalar) && (self.units == other.units)
+    when Unit
+      (self.scalar == other.scalar) && (self.units == other.units)
     else
       x,y = coerce(other)
       x === y
@@ -473,12 +481,13 @@ class Unit < Numeric
   def +(other)   
     if Unit === other 
       case
-      when self.zero? : other.dup
-      when self =~ other :
+      when self.zero?
+        other.dup
+      when self =~ other
         raise ArgumentError, "Cannot add two temperatures" if ([self, other].all? {|x| x.is_temperature?})
         if [self, other].any? {|x| x.is_temperature?}
           case self.is_temperature?
-          when true:
+          when true
             Unit.new(:scalar => (self.scalar + other.to(self.temperature_scale).scalar), :numerator => @numerator, :denominator=>@denominator, :signature => @signature)
           else
             Unit.new(:scalar => (other.scalar + self.to(other.temperature_scale).scalar), :numerator => other.numerator, :denominator=>other.denominator, :signature => other.signature)
@@ -502,15 +511,16 @@ class Unit < Numeric
   # throws an exception if the units are not compatible.
   def -(other)
     if Unit === other 
-    case
-      when self.zero? : -other.dup
-      when self =~ other :
+      case
+      when self.zero?
+        -other.dup
+      when self =~ other
         case
-          when [self, other].all? {|x| x.is_temperature?} : 
+          when [self, other].all? {|x| x.is_temperature?}
             Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => KELVIN, :denominator => UNITY_ARRAY, :signature => @signature).to(self.temperature_scale) 
-          when self.is_temperature? :
+          when self.is_temperature?
             Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<temp-K>'], :denominator => UNITY_ARRAY, :signature => @signature).to(self) 
-          when other.is_temperature? :
+          when other.is_temperature?
             raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
           else
             @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
@@ -578,11 +588,11 @@ class Unit < Numeric
       return self.inverse if other == -1
     end
     case other
-    when Rational:
+    when Rational
       self.power(other.numerator).root(other.denominator)
-    when Integer:
+    when Integer
       self.power(other)
-    when Float:
+    when Float
       return self**(other.to_i) if other == other.to_i
       valid = (1..9).map {|x| 1/x}
       raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
@@ -624,13 +634,13 @@ class Unit < Numeric
     for item in @numerator.uniq do
       x = num.find_all {|i| i==item}.size
       r = ((x/n)*(n-1)).to_int
-      r.times {|x| num.delete_at(num.index(item))}
+      r.times {|y| num.delete_at(num.index(item))}
     end
     
     for item in @denominator.uniq do 
       x = den.find_all {|i| i==item}.size
       r = ((x/n)*(n-1)).to_int
-      r.times {|x| den.delete_at(den.index(item))}
+      r.times {|y| den.delete_at(den.index(item))}
     end
     q = @scalar < 0 ? (-1)**Rational(1,n) * (@scalar.abs)**Rational(1,n) : @scalar**Rational(1,n)
     Unit.new(:scalar=>q,:numerator=>num,:denominator=>den)    
@@ -666,29 +676,38 @@ class Unit < Numeric
       target_unit = other.units rescue other
       unless @base_scalar
         @base_scalar = case start_unit
-          when 'tempC' : @scalar + 273.15
-          when 'tempK' : @scalar
-          when 'tempF' : (@scalar+459.67)*(5.0/9.0)
-          when 'tempR' : @scalar*(5.0/9.0)
+          when 'tempC'
+            @scalar + 273.15
+          when 'tempK'
+            @scalar
+          when 'tempF'
+            (@scalar+459.67)*(5.0/9.0)
+          when 'tempR'
+            @scalar*(5.0/9.0)
         end
       end
       q=  case target_unit
-            when 'tempC'  : @base_scalar - 273.15
-            when 'tempK'  : @base_scalar 
-            when 'tempF'  : @base_scalar * (9.0/5.0) - 459.67
-            when 'tempR'  : @base_scalar * (9.0/5.0) 
+            when 'tempC'
+              @base_scalar - 273.15
+            when 'tempK'
+              @base_scalar 
+            when 'tempF'
+              @base_scalar * (9.0/5.0) - 459.67
+            when 'tempR'
+              @base_scalar * (9.0/5.0) 
           end
         
       Unit.new("#{q} #{target_unit}")
     else
-       case other
-          when Unit: 
-            return self if other.units == self.units
-            target = other
-          when String: target = Unit.new(other)
-          else
-            raise ArgumentError, "Unknown target units"
-        end
+      case other
+      when Unit
+        return self if other.units == self.units
+        target = other
+      when String
+        target = Unit.new(other)
+      else
+        raise ArgumentError, "Unknown target units"
+      end
       raise ArgumentError,  "Incompatible Units" unless self =~ target
       one = @numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
       two = @denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
@@ -833,9 +852,11 @@ class Unit < Numeric
   # 'min'.since(time)
   def since(time_point = ::Time.now)
     case time_point
-    when Time:      (Time.now - time_point).unit('s').to(self)
-    when DateTime, Date:  (DateTime.now - time_point).unit('d').to(self)
-    when String:    
+    when Time
+      (Time.now - time_point).unit('s').to(self)
+    when DateTime, Date
+      (DateTime.now - time_point).unit('d').to(self)
+    when String    
       (DateTime.now - time_point.time(:context=>:past)).unit('d').to(self)
     else
       raise ArgumentError, "Must specify a Time, DateTime, or String" 
@@ -845,9 +866,11 @@ class Unit < Numeric
   # 'min'.until(time)
   def until(time_point = ::Time.now)
     case time_point
-    when Time:      (time_point - Time.now).unit('s').to(self)
-    when DateTime, Date:  (time_point - DateTime.now).unit('d').to(self)
-    when String:
+    when Time
+      (time_point - Time.now).unit('s').to(self)
+    when DateTime, Date
+      (time_point - DateTime.now).unit('d').to(self)
+    when String
       r = (time_point.time(:context=>:future) - DateTime.now)
       Time === time_point.time ? r.unit('s').to(self) : r.unit('d').to(self)
     else
@@ -882,7 +905,8 @@ class Unit < Numeric
       return [other.to_unit, self]
     end
     case other
-    when Unit : [other, self]
+    when Unit
+      [other, self]
     else 
       [Unit.new(other), self]
     end
@@ -984,8 +1008,10 @@ class Unit < Numeric
     den = []
     for key, value in combined do 
       case 
-      when value > 0 : value.times {num << key}
-      when value < 0 : value.abs.times {den << key}
+      when value > 0
+        value.times {num << key}
+      when value < 0
+        value.abs.times {den << key}
       end
     end
     num = UNITY_ARRAY if num.empty?
@@ -1083,8 +1109,10 @@ class Unit < Numeric
       n = item[1].to_i
       x = "#{item[0]} "
       case 
-        when n>=0 : top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) {|s| x * n}
-        when n<0 : bottom = "#{bottom} #{x * -n}"; top.gsub!(/#{item[0]}(\^|\*\*)#{n}/,"")
+        when n>=0
+          top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) {|s| x * n}
+        when n<0
+          bottom = "#{bottom} #{x * -n}"; top.gsub!(/#{item[0]}(\^|\*\*)#{n}/,"")
       end
     end 
     bottom.gsub!(BOTTOM_REGEX) {|s| "#{$1} " * $2.to_i} if bottom

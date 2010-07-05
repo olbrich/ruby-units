@@ -7,10 +7,11 @@ class Date
   alias :unit_date_add :+
   def +(unit)
     case unit
-    when Unit:
+    when Unit
       unit = unit.to('d').round if ['y', 'decade', 'century'].include? unit.units 
       unit_date_add(unit.to('day').scalar)
-    when Time: unit_date_add(unit.to_datetime)
+    when Time
+      unit_date_add(unit.to_datetime)
     else
       unit_date_add(unit)
     end
@@ -20,10 +21,11 @@ class Date
   alias :unit_date_sub :-    
   def -(unit)
     case unit
-    when Unit: 
+    when Unit 
       unit = unit.to('d').round if ['y', 'decade', 'century'].include? unit.units 
       unit_date_sub(unit.to('day').scalar)
-    when Time: unit_date_sub(unit.to_datetime)
+    when Time
+      unit_date_sub(unit.to_datetime)
     else
       unit_date_sub(unit)
     end

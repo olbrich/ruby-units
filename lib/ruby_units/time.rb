@@ -29,7 +29,7 @@ class Time
   end
   
   # ruby 1.8.6 has a reasonable implementation of this that works well, so let's use it.
-  if VERSION == "1.8.4"
+  if RUBY_VERSION == "1.8.4"
     def to_date
       x=(Date.civil(1970,1,1)+((self.to_f+self.gmt_offset)/86400.0)-0.5)
       Date.civil(x.year, x.month, x.day )
@@ -38,14 +38,15 @@ class Time
   
   def +(other)
     case other
-    when Unit:
+    when Unit
       other = other.to('d').round.to('s') if ['y', 'decade', 'century'].include? other.units  
       begin
         unit_add(other.to('s').scalar)
       rescue RangeError
         self.to_datetime + other
       end
-    when DateTime: unit_add(other.to_time)
+    when DateTime
+      unit_add(other.to_time)
     else
       unit_add(other)
     end
@@ -60,7 +61,7 @@ class Time
   
   def -(other)
     case other
-    when Unit: 
+    when Unit
       other = other.to('d').round.to('s') if ['y', 'decade', 'century'].include? other.units  
       begin
         unit_sub(other.to('s').scalar)
@@ -68,7 +69,8 @@ class Time
         self.to_datetime - other
       end
       
-    when DateTime: unit_sub(other.to_time)
+    when DateTime
+      unit_sub(other.to_time)
     else
       unit_sub(other)
     end
