@@ -205,6 +205,8 @@ class Unit < Numeric
       return
     end
     if options.size == 3
+      options[1] = options[1].join if options[1].kind_of?(Array)
+      options[2] = options[2].join if options[2].kind_of?(Array)
       begin
         cached = @@cached_units["#{options[1]}/#{options[2]}"] * options[0] 
         copy(cached)
