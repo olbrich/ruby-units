@@ -67,10 +67,13 @@ class String
       raise(ArgumentError, 'Invalid Time String') unless r
       return r
     rescue
-      if RUBY_VERSION =~ /1.9/
-        (self == "now") ? Time.now : Time.parse(self)
-      else
+      case
+      when self == "now"
+        Time.now
+      when (RUBY_VERSION < "1.9")
         Time.local(*ParseDate.parsedate(self))
+      else
+        Time.parse(self)
       end
     end
   end
@@ -80,13 +83,14 @@ class String
       # raises an exception if Chronic.parse = nil or if Chronic not defined
       r = Chronic.parse(self,options).to_datetime
     rescue
-      r = if RUBY_VERSION =~ /1.9/
-        DateTime.parse(self)
+      r = case
+      when self.to_s == "now"
+        DateTime.now
       else
-        DateTime.civil(*ParseDate.parsedate(self)[0..5].compact)
+        DateTime.parse(self)
       end
     end
-    raise RuntimeError, "Invalid Time String" if r == DateTime.new      
+    raise RuntimeError, "Invalid Time String (#{self.to_s})" if r == DateTime.new      
     return r
   end
   
@@ -94,10 +98,13 @@ class String
     begin
       r = Chronic.parse(self,options).to_date
     rescue
-      r = if RUBY_VERSION =~ /1.9/
-        (self == "today") ? Date.today : Date.parse(self)
-      else
+      r = case
+      when self == "today" 
+        Date.today
+      when RUBY_VERSION < "1.9"
         Date.civil(*ParseDate.parsedate(self)[0..5].compact)
+      else
+        Date.parse(self)
       end
     end
     raise RuntimeError, 'Invalid Date String' if r == Date.new

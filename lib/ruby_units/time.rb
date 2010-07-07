@@ -24,15 +24,16 @@ class Time
   alias :u :to_unit
   alias :unit_add :+
   
-  def to_datetime
-    DateTime.civil(1970,1,1)+(self.to_f+self.gmt_offset)/86400
+  unless Time.instance_methods.include?(:to_datetime)
+    def to_datetime
+      DateTime.civil(1970,1,1)+(self.to_f+self.gmt_offset)/86400
+    end
   end
   
-  # ruby 1.8.6 has a reasonable implementation of this that works well, so let's use it.
-  if RUBY_VERSION == "1.8.4"
+  unless Time.instance_methods.include?(:to_date)
     def to_date
       x=(Date.civil(1970,1,1)+((self.to_f+self.gmt_offset)/86400.0)-0.5)
-      Date.civil(x.year, x.month, x.day )
+      Date.civil(x.year, x.month, x.day)
     end
   end
   

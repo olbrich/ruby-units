@@ -1,8 +1,6 @@
 # Math will convert unit objects to radians and then attempt to use the value for 
 # trigonometric functions.  
 
-require 'complex'
-
 module Math
   alias unit_sqrt sqrt
   def sqrt(n)
@@ -53,7 +51,7 @@ module Math
     end
   end
   
-  alias :unit_atan2 :atan2
+  alias unit_atan2 atan2
   def atan2(x,y)
     case
     when (Unit === x && Unit === y) && (x !~ y)

@@ -1,3 +1,4 @@
+require 'complex'
 class Complex < Numeric
   def to_unit(other = nil)
     real_unit = self.real.to_unit

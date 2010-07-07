@@ -1,6 +1,6 @@
 require 'mathn'
 require 'date'
-unless RUBY_VERSION =~ /1.9/
+if RUBY_VERSION < "1.9"
   require 'parsedate'
   require 'rational'
 end
@@ -727,7 +727,7 @@ class Unit < Numeric
   # converts the unit back to a float if it is unitless.  Otherwise raises an exception
   def to_f
     return @scalar.to_f if self.unitless?
-    raise RuntimeError, "Can't convert to Float unless unitless.  Use Unit#scalar"
+    raise RuntimeError, "Can't convert to Float unless unitless (#{self.to_s}).  Use Unit#scalar"
   end
   
   # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
@@ -859,7 +859,7 @@ class Unit < Numeric
     when DateTime, Date
       (DateTime.now - time_point).unit('d').to(self)
     when String    
-      (DateTime.now - time_point.time(:context=>:past)).unit('d').to(self)
+      (DateTime.now - time_point.to_datetime(:context=>:past)).unit('d').to(self)
     else
       raise ArgumentError, "Must specify a Time, DateTime, or String" 
     end
@@ -873,8 +873,7 @@ class Unit < Numeric
     when DateTime, Date
       (time_point - DateTime.now).unit('d').to(self)
     when String
-      r = (time_point.time(:context=>:future) - DateTime.now)
-      Time === time_point.time ? r.unit('s').to(self) : r.unit('d').to(self)
+      (time_point.to_datetime(:context=>:future) - DateTime.now).unit('d').to(self)
     else
       raise ArgumentError, "Must specify a Time, DateTime, or String" 
     end
