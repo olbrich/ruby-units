@@ -572,6 +572,18 @@ class Unit < Numeric
       y / x
     end
   end
+
+	# divide two units and return quotient and remainder
+	# when both units are in the same units we just use divmod on the raw scalars
+	# otherwise we use the scalar of the base unit which will be a float
+	def divmod(other)
+		raise ArgumentError, "Incompatible Units" unless self =~ other
+		if self.units == other.units
+			return self.scalar.divmod(other.scalar)
+		else
+			return self.to_base.scalar.divmod(other.to_base.scalar)
+		end
+	end
     
   # Exponentiate.  Only takes integer powers. 
   # Note that anything raised to the power of 0 results in a Unit object with a scalar of 1, and no units.

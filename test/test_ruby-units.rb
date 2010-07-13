@@ -104,26 +104,47 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_in_delta Time.now, "now".time, 1
   end
   
-  def test_time_helpers
-    assert_equal @april_fools, Time.now
-    assert_equal @april_fools_datetime, DateTime.now
-    assert_equal "1 day".from_now, @april_fools + 86400
-    assert_equal "1 day".from("now"), @april_fools + 86400
-    assert_equal "1 day".ago, @april_fools - 86400
-    assert_equal "1 day".before_now, @april_fools - 86400
-    assert_equal '1 days'.before('now'), @april_fools - 86400
+	def test_from_now
+		assert_equal "1 day".from_now, @april_fools + 86400
+	end
+	
+	def test_from
+		assert_equal "1 day".from("now"), @april_fools + 86400
+	end
+
+	def test_ago
+		assert_equal "1 day".ago, @april_fools - 86400
+	end
+	
+	def test_before_now
+		assert_equal "1 day".before_now, @april_fools - 86400
+	end
+	
+	def test_before
+		assert_equal '1 days'.before('now'), @april_fools - 86400
+	end
+
+	def test_since
     assert_equal 'days'.since(@april_fools - 86400), "1 day".unit
     assert_equal 'days'.since('2006-3-31 12:00:00 -5:00'), "1 day".unit
-    assert_equal 'days'.since(DateTime.parse('2006-3-31 12:00 -5:00')), "1 day".unit
-    assert_equal 'days'.until('2006-04-2 12:00:00 -5:00'), '1 day'.unit
-    assert_equal 'now'.time, Time.now
-    assert_equal 'now'.datetime, DateTime.now
-    assert_raises(ArgumentError) { 'days'.until(1) }
+    assert_equal 'days'.since(DateTime.parse('2006-3-31 12:00 -5:00')), "1 day".unit		
     assert_raises(ArgumentError) { 'days'.since(1) }
-    assert_equal Unit.new(Time.now).scalar,  1143910800
-    assert_equal @april_fools.unit.to_time, @april_fools
-    assert_equal Time.in('1 day'), @april_fools + 86400
-    assert_equal "2006-04-01T12:00:00-05:00", @april_fools_datetime.inspect
+	end
+
+	def test_until
+    assert_equal 'days'.until('2006-04-2 12:00:00 -5:00'), '1 day'.unit		
+    assert_raises(ArgumentError) { 'days'.until(1) }
+	end
+
+  def test_time_helpers
+    # assert_equal @april_fools, Time.now
+    # assert_equal @april_fools_datetime, DateTime.now
+    # assert_equal 'now'.time, Time.now
+    # assert_equal 'now'.datetime, DateTime.now
+    # assert_equal Unit.new(Time.now).scalar,  1143910800
+    # assert_equal @april_fools.unit.to_time, @april_fools
+    # assert_equal Time.in('1 day'), @april_fools + 86400
+    # assert_equal "2006-04-01T12:00:00-05:00", @april_fools_datetime.inspect
     assert_equal "2006-04-01T00:00:00+00:00", '2453826.5 days'.unit.to_datetime.to_s 
   end
   
@@ -855,8 +876,23 @@ class TestRubyUnits < Test::Unit::TestCase
     a = '-9 mm^2'.unit
     b = a**(0.5)
     assert_in_delta Math.sqrt(a).to_unit.scalar.real, b.scalar.real, 0.00001
-    assert_in_delta Math.sqrt(a).to_unit.scalar.imaginary, b.scalar.imaginary, 0.00001    
+		# ruby 1.8.x uses .image while 1.9.x uses .imaginary
+		if Complex.instance_methods.include?(:imaginary)
+    	assert_in_delta Math.sqrt(a).to_unit.scalar.imaginary, b.scalar.imaginary, 0.00001
+		else
+			assert_in_delta Math.sqrt(a).to_unit.scalar.image, b.scalar.image, 0.00001
+		end
   end
+
+	def test_div
+		assert_equal 11,"23 m".unit.div('2 m'.unit)
+	end
+	
+	def test_divmod
+		assert_equal [277,1], 555.unit('mm').divmod(2.unit('mm'))
+		assert_equal [277, 0.0010000000000000373], '0.555 m'.unit.divmod('2 mm'.unit)
+		assert_raises(ArgumentError) { '1 m'.unit.divmod('1 kg'.unit) }
+	end
 
 	if Math.respond_to?(:cbrt)
 		def test_cbrt
