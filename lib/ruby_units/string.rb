@@ -10,6 +10,7 @@ class String
   
   # format unit output using formating codes '%0.2f' % '1 mm'.unit => '1.00 mm'
   def %(*args)
+		return if self.empty?
     case 
     when Unit === args[0]
       args[0].to_s(self)
