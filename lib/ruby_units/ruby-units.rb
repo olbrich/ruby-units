@@ -1,4 +1,3 @@
-require 'mathn'
 require 'date'
 if RUBY_VERSION < "1.9"
   require 'parsedate'

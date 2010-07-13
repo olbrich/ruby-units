@@ -1,6 +1,6 @@
+require 'rubygems'
 require 'test/unit'
 require 'ruby-units'
-require 'rubygems'
 #require 'uncertain' if Gem::GemPathSearcher.new.find('uncertain')
 require 'yaml'
 #require 'chronic' if Gem::GemPathSearcher.new.find('chronic')
@@ -9,6 +9,10 @@ class Unit < Numeric
   @@USER_DEFINITIONS = {'<inchworm>' =>  [%w{inworm inchworm}, 0.0254, :length, %w{<meter>} ],
                         '<habenero>'   => [%w{degH}, 100, :temperature, %w{<celsius>}]}
   Unit.setup
+end
+
+unless defined?(Uncertain)
+	warn "Can't test Uncertain Units unless 'Uncertain' gem is installed"
 end
 
 class Time
@@ -126,17 +130,13 @@ class TestRubyUnits < Test::Unit::TestCase
   def test_string_helpers
     assert_equal '1 mm'.to('in'), Unit('1 mm').to('in')
   end
-  
-  def test_math
-    pi = Math::PI
-    assert_equal Math.sin(pi), Math.sin("180 deg".unit)
-    assert_equal Math.cos(pi), Math.cos("180 deg".unit)
-    assert_equal Math.tan(pi), Math.tan("180 deg".unit)
-    assert_equal Math.sinh(pi), Math.sinh("180 deg".unit)
-    assert_equal Math.cosh(pi), Math.cosh("180 deg".unit)
-    assert_equal Math.tanh(pi), Math.tanh("180 deg".unit)
-  end
 
+  [:sin, :cos, :tan, :sinh, :cosh, :tanh].each do |trig|
+		define_method("test_#{trig}") do
+			assert_equal Math.send(trig, Math::PI), Math.send(trig, "180 deg".unit)
+		end
+	end
+	
   def test_clone
     unit1= "1 mm".unit
     unit2 = unit1.clone
@@ -757,14 +757,12 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal "cells", a.units
   end
   
-  def test_uncertain
-    if defined?(Uncertain)
-      a = '1 +/- 1 mm'.unit
-      assert_equal a.to_s, '1 +/- 1 mm' 
-    else
-      warn "Can't test Uncertain Units unless 'Uncertain' gem is installed"
-    end  
-  end
+	if defined?(Uncertain)
+		def test_uncertain
+			a = '1 +/- 1 mm'.unit
+			assert_equal a.to_s, '1 +/- 1 mm' 
+		end  
+	end
   
   def test_format
     assert_equal "%0.2f" % "1 mm".unit, "1.00 mm" 
@@ -857,9 +855,14 @@ class TestRubyUnits < Test::Unit::TestCase
     a = '-9 mm^2'.unit
     b = a**(0.5)
     assert_in_delta Math.sqrt(a).to_unit.scalar.real, b.scalar.real, 0.00001
-    assert_in_delta Math.sqrt(a).to_unit.scalar.image, b.scalar.image, 0.00001
-    
+    assert_in_delta Math.sqrt(a).to_unit.scalar.imaginary, b.scalar.imaginary, 0.00001    
   end
+
+	if Math.respond_to?(:cbrt)
+		def test_cbrt
+			assert_in_delta '2 mm'.to_unit, Math.cbrt('8 mm^3'.to_unit), 0.0001
+		end
+	end
   
   def test_hypot
     assert_equal Math.hypot('3 mm'.unit,'4 mm'.unit), '5 mm'.unit
