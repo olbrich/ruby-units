@@ -164,7 +164,7 @@ class Unit < Numeric
   
   # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
   # before YAML'izing it.
-  if RUBY_VERSION =~ /1.8/
+  if RUBY_VERSION < "1.9"
     def to_yaml( opts = {} )
       YAML::quick_emit( object_id, opts ) do |out|
         out.map( taguri, to_yaml_style ) do |map|
@@ -426,15 +426,15 @@ class Unit < Numeric
   # Compare two Unit objects. Throws an exception if they are not of compatible types.
   # Comparisons are done based on the value of the unit in base SI units.
   def <=>(other)
-    case other
-    when 0
-      self.base_scalar <=> 0
-    when Unit
+    case	
+    when other.zero? && !self.is_temperature?
+      return self.base_scalar <=> 0
+    when Unit === other
       raise ArgumentError, "Incompatible Units" unless self =~ other
-      self.base_scalar <=> other.base_scalar
+      return self.base_scalar <=> other.base_scalar
     else
       x,y = coerce(other)
-      x <=> y
+      return x <=> y
     end
   end
   
@@ -675,7 +675,7 @@ class Unit < Numeric
   #
   # Special handling for temperature conversions is supported.  If the Unit object is converted
   # from one temperature unit to another, the proper temperature offsets will be used.
-  # Supports Kelvin, Celcius, fahrenheit, and Rankine scales.
+  # Supports Kelvin, Celsius, fahrenheit, and Rankine scales.
   #
   # Note that if temperature is part of a compound unit, the temperature will be treated as a differential
   # and the units will be scaled appropriately.
@@ -843,7 +843,7 @@ class Unit < Numeric
    
   # true if scalar is zero
   def zero?
-    return @scalar.zero?
+    return self.to_base.scalar.zero?
   end
   
   # '5 min'.unit.ago 

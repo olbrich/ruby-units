@@ -607,8 +607,9 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { '-1000 tempC'.unit}
     assert_raises(ArgumentError) { '-1000 tempF'.unit}
     
-    assert_equal '0 tempC'.unit, '32 tempF'.unit
-    assert_equal '0 tempC'.unit, '273.15 tempK'.unit
+    assert_in_delta '32 tempF'.unit, '0 tempC'.unit, 0.01
+    assert_in_delta '0 tempC'.unit, '32 tempF'.unit, 0.01
+    assert_in_delta '0 tempC'.unit, '273.15 tempK'.unit, 0.01
     assert_in_delta '0 tempC'.unit.base_scalar, '491.67 tempR'.unit.base_scalar, 0.01
     
     a = '10 degC'.unit
