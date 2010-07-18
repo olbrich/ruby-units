@@ -1,18 +1,23 @@
 require 'rubygems'
 require 'test/unit'
 require 'ruby-units'
-#require 'uncertain' if Gem::GemPathSearcher.new.find('uncertain')
 require 'yaml'
-#require 'chronic' if Gem::GemPathSearcher.new.find('chronic')
+begin
+	require 'chronic'
+rescue LoadError
+	warn "Can't test Chronic integration unless gem 'chronic' is installed"
+end
+begin 
+	require 'uncertain'
+rescue LoadError
+	warn "Can't test Uncertain Units unless 'Uncertain' gem is installed"
+end
+
 
 class Unit < Numeric
   @@USER_DEFINITIONS = {'<inchworm>' =>  [%w{inworm inchworm}, 0.0254, :length, %w{<meter>} ],
                         '<habenero>'   => [%w{degH}, 100, :temperature, %w{<celsius>}]}
   Unit.setup
-end
-
-unless defined?(Uncertain)
-	warn "Can't test Uncertain Units unless 'Uncertain' gem is installed"
 end
 
 class Time
@@ -68,11 +73,7 @@ class TestRubyUnits < Test::Unit::TestCase
  
   def setup
     @april_fools = Time.at 1143910800
-    if RUBY_VERSION < "1.9"  
-      @april_fools_datetime = DateTime.parse('01-04-2006 12:00:00 -5:00')
-    else
-      @april_fools_datetime = DateTime.parse('2006-4-1 12:00:00 -5:00')
-    end
+    @april_fools_datetime = DateTime.parse('2006-04-01T12:00:00-05:00')
     Time.forced_now = @april_fools
     DateTime.forced_now = @april_fools_datetime 
     #Unit.clear_cache
@@ -93,7 +94,6 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal "s", a.to_unit.units
     assert_equal a + 3600, a + "1 h".unit
     assert_equal a - 3600, a - "1 h".unit
-    b = Unit(a) + "1 h".unit
     assert_in_delta Time.now - "1 h".unit, "1 h".ago, 1
     assert_in_delta Time.now + 3600, "1 h".from_now, 1
     assert_in_delta "1 h".unit + Time.now, "1 h".from_now, 1
@@ -137,14 +137,14 @@ class TestRubyUnits < Test::Unit::TestCase
 	end
 
   def test_time_helpers
-    # assert_equal @april_fools, Time.now
-    # assert_equal @april_fools_datetime, DateTime.now
-    # assert_equal 'now'.time, Time.now
-    # assert_equal 'now'.datetime, DateTime.now
-    # assert_equal Unit.new(Time.now).scalar,  1143910800
-    # assert_equal @april_fools.unit.to_time, @april_fools
-    # assert_equal Time.in('1 day'), @april_fools + 86400
-    # assert_equal "2006-04-01T12:00:00-05:00", @april_fools_datetime.inspect
+    assert_equal @april_fools, Time.now
+    assert_equal @april_fools_datetime, DateTime.now
+    assert_equal Time.now, 'now'.time
+    assert_equal DateTime.now, 'now'.datetime
+    assert_equal 1143910800, Unit.new(Time.now).scalar
+    assert_equal @april_fools.unit.to_time, @april_fools
+    assert_equal Time.in('1 day'), @april_fools + 86400
+    assert_equal "2006-04-01T12:00:00-05:00", @april_fools_datetime.inspect
     assert_equal "2006-04-01T00:00:00+00:00", '2453826.5 days'.unit.to_datetime.to_s 
   end
   
@@ -338,7 +338,7 @@ class TestRubyUnits < Test::Unit::TestCase
       assert_equal ['<foot>'], unit3.numerator
       assert_equal ['<1>'],unit3.denominator
     }
-    assert_raises(ArgumentError) { unit3= unit1 >> 5.0}
+    assert_raises(ArgumentError) { unit1 >> 5.0}
     assert_equal unit1, unit1.to(true)
     assert_equal unit1, unit1.to(false)
     assert_equal unit1, unit1.to(nil)
@@ -431,7 +431,7 @@ class TestRubyUnits < Test::Unit::TestCase
       assert_equal "2".unit, unit2
     }
     assert_raises(ArgumentError) {
-      unit2 = "1".unit + nil
+      "1".unit + nil
     }
   end
 
@@ -531,7 +531,7 @@ class TestRubyUnits < Test::Unit::TestCase
       assert_equal unit2, unit1**-2
       }
     assert_raises(ZeroDivisionError) {
-      unit="0 mm".unit**-1
+      "0 mm".unit**-1
     }
   end
 
@@ -607,9 +607,9 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { '-1000 tempC'.unit}
     assert_raises(ArgumentError) { '-1000 tempF'.unit}
     
-    assert_in_delta '32 tempF'.unit, '0 tempC'.unit, 0.01
-    assert_in_delta '0 tempC'.unit, '32 tempF'.unit, 0.01
-    assert_in_delta '0 tempC'.unit, '273.15 tempK'.unit, 0.01
+    assert_in_delta '32 tempF'.unit.base_scalar, '0 tempC'.unit.base_scalar, 0.01
+    assert_in_delta '0 tempC'.unit.base_scalar, '32 tempF'.unit.base_scalar, 0.01
+    assert_in_delta '0 tempC'.unit.base_scalar, '273.15 tempK'.unit.base_scalar, 0.01
     assert_in_delta '0 tempC'.unit.base_scalar, '491.67 tempR'.unit.base_scalar, 0.01
     
     a = '10 degC'.unit
@@ -619,14 +619,13 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal a >> 'tempF', '-441.67 tempF'.unit
     
     unit1 = '37 tempC'.unit
-    unit2 = unit1 >> "tempF" >> 'tempK' >> 'tempR' >> 'tempC'
     assert_equal unit1 >> 'tempF' >> 'tempK' >> 'tempR' >> 'tempC', unit1
     
     a = '100 tempF'.unit
     b = '10 degC'.unit
     c = '50 tempF'.unit
     d = '18 degF'.unit
-    assert_equal a+b, '118 tempF'.unit
+    assert_equal('118 tempF'.unit,a+b)
     assert_equal b+a, '118 tempF'.unit
     assert_equal a-b, '82 tempF'.unit
     assert_in_delta((a-c).scalar, '50 degF'.unit.scalar, 0.01)
@@ -796,7 +795,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
   
   def test_currency
-    assert_nothing_raised {a = "$1".unit}
+    assert_nothing_raised {"$1".unit}
   end
   
   def test_kind
@@ -806,9 +805,9 @@ class TestRubyUnits < Test::Unit::TestCase
   
   def test_percent
       assert_nothing_raised {
-       z = "1 percent".unit
-        a = "1%".unit
-        b = "0.01%".unit
+      	"1 percent".unit
+        "1%".unit
+        "0.01%".unit
       }
       a = '100 ml'.unit
       b = '50%'.unit
@@ -959,12 +958,24 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.1.6', Unit::VERSION)
+    assert_equal('1.2.0', Unit::VERSION)
   end
   
   def test_negation
     a = 1.to_unit
     assert_equal(a.class, (1-a).class)
+  end
+  
+  def test_degree
+    assert "100 tempF".unit.degree?
+    assert "100 degC".unit.degree?
+    assert !"1 mm".unit.degree?
+  end
+
+  def test_temperature
+    assert "100 tempF".unit.temperature?
+    assert !"100 degC".unit.temperature?
+    assert !"1 mm".unit.temperature?    
   end
   
 end
