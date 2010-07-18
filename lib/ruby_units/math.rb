@@ -15,18 +15,18 @@ module Math
   module_function :unit_sqrt
   module_function :sqrt
 
-	if self.respond_to?(:cbrt)
-	  alias :unit_cbrt :cbrt
-	  def cbrt(n)
-	    if Unit === n
-	      (n**(Rational(1,3))).to_unit 
-	    else
-	      unit_cbrt(n)
-	    end
-	  end
-	  module_function :unit_cbrt
-	  module_function :cbrt
-	end
+  if self.respond_to?(:cbrt)
+    alias :unit_cbrt :cbrt
+    def cbrt(n)
+      if Unit === n
+        (n**(Rational(1,3))).to_unit 
+      else
+        unit_cbrt(n)
+      end
+    end
+    module_function :unit_cbrt
+    module_function :cbrt
+  end
   
   alias :unit_sin :sin
   def sin(n)
@@ -60,8 +60,8 @@ module Math
   def tan(n)
    Unit === n ? unit_tan(n.to('radian').scalar) : unit_tan(n)
   end
-	module_function :tan
-	module_function :unit_tan
+  module_function :tan
+  module_function :unit_tan
 
   alias :unit_tanh :tanh
   def tanh(n)
