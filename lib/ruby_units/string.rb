@@ -71,10 +71,10 @@ class String
       case
       when self == "now"
         Time.now
-      when (RUBY_VERSION < "1.9")
-        Time.local(*ParseDate.parsedate(self))
-      else
+      when Time.respond_to?(:parse)
         Time.parse(self)
+      else
+        Time.local(*ParseDate.parsedate(self))
       end
     end
   end
