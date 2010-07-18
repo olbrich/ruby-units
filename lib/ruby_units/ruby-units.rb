@@ -40,7 +40,7 @@ end
 #  Unit.setup
 class Unit < Numeric
   # pre-generate hashes from unit definitions for performance.  
-  VERSION = '1.1.6'
+  VERSION = '1.2.0'
   @@USER_DEFINITIONS = {}
   @@PREFIX_VALUES = {}
   @@PREFIX_MAP = {}
@@ -137,7 +137,6 @@ class Unit < Numeric
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/    
     Unit.new(1)
   end
-  
   
   include Comparable
   attr_accessor :scalar, :numerator, :denominator, :signature, :base_scalar, :base_numerator, :base_denominator, :output, :unit_name
@@ -288,7 +287,7 @@ class Unit < Numeric
   # Returns 'true' if the Unit is represented in base units
   def is_base?
     return @is_base if defined? @is_base
-    return @is_base=true if @signature == 400 && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(deg|temp)K/
+    return @is_base=true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(deg|temp)K/
     n = @numerator + @denominator
     for x in n.compact do 
       return @is_base=false unless x == UNITY || (@@BASE_UNITS.include?((x)))
@@ -303,39 +302,39 @@ class Unit < Numeric
     if self.units =~ /\A(deg|temp)(C|F|K|C)\Z/
       @signature = 400
       base = case self.units
-        when /temp/
-          self.to('tempK')
-        when /deg/
-          self.to('degK')
-        end
+      when /temp/
+        self.to('tempK')
+      when /deg/
+        self.to('degK')
+      end
       return base
     end
 
     cached = ((@@base_unit_cache[self.units] * self.scalar) rescue nil)
     return cached if cached
-   
+
     num = []
     den = []
     q = 1
     for unit in @numerator.compact do
-        if @@PREFIX_VALUES[unit]
-          q *= @@PREFIX_VALUES[unit]
-        else
-          q *= @@UNIT_VALUES[unit][:scalar] if @@UNIT_VALUES[unit]
-          num << @@UNIT_VALUES[unit][:numerator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:numerator]
-          den << @@UNIT_VALUES[unit][:denominator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:denominator]
-        end
+      if @@PREFIX_VALUES[unit]
+        q *= @@PREFIX_VALUES[unit]
+      else
+        q *= @@UNIT_VALUES[unit][:scalar] if @@UNIT_VALUES[unit]
+        num << @@UNIT_VALUES[unit][:numerator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:numerator]
+        den << @@UNIT_VALUES[unit][:denominator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:denominator]
+      end
     end
     for unit in @denominator.compact do
-        if @@PREFIX_VALUES[unit]
-          q /= @@PREFIX_VALUES[unit]
-        else
-          q /= @@UNIT_VALUES[unit][:scalar] if @@UNIT_VALUES[unit]
-          den << @@UNIT_VALUES[unit][:numerator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:numerator]
-          num << @@UNIT_VALUES[unit][:denominator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:denominator]
-        end
+      if @@PREFIX_VALUES[unit]
+        q /= @@PREFIX_VALUES[unit]
+      else
+        q /= @@UNIT_VALUES[unit][:scalar] if @@UNIT_VALUES[unit]
+        den << @@UNIT_VALUES[unit][:numerator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:numerator]
+        num << @@UNIT_VALUES[unit][:denominator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:denominator]
+      end
     end
-    
+
     num = num.flatten.compact
     den = den.flatten.compact
     num = UNITY_ARRAY if num.empty?
@@ -406,8 +405,15 @@ class Unit < Numeric
   
   # true if unit is a 'temperature', false if a 'degree' or anything else
   def is_temperature?
-    return true if self.signature == 400 && self.units =~ /temp/
+    self.is_degree? && self.units =~ /temp/
   end
+  alias :temperature? :is_temperature?
+  
+  # true if a degree unit or equivalent.
+  def is_degree?
+    self.kind == :temperature
+  end
+  alias :degree? :is_degree?
   
   # returns the 'degree' unit associated with a temperature unit
   # '100 tempC'.unit.temperature_scale #=> 'degC'
@@ -426,7 +432,7 @@ class Unit < Numeric
   # Compare two Unit objects. Throws an exception if they are not of compatible types.
   # Comparisons are done based on the value of the unit in base SI units.
   def <=>(other)
-    case	
+    case  
     when other.zero? && !self.is_temperature?
       return self.base_scalar <=> 0
     when Unit === other
@@ -487,8 +493,7 @@ class Unit < Numeric
       when self =~ other
         raise ArgumentError, "Cannot add two temperatures" if ([self, other].all? {|x| x.is_temperature?})
         if [self, other].any? {|x| x.is_temperature?}
-          case self.is_temperature?
-          when true
+          if self.is_temperature?
             Unit.new(:scalar => (self.scalar + other.to(self.temperature_scale).scalar), :numerator => @numerator, :denominator=>@denominator, :signature => @signature)
           else
             Unit.new(:scalar => (other.scalar + self.to(other.temperature_scale).scalar), :numerator => other.numerator, :denominator=>other.denominator, :signature => other.signature)
@@ -498,13 +503,13 @@ class Unit < Numeric
           Unit.new(:scalar=>(self.base_scalar + other.base_scalar)*@q, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
         end
       else
-         raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
+        raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
       end
     elsif Time === other
       other + self
     else
-        x,y = coerce(other)
-        y + x
+      x,y = coerce(other)
+      y + x
     end
   end
   
@@ -573,17 +578,17 @@ class Unit < Numeric
     end
   end
 
-	# divide two units and return quotient and remainder
-	# when both units are in the same units we just use divmod on the raw scalars
-	# otherwise we use the scalar of the base unit which will be a float
-	def divmod(other)
-		raise ArgumentError, "Incompatible Units" unless self =~ other
-		if self.units == other.units
-			return self.scalar.divmod(other.scalar)
-		else
-			return self.to_base.scalar.divmod(other.to_base.scalar)
-		end
-	end
+  # divide two units and return quotient and remainder
+  # when both units are in the same units we just use divmod on the raw scalars
+  # otherwise we use the scalar of the base unit which will be a float
+  def divmod(other)
+    raise ArgumentError, "Incompatible Units" unless self =~ other
+    if self.units == other.units
+      return self.scalar.divmod(other.scalar)
+    else
+      return self.to_base.scalar.divmod(other.to_base.scalar)
+    end
+  end
     
   # Exponentiate.  Only takes integer powers. 
   # Note that anything raised to the power of 0 results in a Unit object with a scalar of 1, and no units.
@@ -684,32 +689,32 @@ class Unit < Numeric
     return self if TrueClass === other
     return self if FalseClass === other
     if (Unit === other && other.is_temperature?) || (String === other && other =~ /temp(K|C|R|F)/) 
-      raise ArgumentError, "Receiver is not a temperature unit" unless self.signature == 400 
+      raise ArgumentError, "Receiver is not a temperature unit" unless self.degree?
       start_unit = self.units
       target_unit = other.units rescue other
       unless @base_scalar
         @base_scalar = case start_unit
-          when 'tempC'
-            @scalar + 273.15
-          when 'tempK'
-            @scalar
-          when 'tempF'
-            (@scalar+459.67)*(5.0/9.0)
-          when 'tempR'
-            @scalar*(5.0/9.0)
+        when 'tempC'
+          @scalar + 273.15
+        when 'tempK'
+          @scalar
+        when 'tempF'
+          (@scalar+459.67)*(5.0/9.0)
+        when 'tempR'
+          @scalar*(5.0/9.0)
         end
       end
       q=  case target_unit
-            when 'tempC'
-              @base_scalar - 273.15
-            when 'tempK'
-              @base_scalar 
-            when 'tempF'
-              @base_scalar * (9.0/5.0) - 459.67
-            when 'tempR'
-              @base_scalar * (9.0/5.0) 
-          end
-        
+      when 'tempC'
+        @base_scalar - 273.15
+      when 'tempK'
+        @base_scalar 
+      when 'tempF'
+        @base_scalar * (9.0/5.0) - 459.67
+      when 'tempR'
+        @base_scalar * (9.0/5.0) 
+      end
+
       Unit.new("#{q} #{target_unit}")
     else
       case other
@@ -772,13 +777,13 @@ class Unit < Numeric
       output_d = ['1']
     else
       den.each_with_index do |token,index|
-          if token && @@PREFIX_VALUES[token] then
-            output_d << "#{@@OUTPUT_MAP[token]}#{@@OUTPUT_MAP[den[index+1]]}"
-            den[index+1]=nil
-          else
-            output_d << "#{@@OUTPUT_MAP[token]}" if token
-          end
+        if token && @@PREFIX_VALUES[token] then
+          output_d << "#{@@OUTPUT_MAP[token]}#{@@OUTPUT_MAP[den[index+1]]}"
+          den[index+1]=nil
+        else
+          output_d << "#{@@OUTPUT_MAP[token]}" if token
         end
+      end
     end
     on = output_n.reject {|x| x.empty?}.map {|x| [x, output_n.find_all {|z| z==x}.size]}.uniq.map {|x| ("#{x[0]}".strip+ (x[1] > 1 ? "^#{x[1]}" : ''))}
     od = output_d.reject {|x| x.empty?}.map {|x| [x, output_d.find_all {|z| z==x}.size]}.uniq.map {|x| ("#{x[0]}".strip+ (x[1] > 1 ? "^#{x[1]}" : ''))}
@@ -942,22 +947,21 @@ class Unit < Numeric
   
   # calculates the unit signature vector used by unit_signature
   def unit_signature_vector
-      return self.to_base.unit_signature_vector unless self.is_base?
-      result = self
-      vector = Array.new(SIGNATURE_VECTOR.size,0)
-      for element in @numerator
-        if r=@@ALL_UNIT_DEFINITIONS[element]
-            n = SIGNATURE_VECTOR.index(r[2])
-           vector[n] = vector[n] + 1 if n
-        end
+    return self.to_base.unit_signature_vector unless self.is_base?
+    vector = Array.new(SIGNATURE_VECTOR.size,0)
+    for element in @numerator
+      if r=@@ALL_UNIT_DEFINITIONS[element]
+        n = SIGNATURE_VECTOR.index(r[2])
+        vector[n] = vector[n] + 1 if n
       end
-      for element in @denominator
-        if r=@@ALL_UNIT_DEFINITIONS[element]
-          n = SIGNATURE_VECTOR.index(r[2])
-          vector[n] = vector[n] - 1 if n
-        end
+    end
+    for element in @denominator
+      if r=@@ALL_UNIT_DEFINITIONS[element]
+        n = SIGNATURE_VECTOR.index(r[2])
+        vector[n] = vector[n] - 1 if n
       end
-      vector
+    end
+    vector
   end
     
   private
