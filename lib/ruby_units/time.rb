@@ -24,12 +24,6 @@ class Time
   alias :u :to_unit
   alias :unit_add :+
   
-  unless Time.instance_methods.include?(:to_datetime)
-    def to_datetime
-      DateTime.civil(1970,1,1)+(self.to_f+self.gmt_offset)/86400
-    end
-  end
-  
   unless Time.instance_methods.include?(:to_date)
     def to_date
       x=(Date.civil(1970,1,1)+((self.to_f+self.gmt_offset)/86400.0)-0.5)
@@ -67,7 +61,7 @@ class Time
       begin
         unit_sub(other.to('s').scalar)
       rescue RangeError
-        self.to_datetime - other
+        self.send(:to_datetime) - other
       end
       
     when DateTime

@@ -26,7 +26,7 @@ class Time
   class << self
     alias :unforced_now :now
     def forced_now
-      return @@forced_now ? @@forced_now : unforced_now
+      @@forced_now.nil? ? unforced_now : @@forced_now
     end
     alias :now :forced_now
     
@@ -37,7 +37,7 @@ class Time
     
   alias :unforced_gmt :gmt_offset
   def forced_gmt
-    return @@forced_gmt ? @@forced_gmt : unforced_gmt
+    @@forced_gmt.nil? ? unforced_gmt : @@forced_gmt
   end
   alias :gmt_offset :forced_gmt
 
@@ -958,7 +958,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.2.0', Unit::VERSION)
+    assert_equal('1.2.0.a', Unit::VERSION)
   end
   
   def test_negation

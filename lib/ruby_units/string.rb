@@ -82,8 +82,8 @@ class String
   def to_datetime(options = {})
     begin
       # raises an exception if Chronic.parse = nil or if Chronic not defined
-      r = Chronic.parse(self,options).to_datetime
-    rescue
+      r = Chronic.parse(self,options).send(:to_datetime)
+    rescue Exception  => e
       r = case
       when self.to_s == "now"
         DateTime.now
