@@ -1,3 +1,5 @@
+$LOAD_PATH << File.dirname(__FILE__)
+require "ruby_units/version"
 require 'ruby_units/array'
 require 'ruby_units/date'
 require 'ruby_units/time'

@@ -1,5 +1,3 @@
-
-
 class Unit < Numeric
 UNIT_DEFINITIONS = { 
   # prefixes

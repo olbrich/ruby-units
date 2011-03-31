@@ -1,13 +1,28 @@
 require 'rubygems'
-require 'hoe'
+require 'rake'
+require 'rake/testtask'
+require './lib/ruby-units'
 
-Hoe.plugin :yard
-
-require './lib/ruby_units/units'
-require './lib/ruby_units/ruby-units'
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gem|
+    gem.name = "ruby-units"
+    gem.summary = %Q{A class that performs unit conversions and unit math}
+    gem.description = %Q{Provides classes and methods to perform unit math and conversions}
+    gem.authors = ["Kevin Olbrich, Ph.D."]
+    gem.email = ["kevin.olbrich+ruby_units@gmail.com"]
+    gem.homepage = "https://github.com/olbrich/ruby-units"
+    gem.has_rdoc = true
+    gem.files.exclude(".autotest")
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
+end
 
 begin
   require 'rcov/rcovtask'
+  desc "Generate code coverage"
   Rcov::RcovTask.new do |t|
     t.test_files = FileList['test/test*.rb']
     #t.verbose = true     # uncomment to see the executed command
@@ -15,15 +30,11 @@ begin
 rescue
 end
 
-Hoe.spec('ruby-units') do |p|
-  p.yard_title = "Ruby-Units"
-  p.yard_markup = "markdown"
-  p.version = Unit::VERSION
-  p.rubyforge_name = 'ruby-units'
-  p.summary = %q{A class that performs unit conversions and unit math}
-  p.email = 'kevin.olbrich+ruby_units@gmail.com'
-  p.url = 'http://github.com/olbrich/ruby-units'
-  p.description = "This library handles unit conversions and unit math"
-  p.changes = p.paragraphs_of('CHANGELOG.txt', 0..1).join("\n\n")
-  p.author = 'Kevin Olbrich, Ph.D'
+desc "Run unit tests"
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/test*.rb']
+  t.verbose = true
 end
+
+task :default => :tests
