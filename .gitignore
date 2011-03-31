@@ -1,2 +1,4 @@
 pkg
 .yardoc
+coverage
+Gemfile.lock
