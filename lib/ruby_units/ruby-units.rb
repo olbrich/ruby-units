@@ -234,7 +234,7 @@ class Unit < Numeric
       @scalar = options[0].ajd
       @numerator = ['<day>']
       @denominator = UNITY_ARRAY
-    when ""
+    when /^\s*$/
       raise ArgumentError, "No Unit Specified"
     when String
       parse(options[0])   

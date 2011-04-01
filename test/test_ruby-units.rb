@@ -823,6 +823,10 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { "3 s**2 4s s**2".unit }
     assert_raises(ArgumentError) { "3 s 5^6".unit }
     assert_raises(ArgumentError) { "".unit }
+    assert_raises(ArgumentError) { " ".unit }
+    assert_raises(ArgumentError) { "\t".unit }
+    assert_raises(ArgumentError) { "\t\t".unit }
+    assert_raises(ArgumentError) { "\n".unit }
   end
   
   def test_time_conversions
@@ -977,6 +981,6 @@ class TestRubyUnits < Test::Unit::TestCase
     assert !"100 degC".unit.temperature?
     assert !"1 mm".unit.temperature?    
   end
-  
+
 end
 
