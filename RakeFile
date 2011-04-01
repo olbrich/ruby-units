@@ -27,7 +27,7 @@ begin
     t.test_files = FileList['test/test*.rb']
     #t.verbose = true     # uncomment to see the executed command
   end
-rescue
+rescue LoadError
 end
 
 desc "Run unit tests"

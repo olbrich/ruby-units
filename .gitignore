@@ -2,3 +2,4 @@ pkg
 .yardoc
 coverage
 Gemfile.lock
+*.rbc
