@@ -829,6 +829,12 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { "\n".unit }
   end
   
+  def test_inline_conversions
+    assert_equal "60 s".unit, Unit.parse("1 min to seconds")
+    assert_equal "60 s".unit, Unit.parse("1 min as seconds")
+    assert_equal "60 s".unit, Unit.parse("1 min in seconds")
+  end
+  
   def test_time_conversions
     today = 'now'.to_time
     assert_equal today,@april_fools

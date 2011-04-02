@@ -274,6 +274,9 @@ class Unit < Numeric
     return @@base_unit_cache
   end
   
+  #
+  # parse strings like "1 minute in seconds"
+  #
   def self.parse(input)
     first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
     second.nil? ? first.unit : first.unit.to(second)
