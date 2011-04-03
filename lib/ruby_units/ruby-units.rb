@@ -175,7 +175,7 @@ class Unit < Numeric
     end
   end
   
-  # Create a new Unit object.  Can be initialized using a string, or a hash
+  # Create a new Unit object.  Can be initialized using a String, a Hash, an Array, Time, DateTime
   # Valid formats include:
   #  "5.6 kg*m/s^2"
   #  "5.6 kg*m*s^-2"
@@ -194,8 +194,10 @@ class Unit < Numeric
     @signature = nil
     @output = {}
     if options.size == 2
+      # options[0] is the scalar
+      # options[1] is a unit string
       begin
-        cached = @@cached_units[options[1]] * options[0] 
+        cached = Unit.cached[options[1]] * options[0] 
         copy(cached)
       rescue 
         initialize("#{options[0]} #{(options[1].units rescue options[1])}")
@@ -203,10 +205,13 @@ class Unit < Numeric
       return
     end
     if options.size == 3
+      # options[0] is the scalar
+      # options[1] is an array of unit strings for the numerator
+      # options[2] is an array of unit strings for the denominator
       options[1] = options[1].join if options[1].kind_of?(Array)
       options[2] = options[2].join if options[2].kind_of?(Array)
       begin
-        cached = @@cached_units["#{options[1]}/#{options[2]}"] * options[0] 
+        cached = Unit.cached["#{options[1]}/#{options[2]}"] * options[0] 
         copy(cached)
       rescue 
         initialize("#{options[0]} #{options[1]}/#{options[2]}")
@@ -246,8 +251,8 @@ class Unit < Numeric
   
     unary_unit = self.units || ""
     opt_units = options[0].scan(NUMBER_REGEX)[0][1] if String === options[0]
-    unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(temp|deg(C|K|R|F))|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
-      @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
+    unless Unit.cached.keys.include?(opt_units) || (opt_units =~ /(temp|deg(C|K|R|F))|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+      Unit.cache(opt_units,(self.scalar == 1 ? self : opt_units.unit)) if opt_units && !opt_units.empty?
     end
     unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /(temp|deg)(C|K|R|F)/) then
       @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
@@ -262,6 +267,10 @@ class Unit < Numeric
   
   def self.cached
     return @@cached_units
+  end
+  
+  def self.cache(key, value)
+    @@cached_units[key] = value
   end
   
   def self.clear_cache
@@ -1159,6 +1168,32 @@ class Unit < Numeric
     @denominator = UNITY_ARRAY if @denominator.empty?
     self
   end 
+  
+  private
+
+  # parse a string consisting of a number and a unit string
+  # 
+  #
+  def self.parse_into_numbers_and_units(string)
+    # scientific notation.... 123.234E22, -123.456e-10
+    sci = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
+    # rational numbers.... -1/3, 1/5, 20/100
+    rational = %r{[+-]?\d+\/\d+}
+    # complex numbers... -1.2+3i, +1.2-3.3i
+    complex = %r{#{sci}{2,2}i}
+    anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?(.+)}
+    num, unit = string.scan(anynumber).first
+    [case num
+      when NilClass
+        1
+      when complex
+        num.to_c
+      when rational
+        Rational(*num.split("/").map {|x| x.to_i})
+      else
+        num.to_f
+    end, unit.strip]
+  end
 end
 
 Unit.setup

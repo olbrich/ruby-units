@@ -987,6 +987,18 @@ class TestRubyUnits < Test::Unit::TestCase
     assert !"100 degC".unit.temperature?
     assert !"1 mm".unit.temperature?    
   end
+  
+  def test_parse_into_numbers_and_units
+    assert_equal([1,"m"], Unit.parse_into_numbers_and_units("1 m"))
+    assert_equal([1.0,"m"], Unit.parse_into_numbers_and_units("1.0 m"))
+    assert_equal([0.1,"m"], Unit.parse_into_numbers_and_units("0.1 m"))
+    assert_equal([0.1,"m"], Unit.parse_into_numbers_and_units(".1 m"))
+    assert_equal([-1.23E-3,"m"], Unit.parse_into_numbers_and_units("-1.23E-3 m"))
+    assert_equal([1/4,"m"], Unit.parse_into_numbers_and_units("1/4 m"))
+    assert_equal([-1/4,"m"], Unit.parse_into_numbers_and_units("-1/4 m"))
+    assert_equal([1,"m"], Unit.parse_into_numbers_and_units("1   m"))
+    assert_equal([1,"m"], Unit.parse_into_numbers_and_units("m"))    
+  end
 
 end
 
