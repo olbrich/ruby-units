@@ -32,8 +32,14 @@ end
 
 begin
   require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new do |t|
-    
+
+  desc "Run specs"
+  RSpec::Core::RakeTask.new
+  
+  desc  "Run all specs with rcov"
+  RSpec::Core::RakeTask.new("spec:rcov") do |t|
+    t.rcov = true
+    t.rcov_opts = %w{--exclude osx\/objc,gems\/,spec\/,features\/}
   end
 rescue LoadError
 end
