@@ -4,5 +4,5 @@ group :development do
   gem 'bundler', '~> 1.0'
   gem 'rcov'
   gem 'jeweler'
-  gem 'rspec'
+  gem 'rspec', '~>2.5'
 end
