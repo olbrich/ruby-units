@@ -30,6 +30,15 @@ begin
 rescue LoadError
 end
 
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new do |t|
+    
+  end
+rescue LoadError
+end
+
+
 desc "Run unit tests"
 Rake::TestTask.new do |t|
   t.libs << "test"
