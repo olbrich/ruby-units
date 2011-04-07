@@ -235,12 +235,12 @@ class Unit < Numeric
       @scalar = options[0].to_f
       @numerator = ['<second>']
       @denominator = UNITY_ARRAY
-    when DateTime
+    when DateTime, Date
       @scalar = options[0].ajd
       @numerator = ['<day>']
       @denominator = UNITY_ARRAY
     when /^\s*$/
-      raise ArgumentError, "No Unit Specified"
+      raise ArgumentError, "No Unit Specified (#{options.first})"
     when String
       parse(options[0])   
     else
