@@ -6,11 +6,31 @@ describe Date do
   it {should be_instance_of Date}
   it {should respond_to :to_unit}
   it {should respond_to :to_time}
-  it {should respond_to :to_date}
+  it {should respond_to :to_date}  
   
-  specify { subject.to_unit.should be_instance_of Unit }
-  specify { subject.to_unit.units.should == "d" }
-  specify { subject.to_unit.kind.should == :time }
-  
-  
+  specify { (subject + "5 days".unit).should == Date.new(2011,4,6) }
+  specify { (subject - "5 days".unit).should == Date.new(2011,3,27) }
+  specify { (subject + "1 year".unit).should == Date.new(2012,4,1) }
+  specify { (subject - "1 year".unit).should == Date.new(2010,4,1) }
+end
+
+describe "Date Unit" do
+
+  subject { Date.new(2011,4,1).to_unit }
+
+  it { should be_instance_of Unit }
+  its(:scalar) { should be_kind_of Rational }
+  its(:units) { should == "d" }
+  its(:kind) { should == :time }
+
+  specify { (subject + "5 days".unit).should == Date.new(2011,4,6) }
+  specify { (subject - "5 days".unit).should == Date.new(2011,3,27) }
+
+  specify { expect { subject + Date.new(2011,4,1) }.to raise_error(ArgumentError) }
+  specify { expect { subject + DateTime.new(2011,4,1,12,00,00) }.to raise_error(ArgumentError) }
+  specify { expect { subject + Time.parse("2011-04-01 12:00:00") }.to raise_error(ArgumentError) }
+
+  specify { (subject - Date.new(2011,4,1)).should be_zero }
+  specify { (subject - DateTime.new(2011,4,1,00,00,00)).should be_zero }
+  specify { (subject - Time.parse("2011-04-01 00:00")).should be_zero }
 end

@@ -444,16 +444,34 @@ class Unit < Numeric
   # Compare two Unit objects. Throws an exception if they are not of compatible types.
   # Comparisons are done based on the value of the unit in base SI units.
   def <=>(other)
-    case  
+    case
+    when !self.base_scalar.respond_to?(:<=>)
+      raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspec}"
     when other.zero? && !self.is_temperature?
       return self.base_scalar <=> 0
-    when Unit === other
+    when other.instance_of?(Unit)
       raise ArgumentError, "Incompatible Units" unless self =~ other
       return self.base_scalar <=> other.base_scalar
     else
       x,y = coerce(other)
       return x <=> y
     end
+  end
+  
+  # Compare Units for equality
+  # this is necessary mostly for Complex units.  Complex units do not have a <=> operator
+  # so we define this one here so that we can properly check complex units for equality.
+  def ==(other)
+    case
+    when other.respond_to?(:zero?) && other.zero? && !self.is_temperature?
+      return self.zero?
+    when other.instance_of?(Unit)
+      raise ArgumentError, "Incompatible Units" unless self =~ other
+      return self.base_scalar == other.base_scalar
+    else
+      x,y = coerce(other)
+      return x == y
+    end      
   end
   
   # check to see if units are compatible, but not the scalar part
@@ -497,8 +515,9 @@ class Unit < Numeric
   # Add two units together.  Result is same units as receiver and scalar and base_scalar are updated appropriately
   # throws an exception if the units are not compatible.
   # It is possible to add Time objects to units of time
-  def +(other)   
-    if Unit === other 
+  def +(other)
+    case other
+    when Unit
       case
       when self.zero?
         other.dup
@@ -517,8 +536,8 @@ class Unit < Numeric
       else
         raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
       end
-    elsif Time === other
-      other + self
+    when Date, Time
+      raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be added to a Unit"
     else
       x,y = coerce(other)
       y + x
@@ -528,26 +547,27 @@ class Unit < Numeric
   # Subtract two units. Result is same units as receiver and scalar and base_scalar are updated appropriately
   # throws an exception if the units are not compatible.
   def -(other)
-    if Unit === other 
-      case
-      when self.zero?
-        -other.dup
-      when self =~ other
+    case other
+      when Unit
         case
-          when [self, other].all? {|x| x.is_temperature?}
-            Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => KELVIN, :denominator => UNITY_ARRAY, :signature => @signature).to(self.temperature_scale) 
-          when self.is_temperature?
-            Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<temp-K>'], :denominator => UNITY_ARRAY, :signature => @signature).to(self) 
-          when other.is_temperature?
-            raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
-          else
-            @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
-            Unit.new(:scalar=>(self.base_scalar - other.base_scalar)*@q, :numerator=>@numerator, :denominator=>@denominator, :signature=>@signature)            
+        when self.zero?
+          -other.dup
+        when self =~ other
+          case
+            when [self, other].all? {|x| x.is_temperature?}
+              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => KELVIN, :denominator => UNITY_ARRAY, :signature => @signature).to(self.temperature_scale) 
+            when self.is_temperature?
+              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<temp-K>'], :denominator => UNITY_ARRAY, :signature => @signature).to(self) 
+            when other.is_temperature?
+              raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
+            else
+              @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
+              Unit.new(:scalar=>(self.base_scalar - other.base_scalar)*@q, :numerator=>@numerator, :denominator=>@denominator, :signature=>@signature)            
+          end
+        else
+           raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
-      else
-         raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
-      end
-    elsif Time === other
+    when Time
       other - self
     else
         x,y = coerce(other)
