@@ -3,3 +3,5 @@ pkg
 coverage
 Gemfile.lock
 *.rbc
+.rspec
+
