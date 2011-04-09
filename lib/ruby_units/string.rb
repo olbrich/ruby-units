@@ -28,14 +28,19 @@ class String
     alias :old_from :from
   end 
   
+  # "5 min".from("now")
   def from(time_point = ::Time.now)
-    return old_from(time_point) if Integer === time_point
+    return old_from(time_point) if self.respond_to?(:old_from) && time_point.instance_of?(Integer)
     self.unit.from(time_point)
   end
   
   alias :after :from
-  alias :from_now :from
+
+  def from_now
+    self.from('now')
+  end
   
+  # "5 min".ago
   def ago
     self.unit.ago
   end
@@ -43,7 +48,10 @@ class String
   def before(time_point = ::Time.now)
     self.unit.before(time_point)
   end
-  alias :before_now :before
+  
+  def before_now
+    self.before('now')
+  end
   
   def since(time_point = ::Time.now)
     self.unit.since(time_point)
