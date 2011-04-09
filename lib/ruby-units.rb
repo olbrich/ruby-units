@@ -8,6 +8,6 @@ require 'ruby_units/math'
 require 'ruby_units/numeric'
 require 'ruby_units/object'
 require 'ruby_units/string'
-require 'ruby_units/units'
-require 'ruby_units/ruby-units'
+require 'ruby_units/unit_definitions'
+require 'ruby_units/unit'
 
