@@ -417,7 +417,7 @@ class Unit < Numeric
   
   # true if unit is a 'temperature', false if a 'degree' or anything else
   def is_temperature?
-    self.is_degree? && self.units =~ /temp/
+    self.is_degree? && (!(self.units =~ /temp(C|F|R|K)/).nil?)
   end
   alias :temperature? :is_temperature?
   
@@ -450,7 +450,7 @@ class Unit < Numeric
     when other.zero? && !self.is_temperature?
       return self.base_scalar <=> 0
     when other.instance_of?(Unit)
-      raise ArgumentError, "Incompatible Units" unless self =~ other
+      raise ArgumentError, "Incompatible Units (#{self.units} !=~ #{other.units})" unless self =~ other
       return self.base_scalar <=> other.base_scalar
     else
       x,y = coerce(other)
@@ -830,9 +830,9 @@ class Unit < Numeric
     self.dup * -1
   end
   
-  # returns abs of scalar, without the units
   def abs
-    return @scalar.abs
+    return @scalar.abs if self.unitless?
+    Unit.new(@scalar.abs, @numerator, @denominator)
   end
   
   def ceil

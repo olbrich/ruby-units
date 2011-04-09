@@ -546,7 +546,7 @@ class TestRubyUnits < Test::Unit::TestCase
   
   def test_abs
     unit1 = Unit.new("-1 mm")
-    assert_equal 1, unit1.abs
+    assert_equal "1 mm".unit, unit1.abs
   end
   
   def test_ceil

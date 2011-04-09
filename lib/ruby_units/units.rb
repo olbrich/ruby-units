@@ -183,7 +183,7 @@ UNIT_DEFINITIONS = {
   '<hertz>' => [%w{Hz hertz Hertz}, 1.0, :frequency, %w{<1>}, %{<second>}],
 
   #angle
-  '<radian>' =>[%w{rad radian radian}, 1.0, :angle, %w{<radian>}],
+  '<radian>' =>[%w{rad radian radian radians}, 1.0, :angle, %w{<radian>}],
   '<degree>' =>[%w{deg degree degrees}, Math::PI / 180.0, :angle, %w{<radian>}],
   '<grad>'   =>[%w{grad gradian grads}, Math::PI / 200.0, :angle, %w{<radian>}],
   '<steradian>'  => [%w{sr steradian steradians}, 1.0, :solid_angle, %w{<steradian>}],

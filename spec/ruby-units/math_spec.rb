@@ -15,7 +15,7 @@ describe Math do
   
   context "Trigonometry functions" do
     
-    context "with '90 deg' unit" do
+    context "with '45 deg' unit" do
       subject { "45 deg".unit }
       specify { Math.sin(subject).should be_within(0.01).of(0.70710678) }
       specify { Math.cos(subject).should be_within(0.01).of(0.70710678) }
@@ -24,8 +24,37 @@ describe Math do
       specify { Math.cosh(subject).should be_within(0.01).of(1.3246090892520057) }
       specify { Math.tanh(subject).should be_within(0.01).of(0.6557942026326724) }
     end
+
+    context "with 'PI/4 radians' unit" do
+      subject { (Math::PI/4).unit('radians') }
+      specify { Math.sin(subject).should be_within(0.01).of(0.70710678) }
+      specify { Math.cos(subject).should be_within(0.01).of(0.70710678) }
+      specify { Math.tan(subject).should be_within(0.01).of(1) }
+      specify { Math.sinh(subject).should be_within(0.01).of(0.8686709614860095) }
+      specify { Math.cosh(subject).should be_within(0.01).of(1.3246090892520057) }
+      specify { Math.tanh(subject).should be_within(0.01).of(0.6557942026326724) }
+    end
+
+    context "with 'PI/4' continues to work" do
+      subject { (Math::PI/4) }
+      specify { Math.sin(subject).should be_within(0.01).of(0.70710678) }
+      specify { Math.cos(subject).should be_within(0.01).of(0.70710678) }
+      specify { Math.tan(subject).should be_within(0.01).of(1) }
+      specify { Math.sinh(subject).should be_within(0.01).of(0.8686709614860095) }
+      specify { Math.cosh(subject).should be_within(0.01).of(1.3246090892520057) }
+      specify { Math.tanh(subject).should be_within(0.01).of(0.6557942026326724) }
+    end
+
+    specify { Math.hypot("1 m".unit, "2 m".unit).should be_within("0.01 m".unit).of("2.23607 m".unit) }
+    specify { Math.hypot("1 m".unit, "2 ft".unit).should be_within("0.01 m".unit).of("1.17116 m".unit) }
+    specify { expect {Math.hypot("1 m".unit, "2 lbs".unit) }.to raise_error(ArgumentError) }
+    
+    specify { Math.atan2("1 m".unit, "2 m".unit).should be_within(0.01).of(0.4636476090008061) }
+    specify { Math.atan2("1 m".unit, "2 ft".unit).should be_within(0.01).of(1.0233478888629426) }
+    specify { expect {Math.atan2("1 m".unit, "2 lbs".unit)}.to raise_error(ArgumentError) }
     
   end
+  
   
   
 end
