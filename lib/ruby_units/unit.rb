@@ -197,7 +197,7 @@ class Unit < Numeric
       # options[0] is the scalar
       # options[1] is a unit string
       begin
-        cached = Unit.cached[options[1]] * options[0] 
+        cached = @@cached_units[options[1]] * options[0]
         copy(cached)
       rescue 
         initialize("#{options[0]} #{(options[1].units rescue options[1])}")
@@ -251,8 +251,8 @@ class Unit < Numeric
   
     unary_unit = self.units || ""
     opt_units = options[0].scan(NUMBER_REGEX)[0][1] if String === options[0]
-    unless Unit.cached.keys.include?(opt_units) || (opt_units =~ /(temp|deg(C|K|R|F))|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
-      Unit.cache(opt_units,(self.scalar == 1 ? self : opt_units.unit)) if opt_units && !opt_units.empty?
+    unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(temp|deg(C|K|R|F))|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+      @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
     end
     unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /(temp|deg)(C|K|R|F)/) then
       @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
@@ -306,6 +306,7 @@ class Unit < Numeric
     end
     return @is_base = true
   end  
+  alias :base? :is_base?
   
   # convert to base SI units
   # results of the conversion are cached so subsequent calls to this will be fast
@@ -354,6 +355,7 @@ class Unit < Numeric
     @@base_unit_cache[self.units]=base
     return base * @scalar
   end
+  alias :base :to_base
   
   # Generate human readable output.
   # If the name of a unit is passed, the unit will first be converted to the target unit before output.
@@ -943,8 +945,7 @@ class Unit < Numeric
   # only works when the scalar is an integer    
   def succ
     raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
-    q = @scalar.to_i.succ
-    Unit.new(q, @numerator, @denominator)
+    Unit.new(@scalar.to_i.succ, @numerator, @denominator)
   end
 
   # automatically coerce objects to units when possible
