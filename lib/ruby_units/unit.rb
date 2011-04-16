@@ -5,7 +5,7 @@ if RUBY_VERSION < "1.9"
 end
 # = Ruby Units
 #
-# Copyright 2006-2010 by Kevin C. Olbrich, Ph.D.
+# Copyright 2006-2011 by Kevin C. Olbrich, Ph.D.
 # 
 # See http://rubyforge.org/ruby-units/
 #
@@ -570,7 +570,8 @@ class Unit < Numeric
            raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
     when Time
-      other - self
+#      other - self
+      raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be subtracted from to a Unit, which can only represent time spans"
     else
         x,y = coerce(other)
         y-x
@@ -1193,8 +1194,6 @@ class Unit < Numeric
   private
 
   # parse a string consisting of a number and a unit string
-  # 
-  #
   def self.parse_into_numbers_and_units(string)
     # scientific notation.... 123.234E22, -123.456e-10
     sci = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
