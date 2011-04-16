@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Create some simple units" do
+  # number only
   describe Unit("1") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -11,8 +12,35 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should be_unitless}
-    its(:base) {should == Unit("1")}  
+    its(:base) {should == subject}  
   end
+
+  describe Unit(1) do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should == 1}
+    its(:units) {should be_empty}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should be_unitless}
+    its(:base) {should == subject}  
+  end
+  
+  describe Unit((1/2)) do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should == (1/2)}
+    its(:units) {should be_empty}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should be_unitless}
+    its(:base) {should == subject}  
+  end
+
 
   describe Unit("1 mm") do
     it {should be_a Numeric}
@@ -155,6 +183,30 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+end
+
+describe "Unit handles attempts to create bad units" do
+  specify "no empty strings" do
+    expect {Unit("")}.to raise_error(ArgumentError)
+  end
+
+  specify "no blank strings" do
+    expect {Unit("   ")}.to raise_error(ArgumentError)
+  end
+
+  specify "no strings with tabs" do
+    expect {Unit("\t")}.to raise_error(ArgumentError)
+  end
+
+  specify "no strings with newlines" do
+    expect {Unit("\n")}.to raise_error(ArgumentError)
+  end
+
+  specify "no strings that don't specify a valid unit" do
+    expect {Unit("ruby")}.to raise_error(ArgumentError)
+  end
+
+  
 end
 
 describe Unit do

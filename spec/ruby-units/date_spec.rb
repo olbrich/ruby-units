@@ -32,5 +32,6 @@ describe "Date Unit" do
 
   specify { (subject - Date.new(2011,4,1)).should be_zero }
   specify { (subject - DateTime.new(2011,4,1,00,00,00)).should be_zero }
-  specify { (subject - Time.parse("2011-04-01 00:00")).should be_zero }
+  specify { expect {(subject - Time.parse("2011-04-01 00:00"))}.to raise_error(ArgumentError) }
+  specify { expect {(subject - Time.parse("2010-03-31 00:00"))}.to raise_error(ArgumentError) }
 end
