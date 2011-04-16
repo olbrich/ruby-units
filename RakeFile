@@ -63,6 +63,17 @@ task :multitest do
   exec "rvm #{rubies.join(',')} tests"
 end
 
+desc "Run specs against several ruby versions, requires rvm"
+task :multispec do
+  rubies = %w{
+      ruby-1.8.7@ruby-units
+      ruby-1.8.7@ruby-units-with-chronic
+      ruby-1.9.2-head@ruby-units
+      ruby-1.9.2-head@ruby-units-with-chronic
+      rbx-head@ruby-units}
+  exec "rvm #{rubies.join(',')} specs"
+end
+
 task :default => :test
 
 task :tests => :test
