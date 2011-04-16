@@ -4,4 +4,4 @@ coverage
 Gemfile.lock
 *.rbc
 .rspec
-
+.rvmrc
