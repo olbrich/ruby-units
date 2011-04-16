@@ -52,6 +52,8 @@ Rake::TestTask.new do |t|
 #  t.verbose = true
 end
 
+task :specs => :spec
+
 desc "Run tests against several ruby versions, requires rvm"
 task :multitest do
   rubies = %w{
