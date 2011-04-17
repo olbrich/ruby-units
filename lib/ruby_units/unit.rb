@@ -1114,6 +1114,7 @@ class Unit < Numeric
     unit_string =~ NUMBER_REGEX
     unit = @@cached_units[$2] 
     mult = ($1.empty? ? 1.0 : $1.to_f) rescue 1.0
+    mult = mult.to_int if (mult.to_int == mult)
     if unit
       copy(unit)
       @scalar *= mult
@@ -1168,6 +1169,7 @@ class Unit < Numeric
     bottom.gsub!(BOTTOM_REGEX) {|s| "#{$1} " * $2.to_i} if bottom
     @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
     @scalar = 1 unless @scalar.kind_of? Numeric 
+    @scalar = @scalar.to_int if (@scalar.to_int == @scalar)
         
     @numerator ||= UNITY_ARRAY
     @denominator ||= UNITY_ARRAY

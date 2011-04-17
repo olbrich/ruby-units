@@ -20,20 +20,20 @@ UNIT_DEFINITIONS = {
   '<kilo>'  =>  [%w{k kilo}, 1e3, :prefix],
   '<hecto>' =>  [%w{h Hecto hecto}, 1e2, :prefix],
   '<deca>'  =>  [%w{da Deca deca deka}, 1e1, :prefix],
-  '<deci>'  =>  [%w{d Deci deci}, 1e-1, :prefix],
-  '<centi>'  => [%w{c Centi centi}, 1e-2, :prefix],
-  '<milli>' =>  [%w{m Milli milli}, 1e-3, :prefix],
-  '<micro>'  => [%w{u Micro micro}, 1e-6, :prefix],
-  '<nano>'  =>  [%w{n Nano nano}, 1e-9, :prefix],
-  '<pico>'  =>  [%w{p Pico pico}, 1e-12, :prefix],
-  '<femto>' =>  [%w{f Femto femto}, 1e-15, :prefix],
-  '<atto>'  =>  [%w{a Atto atto}, 1e-18, :prefix],
-  '<zepto>' =>  [%w{z Zepto zepto}, 1e-21, :prefix],
-  '<yocto>' =>  [%w{y Yocto yocto}, 1e-24, :prefix],
+  '<deci>'  =>  [%w{d Deci deci}, Rational(1,1e1), :prefix],
+  '<centi>'  => [%w{c Centi centi}, Rational(1,1e2), :prefix],
+  '<milli>' =>  [%w{m Milli milli}, Rational(1,1e3), :prefix],
+  '<micro>'  => [%w{u Micro micro}, Rational(1,1e6), :prefix],
+  '<nano>'  =>  [%w{n Nano nano}, Rational(1,1e9), :prefix],
+  '<pico>'  =>  [%w{p Pico pico}, Rational(1,1e12), :prefix],
+  '<femto>' =>  [%w{f Femto femto}, Rational(1,1e15), :prefix],
+  '<atto>'  =>  [%w{a Atto atto}, Rational(1,1e18), :prefix],
+  '<zepto>' =>  [%w{z Zepto zepto}, Rational(1,1e21), :prefix],
+  '<yocto>' =>  [%w{y Yocto yocto}, Rational(1,1e24), :prefix],
   '<1>'     =>  [%w{1},1,:prefix],
 
   # length units
-  '<meter>' =>  [%w{m meter meters metre metres}, 1.0, :length, %w{<meter>} ],
+  '<meter>' =>  [%w{m meter meters metre metres}, 1, :length, %w{<meter>} ],
   '<inch>'  =>  [%w{in inch inches "}, 0.0254, :length, %w{<meter>}],
   '<foot>'  =>  [%w{ft foot feet '}, 0.3048, :length, %w{<meter>}],
   '<yard>'  =>  [%w{yd yard yards}, 0.9144, :length, %w{<meter>}],
@@ -43,7 +43,7 @@ UNIT_DEFINITIONS = {
   '<furlong>'=> [%w{furlong furlongs}, 201.2, :length, %w{<meter>}],
   '<rod>'   =>  [%w{rd rod rods}, 5.029, :length, %w{<meter>}],
   '<mil>'   =>  [%w{mil mils}, 0.0000254, :length, %w{<meter>}],
-  '<angstrom>'  =>[%w{ang angstrom angstroms}, 1e-10, :length, %w{<meter>}],
+  '<angstrom>'  =>[%w{ang angstrom angstroms}, Rational(1,1e10), :length, %w{<meter>}],
   '<fathom>' => [%w{fathom fathoms}, 1.829, :length, %w{<meter>}],  
   '<pica>'  => [%w{pica picas}, 0.004217, :length, %w{<meter>}],
   '<point>' => [%w{pt point points}, 0.0003514, :length, %w{<meter>}],
@@ -55,7 +55,7 @@ UNIT_DEFINITIONS = {
   '<parsec>'  => [%w{pc parsec parsecs}, 30856780000000000, :length, %w{<meter>}],
 
   #mass
-  '<kilogram>' => [%w{kg kilogram kilograms}, 1.0, :mass, %w{<kilogram>}],
+  '<kilogram>' => [%w{kg kilogram kilograms}, 1, :mass, %w{<kilogram>}],
   '<AMU>' => [%w{u AMU amu}, 6.0221415e26, :mass, %w{<kilogram>}],
   '<dalton>' => [%w{Da Dalton Daltons dalton daltons}, 6.0221415e26, :mass, %w{<kilogram>}],
   '<slug>' => [%w{slug slugs}, 14.5939029, :mass, %w{<kilogram>}],
@@ -64,7 +64,7 @@ UNIT_DEFINITIONS = {
   '<carat>' => [%w{ct carat carats}, 0.0002, :mass, %w{<kilogram>}],
   '<pound>' => [%w{lbs lb pound pounds #}, 0.45359237, :mass, %w{<kilogram>}],
   '<ounce>' => [%w{oz ounce ounces}, 0.0283495231, :mass, %w{<kilogram>}],
-  '<gram>'    =>  [%w{g gram grams gramme grammes},1e-3,:mass, %w{<kilogram>}],
+  '<gram>'    =>  [%w{g gram grams gramme grammes},Rational(1,1e3),:mass, %w{<kilogram>}],
 
   #area
   '<hectare>'=>[%w{hectare}, 10000, :area, %w{<meter> <meter>}],
@@ -72,7 +72,7 @@ UNIT_DEFINITIONS = {
   '<sqft>'=>[%w(sqft), 1, :area, %w{<feet> <feet>}],
 
   #volume
-  '<liter>' => [%w{l L liter liters litre litres}, 0.001, :volume, %w{<meter> <meter> <meter>}],
+  '<liter>' => [%w{l L liter liters litre litres}, Rational(1,1e3), :volume, %w{<meter> <meter> <meter>}],
   '<gallon>'=>  [%w{gal gallon gallons}, 0.0037854118, :volume, %w{<meter> <meter> <meter>}],
   '<quart>'=>  [%w{qt quart quarts}, 0.00094635295, :volume, %w{<meter> <meter> <meter>}],
   '<pint>'=>  [%w{pt pint pints}, 0.000473176475, :volume, %w{<meter> <meter> <meter>}],
@@ -91,19 +91,19 @@ UNIT_DEFINITIONS = {
   '<gee>' => [%w{gee}, 9.80655, :acceleration, %w{<meter>}, %w{<second> <second>}],
 
   #temperature_difference
-  '<kelvin>' => [%w{degK kelvin}, 1.0, :temperature, %w{<kelvin>}],
-  '<celsius>' => [%w{degC celsius celsius centigrade}, 1.0, :temperature, %w{<kelvin>}],
-  '<fahrenheit>' => [%w{degF fahrenheit}, 1/1.8, :temperature, %w{<kelvin>}],
-  '<rankine>' => [%w{degR rankine}, 1/1.8, :temperature, %w{<kelvin>}],
-  '<temp-K>'  => [%w{tempK}, 1.0, :temperature, %w{<temp-K>}],
-  '<temp-C>'  => [%w{tempC}, 1.0, :temperature, %w{<temp-K>}],
-  '<temp-F>'  => [%w{tempF}, 1/1.8, :temperature, %w{<temp-K>}],
-  '<temp-R>'  => [%w{tempR}, 1/1.8, :temperature, %w{<temp-K>}],
+  '<kelvin>' => [%w{degK kelvin}, 1, :temperature, %w{<kelvin>}],
+  '<celsius>' => [%w{degC celsius celsius centigrade}, 1, :temperature, %w{<kelvin>}],
+  '<fahrenheit>' => [%w{degF fahrenheit}, Rational(1,1.8), :temperature, %w{<kelvin>}],
+  '<rankine>' => [%w{degR rankine}, Rational(1,1.8), :temperature, %w{<kelvin>}],
+  '<temp-K>'  => [%w{tempK}, 1, :temperature, %w{<temp-K>}],
+  '<temp-C>'  => [%w{tempC}, 1, :temperature, %w{<temp-K>}],
+  '<temp-F>'  => [%w{tempF}, Rational(1,1.8), :temperature, %w{<temp-K>}],
+  '<temp-R>'  => [%w{tempR}, Rational(1,1.8), :temperature, %w{<temp-K>}],
   
   #time
-  '<second>'=>  [%w{s sec second seconds}, 1.0, :time, %w{<second>}],
-  '<minute>'=>  [%w{min minute minutes}, 60.0, :time, %w{<second>}],  
-  '<hour>'=>  [%w{h hr hrs hour hours}, 3600.0, :time, %w{<second>}],  
+  '<second>'=>  [%w{s sec second seconds}, 1, :time, %w{<second>}],
+  '<minute>'=>  [%w{min minute minutes}, 60, :time, %w{<second>}],  
+  '<hour>'=>  [%w{h hr hrs hour hours}, 3600, :time, %w{<second>}],  
   '<day>'=>  [%w{d day days}, 3600*24, :time, %w{<second>}],
   '<week>'=>  [%w{wk week weeks}, 7*3600*24, :time, %w{<second>}],
   '<fortnight>'=> [%w{fortnight fortnights}, 1209600, :time, %W{<second>}],
@@ -112,7 +112,7 @@ UNIT_DEFINITIONS = {
   '<century>'=>[%w{century centuries}, 3155692600, :time, %w{<second>}],
 
   #pressure
-  '<pascal>' => [%w{Pa pascal Pascal}, 1.0, :pressure, %w{<kilogram>},%w{<meter> <second> <second>}],
+  '<pascal>' => [%w{Pa pascal Pascal}, 1, :pressure, %w{<kilogram>},%w{<meter> <second> <second>}],
   '<bar>' => [%w{bar bars}, 100000, :pressure, %w{<kilogram>},%w{<meter> <second> <second>}],
   '<mmHg>' => [%w{mmHg}, 133.322368,:pressure, %w{<kilogram>},%w{<meter> <second> <second>}],
   '<inHg>' => [%w{inHg}, 3386.3881472,:pressure, %w{<kilogram>},%w{<meter> <second> <second>}],
@@ -124,102 +124,102 @@ UNIT_DEFINITIONS = {
   '<inh2o>' => [%w{inH2O}, 249.082052,:pressure, %w{<kilogram>},%w{<meter> <second> <second>}],
   
   #viscosity
-  '<poise>'  => [%w{P poise}, 0.1, :viscosity, %w{<kilogram>},%w{<meter> <second>} ],
-  '<stokes>' => [%w{St stokes}, 1e-4, :viscosity, %w{<meter> <meter>}, %w{<second>}],
+  '<poise>'  => [%w{P poise}, Rational(1,10), :viscosity, %w{<kilogram>},%w{<meter> <second>} ],
+  '<stokes>' => [%w{St stokes}, Rational(1,1e4), :viscosity, %w{<meter> <meter>}, %w{<second>}],
 
   #substance
-  '<mole>'  =>  [%w{mol mole}, 1.0, :substance, %w{<mole>}],
+  '<mole>'  =>  [%w{mol mole}, 1, :substance, %w{<mole>}],
 
   #concentration
   '<molar>' => [%w{M molar}, 1000, :concentration, %w{<mole>}, %w{<meter> <meter> <meter>}],
   '<wtpercent>'  => [%w{wt% wtpercent}, 10, :concentration, %w{<kilogram>}, %w{<meter> <meter> <meter>}],
 
   #activity
-  '<katal>' =>  [%w{kat katal Katal}, 1.0, :activity, %w{<mole>}, %w{<second>}],
+  '<katal>' =>  [%w{kat katal Katal}, 1, :activity, %w{<mole>}, %w{<second>}],
   '<unit>'  =>  [%w{U enzUnit}, 16.667e-16, :activity, %w{<mole>}, %w{<second>}],
 
   #capacitance
-  '<farad>' =>  [%w{F farad Farad}, 1.0, :capacitance, %w{<farad>}],
+  '<farad>' =>  [%w{F farad Farad}, 1, :capacitance, %w{<farad>}],
 
   #charge
-  '<coulomb>' =>  [%w{C coulomb Coulomb}, 1.0, :charge, %w{<ampere> <second>}],
+  '<coulomb>' =>  [%w{C coulomb Coulomb}, 1, :charge, %w{<ampere> <second>}],
 
   #current
-  '<ampere>'  =>  [%w{A Ampere ampere amp amps}, 1.0, :current, %w{<ampere>}],
+  '<ampere>'  =>  [%w{A Ampere ampere amp amps}, 1, :current, %w{<ampere>}],
 
   #conductance
-  '<siemens>' => [%w{S Siemens siemens}, 1.0, :resistance, %w{<second> <second> <second> <ampere> <ampere>}, %w{<kilogram> <meter> <meter>}],
+  '<siemens>' => [%w{S Siemens siemens}, 1, :resistance, %w{<second> <second> <second> <ampere> <ampere>}, %w{<kilogram> <meter> <meter>}],
 
   #inductance
-  '<henry>' =>  [%w{H Henry henry}, 1.0, :inductance, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere> <ampere>}],
+  '<henry>' =>  [%w{H Henry henry}, 1, :inductance, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere> <ampere>}],
 
   #potential
-  '<volt>'  =>  [%w{V Volt volt volts}, 1.0, :potential, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <second> <ampere>}],
+  '<volt>'  =>  [%w{V Volt volt volts}, 1, :potential, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <second> <ampere>}],
 
   #resistance
-  '<ohm>' =>  [%w{Ohm ohm}, 1.0, :resistance, %w{<meter> <meter> <kilogram>},%w{<second> <second> <second> <ampere> <ampere>}],
+  '<ohm>' =>  [%w{Ohm ohm}, 1, :resistance, %w{<meter> <meter> <kilogram>},%w{<second> <second> <second> <ampere> <ampere>}],
 
   #magnetism
-  '<weber>' => [%w{Wb weber webers}, 1.0, :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
-  '<tesla>'  => [%w{T tesla teslas}, 1.0, :magnetism, %w{<kilogram>}, %w{<second> <second> <ampere>}],
-  '<gauss>' => [%w{G gauss}, 1e-4, :magnetism,  %w{<kilogram>}, %w{<second> <second> <ampere>}],
-  '<maxwell>' => [%w{Mx maxwell maxwells}, 1e-8, :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
+  '<weber>' => [%w{Wb weber webers}, 1, :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
+  '<tesla>'  => [%w{T tesla teslas}, 1, :magnetism, %w{<kilogram>}, %w{<second> <second> <ampere>}],
+  '<gauss>' => [%w{G gauss}, Rational(1/1e4), :magnetism,  %w{<kilogram>}, %w{<second> <second> <ampere>}],
+  '<maxwell>' => [%w{Mx maxwell maxwells}, Rational(1/1e8), :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
   '<oersted>'  => [%w{Oe oersted oersteds}, 250.0/Math::PI, :magnetism, %w{<ampere>}, %w{<meter>}],
 
   #energy
-  '<joule>' =>  [%w{J joule Joule joules}, 1.0, :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
-  '<erg>'   =>  [%w{erg ergs}, 1e-7, :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
+  '<joule>' =>  [%w{J joule Joule joules}, 1, :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
+  '<erg>'   =>  [%w{erg ergs}, Rational(1,1e7), :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
   '<btu>'   =>  [%w{BTU btu BTUs}, 1055.056, :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
   '<calorie>' =>  [%w{cal calorie calories}, 4.18400, :energy,%w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
   '<Calorie>' =>  [%w{Cal Calorie Calories}, 4184.00, :energy,%w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
   '<therm-US>' => [%w{th therm therms Therm}, 105480400, :energy,%w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
 
   #force
-  '<newton>'  => [%w{N Newton newton}, 1.0, :force, %w{<kilogram> <meter>}, %w{<second> <second>}],
-  '<dyne>'  => [%w{dyn dyne}, 1e-5, :force, %w{<kilogram> <meter>}, %w{<second> <second>}],
+  '<newton>'  => [%w{N Newton newton}, 1, :force, %w{<kilogram> <meter>}, %w{<second> <second>}],
+  '<dyne>'  => [%w{dyn dyne}, Rational(1,1e5), :force, %w{<kilogram> <meter>}, %w{<second> <second>}],
   '<pound-force>'  => [%w{lbf pound-force}, 4.448222, :force, %w{<kilogram> <meter>}, %w{<second> <second>}],
 
   #frequency
-  '<hertz>' => [%w{Hz hertz Hertz}, 1.0, :frequency, %w{<1>}, %{<second>}],
+  '<hertz>' => [%w{Hz hertz Hertz}, 1, :frequency, %w{<1>}, %{<second>}],
 
   #angle
-  '<radian>' =>[%w{rad radian radian radians}, 1.0, :angle, %w{<radian>}],
+  '<radian>' =>[%w{rad radian radian radians}, 1, :angle, %w{<radian>}],
   '<degree>' =>[%w{deg degree degrees}, Math::PI / 180.0, :angle, %w{<radian>}],
   '<grad>'   =>[%w{grad gradian grads}, Math::PI / 200.0, :angle, %w{<radian>}],
-  '<steradian>'  => [%w{sr steradian steradians}, 1.0, :solid_angle, %w{<steradian>}],
+  '<steradian>'  => [%w{sr steradian steradians}, 1, :solid_angle, %w{<steradian>}],
 
   #rotation
   '<rotation>' => [%w{rotation}, 2.0*Math::PI, :angle, %w{<radian>}],
   '<rpm>'   =>[%w{rpm}, 2.0*Math::PI / 60.0, :angular_velocity, %w{<radian>}, %w{<second>}],
 
   #memory
-  '<byte>'  =>[%w{B byte}, 1.0, :memory, %w{<byte>}],
+  '<byte>'  =>[%w{B byte}, 1, :memory, %w{<byte>}],
   '<bit>'  =>[%w{b bit}, 0.125, :memory, %w{<byte>}],
 
   #currency
-  '<dollar>'=>[%w{USD dollar}, 1.0, :currency, %w{<dollar>}],
-  '<cents>' =>[%w{cents}, 0.01, :currency, %w{<dollar>}],
+  '<dollar>'=>[%w{USD dollar}, 1, :currency, %w{<dollar>}],
+  '<cents>' =>[%w{cents}, Rational(1,100), :currency, %w{<dollar>}],
 
   #luminosity
-  '<candela>' => [%w{cd candela}, 1.0, :luminosity, %w{<candela>}],
-  '<lumen>' => [%w{lm lumen}, 1.0, :luminous_power, %w{<candela> <steradian>}],
-  '<lux>' =>[%w{lux}, 1.0, :illuminance, %w{<candela> <steradian>}, %w{<meter> <meter>}],
+  '<candela>' => [%w{cd candela}, 1, :luminosity, %w{<candela>}],
+  '<lumen>' => [%w{lm lumen}, 1, :luminous_power, %w{<candela> <steradian>}],
+  '<lux>' =>[%w{lux}, 1, :illuminance, %w{<candela> <steradian>}, %w{<meter> <meter>}],
 
   #power
-  '<watt>'  => [%w{W watt watts}, 1.0, :power, %w{<kilogram> <meter> <meter>}, %w{<second> <second> <second>}],
+  '<watt>'  => [%w{W watt watts}, 1, :power, %w{<kilogram> <meter> <meter>}, %w{<second> <second> <second>}],
   '<horsepower>'  =>  [%w{hp horsepower}, 745.699872, :power, %w{<kilogram> <meter> <meter>}, %w{<second> <second> <second>}],
 
   #radiation
-  '<gray>' => [%w{Gy gray grays}, 1.0, :radiation, %w{<meter> <meter>}, %w{<second> <second>}],
+  '<gray>' => [%w{Gy gray grays}, 1, :radiation, %w{<meter> <meter>}, %w{<second> <second>}],
   '<roentgen>' => [%w{R roentgen}, 0.009330, :radiation, %w{<meter> <meter>}, %w{<second> <second>}],
-  '<sievert>' => [%w{Sv sievert sieverts}, 1.0, :radiation, %w{<meter> <meter>}, %w{<second> <second>}],
-  '<becquerel>' => [%w{Bq bequerel bequerels}, 1.0, :radiation, %w{<1>},%w{<second>}],
+  '<sievert>' => [%w{Sv sievert sieverts}, 1, :radiation, %w{<meter> <meter>}, %w{<second> <second>}],
+  '<becquerel>' => [%w{Bq bequerel bequerels}, 1, :radiation, %w{<1>},%w{<second>}],
   '<curie>' => [%w{Ci curie curies}, 3.7e10, :radiation, %w{<1>},%w{<second>}],
   
   # rate
-  '<cpm>' => [%w{cpm}, 1.0/60.0, :rate, %w{<count>},%w{<second>}],
-  '<dpm>' => [%w{dpm}, 1.0/60.0, :rate, %w{<count>},%w{<second>}],
-  '<bpm>' => [%w{bpm}, 1.0/60.0, :rate, %w{<count>},%w{<second>}],
+  '<cpm>' => [%w{cpm}, Rational(1,60), :rate, %w{<count>},%w{<second>}],
+  '<dpm>' => [%w{dpm}, Rational(1,60), :rate, %w{<count>},%w{<second>}],
+  '<bpm>' => [%w{bpm}, Rational(1,60), :rate, %w{<count>},%w{<second>}],
 
   #resolution / typography
   '<dot>' => [%w{dot dots}, 1, :resolution, %w{<each>}],
@@ -231,17 +231,17 @@ UNIT_DEFINITIONS = {
 
   #other
   '<cell>' => [%w{cells cell}, 1, :counting, %w{<each>}],
-  '<each>' => [%w{each}, 1.0, :counting, %w{<each>}],
-  '<count>' => [%w{count}, 1.0, :counting, %w{<each>}],  
-  '<base-pair>'  => [%w{bp}, 1.0, :counting, %w{<each>}],
-  '<nucleotide>' => [%w{nt}, 1.0, :counting, %w{<each>}],
-  '<molecule>' => [%w{molecule molecules}, 1.0, :counting, %w{<1>}],
-  '<dozen>' =>  [%w{doz dz dozen},12.0,:prefix_only, %w{<each>}],
-  '<percent>'=> [%w{% percent}, 0.01, :prefix_only, %w{<1>}],
-  '<ppm>' =>  [%w{ppm},1e-6,:prefix_only, %w{<1>}],
-  '<ppt>' =>  [%w{ppt},1e-9,:prefix_only, %w{<1>}],
-  '<gross>' =>  [%w{gr gross},144.0, :prefix_only, %w{<dozen> <dozen>}],
-  '<decibel>'  => [%w{dB decibel decibels}, 1.0, :logarithmic, %w{<decibel>}]
+  '<each>' => [%w{each}, 1, :counting, %w{<each>}],
+  '<count>' => [%w{count}, 1, :counting, %w{<each>}],  
+  '<base-pair>'  => [%w{bp}, 1, :counting, %w{<each>}],
+  '<nucleotide>' => [%w{nt}, 1, :counting, %w{<each>}],
+  '<molecule>' => [%w{molecule molecules}, 1, :counting, %w{<1>}],
+  '<dozen>' =>  [%w{doz dz dozen},12,:prefix_only, %w{<each>}],
+  '<percent>'=> [%w{% percent}, Rational(1/100), :prefix_only, %w{<1>}],
+  '<ppm>' =>  [%w{ppm},Rational(1,1e6),:prefix_only, %w{<1>}],
+  '<ppt>' =>  [%w{ppt},Rational(1,1e9),:prefix_only, %w{<1>}],
+  '<gross>' =>  [%w{gr gross},144, :prefix_only, %w{<dozen> <dozen>}],
+  '<decibel>'  => [%w{dB decibel decibels}, 1, :logarithmic, %w{<decibel>}]
 
 
 } # doc

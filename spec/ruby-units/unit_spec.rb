@@ -5,7 +5,8 @@ describe "Create some simple units" do
   describe Unit("1") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
-    its(:scalar) {should == 1}
+    its(:scalar) {should === 1}
+    its(:scalar) {should be_an Integer}
     its(:units) {should be_empty}
     its(:kind) {should == :unitless}
     it {should_not be_temperature}
@@ -18,7 +19,8 @@ describe "Create some simple units" do
   describe Unit(1) do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
-    its(:scalar) {should == 1}
+    its(:scalar) {should === 1}
+    its(:scalar) {should be_an Integer}
     its(:units) {should be_empty}
     its(:kind) {should == :unitless}
     it {should_not be_temperature}
@@ -28,10 +30,11 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
   
-  describe Unit((1/2)) do
+  describe Unit(Rational(1,2)) do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
-    its(:scalar) {should == (1/2)}
+    its(:scalar) {should === Rational(1,2)}
+    its(:scalar) {should be_a Rational}
     its(:units) {should be_empty}
     its(:kind) {should == :unitless}
     it {should_not be_temperature}
@@ -41,11 +44,39 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  describe Unit(0.5) do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should === 0.5}
+    its(:scalar) {should be_a Float}
+    its(:units) {should be_empty}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should be_unitless}
+    its(:base) {should == subject}  
+  end
+
+  describe Unit(Complex(1,1)) do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should === Complex(1,1)}
+    its(:scalar) {should be_a Complex}
+    its(:units) {should be_empty}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should be_unitless}
+    its(:base) {should == subject}  
+  end
 
   describe Unit("1 mm") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
     its(:scalar) {should == 1}
+    its(:scalar) {should be_an Integer}
     its(:units) {should == "mm"}
     its(:kind) {should == :length}
     it {should_not be_temperature}
@@ -58,6 +89,7 @@ describe "Create some simple units" do
   describe Unit("10 m/s^2") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should == 10}
+    its(:scalar) {should be_an Integer}
     its(:units) {should == "m/s^2"}
     its(:kind) {should == :acceleration}
     it {should_not be_temperature}
@@ -133,7 +165,7 @@ describe "Create some simple units" do
   
   describe Unit("75%") do
     it {should be_an_instance_of Unit}
-    its(:scalar) {should be_a(Numeric)}
+    its(:scalar) {should be_an Integer}
     its(:units) {should == "%"}
     its(:kind) {should == :unitless}
     it {should_not be_temperature}
@@ -146,7 +178,7 @@ describe "Create some simple units" do
 
   describe Unit("180 deg") do
     it {should be_an_instance_of Unit}
-    its(:scalar) {should be_a(Numeric)}
+    its(:scalar) {should be_a Numeric}
     its(:units) {should == "deg"}
     its(:kind) {should == :angle}
     it {should_not be_temperature}
@@ -159,27 +191,27 @@ describe "Create some simple units" do
   
   describe Unit("1 radian") do
     it {should be_an_instance_of Unit}
-    its(:scalar) {should be_a(Numeric)}
+    its(:scalar) {should be_a Numeric}
     its(:units) {should == "rad"}
     its(:kind) {should == :angle}
     it {should_not be_temperature}
     it {should_not be_degree}
     it {should be_base}
     it {should_not be_unitless}
-    its(:base) {should be_a(Numeric)}
+    its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
 
   describe Unit("12 dozen") do
     it {should be_an_instance_of Unit}
-    its(:scalar) {should be_a(Numeric)}
+    its(:scalar) {should be_an Integer}
     its(:units) {should == "doz"}
     its(:kind) {should == :unitless}
     it {should_not be_temperature}
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
-    its(:base) {should be_a(Numeric)}
+    its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
 
