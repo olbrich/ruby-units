@@ -1,6 +1,22 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Create some simple units" do
+
+  describe Unit("0") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should === 0}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should be_empty}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should be_unitless}
+    it {should be_zero}
+    its(:base) {should == subject}  
+  end
+
   describe Unit("1") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -12,6 +28,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should be_unitless}
+    it {should_not be_zero}
     its(:base) {should == subject}  
   end
 
@@ -26,6 +43,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should be_unitless}
+    it {should_not be_zero}
     its(:base) {should == subject}  
   end
   
@@ -40,6 +58,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should be_unitless}
+    it {should_not be_zero}
     its(:base) {should == subject}  
   end
 
@@ -54,6 +73,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should be_unitless}
+    it {should_not be_zero}
     its(:base) {should == subject}  
   end
 
@@ -68,6 +88,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should be_unitless}
+    it {should_not be_zero}
     its(:base) {should == subject}  
   end
 
@@ -82,6 +103,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should == Unit("0.001 m")}
   end
 
@@ -95,6 +117,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should == Unit("10 m/s^2")}  
   end
 
@@ -107,6 +130,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_within(Unit("0.01 m")).of Unit("1.6764 m")}
     specify { subject.to_s(:ft).should == %{5'6"} }
   end
@@ -120,6 +144,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_within(Unit("0.01 kg")).of Unit("2.8633 kg")}
     specify { subject.to_s(:lbs).should == "6 lbs, 5 oz" }
   end
@@ -133,6 +158,7 @@ describe "Create some simple units" do
     it {should be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_within(Unit("0.01 degK")).of Unit("373.15 tempK")}
     its(:temperature_scale) {should == "degC"}
   end
@@ -146,6 +172,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a(Numeric)}
     its(:temperature_scale) {should be_nil}
   end
@@ -171,6 +198,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a(Numeric)}
     its(:temperature_scale) {should be_nil}    
   end
@@ -184,6 +212,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a(Numeric)}
     its(:temperature_scale) {should be_nil}    
   end
@@ -197,6 +226,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
@@ -210,6 +240,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should_not be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
@@ -223,6 +254,7 @@ describe "Create some simple units" do
     it {should_not be_degree}
     it {should be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
@@ -230,12 +262,13 @@ describe "Create some simple units" do
   describe Unit("1/2 kg/m") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Rational}
-    its(:units) {should == "kg"}
-    its(:kind) {should == :mass}
+    its(:units) {should == "kg/m"}
+    its(:kind) {should be_nil}
     it {should_not be_temperature}
     it {should_not be_degree}
     it {should be_base}
     it {should_not be_unitless}
+    it {should_not be_zero}
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
@@ -459,7 +492,7 @@ describe "Unit Math" do
   
   context "divide" do
     context "compatible units" do
-      specify { (Unit("0 m") / Unit("10 m")).should == Unit("0")}
+      specify { (Unit("0 m") / Unit("10 m")).should == Unit(0)}
       specify { (Unit("5 kg") / Unit("10 kg")).should == (1/2)}
     end
         

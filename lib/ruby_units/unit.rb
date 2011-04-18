@@ -67,6 +67,7 @@ class Unit < Numeric
   FAHRENHEIT = ['<fahrenheit>']
   RANKINE = ['<rankine>']
   CELSIUS = ['<celsius>']
+  TEMP_REGEX = /(?:temp|deg)[CFRK]/
 
   SIGNATURE_VECTOR = [:length, :time, :temperature, :mass, :current, :substance, :luminosity, :currency, :memory, :angle, :capacitance]
   @@KINDS = {
@@ -242,7 +243,7 @@ class Unit < Numeric
     when /^\s*$/
       raise ArgumentError, "No Unit Specified"
     when String
-      parse(options[0])   
+      parse(options[0])
     else
       raise ArgumentError, "Invalid Unit Format"
     end
@@ -250,13 +251,17 @@ class Unit < Numeric
     raise ArgumentError, "Temperatures must not be less than absolute zero" if self.is_temperature? &&  self.base_scalar < 0
   
     unary_unit = self.units || ""
-    opt_units = options[0].scan(NUMBER_REGEX)[0][1] if String === options[0]
-    unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(temp|deg(C|K|R|F))|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
-      @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
+    if options.first.instance_of?(String)
+      opt_scalar, opt_units = Unit.parse_into_numbers_and_units(options[0])
+      unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{TEMP_REGEX})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+        @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
+      end
     end
-    unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /(temp|deg)(C|K|R|F)/) then
-      @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
-    end
+
+      unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{TEMP_REGEX}/) then
+        @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
+      end
+
     [@scalar, @numerator, @denominator, @base_scalar, @signature, @is_base].each {|x| x.freeze}
     self
   end
@@ -299,7 +304,7 @@ class Unit < Numeric
   # Returns 'true' if the Unit is represented in base units
   def is_base?
     return @is_base if defined? @is_base
-    return @is_base=true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(deg|temp)K/
+    return @is_base=true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(?:deg|temp)K/
     n = @numerator + @denominator
     for x in n.compact do 
       return @is_base=false unless x == UNITY || (@@BASE_UNITS.include?((x)))
@@ -312,7 +317,7 @@ class Unit < Numeric
   # results of the conversion are cached so subsequent calls to this will be fast
   def to_base
     return self if self.is_base?
-    if self.units =~ /\A(deg|temp)(C|F|K|C)\Z/
+    if self.units =~ /\A#{TEMP_REGEX}\Z/
       @signature = 400
       base = case self.units
       when /temp/
@@ -419,7 +424,7 @@ class Unit < Numeric
   
   # true if unit is a 'temperature', false if a 'degree' or anything else
   def is_temperature?
-    self.is_degree? && (!(self.units =~ /temp(C|F|R|K)/).nil?)
+    self.is_degree? && (!(self.units =~ /temp[CFRK]/).nil?)
   end
   alias :temperature? :is_temperature?
   
@@ -433,7 +438,7 @@ class Unit < Numeric
   # '100 tempC'.unit.temperature_scale #=> 'degC'
   def temperature_scale
     return nil unless self.is_temperature?
-    self.units =~ /temp(C|F|R|K)/
+    self.units =~ /temp([CFRK])/
     "deg#{$1}"
   end
   
@@ -726,7 +731,7 @@ class Unit < Numeric
     return self if other.nil? 
     return self if TrueClass === other
     return self if FalseClass === other
-    if (Unit === other && other.is_temperature?) || (String === other && other =~ /temp(K|C|R|F)/) 
+    if (Unit === other && other.is_temperature?) || (String === other && other =~ /temp[CFRK]/) 
       raise ArgumentError, "Receiver is not a temperature unit" unless self.degree?
       start_unit = self.units
       target_unit = other.units rescue other
@@ -1206,7 +1211,7 @@ class Unit < Numeric
     rational = %r{[+-]?\d+\/\d+}
     # complex numbers... -1.2+3i, +1.2-3.3i
     complex = %r{#{sci}{2,2}i}
-    anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?(.+)}
+    anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([\D].+)}
     num, unit = string.scan(anynumber).first
     [case num
       when NilClass
@@ -1217,7 +1222,7 @@ class Unit < Numeric
         Rational(*num.split("/").map {|x| x.to_i})
       else
         num.to_f
-    end, unit.strip]
+    end, unit.to_s.strip]
   end
 end
 
