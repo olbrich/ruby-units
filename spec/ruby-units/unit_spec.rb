@@ -214,6 +214,33 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+  describe Unit("1/2 kg") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Rational}
+    its(:units) {should == "kg"}
+    its(:kind) {should == :mass}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should_not be_unitless}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}    
+  end
+
+  describe Unit("1/2 kg/m") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Rational}
+    its(:units) {should == "kg"}
+    its(:kind) {should == :mass}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should_not be_unitless}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}    
+  end
+  
+
 end
 
 describe "Unit handles attempts to create bad units" do
@@ -341,14 +368,129 @@ describe "Unit Comparisons" do
     end
   end
   
-  
-  
 end
 
 describe "Unit Conversions" do
   
-  context "Unit should perform unit conversions between compatible units" do
+  context "between compatible units" do
     specify { Unit("1 s").to("ns").should == Unit("1e9 ns")}
+    specify { Unit("1 s").convert_to("ns").should == Unit("1e9 ns")}
+    specify { (Unit("1 s") >> "ns").should == Unit("1e9 ns")}
+
     specify { Unit("1 m").to(Unit("ft")).should be_within(Unit("0.001 ft")).of(Unit("3.28084 ft"))}
+  end
+  
+  context "between incompatible units" do
+    specify { expect { Unit("1 s").to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
+  end
+  
+  context "temperature conversions" do
+    
+  end
+end
+
+describe "Unit Math" do
+  context "addition" do
+    context "between compatible units" do
+      specify { (Unit("0 m") + Unit("10 m")).should == Unit("10 m")}
+      specify { (Unit("5 kg") + Unit("10 kg")).should == Unit("15 kg")}
+    end
+    
+    context "between a zero unit and another unit" do
+      specify { (Unit("0 kg") + Unit("10 m")).should == Unit("10 m")}
+      specify { (Unit("0 m") + Unit("10 kg")).should == Unit("10 kg")}
+    end
+    
+    context "between incompatible units" do
+      specify { expect {Unit("10 kg") + Unit("10 m")}.to raise_error(ArgumentError)}
+      specify { expect {Unit("10 m") + Unit("10 kg")}.to raise_error(ArgumentError)}
+    end
+
+    context "a number from a unit" do
+      specify { expect { Unit("10 kg") + 1 }.to raise_error(ArgumentError)}
+      specify { expect { 10 + Unit("10 kg") }.to raise_error(ArgumentError)}
+    end
+    
+  end 
+  
+  context "subtracting" do
+    context "compatible units" do
+      specify { (Unit("0 m") - Unit("10 m")).should == Unit("-10 m")}
+      specify { (Unit("5 kg") - Unit("10 kg")).should == Unit("-5 kg")}
+    end
+    
+    context "a unit from a zero unit" do
+      specify { (Unit("0 kg") - Unit("10 m")).should == Unit("-10 m")}
+      specify { (Unit("0 m") - Unit("10 kg")).should == Unit("-10 kg")}
+    end
+    
+    context "incompatible units" do
+      specify { expect {Unit("10 kg") - Unit("10 m")}.to raise_error(ArgumentError)}
+      specify { expect {Unit("10 m") - Unit("10 kg")}.to raise_error(ArgumentError)}
+    end
+    
+    context "a number from a unit" do
+      specify { expect { Unit("10 kg") - 1 }.to raise_error(ArgumentError)}
+      specify { expect { 10 - Unit("10 kg") }.to raise_error(ArgumentError)}
+    end
+    
+  end
+  
+  context "multiplication" do
+    context "between compatible units" do
+      specify { (Unit("0 m") * Unit("10 m")).should == Unit("0 m^2")}
+      specify { (Unit("5 kg") * Unit("10 kg")).should == Unit("50 kg^2")}
+    end
+        
+    context "between incompatible units" do
+      specify { (Unit("0 m") * Unit("10 kg")).should == Unit("0 kg*m")}
+      specify { (Unit("5 m") * Unit("10 kg")).should == Unit("50 kg*m")}
+    end
+    
+    context "by a temperature" do
+      specify { expect { Unit("5 kg") * Unit("100 tempF")}.to raise_exception(ArgumentError) }
+    end
+
+    context "by a number" do
+      specify { (10 * Unit("5 kg")).should == Unit("50 kg")}
+    end
+    
+  end
+  
+  context "divide" do
+    context "compatible units" do
+      specify { (Unit("0 m") / Unit("10 m")).should == Unit("0")}
+      specify { (Unit("5 kg") / Unit("10 kg")).should == (1/2)}
+    end
+        
+    context "incompatible units" do
+      specify { (Unit("0 m") / Unit("10 kg")).should == Unit("0 m/kg")}
+      specify { (Unit("5 m") / Unit("10 kg")).should == Unit("1/2 m/kg")}
+    end
+    
+    context "by a temperature" do
+      specify { expect { Unit("5 kg") / Unit("100 tempF")}.to raise_exception(ArgumentError) }
+    end
+
+    context "by a number" do
+      specify { (10 / Unit("5 kg")).should == Unit("2 1/kg")}
+    end
+    
+    context "by zero" do
+      specify { expect { Unit("10 m") / 0}.to raise_error(ZeroDivisionError)}
+      specify { expect { Unit("10 m") / Unit("0 m")}.to raise_error(ZeroDivisionError)}
+      specify { expect { Unit("10 m") / Unit("0 kg")}.to raise_error(ZeroDivisionError)}
+    end
+  end
+  
+  context "exponentiation" do
+    context "between compatible units" do
+      
+    end
+    
+    context "between incompatible units" do
+      
+    end
+    
   end
 end

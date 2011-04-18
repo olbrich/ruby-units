@@ -785,7 +785,6 @@ class Unit < Numeric
   end
   
   # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
-  
   def to_c
     return Complex(@scalar) if self.unitless?
     raise RuntimeError, "Can't convert to Complex unless unitless.  Use Unit#scalar"
