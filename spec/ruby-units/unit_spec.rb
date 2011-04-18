@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Create some simple units" do
-  # number only
   describe Unit("1") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -219,26 +218,42 @@ end
 
 describe "Unit handles attempts to create bad units" do
   specify "no empty strings" do
-    expect {Unit("")}.to raise_error(ArgumentError)
+    expect {Unit("")}.to raise_error(ArgumentError,"No Unit Specified")
   end
 
   specify "no blank strings" do
-    expect {Unit("   ")}.to raise_error(ArgumentError)
+    expect {Unit("   ")}.to raise_error(ArgumentError,"No Unit Specified")
   end
 
   specify "no strings with tabs" do
-    expect {Unit("\t")}.to raise_error(ArgumentError)
+    expect {Unit("\t")}.to raise_error(ArgumentError,"No Unit Specified")
   end
 
   specify "no strings with newlines" do
-    expect {Unit("\n")}.to raise_error(ArgumentError)
+    expect {Unit("\n")}.to raise_error(ArgumentError,"No Unit Specified")
   end
 
   specify "no strings that don't specify a valid unit" do
-    expect {Unit("ruby")}.to raise_error(ArgumentError)
+    expect {Unit("random string")}.to raise_error(ArgumentError,"'random string' Unit not recognized")
   end
 
-  
+  specify "no undefined units" do
+    expect {Unit("1 mFoo")}.to raise_error(ArgumentError,"'1 mFoo' Unit not recognized")
+  end
+
+  specify "no units with powers greater than 19" do
+    expect {Unit("1 m^20")}.to raise_error(ArgumentError, "Power out of range (-20 < net power of a unit < 20)")
+  end
+
+  specify "no units with powers less than 19" do
+    expect {Unit("1 m^-20")}.to raise_error(ArgumentError, "Power out of range (-20 < net power of a unit < 20)")
+  end
+
+  specify "no temperatures less than absolute zero" do
+    expect {Unit("-100 tempK")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
+    expect {Unit("-100 tempR")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
+  end
+
 end
 
 describe Unit do
@@ -250,19 +265,90 @@ describe Unit do
   end
 end
 
-describe "Unit Conversions" do
+describe "Unit Comparisons" do
   context "Unit should detect if two units are 'compatible' (i.e., can be converted into each other)" do
     specify { Unit("1 ft").should =~ Unit('1 m')}
     specify { Unit("1 ft").should =~ "m"}
     specify { Unit("1 ft").should be_compatible_with Unit('1 m')}
     specify { Unit("1 ft").should be_compatible_with "m"}
-    specify { Unit("1 m").should be_compatible_with Unit('1 kg*m/kg')}
-    
+    specify { Unit("1 m").should be_compatible_with Unit('1 kg*m/kg')}    
     specify { Unit("1 ft").should_not =~ Unit('1 kg')}
     specify { Unit("1 ft").should_not be_compatible_with Unit('1 kg')}
   end
   
+  context "Equality" do
+    context "units of same kind" do
+      specify { Unit("1000 m").should == Unit('1 km')}
+      specify { Unit("100 m").should_not == Unit('1 km')}
+      specify { Unit("1 m").should == Unit('100 cm')}
+    end
+    
+    context "units of incompatible types" do
+      specify { Unit("1 m").should_not == Unit("1 kg")}
+    end
+    
+    context "units with a zero scalar are equal" do
+      specify {Unit("0 m").should == Unit("0 s")}
+      specify {Unit("0 m").should == Unit("0 kg")}
+      
+      context "except for temperature units" do
+        specify {Unit("0 tempK").should == Unit("0 m")}
+        specify {Unit("0 tempR").should == Unit("0 m")}
+        specify {Unit("0 tempC").should_not == Unit("0 m")}
+        specify {Unit("0 tempF").should_not == Unit("0 m")}
+      end
+    end
+  end
+  
+  context "Equivalence" do
+    context "units and scalars are the exactly the same" do
+      specify { Unit("1 m").should === Unit("1 m")}
+      specify { Unit("1 m").should be_same Unit("1 m")}
+      specify { Unit("1 m").should be_same_as Unit("1 m")}
+    end
+    
+    context "units are compatible but not identical" do
+      specify { Unit("1000 m").should_not === Unit("1 km")}
+      specify { Unit("1000 m").should_not be_same Unit("1 km")}
+      specify { Unit("1000 m").should_not be_same_as Unit("1 km")}      
+    end
+    
+    context "units are not compatible" do
+      specify { Unit("1000 m").should_not === Unit("1 hour")}
+      specify { Unit("1000 m").should_not be_same Unit("1 hour")}
+      specify { Unit("1000 m").should_not be_same_as Unit("1 hour")}
+    end
+    
+    context "scalars are different" do
+      specify { Unit("1 m").should_not === Unit("2 m")}
+      specify { Unit("1 m").should_not be_same Unit("2 m")}
+      specify { Unit("1 m").should_not be_same_as Unit("2 m")}      
+    end
+  end
+  
+  context "Comparisons" do
+    context "compatible units can be compared" do
+      specify { Unit("1 m").should < Unit("2 m")}
+      specify { Unit("2 m").should > Unit("1 m")}
+      specify { Unit("1 m").should < Unit("1 mi")}
+      specify { Unit("2 m").should > Unit("1 ft")}
+#      specify { Unit("70 tempF").should > Unit("10 degC")}
+    end
+    
+    context "incompatible units cannot be compared" do
+      specify { expect { Unit("1 m") < Unit("1 liter")}.to raise_error(ArgumentError,"Incompatible Units (m !~ l)")}
+      specify { expect { Unit("1 kg") > Unit("60 mph")}.to raise_error(ArgumentError,"Incompatible Units (kg !~ mph)")}
+    end
+  end
+  
+  
+  
+end
+
+describe "Unit Conversions" do
+  
   context "Unit should perform unit conversions between compatible units" do
     specify { Unit("1 s").to("ns").should == Unit("1e9 ns")}
+    specify { Unit("1 m").to(Unit("ft")).should be_within(Unit("0.001 ft")).of(Unit("3.28084 ft"))}
   end
 end

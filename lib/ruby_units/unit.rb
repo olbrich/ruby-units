@@ -240,14 +240,14 @@ class Unit < Numeric
       @numerator = ['<day>']
       @denominator = UNITY_ARRAY
     when /^\s*$/
-      raise ArgumentError, "No Unit Specified (#{options.first})"
+      raise ArgumentError, "No Unit Specified"
     when String
       parse(options[0])   
     else
       raise ArgumentError, "Invalid Unit Format"
     end
     self.update_base_scalar
-    raise ArgumentError, "Temperature out of range" if self.is_temperature? &&  self.base_scalar < 0
+    raise ArgumentError, "Temperatures must not be less than absolute zero" if self.is_temperature? &&  self.base_scalar < 0
   
     unary_unit = self.units || ""
     opt_units = options[0].scan(NUMBER_REGEX)[0][1] if String === options[0]
@@ -448,11 +448,11 @@ class Unit < Numeric
   def <=>(other)
     case
     when !self.base_scalar.respond_to?(:<=>)
-      raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspec}"
+      raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspect}"
     when other.zero? && !self.is_temperature?
       return self.base_scalar <=> 0
     when other.instance_of?(Unit)
-      raise ArgumentError, "Incompatible Units (#{self.units} !=~ #{other.units})" unless self =~ other
+      raise ArgumentError, "Incompatible Units (#{self.units} !~ #{other.units})" unless self =~ other
       return self.base_scalar <=> other.base_scalar
     else
       x,y = coerce(other)
@@ -463,12 +463,15 @@ class Unit < Numeric
   # Compare Units for equality
   # this is necessary mostly for Complex units.  Complex units do not have a <=> operator
   # so we define this one here so that we can properly check complex units for equality.
+  # Units of incompatible types are not equal, except when they are both zero and neither is a temperature
+  # Equality checks can be tricky since round off errors may make essentially equivalent units
+  # appear to be different.
   def ==(other)
     case
     when other.respond_to?(:zero?) && other.zero? && !self.is_temperature?
       return self.zero?
     when other.instance_of?(Unit)
-      raise ArgumentError, "Incompatible Units" unless self =~ other
+      return false unless self =~ other
       return self.base_scalar == other.base_scalar
     else
       x,y = coerce(other)
@@ -995,6 +998,7 @@ class Unit < Numeric
         vector[n] = vector[n] - 1 if n
       end
     end
+    raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? {|x| x.abs >=20}
     vector
   end
     
@@ -1178,7 +1182,7 @@ class Unit < Numeric
     
     
     us = "#{(top || '' + bottom || '')}".to_s.gsub(@@UNIT_MATCH_REGEX,'').gsub(/[\d\*, "'_^\/\$]/,'')
-    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized #{us.inspect}") unless us.empty?
+    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless us.empty?
 
     @numerator = @numerator.map do |item|
        @@PREFIX_MAP[item[0]] ? [@@PREFIX_MAP[item[0]], @@UNIT_MAP[item[1]]] : [@@UNIT_MAP[item[1]]]
