@@ -14,7 +14,7 @@ describe String do
     
     specify { "5 min".from.should be_instance_of Time }
     specify { "5 min".from('now').should be_instance_of Time }
-    specify { "5 min".from(Time.now.to_i).should be_instance_of Time }
+#    specify { "5 min".from(Time.now.to_i).should be_instance_of Time }
     specify { "5 min".from_now.should be_instance_of Time }
     
     specify { "5 min".after('12:00').should be_instance_of Time }

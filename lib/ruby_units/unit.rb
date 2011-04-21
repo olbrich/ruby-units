@@ -206,13 +206,10 @@ class Unit < Numeric
       return
     end
     if options.size == 3
-      # options[0] is the scalar
-      # options[1] is an array of unit strings for the numerator
-      # options[2] is an array of unit strings for the denominator
       options[1] = options[1].join if options[1].kind_of?(Array)
       options[2] = options[2].join if options[2].kind_of?(Array)
       begin
-        cached = Unit.cached["#{options[1]}/#{options[2]}"] * options[0] 
+        cached = @@cached_units["#{options[1]}/#{options[2]}"] * options[0] 
         copy(cached)
       rescue 
         initialize("#{options[0]} #{options[1]}/#{options[2]}")
@@ -274,10 +271,6 @@ class Unit < Numeric
     return @@cached_units
   end
   
-  def self.cache(key, value)
-    @@cached_units[key] = value
-  end
-  
   def self.clear_cache
     @@cached_units = {}
     @@base_unit_cache = {}
@@ -317,12 +310,12 @@ class Unit < Numeric
   # results of the conversion are cached so subsequent calls to this will be fast
   def to_base
     return self if self.is_base?
-    if self.units =~ /\A#{TEMP_REGEX}\Z/
-      @signature = 400
-      base = case self.units
-      when /temp/
+    if self.units =~ /\A(?:temp|deg)[CRF]\Z/
+      @signature = @@KINDS.key(:temperature)
+      base = case 
+      when self.is_temperature?
         self.to('tempK')
-      when /deg/
+      when self.is_degree?
         self.to('degK')
       end
       return base
@@ -454,7 +447,7 @@ class Unit < Numeric
     case
     when !self.base_scalar.respond_to?(:<=>)
       raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspect}"
-    when other.zero? && !self.is_temperature?
+    when !self.is_temperature? && other.zero?
       return self.base_scalar <=> 0
     when other.instance_of?(Unit)
       raise ArgumentError, "Incompatible Units (#{self.units} !~ #{other.units})" unless self =~ other
@@ -473,7 +466,7 @@ class Unit < Numeric
   # appear to be different.
   def ==(other)
     case
-    when other.respond_to?(:zero?) && other.zero? && !self.is_temperature?
+    when other.respond_to?(:zero?) && other.zero?
       return self.zero?
     when other.instance_of?(Unit)
       return false unless self =~ other
@@ -492,7 +485,6 @@ class Unit < Numeric
   # if you want to do a regexp on the unit string do this ...
   #  unit.units =~ /regexp/
   def =~(other)
-    return true if self == 0 || other == 0
     case other
     when Unit
       self.signature == other.signature
@@ -578,7 +570,6 @@ class Unit < Numeric
            raise ArgumentError,  "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
     when Time
-#      other - self
       raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be subtracted from to a Unit, which can only represent time spans"
     else
         x,y = coerce(other)
@@ -890,7 +881,7 @@ class Unit < Numeric
    
   # true if scalar is zero
   def zero?
-    return self.to_base.scalar.zero?
+    return self.base_scalar.zero?
   end
   
   # '5 min'.unit.ago 

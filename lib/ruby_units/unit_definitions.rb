@@ -162,8 +162,8 @@ UNIT_DEFINITIONS = {
   #magnetism
   '<weber>' => [%w{Wb weber webers}, 1, :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
   '<tesla>'  => [%w{T tesla teslas}, 1, :magnetism, %w{<kilogram>}, %w{<second> <second> <ampere>}],
-  '<gauss>' => [%w{G gauss}, Rational(1/1e4), :magnetism,  %w{<kilogram>}, %w{<second> <second> <ampere>}],
-  '<maxwell>' => [%w{Mx maxwell maxwells}, Rational(1/1e8), :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
+  '<gauss>' => [%w{G gauss}, Rational(1,1e4), :magnetism,  %w{<kilogram>}, %w{<second> <second> <ampere>}],
+  '<maxwell>' => [%w{Mx maxwell maxwells}, Rational(1,1e8), :magnetism, %w{<meter> <meter> <kilogram>}, %w{<second> <second> <ampere>}],
   '<oersted>'  => [%w{Oe oersted oersteds}, 250.0/Math::PI, :magnetism, %w{<ampere>}, %w{<meter>}],
 
   #energy
@@ -237,7 +237,7 @@ UNIT_DEFINITIONS = {
   '<nucleotide>' => [%w{nt}, 1, :counting, %w{<each>}],
   '<molecule>' => [%w{molecule molecules}, 1, :counting, %w{<1>}],
   '<dozen>' =>  [%w{doz dz dozen},12,:prefix_only, %w{<each>}],
-  '<percent>'=> [%w{% percent}, Rational(1/100), :prefix_only, %w{<1>}],
+  '<percent>'=> [%w{% percent}, Rational(1,100), :prefix_only, %w{<1>}],
   '<ppm>' =>  [%w{ppm},Rational(1,1e6),:prefix_only, %w{<1>}],
   '<ppt>' =>  [%w{ppt},Rational(1,1e9),:prefix_only, %w{<1>}],
   '<gross>' =>  [%w{gr gross},144, :prefix_only, %w{<dozen> <dozen>}],

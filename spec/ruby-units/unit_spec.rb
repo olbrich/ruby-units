@@ -177,17 +177,17 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}
   end
 
-  # describe Unit("100 degC") do
-  #   it {should be_an_instance_of Unit}
-  #   its(:scalar) {should be_within(0.001).of 100}
-  #   its(:units) {should == "degC"}
-  #   its(:kind) {should == :temperature}
-  #   it {should_not be_temperature}
-  #   it {should be_degree}
-  #   it {should_not be_base}
-  #   it {should_not be_unitless}
-  #   its(:base) {should be_within(Unit("0.01 degK")).of Unit("373.15 tempK")}
-  # end
+  describe Unit("100 degC") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_within(0.001).of 100}
+    its(:units) {should == "degC"}
+    its(:kind) {should == :temperature}
+    it {should_not be_temperature}
+    it {should be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    its(:base) {should be_within(Unit("0.01 degK")).of Unit("100 degK")}
+  end
   
   describe Unit("75%") do
     it {should be_an_instance_of Unit}
