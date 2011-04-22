@@ -623,5 +623,12 @@ describe "Unit Math" do
     
   end
   
+  context "inverse" do
+    specify { Unit("1 m").inverse.should == Unit("1 1/m") }
+    specify { expect {Unit("100 tempK").inverse}.to raise_error(ArgumentError,"Cannot divide with temperatures") }
+  end
+  
+  
+  
   
 end

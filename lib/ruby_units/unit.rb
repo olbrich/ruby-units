@@ -787,14 +787,21 @@ class Unit < Numeric
   # converts the unit back to a float if it is unitless.  Otherwise raises an exception
   def to_f
     return @scalar.to_f if self.unitless?
-    raise RuntimeError, "Can't convert to Float unless unitless (#{self.to_s}).  Use Unit#scalar"
+    raise RuntimeError, "Can't convert '#{self.to_s}' to Float unless unitless.  Use Unit#scalar"
   end
   
   # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
   def to_c
     return Complex(@scalar) if self.unitless?
-    raise RuntimeError, "Can't convert to Complex unless unitless.  Use Unit#scalar"
+    raise RuntimeError, "Can't convert '#{self.to_s}' to Complex unless unitless.  Use Unit#scalar"
   end
+
+  # if unitless, returns an int, otherwise raises an error
+  def to_i
+    return @scalar.to_int if self.unitless?
+    raise RuntimeError, "Cannot convert '#{self.to_s}' to Integer unless unitless"
+  end
+  alias :to_int :to_i
   
   # returns the 'unit' part of the Unit object without the scalar
   def units
@@ -856,12 +863,6 @@ class Unit < Numeric
     Unit.new(@scalar.floor, @numerator, @denominator)    
   end
 
-  # if unitless, returns an int, otherwise raises an error
-  def to_i
-    return @scalar.to_int if self.unitless?
-    raise RuntimeError, 'Cannot convert to Integer unless unitless'
-  end
-  alias :to_int :to_i
   
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
   def to_time
