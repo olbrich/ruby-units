@@ -512,7 +512,7 @@ describe "Unit Math" do
     
   end
   
-  context "divide" do
+  context "divide (/)" do
     context "compatible units" do
       specify { (Unit("0 m") / Unit("10 m")).should == Unit(0)}
       specify { (Unit("5 kg") / Unit("10 kg")).should == Rational(1,2)}
@@ -538,7 +538,7 @@ describe "Unit Math" do
     end
   end
   
-  context "exponentiation" do
+  context "exponentiation (**)" do
     specify { expect { Unit("100 tempK")**2 }.to raise_error(ArgumentError,"Cannot raise a temperature to a power")}
     
     context Unit("0 m") do
@@ -556,6 +556,7 @@ describe "Unit Math" do
       specify { expect { subject**(1/2)}.to raise_error(ArgumentError, "Illegal root")}
         # because 1 m^(1/2) doesn't make any sense
       specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")}
+      specify { expect { subject**(Unit("1 m"))}.to raise_error(ArgumentError, "Invalid Exponent")}
     end
     
     context Unit("1 m^2") do
@@ -571,9 +572,56 @@ describe "Unit Math" do
   context "modulo (%)" do
     context "compatible units" do
       specify { (Unit("2 m") % Unit("1 m")).should == 0 }
+      specify { (Unit("5 m") % Unit("2 m")).should == 1 }
     end
     
     specify { expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units") }
+  end
+  
+  context "power" do
+    subject { Unit("1 m") }
+    it "raises an exception when passed a Float argument" do
+      expect {subject.power(1.5)}.to raise_error(ArgumentError,"Exponent must an Integer")
+    end
+    it "raises an exception when passed a Rational argument" do
+      expect {subject.power(Rational(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
+    end
+    it "raises an exception when passed a Complex argument" do
+      expect {subject.power(Complex(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
+    end
+    it "raises an exception when called on a temperature unit" do
+      expect { Unit("100 tempC").power(2)}.to raise_error(ArgumentError,"Cannot raise a temperature to a power")
+    end
+    
+    specify { (subject.power(-1)).should == Unit("1 1/m") }    
+    specify { (subject.power(0)).should == 1 }
+    specify { (subject.power(1)).should == subject }
+    specify { (subject.power(2)).should == Unit("1 m^2") }
     
   end
+  
+  context "root" do
+    subject { Unit("1 m") }
+    it "raises an exception when passed a Float argument" do
+      expect {subject.root(1.5)}.to raise_error(ArgumentError,"Exponent must an Integer")
+    end
+    it "raises an exception when passed a Rational argument" do
+      expect {subject.root(Rational(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
+    end
+    it "raises an exception when passed a Complex argument" do
+      expect {subject.root(Complex(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
+    end
+    it "raises an exception when called on a temperature unit" do
+      expect { Unit("100 tempC").root(2)}.to raise_error(ArgumentError,"Cannot take the root of a temperature")
+    end
+    
+    specify { (Unit("1 m^2").root(-2)).should == Unit("1 1/m") }
+    specify { (subject.root(-1)).should == Unit("1 1/m") }    
+    specify { expect {(subject.root(0))}.to raise_error(ArgumentError, "0th root undefined")}
+    specify { (subject.root(1)).should == subject }
+    specify { (Unit("1 m^2").root(2)).should == Unit("1 m") }
+    
+  end
+  
+  
 end

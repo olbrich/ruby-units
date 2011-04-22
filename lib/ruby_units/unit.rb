@@ -628,6 +628,7 @@ class Unit < Numeric
     end
   end
 
+  # perform a modulo on a unit, will raise an exception if the units are not compatible
   def %(other)
     self.divmod(other).last
   end
@@ -667,7 +668,7 @@ class Unit < Numeric
   # returns the unit raised to the n-th power.  Integers only
   def power(n)
     raise ArgumentError, "Cannot raise a temperature to a power" if self.is_temperature?
-    raise ArgumentError, "Can only use Integer exponents" unless n.kind_of?(Integer)
+    raise ArgumentError, "Exponent must an Integer" unless n.kind_of?(Integer)
     return self.inverse if n == -1
     return 1 if n.zero?
     return self if n == 1
