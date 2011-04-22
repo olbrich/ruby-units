@@ -18,9 +18,20 @@ describe "Complex Unit" do
   it { should == "1-1i".to_unit }
   it { should === "1-1i".to_unit }
 
-  it "is not comparable" do 
-    expect { subject > "1+1i".to_unit }.to raise_error(NoMethodError)
-    expect { subject < "1+1i".to_unit }.to raise_error(NoMethodError) 
+  if RUBY_VERSION < "1.9"
+    context "in Ruby < 1.9" do
+      it "is comparable" do
+        subject.should > "1+0.5i".to_unit
+        subject.should < "2+1i".to_unit
+      end
+    end
+  else
+    context "in Ruby >= 1.9" do
+      it "is not comparable" do 
+        expect { subject > "1+1i".to_unit }.to raise_error(NoMethodError)
+        expect { subject < "1+1i".to_unit }.to raise_error(NoMethodError) 
+      end
+    end
   end
   
 end

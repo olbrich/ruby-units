@@ -188,7 +188,7 @@ describe "Create some simple units" do
     it {should_not be_unitless}
     its(:base) {should be_within(Unit("0.01 degK")).of Unit("100 degK")}
   end
-  
+      
   describe Unit("75%") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
@@ -312,6 +312,7 @@ describe "Unit handles attempts to create bad units" do
   specify "no temperatures less than absolute zero" do
     expect {Unit("-100 tempK")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
     expect {Unit("-100 tempR")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
+    expect {Unit("-500/9 tempR")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
   end
 
 end
@@ -392,7 +393,7 @@ describe "Unit Comparisons" do
       specify { Unit("2 m").should > Unit("1 m")}
       specify { Unit("1 m").should < Unit("1 mi")}
       specify { Unit("2 m").should > Unit("1 ft")}
-#      specify { Unit("70 tempF").should > Unit("10 degC")}
+      specify { Unit("70 tempF").should > Unit("10 degC")}
     end
     
     context "incompatible units cannot be compared" do
@@ -417,8 +418,29 @@ describe "Unit Conversions" do
     specify { expect { Unit("1 s").to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
   end
   
-  context "temperature conversions" do
+  context "between temperature scales" do
+    # note that 'temp' units are for temperature readings on a scale, while 'deg' units are used to represent
+    # differences between temperatures, offsets, or other differential temperatures.
     
+    specify { Unit("100 tempC").should be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
+    specify { Unit("0 tempC").should be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
+    specify { Unit("37 tempC").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
+    specify { Unit("-273.15 tempC").should == Unit("0 tempK") }
+    
+    specify { Unit("212 tempF").should be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
+    specify { Unit("32 tempF").should be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
+    specify { Unit("98.6 tempF").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
+    specify { Unit("-459.67 tempF").should == Unit("0 tempK") }
+
+    specify { Unit("671.67 tempR").should be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
+    specify { Unit("491.67 tempR").should be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
+    specify { Unit("558.27 tempR").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
+    specify { Unit("0 tempR").should == Unit("0 tempK") }
+    
+    specify { Unit("1 degC").should == Unit("1 degK")}
+    specify { Unit("1 degF").should == Unit("1 degR")}
+    specify { Unit("1 degC").should == Unit("1.8 degR")}
+    specify { Unit("1 degF").should be_within(Unit("0.001 degK")).of(Unit("0.5555 degK"))}
   end
 end
 
@@ -493,7 +515,7 @@ describe "Unit Math" do
   context "divide" do
     context "compatible units" do
       specify { (Unit("0 m") / Unit("10 m")).should == Unit(0)}
-      specify { (Unit("5 kg") / Unit("10 kg")).should == (1/2)}
+      specify { (Unit("5 kg") / Unit("10 kg")).should == Rational(1,2)}
     end
         
     context "incompatible units" do
@@ -517,13 +539,41 @@ describe "Unit Math" do
   end
   
   context "exponentiation" do
-    context "between compatible units" do
-      
+    specify { expect { Unit("100 tempK")**2 }.to raise_error(ArgumentError,"Cannot raise a temperature to a power")}
+    
+    context Unit("0 m") do
+      it { (subject**1).should == subject }
+      it { (subject**2).should == subject }
+    end
+
+
+    context Unit("1 m") do
+      it { (subject**0).should == 1 }
+      it { (subject**1).should == subject }
+      it { (subject**(-1)).should == 1/subject }
+      it { (subject**(2)).should == Unit("1 m^2")}
+      it { (subject**(-2)).should == Unit("1 1/m^2")}
+      specify { expect { subject**(1/2)}.to raise_error(ArgumentError, "Illegal root")}
+        # because 1 m^(1/2) doesn't make any sense
+      specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")}
     end
     
-    context "between incompatible units" do
+    context Unit("1 m^2") do
+      it { (subject**(Rational(1,2))).should == Unit("1 m")}
+      it { (subject**(0.5)).should == Unit("1 m")}
       
+      specify { expect { subject**(0.12345) }.to raise_error(ArgumentError,"Not a n-th root (1..9), use 1/n")}
+      specify { expect { subject**("abcdefg") }.to raise_error(ArgumentError,"Invalid Exponent")}
     end
+    
+  end
+  
+  context "modulo (%)" do
+    context "compatible units" do
+      specify { (Unit("2 m") % Unit("1 m")).should == 0 }
+    end
+    
+    specify { expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units") }
     
   end
 end

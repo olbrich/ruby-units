@@ -54,7 +54,7 @@ class Unit < Numeric
   TIME_REGEX = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
   LBS_OZ_REGEX = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
   SCI_NUMBER = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
-  RATIONAL_NUMBER = /(\d+)\/(\d+)/
+  RATIONAL_NUMBER = /([+-]?\d+)\/(\d+)/
   COMPLEX_NUMBER = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
   NUMBER_REGEX = /#{SCI_NUMBER}*\s*(.+)?/
   UNIT_STRING_REGEX = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
@@ -311,7 +311,11 @@ class Unit < Numeric
   def to_base
     return self if self.is_base?
     if self.units =~ /\A(?:temp|deg)[CRF]\Z/
-      @signature = @@KINDS.key(:temperature)
+      if RUBY_VERSION < "1.9"
+        @signature = @@KINDS.index(:temperature)
+      else
+        @signature = @@KINDS.key(:temperature)
+      end
       base = case 
       when self.is_temperature?
         self.to('tempK')
@@ -623,6 +627,10 @@ class Unit < Numeric
       return self.to_base.scalar.divmod(other.to_base.scalar)
     end
   end
+
+  def %(other)
+    self.divmod(other).last
+  end
     
   # Exponentiate.  Only takes integer powers. 
   # Note that anything raised to the power of 0 results in a Unit object with a scalar of 1, and no units.
@@ -634,10 +642,10 @@ class Unit < Numeric
   # For now, if a rational is passed in, it will be used, otherwise we are stuck with integers and certain floats < 1
   def **(other)
     raise ArgumentError, "Cannot raise a temperature to a power" if self.is_temperature?
-    if Numeric === other
-      return Unit("1") if other.zero?
-      return self if other == 1
+    if other.kind_of?(Numeric)
       return self.inverse if other == -1
+      return self if other == 1
+      return 1 if other.zero?
     end
     case other
     when Rational
@@ -649,6 +657,8 @@ class Unit < Numeric
       valid = (1..9).map {|x| 1/x}
       raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
       self.root((1/other).to_int)
+    when Complex
+      raise ArgumentError, "exponentiation of complex numbers is not yet supported."
     else
       raise ArgumentError, "Invalid Exponent"
     end
@@ -657,10 +667,10 @@ class Unit < Numeric
   # returns the unit raised to the n-th power.  Integers only
   def power(n)
     raise ArgumentError, "Cannot raise a temperature to a power" if self.is_temperature?
-    raise ArgumentError, "Can only use Integer exponenents" unless Integer === n
-    return self if n == 1
-    return Unit("1") if n == 0
+    raise ArgumentError, "Can only use Integer exponents" unless n.kind_of?(Integer)
     return self.inverse if n == -1
+    return 1 if n.zero?
+    return self if n == 1
     if n > 0 then 
       (1..(n-1).to_i).inject(self) {|product, x| product * self}
     else
@@ -672,8 +682,8 @@ class Unit < Numeric
   # if n < 0, returns 1/unit^(1/n)
   def root(n)
     raise ArgumentError, "Cannot take the root of a temperature" if self.is_temperature?
-    raise ArgumentError, "Exponent must an Integer" unless Integer === n
-    raise ArgumentError, "0th root undefined" if n == 0
+    raise ArgumentError, "Exponent must an Integer" unless n.kind_of?(Integer)
+    raise ArgumentError, "0th root undefined" if n.zero?
     return self if n == 1
     return self.root(n.abs).inverse if n < 0
     
@@ -733,9 +743,9 @@ class Unit < Numeric
         when 'tempK'
           @scalar
         when 'tempF'
-          (@scalar+459.67)*(5.0/9.0)
+          (@scalar+459.67)*Rational(5,9)
         when 'tempR'
-          @scalar*(5.0/9.0)
+          @scalar*Rational(5,9)
         end
       end
       q=  case target_unit
@@ -744,11 +754,10 @@ class Unit < Numeric
       when 'tempK'
         @base_scalar 
       when 'tempF'
-        @base_scalar * (9.0/5.0) - 459.67
+        @base_scalar * Rational(9,5) - 459.67
       when 'tempR'
-        @base_scalar * (9.0/5.0) 
+        @base_scalar * Rational(9,5)
       end
-
       Unit.new("#{q} #{target_unit}")
     else
       case other
