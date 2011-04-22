@@ -12,7 +12,6 @@ begin
     gem.authors = ["Kevin Olbrich, Ph.D."]
     gem.email = ["kevin.olbrich+ruby_units@gmail.com"]
     gem.homepage = "https://github.com/olbrich/ruby-units"
-    gem.has_rdoc = true
     gem.files.exclude(".autotest")
   end
   Jeweler::GemcutterTasks.new
