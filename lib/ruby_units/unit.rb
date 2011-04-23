@@ -1237,7 +1237,11 @@ class Unit < Numeric
       when NilClass
         1
       when complex
-        num.to_c
+        if num.respond_to?(:to_c)
+          num.to_c
+        else
+          Complex(*num.scan(/(#{sci})(#{sci})i/).flatten.map {|n| n.to_i})
+        end
       when rational
         Rational(*num.split("/").map {|x| x.to_i})
       else
