@@ -86,7 +86,7 @@ class TestRubyUnits < Test::Unit::TestCase
   
   def test_to_yaml
     unit = "1 mm".u
-    assert_equal "--- !ruby/object:Unit \nscalar: 1.0\nnumerator: \n- <milli>\n- <meter>\ndenominator: \n- <1>\nsignature: 1\nbase_scalar: 0.001\n", unit.to_yaml    
+    assert_equal "--- !ruby/object:Unit \nscalar: 1\nnumerator: \n- <milli>\n- <meter>\ndenominator: \n- <1>\nsignature: 1\nbase_scalar: !ruby/object:Rational \n  denominator: 1000\n  numerator: 1\n", unit.to_yaml    
   end
 
   def test_time
@@ -96,9 +96,8 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal a - 3600, a - "1 h".unit
     assert_in_delta Time.now - "1 h".unit, "1 h".ago, 1
     assert_in_delta Time.now + 3600, "1 h".from_now, 1
-    assert_in_delta "1 h".unit + Time.now, "1 h".from_now, 1
+    assert_in_delta Time.now + "1 h".unit, "1 h".from_now, 1
     assert_in_delta Time.now - 3600, "1 h".before_now, 1
-    assert_in_delta((Time.now.unit - Time.now).unit.scalar, 0, 1)
     assert_equal "60 min", "min".until(Time.now + 3600).to_s
     assert_equal "01:00", "min".since(Time.now - 3600).to_s("%H:%M")
     assert_in_delta Time.now, "now".time, 1
@@ -629,8 +628,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal b+a, '118 tempF'.unit
     assert_equal a-b, '82 tempF'.unit
     assert_in_delta((a-c).scalar, '50 degF'.unit.scalar, 0.01)
-    assert_equal b+d, '20 degC'.unit
-    
+    assert_in_delta '20 degC'.unit, b+d, Unit("0.01 degC")
     assert_raises(ArgumentError) { a * b }
     assert_raises(ArgumentError) { a / b }
     assert_raises(ArgumentError) { a ** 2 }
@@ -676,7 +674,7 @@ class TestRubyUnits < Test::Unit::TestCase
     unit2 = Unit.new("mm")
     assert_equal "1 mm", unit2.to_s
     assert_equal "0.04 in", unit2.to_s("%0.2f in")
-    assert_equal "0.1 cm", unit2.to_s("cm")
+    assert_equal "1/10 cm", unit2.to_s("cm")
     unit3 = Unit.new("1 mm")
     assert_equal "1 mm", unit3.to_s
     assert_equal "0.04 in", unit3.to_s("%0.2f in")
@@ -963,8 +961,8 @@ class TestRubyUnits < Test::Unit::TestCase
     a.to_s                # cache the conversion to itself
     b = Unit.new('2 mm')
     assert_equal('2 mm', b.to_s)
-    assert_equal('0.001 m', a.to_s('m'))
-    assert_equal('0.001 m', a.output['m'])
+    assert_equal('1/1000 m', a.to_s('m'))
+    assert_equal('1/1000 m', a.output['m'])
   end
     
   def test_version
@@ -997,7 +995,11 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal([1/4,"m"], Unit.parse_into_numbers_and_units("1/4 m"))
     assert_equal([-1/4,"m"], Unit.parse_into_numbers_and_units("-1/4 m"))
     assert_equal([1,"m"], Unit.parse_into_numbers_and_units("1   m"))
-    assert_equal([1,"m"], Unit.parse_into_numbers_and_units("m"))    
+    assert_equal([1,"m"], Unit.parse_into_numbers_and_units("m"))
+    assert_equal([10,""], Unit.parse_into_numbers_and_units("10"))
+    assert_equal([10.0,""], Unit.parse_into_numbers_and_units("10.0"))
+    assert_equal([(1/4),""], Unit.parse_into_numbers_and_units("1/4"))
+    assert_equal([Complex(1,1),""], Unit.parse_into_numbers_and_units("1+1i"))
   end
 
 end

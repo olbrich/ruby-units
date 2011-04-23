@@ -879,6 +879,21 @@ class Unit < Numeric
     Unit.new(@scalar.truncate, @numerator, @denominator)    
   end
 
+  # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
+  # only works when the scalar is an integer    
+  def succ
+    raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
+    Unit.new(@scalar.to_i.succ, @numerator, @denominator)
+  end
+  alias :next :succ
+  
+  # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
+  # only works when the scalar is an integer    
+  def pred
+    raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
+    Unit.new(@scalar.to_i.pred, @numerator, @denominator)
+  end
+  
   
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
   def to_time
@@ -959,21 +974,7 @@ class Unit < Numeric
   alias :after :from
   alias :from_now :from
   
-  # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
-  # only works when the scalar is an integer    
-  def succ
-    raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
-    Unit.new(@scalar.to_i.succ, @numerator, @denominator)
-  end
-  alias :next :succ
-  
-  # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
-  # only works when the scalar is an integer    
-  def pred
-    raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
-    Unit.new(@scalar.to_i.pred, @numerator, @denominator)
-  end
-  
+ 
 
   # automatically coerce objects to units when possible
   # if an object defines a 'to_unit' method, it will be coerced using that method
@@ -1230,7 +1231,7 @@ class Unit < Numeric
     rational = %r{[+-]?\d+\/\d+}
     # complex numbers... -1.2+3i, +1.2-3.3i
     complex = %r{#{sci}{2,2}i}
-    anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([\D].+)?}
+    anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([\D].*)?}
     num, unit = string.scan(anynumber).first
     [case num
       when NilClass
