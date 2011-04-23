@@ -705,5 +705,48 @@ describe "Unit Math" do
     end
   end
   
+  context "#truncate" do
+    context "of a unitless unit" do
+      specify "returns the truncate of the scalar" do
+        Unit("10.5").truncate.should == 10
+      end
+    end
+    
+    context "of a unit" do
+      specify "returns a unit with the truncate of the scalar" do
+        Unit("10.5 m").truncate.should == Unit("10 m")
+      end
+    end
+  end
+  
+  context '#zero?' do
+    it "is true when the scalar is zero on the base scale" do
+      Unit("0").should be_zero
+      Unit("0 mm").should be_zero
+      Unit("-273.15 tempC").should be_zero
+    end
+
+    it "is false when the scalar is not zero" do
+      Unit("1").should_not be_zero
+      Unit("1 mm").should_not be_zero
+      Unit("0 tempC").should_not be_zero
+    end
+  end
+  
+  context '#succ' do
+    specify { Unit("1").succ.should == Unit("2")}
+    specify { Unit("1 mm").succ.should == Unit("2 mm")}
+    specify { Unit("1 mm").next.should == Unit("2 mm")}
+    specify { Unit("-1 mm").succ.should == Unit("0 mm")}
+    specify { expect {Unit("1.5 mm").succ}.to raise_error(ArgumentError,"Non Integer Scalar")}
+  end
+
+  context '#pred' do
+    specify { Unit("1").pred.should == Unit("0")}
+    specify { Unit("1 mm").pred.should == Unit("0 mm")}
+    specify { Unit("-1 mm").pred.should == Unit("-2 mm")}
+    specify { expect {Unit("1.5 mm").pred}.to raise_error(ArgumentError,"Non Integer Scalar")}
+  end
+  
   
 end

@@ -874,6 +874,11 @@ class Unit < Numeric
     Unit.new(@scalar.round, @numerator, @denominator)    
   end
 
+  def truncate
+    return @scalar.truncate if self.unitless?
+    Unit.new(@scalar.truncate, @numerator, @denominator)    
+  end
+
   
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
   def to_time
@@ -881,10 +886,6 @@ class Unit < Numeric
   end
   alias :time :to_time
 
-  def truncate
-    return @scalar.truncate if self.unitless?
-    Unit.new(@scalar.truncate, @numerator, @denominator)    
-  end
 
   # convert a duration to a DateTime.  This will work so long as the duration is the duration from the zero date
   # defined by DateTime
@@ -964,6 +965,15 @@ class Unit < Numeric
     raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
     Unit.new(@scalar.to_i.succ, @numerator, @denominator)
   end
+  alias :next :succ
+  
+  # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
+  # only works when the scalar is an integer    
+  def pred
+    raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
+    Unit.new(@scalar.to_i.pred, @numerator, @denominator)
+  end
+  
 
   # automatically coerce objects to units when possible
   # if an object defines a 'to_unit' method, it will be coerced using that method
