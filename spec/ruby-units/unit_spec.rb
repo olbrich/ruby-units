@@ -628,7 +628,14 @@ describe "Unit Math" do
     specify { expect {Unit("100 tempK").inverse}.to raise_error(ArgumentError,"Cannot divide with temperatures") }
   end
   
-  
+  context "convert to scalars" do
+    specify {Unit("10").to_i.should be_kind_of(Integer)}
+    specify {Unit("10.0").to_f.should be_kind_of(Float)}
+    specify {Unit("1+1i").to_c.should be_kind_of(Complex)}
+    
+    
+    
+  end
   
   
 end
