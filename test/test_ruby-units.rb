@@ -86,7 +86,12 @@ class TestRubyUnits < Test::Unit::TestCase
   
   def test_to_yaml
     unit = "1 mm".u
-    assert_equal "--- !ruby/object:Unit \nscalar: 1\nnumerator: \n- <milli>\n- <meter>\ndenominator: \n- <1>\nsignature: 1\nbase_scalar: !ruby/object:Rational \n  denominator: 1000\n  numerator: 1\n", unit.to_yaml    
+    if RUBY_PLATFORM == "java"
+      # apparently jruby's implementation of yaml has some white space differences
+      assert_equal "--- !ruby/object:Unit \nscalar: 1\nnumerator: \n  - <milli>\n  - <meter>\ndenominator: \n  - <1>\nsignature: 1\nbase_scalar: !ruby/object:Rational \n  denominator: 1000\n  numerator: 1\n", unit.to_yaml
+    else
+      assert_equal "--- !ruby/object:Unit \nscalar: 1\nnumerator: \n- <milli>\n- <meter>\ndenominator: \n- <1>\nsignature: 1\nbase_scalar: !ruby/object:Rational \n  denominator: 1000\n  numerator: 1\n", unit.to_yaml
+    end
   end
 
   def test_time
@@ -628,7 +633,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal b+a, '118 tempF'.unit
     assert_equal a-b, '82 tempF'.unit
     assert_in_delta((a-c).scalar, '50 degF'.unit.scalar, 0.01)
-    assert_in_delta '20 degC'.unit, b+d, Unit("0.01 degC")
+    assert_in_delta '20 degC'.unit.scalar, (b+d).scalar, 0.01
     assert_raises(ArgumentError) { a * b }
     assert_raises(ArgumentError) { a / b }
     assert_raises(ArgumentError) { a ** 2 }
@@ -966,7 +971,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.2.0', Unit::VERSION)
+    assert_equal('1.3.0.a', Unit::VERSION)
   end
   
   def test_negation
