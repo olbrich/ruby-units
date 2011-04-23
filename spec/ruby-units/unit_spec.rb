@@ -445,140 +445,146 @@ describe "Unit Conversions" do
 end
 
 describe "Unit Math" do
-  context "addition" do
-    context "between compatible units" do
-      specify { (Unit("0 m") + Unit("10 m")).should == Unit("10 m")}
-      specify { (Unit("5 kg") + Unit("10 kg")).should == Unit("15 kg")}
-    end
+  context "operators:" do
+    context "addition (+)" do
+      context "between compatible units" do
+        specify { (Unit("0 m") + Unit("10 m")).should == Unit("10 m")}
+        specify { (Unit("5 kg") + Unit("10 kg")).should == Unit("15 kg")}
+      end
     
-    context "between a zero unit and another unit" do
-      specify { (Unit("0 kg") + Unit("10 m")).should == Unit("10 m")}
-      specify { (Unit("0 m") + Unit("10 kg")).should == Unit("10 kg")}
-    end
+      context "between a zero unit and another unit" do
+        specify { (Unit("0 kg") + Unit("10 m")).should == Unit("10 m")}
+        specify { (Unit("0 m") + Unit("10 kg")).should == Unit("10 kg")}
+      end
     
-    context "between incompatible units" do
-      specify { expect {Unit("10 kg") + Unit("10 m")}.to raise_error(ArgumentError)}
-      specify { expect {Unit("10 m") + Unit("10 kg")}.to raise_error(ArgumentError)}
-    end
+      context "between incompatible units" do
+        specify { expect {Unit("10 kg") + Unit("10 m")}.to raise_error(ArgumentError)}
+        specify { expect {Unit("10 m") + Unit("10 kg")}.to raise_error(ArgumentError)}
+      end
 
-    context "a number from a unit" do
-      specify { expect { Unit("10 kg") + 1 }.to raise_error(ArgumentError)}
-      specify { expect { 10 + Unit("10 kg") }.to raise_error(ArgumentError)}
-    end
+      context "a number from a unit" do
+        specify { expect { Unit("10 kg") + 1 }.to raise_error(ArgumentError)}
+        specify { expect { 10 + Unit("10 kg") }.to raise_error(ArgumentError)}
+      end
     
-  end 
+    end 
   
-  context "subtracting" do
-    context "compatible units" do
-      specify { (Unit("0 m") - Unit("10 m")).should == Unit("-10 m")}
-      specify { (Unit("5 kg") - Unit("10 kg")).should == Unit("-5 kg")}
-    end
+    context "subtracting (-)" do
+      context "compatible units" do
+        specify { (Unit("0 m") - Unit("10 m")).should == Unit("-10 m")}
+        specify { (Unit("5 kg") - Unit("10 kg")).should == Unit("-5 kg")}
+      end
     
-    context "a unit from a zero unit" do
-      specify { (Unit("0 kg") - Unit("10 m")).should == Unit("-10 m")}
-      specify { (Unit("0 m") - Unit("10 kg")).should == Unit("-10 kg")}
-    end
+      context "a unit from a zero unit" do
+        specify { (Unit("0 kg") - Unit("10 m")).should == Unit("-10 m")}
+        specify { (Unit("0 m") - Unit("10 kg")).should == Unit("-10 kg")}
+      end
     
-    context "incompatible units" do
-      specify { expect {Unit("10 kg") - Unit("10 m")}.to raise_error(ArgumentError)}
-      specify { expect {Unit("10 m") - Unit("10 kg")}.to raise_error(ArgumentError)}
-    end
+      context "incompatible units" do
+        specify { expect {Unit("10 kg") - Unit("10 m")}.to raise_error(ArgumentError)}
+        specify { expect {Unit("10 m") - Unit("10 kg")}.to raise_error(ArgumentError)}
+      end
     
-    context "a number from a unit" do
-      specify { expect { Unit("10 kg") - 1 }.to raise_error(ArgumentError)}
-      specify { expect { 10 - Unit("10 kg") }.to raise_error(ArgumentError)}
-    end
+      context "a number from a unit" do
+        specify { expect { Unit("10 kg") - 1 }.to raise_error(ArgumentError)}
+        specify { expect { 10 - Unit("10 kg") }.to raise_error(ArgumentError)}
+      end
     
-  end
+    end
   
-  context "multiplication" do
-    context "between compatible units" do
-      specify { (Unit("0 m") * Unit("10 m")).should == Unit("0 m^2")}
-      specify { (Unit("5 kg") * Unit("10 kg")).should == Unit("50 kg^2")}
-    end
+    context "multiplying (*)" do
+      context "between compatible units" do
+        specify { (Unit("0 m") * Unit("10 m")).should == Unit("0 m^2")}
+        specify { (Unit("5 kg") * Unit("10 kg")).should == Unit("50 kg^2")}
+      end
         
-    context "between incompatible units" do
-      specify { (Unit("0 m") * Unit("10 kg")).should == Unit("0 kg*m")}
-      specify { (Unit("5 m") * Unit("10 kg")).should == Unit("50 kg*m")}
-    end
+      context "between incompatible units" do
+        specify { (Unit("0 m") * Unit("10 kg")).should == Unit("0 kg*m")}
+        specify { (Unit("5 m") * Unit("10 kg")).should == Unit("50 kg*m")}
+      end
     
-    context "by a temperature" do
-      specify { expect { Unit("5 kg") * Unit("100 tempF")}.to raise_exception(ArgumentError) }
-    end
+      context "by a temperature" do
+        specify { expect { Unit("5 kg") * Unit("100 tempF")}.to raise_exception(ArgumentError) }
+      end
 
-    context "by a number" do
-      specify { (10 * Unit("5 kg")).should == Unit("50 kg")}
-    end
+      context "by a number" do
+        specify { (10 * Unit("5 kg")).should == Unit("50 kg")}
+      end
     
-  end
-  
-  context "divide (/)" do
-    context "compatible units" do
-      specify { (Unit("0 m") / Unit("10 m")).should == Unit(0)}
-      specify { (Unit("5 kg") / Unit("10 kg")).should == Rational(1,2)}
     end
+  
+    context "dividing (/)" do
+      context "compatible units" do
+        specify { (Unit("0 m") / Unit("10 m")).should == Unit(0)}
+        specify { (Unit("5 kg") / Unit("10 kg")).should == Rational(1,2)}
+      end
         
-    context "incompatible units" do
-      specify { (Unit("0 m") / Unit("10 kg")).should == Unit("0 m/kg")}
-      specify { (Unit("5 m") / Unit("10 kg")).should == Unit("1/2 m/kg")}
-    end
+      context "incompatible units" do
+        specify { (Unit("0 m") / Unit("10 kg")).should == Unit("0 m/kg")}
+        specify { (Unit("5 m") / Unit("10 kg")).should == Unit("1/2 m/kg")}
+      end
     
-    context "by a temperature" do
-      specify { expect { Unit("5 kg") / Unit("100 tempF")}.to raise_exception(ArgumentError) }
-    end
+      context "by a temperature" do
+        specify { expect { Unit("5 kg") / Unit("100 tempF")}.to raise_exception(ArgumentError) }
+      end
 
-    context "by a number" do
-      specify { (10 / Unit("5 kg")).should == Unit("2 1/kg")}
-    end
+      context "by a number" do
+        specify { (10 / Unit("5 kg")).should == Unit("2 1/kg")}
+      end
     
-    context "by zero" do
-      specify { expect { Unit("10 m") / 0}.to raise_error(ZeroDivisionError)}
-      specify { expect { Unit("10 m") / Unit("0 m")}.to raise_error(ZeroDivisionError)}
-      specify { expect { Unit("10 m") / Unit("0 kg")}.to raise_error(ZeroDivisionError)}
+      context "by zero" do
+        specify { expect { Unit("10 m") / 0}.to raise_error(ZeroDivisionError)}
+        specify { expect { Unit("10 m") / Unit("0 m")}.to raise_error(ZeroDivisionError)}
+        specify { expect { Unit("10 m") / Unit("0 kg")}.to raise_error(ZeroDivisionError)}
+      end
     end
-  end
   
-  context "exponentiation (**)" do
-    specify { expect { Unit("100 tempK")**2 }.to raise_error(ArgumentError,"Cannot raise a temperature to a power")}
+    context "exponentiating (**)" do
     
-    context Unit("0 m") do
-      it { (subject**1).should == subject }
-      it { (subject**2).should == subject }
-    end
-
-
-    context Unit("1 m") do
-      it { (subject**0).should == 1 }
-      it { (subject**1).should == subject }
-      it { (subject**(-1)).should == 1/subject }
-      it { (subject**(2)).should == Unit("1 m^2")}
-      it { (subject**(-2)).should == Unit("1 1/m^2")}
-      specify { expect { subject**(1/2)}.to raise_error(ArgumentError, "Illegal root")}
-        # because 1 m^(1/2) doesn't make any sense
-      specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")}
-      specify { expect { subject**(Unit("1 m"))}.to raise_error(ArgumentError, "Invalid Exponent")}
-    end
+      specify "a temperature raises an execption" do
+        expect { Unit("100 tempK")**2 }.to raise_error(ArgumentError,"Cannot raise a temperature to a power")
+      end
     
-    context Unit("1 m^2") do
-      it { (subject**(Rational(1,2))).should == Unit("1 m")}
-      it { (subject**(0.5)).should == Unit("1 m")}
+      context Unit("0 m") do
+        it { (subject**1).should == subject }
+        it { (subject**2).should == subject }
+      end
+
+      context Unit("1 m") do
+        it { (subject**0).should == 1 }
+        it { (subject**1).should == subject }
+        it { (subject**(-1)).should == 1/subject }
+        it { (subject**(2)).should == Unit("1 m^2")}
+        it { (subject**(-2)).should == Unit("1 1/m^2")}
+        specify { expect { subject**(1/2)}.to raise_error(ArgumentError, "Illegal root")}
+          # because 1 m^(1/2) doesn't make any sense
+        specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")}
+        specify { expect { subject**(Unit("1 m"))}.to raise_error(ArgumentError, "Invalid Exponent")}
+      end
+    
+      context Unit("1 m^2") do
+        it { (subject**(Rational(1,2))).should == Unit("1 m")}
+        it { (subject**(0.5)).should == Unit("1 m")}
       
-      specify { expect { subject**(0.12345) }.to raise_error(ArgumentError,"Not a n-th root (1..9), use 1/n")}
-      specify { expect { subject**("abcdefg") }.to raise_error(ArgumentError,"Invalid Exponent")}
-    end
+        specify { expect { subject**(0.12345) }.to raise_error(ArgumentError,"Not a n-th root (1..9), use 1/n")}
+        specify { expect { subject**("abcdefg") }.to raise_error(ArgumentError,"Invalid Exponent")}
+      end
     
+    end
+  
+    context "modulo (%)" do
+      context "compatible units" do
+        specify { (Unit("2 m") % Unit("1 m")).should == 0 }
+        specify { (Unit("5 m") % Unit("2 m")).should == 1 }
+      end
+    
+      specify "incompatible units raises an exception" do 
+        expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units")
+      end
+    end
   end
   
-  context "modulo (%)" do
-    context "compatible units" do
-      specify { (Unit("2 m") % Unit("1 m")).should == 0 }
-      specify { (Unit("5 m") % Unit("2 m")).should == 1 }
-    end
-    
-    specify { expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units") }
-  end
-  
-  context "power" do
+  context "#power" do
     subject { Unit("1 m") }
     it "raises an exception when passed a Float argument" do
       expect {subject.power(1.5)}.to raise_error(ArgumentError,"Exponent must an Integer")
@@ -600,7 +606,7 @@ describe "Unit Math" do
     
   end
   
-  context "root" do
+  context "#root" do
     subject { Unit("1 m") }
     it "raises an exception when passed a Float argument" do
       expect {subject.root(1.5)}.to raise_error(ArgumentError,"Exponent must an Integer")
@@ -623,7 +629,7 @@ describe "Unit Math" do
     
   end
   
-  context "inverse" do
+  context "#inverse" do
     specify { Unit("1 m").inverse.should == Unit("1 1/m") }
     specify { expect {Unit("100 tempK").inverse}.to raise_error(ArgumentError,"Cannot divide with temperatures") }
   end
@@ -641,6 +647,62 @@ describe "Unit Math" do
     specify {Unit("3/7").to_r.should be_kind_of(Rational)}
     specify { expect { Unit("3/7 m").to_r }.to raise_error(RuntimeError,"Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }
     
+  end
+  
+  context "absolute value (#abs)" do
+    context "of a unitless unit" do
+      specify "returns the absolute value of the scalar" do
+        Unit("-10").abs.should == 10
+      end
+    end
+    
+    context "of a unit" do
+      specify "returns a unit with the absolute value of the scalar" do
+        Unit("-10 m").abs.should == Unit("10 m")
+      end
+    end
+  end
+  
+  context "#ceil" do
+    context "of a unitless unit" do
+      specify "returns the ceil of the scalar" do
+        Unit("10.1").ceil.should == 11
+      end
+    end
+    
+    context "of a unit" do
+      specify "returns a unit with the ceil of the scalar" do
+        Unit("10.1 m").ceil.should == Unit("11 m")
+      end
+    end
+  end
+
+  context "#floor" do
+    context "of a unitless unit" do
+      specify "returns the floor of the scalar" do
+        Unit("10.1").floor.should == 10
+      end
+    end
+    
+    context "of a unit" do
+      specify "returns a unit with the floor of the scalar" do
+        Unit("10.1 m").floor.should == Unit("10 m")
+      end
+    end
+  end
+
+  context "#round" do
+    context "of a unitless unit" do
+      specify "returns the round of the scalar" do
+        Unit("10.5").round.should == 11
+      end
+    end
+    
+    context "of a unit" do
+      specify "returns a unit with the round of the scalar" do
+        Unit("10.5 m").round.should == Unit("11 m")
+      end
+    end
   end
   
   

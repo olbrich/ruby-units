@@ -869,6 +869,11 @@ class Unit < Numeric
     Unit.new(@scalar.floor, @numerator, @denominator)    
   end
 
+  def round
+    return @scalar.round if self.unitless?
+    Unit.new(@scalar.round, @numerator, @denominator)    
+  end
+
   
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
   def to_time
@@ -891,10 +896,6 @@ class Unit < Numeric
     Date.new0(self.to('d').scalar)
   end
   
-  def round
-    return @scalar.round if self.unitless?
-    Unit.new(@scalar.round, @numerator, @denominator)    
-  end
    
   # true if scalar is zero
   def zero?
