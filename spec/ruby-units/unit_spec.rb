@@ -630,10 +630,16 @@ describe "Unit Math" do
   
   context "convert to scalars" do
     specify {Unit("10").to_i.should be_kind_of(Integer)}
+    specify { expect { Unit("10 m").to_i }.to raise_error(RuntimeError,"Cannot convert '10 m' to Integer unless unitless.  Use Unit#scalar") }
+
     specify {Unit("10.0").to_f.should be_kind_of(Float)}
+    specify { expect { Unit("10.0 m").to_f }.to raise_error(RuntimeError,"Cannot convert '10 m' to Float unless unitless.  Use Unit#scalar") }
+
     specify {Unit("1+1i").to_c.should be_kind_of(Complex)}
-    
-    
+    specify { expect { Unit("1+1i m").to_c }.to raise_error(RuntimeError,"Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") }
+
+    specify {Unit("3/7").to_r.should be_kind_of(Rational)}
+    specify { expect { Unit("3/7 m").to_r }.to raise_error(RuntimeError,"Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }
     
   end
   
