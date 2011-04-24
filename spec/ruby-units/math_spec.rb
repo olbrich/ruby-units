@@ -5,10 +5,12 @@ describe Math do
     subject { '1 mm^6'.to_unit }
     
     specify { Math.sqrt(subject).should == '1 mm^3'.to_unit }
-
+    specify { Math.sqrt(4).should == 2 }
+    
     if RUBY_VERSION > "1.9"
       # cbrt is only defined in Ruby > 1.9
       specify { Math.cbrt(subject).should == '1 mm^2'.to_unit }
+      specify { Math.cbrt(8).should == 2 }
     end
 
   end
@@ -51,6 +53,7 @@ describe Math do
     
     specify { Math.atan2("1 m".unit, "2 m".unit).should be_within(0.01).of(0.4636476090008061) }
     specify { Math.atan2("1 m".unit, "2 ft".unit).should be_within(0.01).of(1.0233478888629426) }
+    specify { Math.atan2(1,1).should be_within(0.01).of(0.785398163397448)}
     specify { expect {Math.atan2("1 m".unit, "2 lbs".unit)}.to raise_error(ArgumentError) }
     
   end

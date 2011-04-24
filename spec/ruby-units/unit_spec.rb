@@ -273,6 +273,51 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
   
+  describe Unit("1:23:45") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Rational}
+    its(:units) {should == "h"}
+    its(:kind) {should == :time}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}    
+  end
+
+  # also  '1 hours as minutes'
+  #       '1 hour to minutes'
+  describe Unit.parse("1 hour in minutes") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "min"}
+    its(:kind) {should == :time}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}    
+  end
+
+  describe Unit.new("1 attoparsec/microfortnight") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "apc/ufortnight"}
+    its(:kind) {should == :speed}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}
+    it { subject.to("in/s").should be_within(Unit("0.0001 in/s")).of(Unit("1.0043269330917 in/s"))}
+  end
+
 
 end
 
@@ -295,6 +340,10 @@ describe "Unit handles attempts to create bad units" do
 
   specify "no strings that don't specify a valid unit" do
     expect {Unit("random string")}.to raise_error(ArgumentError,"'random string' Unit not recognized")
+  end
+  
+  specify "no unhandled classes" do
+    expect {Unit(STDIN)}.to raise_error(ArgumentError,"Invalid Unit Format")
   end
 
   specify "no undefined units" do
@@ -394,6 +443,7 @@ describe "Unit Comparisons" do
       specify { Unit("1 m").should < Unit("1 mi")}
       specify { Unit("2 m").should > Unit("1 ft")}
       specify { Unit("70 tempF").should > Unit("10 degC")}
+      specify { Unit("1 m").should > 0 }
     end
     
     context "incompatible units cannot be compared" do
@@ -418,6 +468,11 @@ describe "Unit Conversions" do
     specify { expect { Unit("1 s").to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
   end
   
+  context "given bad input" do
+    specify { expect { Unit("1 m").to("random string")}.to raise_error(ArgumentError,"'random string' Unit not recognized")}
+    specify { expect { Unit("1 m").to(STDOUT)}.to raise_error(ArgumentError,"Unknown target units")}
+  end
+  
   context "between temperature scales" do
     # note that 'temp' units are for temperature readings on a scale, while 'deg' units are used to represent
     # differences between temperatures, offsets, or other differential temperatures.
@@ -437,6 +492,10 @@ describe "Unit Conversions" do
     specify { Unit("558.27 tempR").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
     specify { Unit("0 tempR").should == Unit("0 tempK") }
     
+    specify { Unit("100 tempK").to("tempC").should == "-173.15 tempC"}
+    specify { Unit("100 tempK").to("tempF").should == "-279.67 tempF"}
+    specify { Unit("100 tempK").to("tempR").should == "180 tempR"}
+            
     specify { Unit("1 degC").should == Unit("1 degK")}
     specify { Unit("1 degF").should == Unit("1 degR")}
     specify { Unit("1 degC").should == Unit("1.8 degR")}
@@ -466,6 +525,18 @@ describe "Unit Math" do
         specify { expect { Unit("10 kg") + 1 }.to raise_error(ArgumentError)}
         specify { expect { 10 + Unit("10 kg") }.to raise_error(ArgumentError)}
       end
+      
+      context "between two temperatures" do
+        specify { expect {(Unit("100 tempK") + Unit("100 tempK"))}.to raise_error(ArgumentError,"Cannot add two temperatures") }
+      end
+      
+      context "between a temperature and a degree" do
+        specify { (Unit("100 tempK") + Unit("100 degK")).should == Unit("200 tempK") }
+      end
+
+      context "between a degree and a temperature" do
+        specify { (Unit("100 degK") + Unit("100 tempK")).should == Unit("200 tempK") }
+      end
     
     end 
   
@@ -488,6 +559,18 @@ describe "Unit Math" do
       context "a number from a unit" do
         specify { expect { Unit("10 kg") - 1 }.to raise_error(ArgumentError)}
         specify { expect { 10 - Unit("10 kg") }.to raise_error(ArgumentError)}
+      end
+
+      context "between two temperatures" do
+        specify { (Unit("100 tempK") - Unit("100 tempK")).should == Unit("0 degK") }
+      end
+      
+      context "between a temperature and a degree" do
+        specify { (Unit("100 tempK") - Unit("100 degK")).should == Unit("0 tempK") }
+      end
+
+      context "between a degree and a temperature" do
+        specify { expect {(Unit("100 degK") - Unit("100 tempK"))}.to raise_error(ArgumentError,"Cannot subtract a temperature from a differential degree unit")}
       end
     
     end
@@ -528,8 +611,12 @@ describe "Unit Math" do
         specify { expect { Unit("5 kg") / Unit("100 tempF")}.to raise_exception(ArgumentError) }
       end
 
-      context "by a number" do
+      context "a number by a unit" do
         specify { (10 / Unit("5 kg")).should == Unit("2 1/kg")}
+      end
+
+      context "a unit by a number" do
+        specify { (Unit("5 kg") / 2).should == Unit("2.5 kg")}
       end
     
       context "by zero" do
@@ -747,6 +834,22 @@ describe "Unit Math" do
     specify { Unit("-1 mm").pred.should == Unit("-2 mm")}
     specify { expect {Unit("1.5 mm").pred}.to raise_error(ArgumentError,"Non Integer Scalar")}
   end
-  
+
+  context '#divmod' do
+    specify { Unit("5 mm").divmod(Unit("2 mm")).should == [2,1] }
+    specify { Unit("1 km").divmod(Unit("2 m")).should == [500,0] }
+  end
+
+end
+
+describe "Unit Output formatting" do
+  context Unit("10.5 m/s^2") do
+    specify { subject.to_s.should == "10.5 m/s^2" }
+    specify { subject.to_s("%0.2f").should == "10.50 m/s^2"}
+    specify { subject.to_s("%0.2e km/s^2").should == "1.05e-02 km/s^2"}
+    specify { subject.to_s("km/s^2").should == "0.0105 km/s^2"}
+    specify { subject.to_s(STDOUT).should == "10.5 m/s^2" }
+    specify { expect {subject.to_s("random string")}.to raise_error(ArgumentError,"'random' Unit not recognized")}
+  end
   
 end

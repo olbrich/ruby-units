@@ -314,7 +314,9 @@ class Unit < Numeric
       if RUBY_VERSION < "1.9"
         @signature = @@KINDS.index(:temperature)
       else
+        #:nocov:
         @signature = @@KINDS.key(:temperature)
+        #:nocov:
       end
       base = case 
       when self.is_temperature?
@@ -1118,12 +1120,15 @@ class Unit < Numeric
     unit_string.gsub!(/'/,'feet')
     unit_string.gsub!(/"/,'inch')
     unit_string.gsub!(/#/,'pound')
+    
+    #:nocov:
     if defined?(Uncertain) && unit_string =~ /(\+\/-|&plusmn;)/
       value, uncertainty, unit_s = unit_string.scan(UNCERTAIN_REGEX)[0]
       result = unit_s.unit * Uncertain.new(value.to_f,uncertainty.to_f)
       copy(result)
       return  
     end
+    #:nocov:
     
     if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
       real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]

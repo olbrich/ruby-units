@@ -15,6 +15,7 @@ module Math
   module_function :unit_sqrt
   module_function :sqrt
 
+  #:nocov:
   if self.respond_to?(:cbrt)
     alias :unit_cbrt :cbrt
     def cbrt(n)
@@ -27,7 +28,8 @@ module Math
     module_function :unit_cbrt
     module_function :cbrt
   end
-  
+  #:nocov:
+    
   alias :unit_sin :sin
   def sin(n)
    Unit === n ? unit_sin(n.to('radian').scalar) : unit_sin(n)
@@ -85,12 +87,10 @@ module Math
   alias :unit_atan2 :atan2
   def atan2(x,y)
     case
-    when (Unit === x && Unit === y) && (x !~ y)
+    when (x.is_a?(Unit) && y.is_a?(Unit)) && (x !~ y)
       raise ArgumentError, "Incompatible Units"
-    when (Unit === x && Unit === y) && (x =~ y)
+    when (x.is_a?(Unit) && y.is_a?(Unit)) && (x =~ y)
       Math::unit_atan2(x.base_scalar, y.base_scalar)
-    when (Unit === x || Unit === y)
-      raise ArgumentError, "Incompatible Units"
     else
       Math::unit_atan2(x,y)
     end
