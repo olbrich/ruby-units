@@ -12,7 +12,7 @@ begin
     gem.authors = ["Kevin Olbrich, Ph.D."]
     gem.email = ["kevin.olbrich+ruby_units@gmail.com"]
     gem.homepage = "https://github.com/olbrich/ruby-units"
-    gem.files.exclude(".autotest")
+    gem.files.exclude(".*")
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -48,7 +48,6 @@ desc "Run unit tests"
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.test_files = FileList['test/test*.rb']
-#  t.verbose = true
 end
 
 task :specs => :spec
