@@ -9,11 +9,14 @@ class Time
     alias unit_time_at at
   end
   
-  def self.at(*args)
-    if Unit === args[0]
-      unit_time_at(args[0].to("s").scalar)
+  # Convert a duration to a Time value by considering the duration to be the number of seconds since the 
+  # epoch
+  def self.at(arg)
+    case arg
+    when Unit
+      unit_time_at(arg.to("s").scalar)
     else
-      unit_time_at(*args)
+      unit_time_at(arg)
     end
   end
   
@@ -40,8 +43,6 @@ class Time
       rescue RangeError
         self.to_datetime + other
       end
-    when DateTime
-      unit_add(other.to_time)
     else
       unit_add(other)
     end
@@ -63,9 +64,6 @@ class Time
       rescue RangeError
         self.send(:to_datetime) - other
       end
-      
-    when DateTime
-      unit_sub(other.to_time)
     else
       unit_sub(other)
     end

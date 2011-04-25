@@ -10,14 +10,14 @@ class String
   
   # format unit output using formating codes '%0.2f' % '1 mm'.unit => '1.00 mm'
   def %(*args)
-		return if self.empty?
+		return "" if self.empty?
     case 
-    when Unit === args[0]
-      args[0].to_s(self)
-    when (!defined?(Uncertain).nil? && (Uncertain === args[0]))
-      args[0].to_s(self)
-    when Complex === args[0]
-      args[0].to_s
+    when args.first.is_a?(Unit)
+      args.first.to_s(self)
+    when (!defined?(Uncertain).nil? && args.first.is_a?(Uncertain))
+      args.first.to_s(self)
+    when args.first.is_a?(Complex)
+      args.first.to_s
     else
       unit_format(*args)
     end
