@@ -7,7 +7,7 @@ describe Time do
 
   context ".at" do
     subject { Date.new(2011,4,1).to_unit }
-    specify { Time.at(subject - Date.new(1970,1,1)).to_s.should == "Thu Mar 31 20:00:00 -0400 2011"}
+    specify { Time.at(subject - Date.new(1970,1,1)).strftime("%D %T").should == "03/31/11 20:00:00"}
   end
   
   context ".in" do

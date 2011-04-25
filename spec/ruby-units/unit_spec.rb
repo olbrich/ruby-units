@@ -492,9 +492,9 @@ describe "Unit Conversions" do
     specify { Unit("558.27 tempR").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
     specify { Unit("0 tempR").should == Unit("0 tempK") }
     
-    specify { Unit("100 tempK").to("tempC").should == "-173.15 tempC"}
-    specify { Unit("100 tempK").to("tempF").should == "-279.67 tempF"}
-    specify { Unit("100 tempK").to("tempR").should == "180 tempR"}
+    specify { Unit("100 tempK").to("tempC").should be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
+    specify { Unit("100 tempK").to("tempF").should be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
+    specify { Unit("100 tempK").to("tempR").should be_within(U"0.01 degR").of(Unit("180 tempR"))}
             
     specify { Unit("1 degC").should == Unit("1 degK")}
     specify { Unit("1 degF").should == Unit("1 degR")}
