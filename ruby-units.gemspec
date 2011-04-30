@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ruby-units}
-  s.version = "1.2.0"
+  s.version = "1.3.0.a"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kevin Olbrich, Ph.D."]
-  s.date = %q{2011-04-01}
+  s.date = %q{2011-04-30}
   s.description = %q{Provides classes and methods to perform unit math and conversions}
   s.email = ["kevin.olbrich+ruby_units@gmail.com"]
   s.extra_rdoc_files = [
@@ -17,57 +17,44 @@ Gem::Specification.new do |s|
     "README.md",
     "TODO"
   ]
-  s.files = [
-    "CHANGELOG.txt",
-    "Gemfile",
-    "LICENSE.txt",
-    "Manifest.txt",
-    "README.md",
-    "RakeFile",
-    "TODO",
-    "VERSION",
-    "lib/ruby-units.rb",
-    "lib/ruby_units.rb",
-    "lib/ruby_units/array.rb",
-    "lib/ruby_units/cmath.rb",
-    "lib/ruby_units/complex.rb",
-    "lib/ruby_units/date.rb",
-    "lib/ruby_units/math.rb",
-    "lib/ruby_units/numeric.rb",
-    "lib/ruby_units/object.rb",
-    "lib/ruby_units/ruby-units.rb",
-    "lib/ruby_units/string.rb",
-    "lib/ruby_units/time.rb",
-    "lib/ruby_units/units.rb",
-    "lib/ruby_units/version.rb",
-    "ruby-units.gemspec",
-    "test/test_ruby-units.rb"
-  ]
   s.homepage = %q{https://github.com/olbrich/ruby-units}
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.7.2}
   s.summary = %q{A class that performs unit conversions and unit math}
   s.test_files = [
+    "spec/ruby-units/array_spec.rb",
+    "spec/ruby-units/complex_spec.rb",
+    "spec/ruby-units/date_spec.rb",
+    "spec/ruby-units/math_spec.rb",
+    "spec/ruby-units/numeric_spec.rb",
+    "spec/ruby-units/object_spec.rb",
+    "spec/ruby-units/string_spec.rb",
+    "spec/ruby-units/time_spec.rb",
+    "spec/ruby-units/unit_spec.rb",
+    "spec/spec_helper.rb",
+    "test/test_cache.rb",
     "test/test_ruby-units.rb"
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<bundler>, ["~> 1.0"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.5"])
     else
       s.add_dependency(%q<bundler>, ["~> 1.0"])
       s.add_dependency(%q<rcov>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["~> 2.5"])
     end
   else
     s.add_dependency(%q<bundler>, ["~> 1.0"])
     s.add_dependency(%q<rcov>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["~> 2.5"])
   end
 end
 
