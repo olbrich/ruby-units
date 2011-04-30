@@ -927,7 +927,7 @@ class TestRubyUnits < Test::Unit::TestCase
   def test_atan2
     assert_equal Math.atan2('1 mm'.unit,'1 mm'.unit), Math.atan2(1,1)
     assert_raises(ArgumentError) {Math.atan2('1 mm'.unit, '1 lb'.unit)}
-    assert_raises(ArgumentError) {Math.atan2('1 mm'.unit, 1)}
+    assert_raises(RuntimeError) {Math.atan2('1 mm'.unit, 1)}
   end
 
   def test_rational_units
