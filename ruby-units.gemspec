@@ -58,20 +58,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.7.2}
   s.summary = %q{A class that performs unit conversions and unit math}
-  s.test_files = [
-    "spec/ruby-units/array_spec.rb",
-    "spec/ruby-units/complex_spec.rb",
-    "spec/ruby-units/date_spec.rb",
-    "spec/ruby-units/math_spec.rb",
-    "spec/ruby-units/numeric_spec.rb",
-    "spec/ruby-units/object_spec.rb",
-    "spec/ruby-units/string_spec.rb",
-    "spec/ruby-units/time_spec.rb",
-    "spec/ruby-units/unit_spec.rb",
-    "spec/spec_helper.rb",
-    "test/test_cache.rb",
-    "test/test_ruby-units.rb"
-  ]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
