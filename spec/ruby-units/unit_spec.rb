@@ -853,3 +853,36 @@ describe "Unit Output formatting" do
   end
   
 end
+
+describe "Foot-inch conversions" do
+  [
+    ["76 in", %Q{6'4"}],
+    ["77 in", %Q{6'5"}],
+    ["78 in", %Q{6'6"}],
+    ["79 in", %Q{6'7"}],
+    ["80 in", %Q{6'8"}],
+    ["87 in", %Q{7'3"}],
+    ["88 in", %Q{7'4"}],
+    ["89 in", %Q{7'5"}]
+    ].each do |inches, feet|
+    specify { Unit(inches).to("ft").should == Unit(feet)}
+    specify { Unit(inches).to_s(:ft).should == feet}
+  end
+end
+
+describe "pound-ounce conversions" do
+  [
+    ["76 oz", "4 lbs, 12 oz"],
+    ["77 oz", "4 lbs, 13 oz"],
+    ["78 oz", "4 lbs, 14 oz"],
+    ["79 oz", "4 lbs, 15 oz"],
+    ["80 oz", "5 lbs, 0 oz"],
+    ["87 oz", "5 lbs, 7 oz"],
+    ["88 oz", "5 lbs, 8 oz"],
+    ["89 oz", "5 lbs, 9 oz"]
+    ].each do |ounces, pounds|
+    specify { Unit(ounces).to("lbs").should == Unit(pounds)}
+    specify { Unit(ounces).to_s(:lbs).should == pounds}
+  end  
+end
+

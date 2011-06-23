@@ -34,8 +34,8 @@ UNIT_DEFINITIONS = {
 
   # length units
   '<meter>' =>  [%w{m meter meters metre metres}, 1, :length, %w{<meter>} ],
-  '<inch>'  =>  [%w{in inch inches "}, 0.0254, :length, %w{<meter>}],
-  '<foot>'  =>  [%w{ft foot feet '}, 0.3048, :length, %w{<meter>}],
+  '<inch>'  =>  [%w{in inch inches "}, Rational(254,10_000), :length, %w{<meter>}],
+  '<foot>'  =>  [%w{ft foot feet '}, Rational(3048,10_000), :length, %w{<meter>}],
   '<yard>'  =>  [%w{yd yard yards}, 0.9144, :length, %w{<meter>}],
   '<mile>'  =>  [%w{mi mile miles}, 1609.344, :length, %w{<meter>}],
   '<naut-mile>' => [%w{nmi}, 1852, :length, %w{<meter>}],
@@ -62,8 +62,8 @@ UNIT_DEFINITIONS = {
   '<short-ton>' => [%w{tn ton}, 907.18474, :mass, %w{<kilogram>}],
   '<metric-ton>'=>[%w{tonne}, 1000, :mass, %w{<kilogram>}],
   '<carat>' => [%w{ct carat carats}, 0.0002, :mass, %w{<kilogram>}],
-  '<pound>' => [%w{lbs lb pound pounds #}, 0.45359237, :mass, %w{<kilogram>}],
-  '<ounce>' => [%w{oz ounce ounces}, 0.0283495231, :mass, %w{<kilogram>}],
+  '<pound>' => [%w{lbs lb pound pounds #}, Rational(8171193714040401,18014398509481984), :mass, %w{<kilogram>}],
+  '<ounce>' => [%w{oz ounce ounces}, Rational(8171193714040401,288230376151711744), :mass, %w{<kilogram>}],
   '<gram>'    =>  [%w{g gram grams gramme grammes},Rational(1,1e3),:mass, %w{<kilogram>}],
 
   #area
