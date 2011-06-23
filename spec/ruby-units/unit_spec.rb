@@ -107,6 +107,36 @@ describe "Create some simple units" do
     its(:base) {should == Unit("0.001 m")}
   end
 
+  describe Unit("1g") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should == 1}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "g"}
+    its(:kind) {should == :mass}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should == subject}
+  end
+  
+  describe Unit("1.4g") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should === 1.4}
+    its(:scalar) {should be_a Float}
+    its(:units) {should == "g"}
+    its(:kind) {should == :mass}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should == subject}  
+  end
+
   describe Unit("10 m/s^2") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should == 10}
