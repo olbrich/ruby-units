@@ -45,7 +45,6 @@ describe String do
     specify { "now".to_datetime.should be_instance_of DateTime }
     specify { "now".to_time.should be_instance_of Time }
     
-    #fails in rubinius 1.2.4dev
     specify { "10001-01-01 12:00".time.should be_instance_of Time }
     specify { "2001-01-01 12:00".time.should be_instance_of Time }
     
