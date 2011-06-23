@@ -773,13 +773,27 @@ class Unit < Numeric
         raise ArgumentError, "Unknown target units"
       end
       raise ArgumentError,  "Incompatible Units" unless self =~ target
-      one = @numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
-      two = @denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
-      v = one.inject(1) {|product,n| product*n} / two.inject(1) {|product,n| product*n}
-      one = target.numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
-      two = target.denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
-      y = one.inject(1) {|product,n| product*n} / two.inject(1) {|product,n| product*n}
-      q = @scalar * v/y
+      _numerator1 = @numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
+      _denominator1 = @denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
+      _numerator2 = target.numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
+      _denominator2 = target.denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
+      
+      # eliminate common terms
+      
+      (_numerator1 & _denominator2).each do |common|
+        _numerator1.delete(common)
+        _denominator2.delete(common)
+      end
+      
+      (_numerator2 & _denominator1).each do |common|
+        _numerator1.delete(common)
+        _denominator2.delete(common)
+      end
+            
+      q = @scalar * ( (_numerator1 + _denominator2).inject(1) {|product,n| product*n} ) / 
+          ( (_numerator2 + _denominator1).inject(1) {|product,n| product*n} ) 
+      
+      
       Unit.new(:scalar=>q, :numerator=>target.numerator, :denominator=>target.denominator, :signature => target.signature)
     end
   end  
