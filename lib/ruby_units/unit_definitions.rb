@@ -81,6 +81,9 @@ UNIT_DEFINITIONS = {
   '<tablespoon>'=>  [%w{tbs tablespoon tablespoons}, 1.47867648e-5, :volume, %w{<meter> <meter> <meter>}],
   '<teaspoon>'=>  [%w{tsp teaspoon teaspoons}, 4.92892161e-6, :volume, %w{<meter> <meter> <meter>}],
 
+  #volumetric flow
+  '<cfm>' => [%w{cfm CFM CFPM}, (18435447/39062500000), :volumetric_flow, %w{<meter> <meter> <meter>}, %w{<second>}],
+
   #speed
   '<kph>' => [%w{kph}, 0.277777778, :speed, %w{<meter>}, %w{<second>}],
   '<mph>' => [%w{mph}, 0.44704, :speed, %w{<meter>}, %w{<second>}],
@@ -89,16 +92,17 @@ UNIT_DEFINITIONS = {
   
   #acceleration
   '<gee>' => [%w{gee}, 9.80655, :acceleration, %w{<meter>}, %w{<second> <second>}],
+  
 
   #temperature_difference
   '<kelvin>' => [%w{degK kelvin}, 1, :temperature, %w{<kelvin>}],
   '<celsius>' => [%w{degC celsius celsius centigrade}, 1, :temperature, %w{<kelvin>}],
   '<fahrenheit>' => [%w{degF fahrenheit}, Rational(1,1.8), :temperature, %w{<kelvin>}],
   '<rankine>' => [%w{degR rankine}, Rational(1,1.8), :temperature, %w{<kelvin>}],
-  '<temp-K>'  => [%w{tempK}, 1, :temperature, %w{<temp-K>}],
-  '<temp-C>'  => [%w{tempC}, 1, :temperature, %w{<temp-K>}],
-  '<temp-F>'  => [%w{tempF}, Rational(1,1.8), :temperature, %w{<temp-K>}],
-  '<temp-R>'  => [%w{tempR}, Rational(1,1.8), :temperature, %w{<temp-K>}],
+  '<tempK>'  => [%w{tempK}, 1, :temperature, %w{<tempK>}],
+  '<tempC>'  => [%w{tempC}, 1, :temperature, %w{<tempK>}],
+  '<tempF>'  => [%w{tempF}, Rational(1,1.8), :temperature, %w{<tempK>}],
+  '<tempR>'  => [%w{tempR}, Rational(1,1.8), :temperature, %w{<tempK>}],
   
   #time
   '<second>'=>  [%w{s sec second seconds}, 1, :time, %w{<second>}],
@@ -139,7 +143,7 @@ UNIT_DEFINITIONS = {
   '<unit>'  =>  [%w{U enzUnit}, 16.667e-16, :activity, %w{<mole>}, %w{<second>}],
 
   #capacitance
-  '<farad>' =>  [%w{F farad Farad}, 1, :capacitance, %w{<farad>}],
+  '<farad>' =>  [%w{F farad Farad}, 1, :capacitance, %w{<second> <second> <second> <second> <ampere> <ampere>}, %w{<kilogram> <meter> <meter>}],
 
   #charge
   '<coulomb>' =>  [%w{C coulomb Coulomb}, 1, :charge, %w{<ampere> <second>}],

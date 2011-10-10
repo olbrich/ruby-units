@@ -47,7 +47,7 @@ class Unit < Numeric
   @@UNIT_MAP = {}
   @@UNIT_VALUES = {}
   @@OUTPUT_MAP = {}
-  @@BASE_UNITS = ['<meter>','<kilogram>','<second>','<mole>', '<farad>', '<ampere>','<radian>','<kelvin>','<temp-K>','<byte>','<dollar>','<candela>','<each>','<steradian>','<decibel>']
+  @@BASE_UNITS = ['<meter>','<kilogram>','<second>','<mole>', '<ampere>','<radian>','<kelvin>','<tempK>','<byte>','<dollar>','<candela>','<each>','<steradian>','<decibel>']
   UNITY = '<1>'
   UNITY_ARRAY= [UNITY]
   FEET_INCH_REGEX = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inches)/
@@ -69,35 +69,46 @@ class Unit < Numeric
   CELSIUS = ['<celsius>']
   TEMP_REGEX = /(?:temp|deg)[CFRK]/
 
-  SIGNATURE_VECTOR = [:length, :time, :temperature, :mass, :current, :substance, :luminosity, :currency, :memory, :angle, :capacitance]
+  SIGNATURE_VECTOR = [:length, :time, :temperature, :mass, :current, :substance, :luminosity, :currency, :memory, :angle]
   @@KINDS = {
-    -312058=>:resistance, 
+    -312078 => :elastance,
+    -312058=>:resistance,
     -312038=>:inductance, 
     -152040=>:magnetism, 
     -152038=>:magnetism, 
-    -152058=>:potential, 
+    -152058=>:potential,
+    -7997 => :specific_volume,
+    -79 => :snap,
+    -59 => :jolt, 
     -39=>:acceleration,
     -38=>:radiation, 
     -20=>:frequency, 
     -19=>:speed, 
     -18=>:viscosity, 
+    -17 => :volumetric_flow,
+    -1 => :wavenumber,
     0=>:unitless, 
     1=>:length, 
     2=>:area, 
     3=>:volume, 
     20=>:time, 
     400=>:temperature, 
+    7941 => :yank,
     7942=>:power, 
     7959=>:pressure, 
     7962=>:energy, 
     7979=>:viscosity, 
     7961=>:force, 
-    7997=>:mass_concentration,
+    7981 => :momentum,
+    7982 => :angular_momentum,
+    7997 => :density,
+    7998 => :area_density,
     8000=>:mass, 
     159999=>:magnetism, 
     160000=>:current, 
     160020=>:charge, 
-    312058=>:resistance, 
+    312058=>:resistance,
+    312078=>:capacitance,
     3199980=>:activity, 
     3199997=>:molar_concentration, 
     3200000=>:substance, 
@@ -106,8 +117,7 @@ class Unit < Numeric
     1280000000=>:currency, 
     25600000000=>:memory,
     511999999980=>:angular_velocity, 
-    512000000000=>:angle, 
-    10240000000000=>:capacitance, 
+    512000000000=>:angle
     }
   
   @@cached_units = {}
@@ -565,7 +575,7 @@ class Unit < Numeric
             when [self, other].all? {|x| x.is_temperature?}
               Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => KELVIN, :denominator => UNITY_ARRAY, :signature => @signature).to(self.temperature_scale) 
             when self.is_temperature?
-              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<temp-K>'], :denominator => UNITY_ARRAY, :signature => @signature).to(self) 
+              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<tempK>'], :denominator => UNITY_ARRAY, :signature => @signature).to(self) 
             when other.is_temperature?
               raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
             else
@@ -1239,6 +1249,10 @@ class Unit < Numeric
     @denominator = UNITY_ARRAY if @denominator.empty?
     self
   end 
+  
+  def self.base_units
+    @@BASE_UNITS.map {|u| Unit.new(u)}
+  end
   
   private
 

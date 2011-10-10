@@ -1,5 +1,14 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
+describe Unit.base_units do
+  it {should be_a Array}
+  it {should have(14).elements}
+  %w{kilogram meter second Ampere degK tempK mole candela each dollar steradian radian decibel byte}.each do |u|
+    it {should include(Unit(u))}
+  end
+end
+
+
 describe "Create some simple units" do
 
   describe Unit("0") do
@@ -316,6 +325,20 @@ describe "Create some simple units" do
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}
     it { subject.to("in/s").should be_within(Unit("0.0001 in/s")).of(Unit("1.0043269330917 in/s"))}
+  end
+  
+  describe Unit.new("1 F") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "F"}
+    its(:kind) {should == :capacitance}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}
   end
 
 
