@@ -57,10 +57,11 @@ task :multitest do
   rubies = %w{
       ruby-1.8.7@ruby-units
       ruby-1.8.7@ruby-units-with-chronic
-      ruby-1.9.2-head@ruby-units
-      ruby-1.9.2-head@ruby-units-with-chronic
-      rbx-head@ruby-units
-      jruby-head@ruby-units
+      ruby-1.9.2@ruby-units
+      ruby-1.9.2@ruby-units-with-chronic
+      ruby-1.9.3@ruby-units
+      rbx@ruby-units
+      jruby-1.6.1@ruby-units
       }
   exec "rvm #{rubies.join(',')} tests"
 end
@@ -70,10 +71,11 @@ task :multispec do
   rubies = %w{
       ruby-1.8.7@ruby-units
       ruby-1.8.7@ruby-units-with-chronic
-      ruby-1.9.2-head@ruby-units
-      ruby-1.9.2-head@ruby-units-with-chronic
-      rbx-head@ruby-units
-      jruby-head@ruby-units
+      ruby-1.9.2@ruby-units
+      ruby-1.9.2@ruby-units-with-chronic
+      ruby-1.9.3@ruby-units
+      rbx@ruby-units
+      jruby-1.6.1@ruby-units
       }
   exec "rvm #{rubies.join(',')} specs"
 end
