@@ -33,7 +33,11 @@ begin
   require 'rspec/core/rake_task'
 
   desc "Run specs"
-  RSpec::Core::RakeTask.new
+  RSpec::Core::RakeTask.new do
+	puts
+	puts %x{rvm current}
+	puts
+  end
   
   desc  "Run all specs with rcov"
   RSpec::Core::RakeTask.new("spec:rcov") do |t|
@@ -61,7 +65,7 @@ task :multitest do
       ruby-1.9.2@ruby-units-with-chronic
       ruby-1.9.3@ruby-units
       rbx@ruby-units
-      jruby-1.6.1@ruby-units
+      jruby-1.6.4@ruby-units
       }
   exec "rvm #{rubies.join(',')} tests"
 end
@@ -75,7 +79,7 @@ task :multispec do
       ruby-1.9.2@ruby-units-with-chronic
       ruby-1.9.3@ruby-units
       rbx@ruby-units
-      jruby-1.6.1@ruby-units
+      jruby-1.6.4@ruby-units
       }
   exec "rvm #{rubies.join(',')} specs"
 end
