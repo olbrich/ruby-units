@@ -58,7 +58,6 @@ begin
 	puts
 	puts %x{rvm current}
 	puts
-	spec.rspec_opts = "-b"
   end
   
   desc  "Run all specs with rcov"
