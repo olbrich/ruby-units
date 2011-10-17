@@ -27,6 +27,7 @@ module AutoGrowl
 
   Autotest.add_hook :interrupt do |at|
     growl "autotest", "autotest was reset" unless $TESTING
+	nil
   end
 
   Autotest.add_hook :quit do |at|
