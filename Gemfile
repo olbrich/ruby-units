@@ -5,4 +5,7 @@ group :development do
   gem 'rcov', :platforms => :mri_18
   gem 'jeweler'
   gem 'rspec', '~>2.5'
+  gem 'autotest'
+  gem 'autotest-growl'
+  gem 'autotest-fsevent'
 end
