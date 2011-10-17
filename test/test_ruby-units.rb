@@ -99,52 +99,17 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal "s", a.to_unit.units
     assert_equal a + 3600, a + "1 h".unit
     assert_equal a - 3600, a - "1 h".unit
-    assert_in_delta Time.now - "1 h".unit, "1 h".ago, 1
-    assert_in_delta Time.now + 3600, "1 h".from_now, 1
-    assert_in_delta Time.now + "1 h".unit, "1 h".from_now, 1
-    assert_in_delta Time.now - 3600, "1 h".before_now, 1
-    assert_equal "60 min", "min".until(Time.now + 3600).to_s
-    assert_equal "01:00", "min".since(Time.now - 3600).to_s("%H:%M")
-    assert_in_delta Time.now, "now".time, 1
+    assert_in_delta Time.now - "1 h".unit, Unit("1 h").ago, 1
+    assert_in_delta Time.now + 3600, Unit("1 h").from(Time.now), 1
+    assert_in_delta Time.now + "1 h".unit, Unit("1 h").from(Time.now), 1
+    assert_in_delta Time.now - 3600, Unit("1 h").before_now, 1
+    assert_equal "60 min", Unit("min").until(Time.now + 3600).to_s
+    assert_equal "01:00", Unit("min").since(Time.now - 3600).to_s("%H:%M")
   end
   
-	def test_from_now
-		assert_equal "1 day".from_now, @april_fools + 86400
-	end
-	
-	def test_from
-		assert_equal "1 day".from("now"), @april_fools + 86400
-	end
-
-	def test_ago
-		assert_equal "1 day".ago, @april_fools - 86400
-	end
-	
-	def test_before_now
-		assert_equal "1 day".before_now, @april_fools - 86400
-	end
-	
-	def test_before
-		assert_equal '1 days'.before('now'), @april_fools - 86400
-	end
-
-	def test_since
-    assert_equal 'days'.since(@april_fools - 86400), "1 day".unit
-    assert_equal 'days'.since('2006-3-31 12:00:00 -5:00'), "1 day".unit
-    assert_equal 'days'.since(DateTime.parse('2006-3-31 12:00 -5:00')), "1 day".unit		
-    assert_raises(ArgumentError) { 'days'.since(1) }
-	end
-
-	def test_until
-    assert_equal 'days'.until('2006-04-2 12:00:00 -5:00'), '1 day'.unit		
-    assert_raises(ArgumentError) { 'days'.until(1) }
-	end
-
   def test_time_helpers
     assert_equal @april_fools, Time.now
     assert_equal @april_fools_datetime, DateTime.now
-    assert_equal Time.now, 'now'.time
-    assert_equal DateTime.now, 'now'.datetime
     assert_equal 1143910800, Unit.new(Time.now).scalar
     assert_equal @april_fools.unit.to_time, @april_fools
     assert_equal Time.in('1 day'), @april_fools + 86400
@@ -839,10 +804,10 @@ class TestRubyUnits < Test::Unit::TestCase
   end
   
   def test_time_conversions
-    today = 'now'.to_time
+    today = Time.now
     assert_equal today,@april_fools
     last_century = today - '150 years'.unit
-    assert_equal last_century.to_date, '1856-04-01'.to_date
+    assert_equal last_century.to_date, DateTime.parse('1856-04-01')
   end
   
   def test_coercion
@@ -971,7 +936,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.3.2', Unit::VERSION)
+    assert_equal('1.3.2.a', Unit::VERSION)
   end
   
   def test_negation
