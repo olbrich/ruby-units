@@ -296,7 +296,7 @@ class Unit < Numeric
   #
   def self.parse(input)
     first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
-    second.nil? ? first.unit : first.unit.to(second)
+    second.nil? ? first.unit : first.unit.convert_to(second)
   end
   
   def to_unit
@@ -330,9 +330,9 @@ class Unit < Numeric
       end
       base = case 
       when self.is_temperature?
-        self.to('tempK')
+        self.convert_to('tempK')
       when self.is_degree?
-        self.to('degK')
+        self.convert_to('degK')
       end
       return base
     end
@@ -390,17 +390,17 @@ class Unit < Numeric
     else
       case target_units
       when :ft
-        inches = self.to("in").scalar.to_int
+        inches = self.convert_to("in").scalar.to_int
         out = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
       when :lbs
-        ounces = self.to("oz").scalar.to_int
+        ounces = self.convert_to("oz").scalar.to_int
         out = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
       when String
         out = case target_units
         when /(%[\-+\.\w#]+)\s*(.+)*/       #format string like '%0.2f in'
           begin
             if $2 #unit specified, need to convert
-              self.to($2).to_s($1)
+              self.convert_to($2).to_s($1)
             else 
               "#{$1 % @scalar} #{$2 || self.units}".strip
             end
@@ -408,7 +408,7 @@ class Unit < Numeric
             (DateTime.new(0) + self).strftime(target_units)  
           end
         when /(\S+)/ #unit only 'mm' or '1/mm'
-          "#{self.to($1).to_s}"
+          "#{self.convert_to($1).to_s}"
         else
           raise "unhandled case"
         end
@@ -543,9 +543,9 @@ class Unit < Numeric
         raise ArgumentError, "Cannot add two temperatures" if ([self, other].all? {|x| x.is_temperature?})
         if [self, other].any? {|x| x.is_temperature?}
           if self.is_temperature?
-            Unit.new(:scalar => (self.scalar + other.to(self.temperature_scale).scalar), :numerator => @numerator, :denominator=>@denominator, :signature => @signature)
+            Unit.new(:scalar => (self.scalar + other.convert_to(self.temperature_scale).scalar), :numerator => @numerator, :denominator=>@denominator, :signature => @signature)
           else
-            Unit.new(:scalar => (other.scalar + self.to(other.temperature_scale).scalar), :numerator => other.numerator, :denominator=>other.denominator, :signature => other.signature)
+            Unit.new(:scalar => (other.scalar + self.convert_to(other.temperature_scale).scalar), :numerator => other.numerator, :denominator=>other.denominator, :signature => other.signature)
           end
         else
           @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.to_base.scalar))
@@ -573,9 +573,9 @@ class Unit < Numeric
         when self =~ other
           case
             when [self, other].all? {|x| x.is_temperature?}
-              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => KELVIN, :denominator => UNITY_ARRAY, :signature => @signature).to(self.temperature_scale) 
+              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => KELVIN, :denominator => UNITY_ARRAY, :signature => @signature).convert_to(self.temperature_scale) 
             when self.is_temperature?
-              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<tempK>'], :denominator => UNITY_ARRAY, :signature => @signature).to(self) 
+              Unit.new(:scalar => (self.base_scalar - other.base_scalar), :numerator  => ['<tempK>'], :denominator => UNITY_ARRAY, :signature => @signature).convert_to(self) 
             when other.is_temperature?
               raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
             else
@@ -741,7 +741,7 @@ class Unit < Numeric
   #
   # Note that if temperature is part of a compound unit, the temperature will be treated as a differential
   # and the units will be scaled appropriately.
-  def to(other)
+  def convert_to(other)
     return self if other.nil? 
     return self if TrueClass === other
     return self if FalseClass === other
@@ -807,8 +807,8 @@ class Unit < Numeric
       Unit.new(:scalar=>q, :numerator=>target.numerator, :denominator=>target.denominator, :signature => target.signature)
     end
   end  
-  alias :>> :to
-  alias :convert_to :to
+  alias :>> :convert_to
+  alias :to :convert_to
     
   # converts the unit back to a float if it is unitless.  Otherwise raises an exception
   def to_f
@@ -931,11 +931,11 @@ class Unit < Numeric
   # convert a duration to a DateTime.  This will work so long as the duration is the duration from the zero date
   # defined by DateTime
   def to_datetime
-    DateTime.new!(self.to('d').scalar)
+    DateTime.new!(self.convert_to('d').scalar)
   end
   
   def to_date
-    Date.new0(self.to('d').scalar)
+    Date.new0(self.convert_to('d').scalar)
   end
   
    
@@ -951,50 +951,46 @@ class Unit < Numeric
   
   # '5 min'.before(time)
   def before(time_point = ::Time.now)
-    raise ArgumentError, "Must specify a Time" unless time_point
-    if String === time_point
-      time_point.time - self rescue time_point.datetime - self
-    else
+    case time_point
+    when Time, Date, DateTime
       time_point - self rescue time_point.to_datetime - self
+    else
+      raise ArgumentError, "Must specify a Time, Date, or DateTime"
     end
   end
   alias :before_now :before
   
   # 'min'.since(time)
-  def since(time_point = ::Time.now)
+  def since(time_point)
     case time_point
     when Time
-      (Time.now - time_point).unit('s').to(self)
+      (Time.now - time_point).unit('s').convert_to(self)
     when DateTime, Date
-      (DateTime.now - time_point).unit('d').to(self)
-    when String    
-      (DateTime.now - time_point.to_datetime(:context=>:past)).unit('d').to(self)
+      (DateTime.now - time_point).unit('d').convert_to(self)
     else
-      raise ArgumentError, "Must specify a Time, DateTime, or String" 
+      raise ArgumentError, "Must specify a Time, Date, or DateTime" 
     end
   end
   
   # 'min'.until(time)
-  def until(time_point = ::Time.now)
+  def until(time_point)
     case time_point
     when Time
-      (time_point - Time.now).unit('s').to(self)
+      (time_point - Time.now).unit('s').convert_to(self)
     when DateTime, Date
-      (time_point - DateTime.now).unit('d').to(self)
-    when String
-      (time_point.to_datetime(:context=>:future) - DateTime.now).unit('d').to(self)
+      (time_point - DateTime.now).unit('d').convert_to(self)
     else
-      raise ArgumentError, "Must specify a Time, DateTime, or String" 
+      raise ArgumentError, "Must specify a Time, Date, or DateTime" 
     end
   end
   
   # '5 min'.from(time)
-  def from(time_point = ::Time.now)
-    raise ArgumentError, "Must specify a Time" unless time_point
-    if String === time_point
-      time_point.time + self rescue time_point.datetime + self
-    else
+  def from(time_point)
+    case time_point
+    when Time, DateTime, Date
       time_point + self rescue time_point.to_datetime + self
+    else
+      raise ArgumentError, "Must specify a Time, Date, or DateTime"       
     end
   end
   alias :after :from
