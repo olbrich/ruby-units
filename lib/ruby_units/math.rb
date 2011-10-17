@@ -32,42 +32,42 @@ module Math
     
   alias :unit_sin :sin
   def sin(n)
-   Unit === n ? unit_sin(n.to('radian').scalar) : unit_sin(n)
+   Unit === n ? unit_sin(n.convert_to('radian').scalar) : unit_sin(n)
   end
   module_function :unit_sin
   module_function :sin
 
   alias :unit_cos :cos
   def cos(n)
-    Unit === n ? unit_cos(n.to('radian').scalar) : unit_cos(n)
+    Unit === n ? unit_cos(n.convert_to('radian').scalar) : unit_cos(n)
   end
   module_function :unit_cos
   module_function :cos
     
   alias :unit_sinh :sinh
   def sinh(n)
-    Unit === n ? unit_sinh(n.to('radian').scalar) : unit_sinh(n)
+    Unit === n ? unit_sinh(n.convert_to('radian').scalar) : unit_sinh(n)
   end
   module_function :unit_sinh
   module_function :sinh
 
   alias :unit_cosh :cosh
   def cosh(n)
-    Unit === n ? unit_cosh(n.to('radian').scalar) : unit_cosh(n)
+    Unit === n ? unit_cosh(n.convert_to('radian').scalar) : unit_cosh(n)
   end
   module_function :unit_cosh
   module_function :cosh
 
   alias :unit_tan :tan
   def tan(n)
-   Unit === n ? unit_tan(n.to('radian').scalar) : unit_tan(n)
+   Unit === n ? unit_tan(n.convert_to('radian').scalar) : unit_tan(n)
   end
   module_function :tan
   module_function :unit_tan
 
   alias :unit_tanh :tanh
   def tanh(n)
-    Unit === n ? unit_tanh(n.to('radian').scalar) : unit_tanh(n)
+    Unit === n ? unit_tanh(n.convert_to('radian').scalar) : unit_tanh(n)
   end
   module_function :unit_tanh
   module_function :tanh

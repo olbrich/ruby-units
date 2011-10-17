@@ -324,7 +324,7 @@ describe "Create some simple units" do
     it {should_not be_zero}
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}
-    it { subject.to("in/s").should be_within(Unit("0.0001 in/s")).of(Unit("1.0043269330917 in/s"))}
+    it { subject.convert_to("in/s").should be_within(Unit("0.0001 in/s")).of(Unit("1.0043269330917 in/s"))}
   end
   
   describe Unit.new("1 F") do
@@ -480,20 +480,20 @@ end
 describe "Unit Conversions" do
   
   context "between compatible units" do
-    specify { Unit("1 s").to("ns").should == Unit("1e9 ns")}
+    specify { Unit("1 s").convert_to("ns").should == Unit("1e9 ns")}
     specify { Unit("1 s").convert_to("ns").should == Unit("1e9 ns")}
     specify { (Unit("1 s") >> "ns").should == Unit("1e9 ns")}
 
-    specify { Unit("1 m").to(Unit("ft")).should be_within(Unit("0.001 ft")).of(Unit("3.28084 ft"))}
+    specify { Unit("1 m").convert_to(Unit("ft")).should be_within(Unit("0.001 ft")).of(Unit("3.28084 ft"))}
   end
   
   context "between incompatible units" do
-    specify { expect { Unit("1 s").to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
+    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
   end
   
   context "given bad input" do
-    specify { expect { Unit("1 m").to("random string")}.to raise_error(ArgumentError,"'random string' Unit not recognized")}
-    specify { expect { Unit("1 m").to(STDOUT)}.to raise_error(ArgumentError,"Unknown target units")}
+    specify { expect { Unit("1 m").convert_to("random string")}.to raise_error(ArgumentError,"'random string' Unit not recognized")}
+    specify { expect { Unit("1 m").convert_to(STDOUT)}.to raise_error(ArgumentError,"Unknown target units")}
   end
   
   context "between temperature scales" do
@@ -515,9 +515,9 @@ describe "Unit Conversions" do
     specify { Unit("558.27 tempR").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
     specify { Unit("0 tempR").should == Unit("0 tempK") }
     
-    specify { Unit("100 tempK").to("tempC").should be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
-    specify { Unit("100 tempK").to("tempF").should be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
-    specify { Unit("100 tempK").to("tempR").should be_within(U"0.01 degR").of(Unit("180 tempR"))}
+    specify { Unit("100 tempK").convert_to("tempC").should be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
+    specify { Unit("100 tempK").convert_to("tempF").should be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
+    specify { Unit("100 tempK").convert_to("tempR").should be_within(U"0.01 degR").of(Unit("180 tempR"))}
             
     specify { Unit("1 degC").should == Unit("1 degK")}
     specify { Unit("1 degF").should == Unit("1 degR")}
@@ -863,6 +863,55 @@ describe "Unit Math" do
     specify { Unit("1 km").divmod(Unit("2 m")).should == [500,0] }
   end
 
+  context "Time helper functions" do
+    before do
+      Time.stub!(:now).and_return(Time.utc(2011,10,16))
+      DateTime.stub!(:now).and_return(DateTime.civil(2011,10,16))
+      Date.stub!(:today).and_return(Date.civil(2011,10,16))
+    end
+  
+    context '#since' do
+      specify { Unit("min").since(Time.utc(2001,4,1,0,0,0)).should == Unit("5544000 min")}
+      specify { Unit("min").since(DateTime.civil(2001,4,1,0,0,0)).should == Unit("5544000 min")}
+      specify { Unit("min").since(Date.civil(2001,4,1)).should == Unit("5544000 min")}
+      specify { expect {Unit("min").since("4-1-2001")}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")  }
+      specify { expect {Unit("min").since(nil)}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")  }
+    end
+    
+    context '#before' do
+      specify { Unit("5 min").before(Time.now).should == Time.utc(2011,10,15,23,55)}
+      specify { Unit("5 min").before(DateTime.now).should == DateTime.civil(2011,10,15,23,55)}
+      specify { Unit("5 min").before(Date.today).should == DateTime.civil(2011,10,15,23,55)}
+      specify { expect {Unit('5 min').before(nil)}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")}
+      specify { expect {Unit('5 min').before("12:00")}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")}
+    end
+    
+    context '#ago' do
+      specify { Unit("5 min").ago.should be_kind_of Time}
+      specify { Unit("10000 y").ago.should be_kind_of Time}
+      specify { Unit("1 year").ago.should == Time.utc(2010,10,16)}
+    end
+    
+    context '#until' do
+      specify { Unit("min").until(Date.civil(2011,10,17)).should == Unit("1440 min")}
+      specify { Unit("min").until(DateTime.civil(2011,10,21)).should == Unit("7200 min")}
+      specify { Unit("min").until(Time.utc(2011,10,21)).should == Unit("7200 min")}
+      specify { expect {Unit('5 min').until(nil)}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")}
+      specify { expect {Unit('5 min').until("12:00")}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")}
+    end
+    
+    context '#from' do
+      specify { Unit("1 day").from(Date.civil(2011,10,17)).should == Date.civil(2011,10,18)}
+      specify { Unit("5 min").from(DateTime.civil(2011,10,21)).should == DateTime.civil(2011,10,21,00,05)}
+      specify { Unit("5 min").from(Time.utc(2011,10,21)).should == Time.utc(2011,10,21,00,05)}
+      specify { expect {Unit('5 min').from(nil)}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")}
+      specify { expect {Unit('5 min').from("12:00")}.to raise_error(ArgumentError, "Must specify a Time, Date, or DateTime")}
+    end
+  
+  end
+  
+  
+
 end
 
 describe "Unit Output formatting" do
@@ -888,7 +937,7 @@ describe "Foot-inch conversions" do
     ["88 in", %Q{7'4"}],
     ["89 in", %Q{7'5"}]
     ].each do |inches, feet|
-    specify { Unit(inches).to("ft").should == Unit(feet)}
+    specify { Unit(inches).convert_to("ft").should == Unit(feet)}
     specify { Unit(inches).to_s(:ft).should == feet}
   end
 end
@@ -904,7 +953,7 @@ describe "pound-ounce conversions" do
     ["88 oz", "5 lbs, 8 oz"],
     ["89 oz", "5 lbs, 9 oz"]
     ].each do |ounces, pounds|
-    specify { Unit(ounces).to("lbs").should == Unit(pounds)}
+    specify { Unit(ounces).convert_to("lbs").should == Unit(pounds)}
     specify { Unit(ounces).to_s(:lbs).should == pounds}
   end  
 end

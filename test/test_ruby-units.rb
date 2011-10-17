@@ -153,7 +153,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
   
   def test_string_helpers
-    assert_equal '1 mm'.to('in'), Unit('1 mm').to('in')
+    assert_equal '1 mm'.convert_to('in'), Unit('1 mm').convert_to('in')
   end
 
   [:sin, :cos, :tan, :sinh, :cosh, :tanh].each do |trig|
@@ -343,9 +343,9 @@ class TestRubyUnits < Test::Unit::TestCase
       assert_equal ['<1>'],unit3.denominator
     }
     assert_raises(ArgumentError) { unit1 >> 5.0}
-    assert_equal unit1, unit1.to(true)
-    assert_equal unit1, unit1.to(false)
-    assert_equal unit1, unit1.to(nil)
+    assert_equal unit1, unit1.convert_to(true)
+    assert_equal unit1, unit1.convert_to(false)
+    assert_equal unit1, unit1.convert_to(nil)
   end
   
   def test_compare 
@@ -638,7 +638,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { a / b }
     assert_raises(ArgumentError) { a ** 2 }
     assert_raises(ArgumentError) { c - '400 degK'.unit}
-    assert_equal a, a.to('tempF')
+    assert_equal a, a.convert_to('tempF')
   end
   
   def test_feet
@@ -723,7 +723,7 @@ class TestRubyUnits < Test::Unit::TestCase
     v = Unit "1 m^3"
     n = Unit "1 mole"
     r = Unit "8.31451 J/mol*degK"
-    t = ((p*v)/(n*r)).to('tempK')
+    t = ((p*v)/(n*r)).convert_to('tempK')
     assert_in_delta 12027.16,t.base_scalar, 0.1
   end
   
@@ -942,7 +942,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
   
   def test_natural_language
-    assert_equal Unit.parse("10 mm in cm"), '10 mm'.unit.to('cm')
+    assert_equal Unit.parse("10 mm in cm"), '10 mm'.unit.convert_to('cm')
   end
   
   def test_round_pounds
@@ -971,7 +971,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.3.0.a', Unit::VERSION)
+    assert_equal('1.3.2', Unit::VERSION)
   end
   
   def test_negation

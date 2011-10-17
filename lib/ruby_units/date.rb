@@ -8,8 +8,8 @@ class Date
   def +(unit)
     case unit
     when Unit
-      unit = unit.to('d').round if ['y', 'decade', 'century'].include? unit.units 
-      unit_date_add(unit.to('day').scalar)
+      unit = unit.convert_to('d').round if ['y', 'decade', 'century'].include? unit.units 
+      unit_date_add(unit.convert_to('day').scalar)
     else
       unit_date_add(unit)
     end
@@ -20,15 +20,15 @@ class Date
   def -(unit)
     case unit
     when Unit 
-      unit = unit.to('d').round if ['y', 'decade', 'century'].include? unit.units 
-      unit_date_sub(unit.to('day').scalar)
+      unit = unit.convert_to('d').round if ['y', 'decade', 'century'].include? unit.units 
+      unit_date_sub(unit.convert_to('day').scalar)
     else
       unit_date_sub(unit)
     end
   end
   
   def to_unit(other = nil)
-    other ? Unit.new(self).to(other) : Unit.new(self)
+    other ? Unit.new(self).convert_to(other) : Unit.new(self)
   end
   alias :unit :to_unit
   

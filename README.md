@@ -73,7 +73,7 @@ Units can be converted to other units in a couple of ways.
     unit1 === unit2        # true if units and quantity are the same, even if 'equivalent' by <=>
     unit.to('ft')          # convert
     unit1 + unit2 >> "ft"  # converts result of math to 'ft'
-    (unit1 + unit2).to('ft') # converts result to 'ft'
+    (unit1 + unit2).convert_to('ft') # converts result to 'ft'
  
 Any object that defines a 'to_unit' method will be automatically coerced to a unit during calculations.
  
@@ -81,7 +81,7 @@ Any object that defines a 'to_unit' method will be automatically coerced to a un
 Units will display themselves nicely based on the preferred abbreviation for the units and prefixes.
 Since Unit implements a Unit#to_s, all that is needed in most cases is:
     
-    "#{Unit.new('1 mm')}"  #=> "1 mm"
+    "#{Unit('1 mm')}"  #=> "1 mm"
  
 The to_s also accepts some options.
 
@@ -101,7 +101,7 @@ Several helpers have also been defined.
 Note: If you include the 'Chronic' gem, you can specify times in natural
       language.
 
-      'min'.since('9/18/06 3:00pm')
+      Unit('min').since(DateTime.parse('9/18/06 3:00pm'))
       'min'.before('9/18/08 3:00pm')
       'days'.until('1/1/07')
       '5 min'.from(Time.now)

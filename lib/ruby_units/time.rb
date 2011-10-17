@@ -14,14 +14,14 @@ class Time
   def self.at(arg)
     case arg
     when Unit
-      unit_time_at(arg.to("s").scalar)
+      unit_time_at(arg.convert_to("s").scalar)
     else
       unit_time_at(arg)
     end
   end
   
   def to_unit(other = nil)
-    other ? Unit.new(self).to(other) : Unit.new(self)
+    other ? Unit.new(self).convert_to(other) : Unit.new(self)
   end
   alias :unit :to_unit
   alias :u :to_unit
@@ -37,9 +37,9 @@ class Time
   def +(other)
     case other
     when Unit
-      other = other.to('d').round.to('s') if ['y', 'decade', 'century'].include? other.units  
+      other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units  
       begin
-        unit_add(other.to('s').scalar)
+        unit_add(other.convert_to('s').scalar)
       rescue RangeError
         self.to_datetime + other
       end
@@ -58,9 +58,9 @@ class Time
   def -(other)
     case other
     when Unit
-      other = other.to('d').round.to('s') if ['y', 'decade', 'century'].include? other.units  
+      other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units  
       begin
-        unit_sub(other.to('s').scalar)
+        unit_sub(other.convert_to('s').scalar)
       rescue RangeError
         self.send(:to_datetime) - other
       end

@@ -13,6 +13,27 @@ begin
     gem.email = ["kevin.olbrich+ruby_units@gmail.com"]
     gem.homepage = "https://github.com/olbrich/ruby-units"
     gem.files.exclude(".*")
+	gem.post_install_message = <<-EOS
+====================
+Deprecation Warning
+====================
+
+Several convenience methods that ruby-units added to the string class have
+been deprecated in this release.  These methods include String#to, String#from, String#ago, String#before and others.
+If your code relies on these functions, they can be added back by adding this line to your code.
+
+require 'ruby-units/string/extras'
+# note that these methods do not play well with Rails, which is one of the reasons they are being removed.
+
+The extra functions mostly work the same, but will no longer properly handle cases when they are called with strings..
+
+'min'.from("4-1-2011") # => Exception
+
+Pass in a Date, Time, or DateTime object to get the expected result.
+
+They will probably go away completely in an upcoming release, so it would be a good idea to refactor your code
+to avoid using them.  They will also throw deprecation warnings when they are used.
+EOS
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -33,10 +54,11 @@ begin
   require 'rspec/core/rake_task'
 
   desc "Run specs"
-  RSpec::Core::RakeTask.new do
+  RSpec::Core::RakeTask.new do |spec|
 	puts
 	puts %x{rvm current}
 	puts
+	spec.rspec_opts = "-b"
   end
   
   desc  "Run all specs with rcov"

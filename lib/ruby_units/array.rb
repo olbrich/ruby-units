@@ -2,7 +2,7 @@
 # [1, 'mm'].unit => 1 mm
 class Array
   def to_unit(other = nil)
-    other ? Unit.new(self).to(other) : Unit.new(self)
+    other ? Unit.new(self).convert_to(other) : Unit.new(self)
   end
   alias :unit :to_unit
   alias :u :to_unit
