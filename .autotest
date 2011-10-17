@@ -1,5 +1,9 @@
 # -*- ruby -*-
 
+require 'autotest/growl'
+require 'autotest/fsevent'
+require 'autotest/bundler'
+
 module AutoGrowl
   def self.growl title, msg, pri=0
     system "growlnotify -n autotest --image /Applications/Mail.app/Contents/Resources/Caution.tiff -p #{pri} -m #{msg.inspect} #{title}"
