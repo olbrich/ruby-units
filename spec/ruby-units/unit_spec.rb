@@ -524,6 +524,11 @@ describe "Unit Conversions" do
     specify { Unit("1 degC").should == Unit("1.8 degR")}
     specify { Unit("1 degF").should be_within(Unit("0.001 degK")).of(Unit("0.5555 degK"))}
   end
+  
+  context "reported bugs" do
+    specify { (Unit("189 Mtonne") * Unit("1189 g/tonne")).should == Unit("224721 tonne") }
+    specify { (Unit("189 Mtonne") * Unit("1189 g/tonne")).convert_to("tonne").should == Unit("224721 tonne") }
+  end
 end
 
 describe "Unit Math" do
