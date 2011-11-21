@@ -936,7 +936,7 @@ class TestRubyUnits < Test::Unit::TestCase
   end
     
   def test_version
-    assert_equal('1.3.2.a', Unit::VERSION)
+    assert_equal('1.3.2', Unit::VERSION)
   end
   
   def test_negation
