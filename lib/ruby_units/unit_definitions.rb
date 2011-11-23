@@ -78,7 +78,7 @@ UNIT_DEFINITIONS = {
   '<pint>'=>  [%w{pt pint pints}, 0.000473176475, :volume, %w{<meter> <meter> <meter>}],
   '<cup>'=>  [%w{cu cup cups}, 0.000236588238, :volume, %w{<meter> <meter> <meter>}],
   '<fluid-ounce>'=>  [%w{floz fluid-ounce}, 2.95735297e-5, :volume, %w{<meter> <meter> <meter>}],
-  '<tablespoon>'=>  [%w{tbs tablespoon tablespoons}, 1.47867648e-5, :volume, %w{<meter> <meter> <meter>}],
+  '<tablespoon>'=>  [%w{tbs tbsp tablespoon tablespoons}, 1.47867648e-5, :volume, %w{<meter> <meter> <meter>}],
   '<teaspoon>'=>  [%w{tsp teaspoon teaspoons}, 4.92892161e-6, :volume, %w{<meter> <meter> <meter>}],
 
   #volumetric flow
