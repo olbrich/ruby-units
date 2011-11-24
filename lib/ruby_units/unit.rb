@@ -7,11 +7,7 @@ end
 #
 # Copyright 2006-2011 by Kevin C. Olbrich, Ph.D.
 # 
-# See http://rubyforge.org/ruby-units/
-#
-# http://www.sciwerks.org
-#
-# mailto://kevin.olbrich+ruby-units@gmail.com
+# See https://github.com/olbrich/ruby-units
 #
 # See README for detailed usage instructions and examples
 #
@@ -28,9 +24,9 @@ end
 # While there are a large number of unit specified in the base package, 
 # there are also a large number of units that are not included.
 # This package covers nearly all SI, Imperial, and units commonly used
-# in the United States. If your favorite units are not listed here, send me an email
+# in the United States. If your favorite units are not listed here, file an issue on github.
 #
-# To add / override a unit definition, add a code block like this..
+# To add or override a unit definition, add a code block like this..
 #
 #  class Unit < Numeric
 #   @@USER_DEFINITIONS = {
@@ -38,8 +34,9 @@ end
 #    }
 #  end
 #  Unit.setup
+#
+# @author Kevin C. Olbrich, Ph.D.
 class Unit < Numeric
-  # pre-generate hashes from unit definitions for performance.  
   VERSION = Unit::Version::STRING
   @@USER_DEFINITIONS = {}
   @@PREFIX_VALUES = {}
@@ -123,6 +120,7 @@ class Unit < Numeric
   @@cached_units = {}
   @@base_unit_cache = {}
   
+  # @private
   def self.setup
     @@ALL_UNIT_DEFINITIONS = UNIT_DEFINITIONS.merge!(@@USER_DEFINITIONS)
     for unit in (@@ALL_UNIT_DEFINITIONS) do
@@ -150,14 +148,24 @@ class Unit < Numeric
   end
   
   include Comparable
-  attr_accessor :scalar, :numerator, :denominator, :signature, :base_scalar, :base_numerator, :base_denominator, :output, :unit_name
+  
+  attr_accessor :scalar, 
+                :numerator, 
+                :denominator, 
+                :signature, 
+                :base_scalar, 
+                :base_numerator, 
+                :base_denominator, 
+                :output, 
+                :unit_name
 
   def to_yaml_properties
     %w{@scalar @numerator @denominator @signature @base_scalar}
   end
   
   # needed to make complex units play nice -- otherwise not detected as a complex_generic
- 
+  # @param [Class]
+  # @return [Boolean]
   def kind_of?(klass)
     self.scalar.kind_of?(klass)
   end
@@ -187,7 +195,8 @@ class Unit < Numeric
   end
   
   # Create a new Unit object.  Can be initialized using a String, a Hash, an Array, Time, DateTime
-  # Valid formats include:
+  # 
+  # @example Valid options include:
   #  "5.6 kg*m/s^2"
   #  "5.6 kg*m*s^-2"
   #  "5.6 kilogram*meter*second^-2"
@@ -195,9 +204,13 @@ class Unit < Numeric
   #  "37 degC"
   #  "1"  -- creates a unitless constant with value 1
   #  "GPa"  -- creates a unit with scalar 1 with units 'GPa'
-  #  6'4"  -- recognized as 6 feet + 4 inches 
-  #  8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
+  #  "6'4\"""  -- recognized as 6 feet + 4 inches 
+  #  "8 lbs 8 oz" -- recognized as 8 lbs + 8 ounces
+  #  [1, 'kg'] 
+  #  {:scalar => 1, :numerator=>'kg'}
   #
+  # @param [Unit,String,Hash,Array,Date,Time,DateTime] options
+  # @return [Unit]
   def initialize(*options)
     @scalar = nil
     @base_scalar = nil
@@ -273,38 +286,48 @@ class Unit < Numeric
     self
   end
 
+  # return the kind of the unit (:mass, :length, etc...)
+  # @return [Boolean]
   def kind
     return @@KINDS[self.signature]
   end
   
+  # private?
+  # @private
   def self.cached
     return @@cached_units
   end
   
+  # private?
+  # @private
   def self.clear_cache
     @@cached_units = {}
     @@base_unit_cache = {}
     Unit.new(1)
   end
     
+  # private?
+  # @private
   def self.base_unit_cache
     return @@base_unit_cache
   end
   
-  #
-  # parse strings like "1 minute in seconds"
-  #
+  # @example parse strings 
+  #   "1 minute in seconds"
+  # @param [String] input
+  # @return [Unit]
   def self.parse(input)
     first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
     second.nil? ? first.unit : first.unit.convert_to(second)
   end
   
+  # @return [Unit]
   def to_unit
     self
   end
   alias :unit :to_unit
   
-  # Returns 'true' if the Unit is represented in base units
+  # @return [Boolean]
   def is_base?
     return @is_base if defined? @is_base
     return @is_base=true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(?:deg|temp)K/
@@ -318,6 +341,7 @@ class Unit < Numeric
   
   # convert to base SI units
   # results of the conversion are cached so subsequent calls to this will be fast
+  # @return [Unit]
   def to_base
     return self if self.is_base?
     if self.units =~ /\A(?:temp|deg)[CRF]\Z/
@@ -375,14 +399,17 @@ class Unit < Numeric
   # If the name of a unit is passed, the unit will first be converted to the target unit before output.
   # some named conversions are available
   #
-  #  :ft - outputs in feet and inches (e.g., 6'4")
-  #  :lbs - outputs in pounds and ounces (e.g, 8 lbs, 8 oz)
-  #  
+  # @example
+  #  unit.to_s(:ft) - outputs in feet and inches (e.g., 6'4")
+  #  unit.to_s(:lbs) - outputs in pounds and ounces (e.g, 8 lbs, 8 oz)
+  #
   # You can also pass a standard format string (i.e., '%0.2f')
   # or a strftime format string.
   #
   # output is cached so subsequent calls for the same format will be fast
   #
+  # @param [Symbol] target_units
+  # @return [String]
   def to_s(target_units=nil)
     out = @output[target_units]
     if out
@@ -426,18 +453,21 @@ class Unit < Numeric
   end
   
   # Normally pretty prints the unit, but if you really want to see the guts of it, pass ':dump'
+  # @deprecated
   def inspect(option=nil)
     return super() if option == :dump
     self.to_s
   end
   
   # true if unit is a 'temperature', false if a 'degree' or anything else
+  # @return [Boolean]
   def is_temperature?
     self.is_degree? && (!(self.units =~ /temp[CFRK]/).nil?)
   end
   alias :temperature? :is_temperature?
   
   # true if a degree unit or equivalent.
+  # @return [Boolean]
   def is_degree?
     self.kind == :temperature
   end
@@ -453,12 +483,17 @@ class Unit < Numeric
   
   # returns true if no associated units
   # false, even if the units are "unitless" like 'radians, each, etc'
+  # @return [Boolean]
   def unitless?
     (@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
   end
   
   # Compare two Unit objects. Throws an exception if they are not of compatible types.
   # Comparisons are done based on the value of the unit in base SI units.
+  # @param [Object] other
+  # @return [-1|0|1]
+  # @raise [NoMethodError] when other does not define <=>
+  # @raise [ArgumentError] when units are not compatible
   def <=>(other)
     case
     when !self.base_scalar.respond_to?(:<=>)
@@ -480,6 +515,8 @@ class Unit < Numeric
   # Units of incompatible types are not equal, except when they are both zero and neither is a temperature
   # Equality checks can be tricky since round off errors may make essentially equivalent units
   # appear to be different.
+  # @param [Object] other
+  # @return [Boolean]
   def ==(other)
     case
     when other.respond_to?(:zero?) && other.zero?
@@ -496,10 +533,12 @@ class Unit < Numeric
   # check to see if units are compatible, but not the scalar part
   # this check is done by comparing signatures for performance reasons
   # if passed a string, it will create a unit object with the string and then do the comparison
-  # this permits a syntax like:  
+  # @example this permits a syntax like:  
   #  unit =~ "mm"
-  # if you want to do a regexp on the unit string do this ...
+  # @note if you want to do a regexp comparison of the unit string do this ...
   #  unit.units =~ /regexp/
+  # @param [Object] other
+  # @return [Boolean]
   def =~(other)
     case other
     when Unit
@@ -514,9 +553,11 @@ class Unit < Numeric
   alias :compatible_with? :=~
   
   # Compare two units.  Returns true if quantities and units match
-  #
-  # Unit("100 cm") === Unit("100 cm")   # => true
-  # Unit("100 cm") === Unit("1 m")      # => false
+  # @example
+  #   Unit("100 cm") === Unit("100 cm")   # => true
+  #   Unit("100 cm") === Unit("1 m")      # => false
+  # @param [Object] other
+  # @return [Boolean]
   def ===(other)
     case other
     when Unit
@@ -533,6 +574,11 @@ class Unit < Numeric
   # Add two units together.  Result is same units as receiver and scalar and base_scalar are updated appropriately
   # throws an exception if the units are not compatible.
   # It is possible to add Time objects to units of time
+  # @param [Object] other
+  # @return [Unit]
+  # @raise [ArgumentError] when two temperatures are added
+  # @raise [ArgumentError] when units are not compatible
+  # @raise [ArgumentError] when adding a Date or Time
   def +(other)
     case other
     when Unit
@@ -722,6 +768,7 @@ class Unit < Numeric
   end
   
   # returns inverse of Unit (1/unit)
+  # @return [Unit]
   def inverse
     Unit("1") / self
   end
@@ -741,6 +788,11 @@ class Unit < Numeric
   #
   # Note that if temperature is part of a compound unit, the temperature will be treated as a differential
   # and the units will be scaled appropriately.
+  # @param [Object] other
+  # @return [Unit]
+  # @raise [ArgumentError] when attempting to convert a degree to a temperature
+  # @raise [ArgumentError] when target unit is unknown
+  # @raise [ArgumentError] when target unit is incompatible
   def convert_to(other)
     return self if other.nil? 
     return self if TrueClass === other
@@ -799,18 +851,24 @@ class Unit < Numeric
   alias :to :convert_to
     
   # converts the unit back to a float if it is unitless.  Otherwise raises an exception
+  # @return [Float]
+  # @raise [RuntimeError] when not unitless
   def to_f
     return @scalar.to_f if self.unitless?
     raise RuntimeError, "Cannot convert '#{self.to_s}' to Float unless unitless.  Use Unit#scalar"
   end
   
   # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
+  # @return [Complex]
+  # @raise [RuntimeError] when not unitless
   def to_c
     return Complex(@scalar) if self.unitless?
     raise RuntimeError, "Cannot convert '#{self.to_s}' to Complex unless unitless.  Use Unit#scalar"
   end
 
   # if unitless, returns an int, otherwise raises an error
+  # @return [Integer]
+  # @raise [RuntimeError] when not unitless
   def to_i
     return @scalar.to_int if self.unitless?
     raise RuntimeError, "Cannot convert '#{self.to_s}' to Integer unless unitless.  Use Unit#scalar"
@@ -818,12 +876,15 @@ class Unit < Numeric
   alias :to_int :to_i
   
   # if unitless, returns a Rational, otherwise raises an error
+  # @return [Rational]
+  # @raise [RuntimeError] when not unitless
   def to_r
     return @scalar.to_r if self.unitless?
     raise RuntimeError, "Cannot convert '#{self.to_s}' to Rational unless unitless.  Use Unit#scalar"
   end
   
   # returns the 'unit' part of the Unit object without the scalar
+  # @return [String]
   def units
     return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
     return @unit_name unless @unit_name.nil?
@@ -894,20 +955,23 @@ class Unit < Numeric
   end
 
   # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
-  # only works when the scalar is an integer    
+  # only works when the scalar is an integer
+  # @return [Unit]
+  # @raise [ArgumentError] when scalar is not equal to an integer
   def succ
     raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
     Unit.new(@scalar.to_i.succ, @numerator, @denominator)
   end
   alias :next :succ
   
-  # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
-  # only works when the scalar is an integer    
+  # returns previous unit in a range.  '2 mm'.unit.pred #=> '1 mm'.unit
+  # only works when the scalar is an integer
+  # @return [Unit]
+  # @raise [ArgumentError] when scalar is not equal to an integer
   def pred
     raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
     Unit.new(@scalar.to_i.pred, @numerator, @denominator)
   end
-  
   
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
   def to_time
@@ -926,8 +990,8 @@ class Unit < Numeric
     Date.new0(self.convert_to('d').scalar)
   end
   
-   
   # true if scalar is zero
+  # @return [Boolean]
   def zero?
     return self.base_scalar.zero?
   end
@@ -978,16 +1042,16 @@ class Unit < Numeric
     when Time, DateTime, Date
       time_point + self rescue time_point.to_datetime + self
     else
-      raise ArgumentError, "Must specify a Time, Date, or DateTime"       
+      raise ArgumentError, "Must specify a Time, Date, or DateTime"
     end
   end
   alias :after :from
   alias :from_now :from
   
- 
-
   # automatically coerce objects to units when possible
   # if an object defines a 'to_unit' method, it will be coerced using that method
+  # @param [Object, #to_unit]
+  # @return [Array]
   def coerce(other)
     if other.respond_to? :to_unit
       return [other.to_unit, self]
@@ -1003,7 +1067,6 @@ class Unit < Numeric
   # Protected and Private Functions that should only be called from this class
   protected
   
-  
   def update_base_scalar
     return @base_scalar unless @base_scalar.nil?
     if self.is_base?
@@ -1017,6 +1080,8 @@ class Unit < Numeric
   end
   
   # calculates the unit signature vector used by unit_signature
+  # @return [Array]
+  # @raise [ArgumentError] when exponent associated with a unit is > 20 or < -20
   def unit_signature_vector
     return self.to_base.unit_signature_vector unless self.is_base?
     vector = Array.new(SIGNATURE_VECTOR.size,0)
@@ -1045,12 +1110,10 @@ class Unit < Numeric
   
   # calculates the unit signature id for use in comparing compatible units and simplification
   # the signature is based on a simple classification of units and is based on the following publication
-  #  
-  #  Novak, G.S., Jr. "Conversion of units of measurement", IEEE Transactions on Software Engineering,
-  #  21(8), Aug 1995, pp.651-661
-  #  doi://10.1109/32.403789
-  #  http://ieeexplore.ieee.org/Xplore/login.jsp?url=/iel1/32/9079/00403789.pdf?isnumber=9079&prod=JNL&arnumber=403789&arSt=651&ared=661&arAuthor=Novak%2C+G.S.%2C+Jr.
   #
+  # Novak, G.S., Jr. "Conversion of units of measurement", IEEE Transactions on Software Engineering, 21(8), Aug 1995, pp.651-661
+  # @see http://doi.ieeecomputersociety.org/10.1109/32.403789
+  # @return [Array]
   def unit_signature
     return @signature unless @signature.nil?
     vector = unit_signature_vector
@@ -1241,6 +1304,8 @@ class Unit < Numeric
   private
 
   # parse a string consisting of a number and a unit string
+  # @param [String] string
+  # @return [Array] consisting of [number, unit]
   def self.parse_into_numbers_and_units(string)
     # scientific notation.... 123.234E22, -123.456e-10
     sci = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
