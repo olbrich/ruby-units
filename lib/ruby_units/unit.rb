@@ -127,7 +127,9 @@ class Unit < Numeric
     }
   @@cached_units = {}
   @@base_unit_cache = {}
-  # @private
+
+  # setup internal arrays and hashes
+  # @return undefined
   def self.setup
     @@ALL_UNIT_DEFINITIONS = UNIT_DEFINITIONS.merge!(@@USER_DEFINITIONS)
     for unit in (@@ALL_UNIT_DEFINITIONS) do
@@ -153,17 +155,35 @@ class Unit < Numeric
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/
     Unit.new(1)
   end
+  
   include Comparable
 
-  attr_accessor :scalar,
-                :numerator,
-                :denominator,
-                :signature,
-                :base_scalar,
-                :base_numerator,
-                :base_denominator,
-                :output,
-                :unit_name
+  # @return [Numeric]
+  attr_accessor :scalar
+  
+  # @return [Array]
+  attr_accessor :numerator
+
+  # @return [Array]
+  attr_accessor :denominator
+
+  # @return [Integer]
+  attr_accessor :signature  
+
+  # @return [Numeric]
+  attr_accessor :base_scalar
+  
+  # @return [Array]
+  attr_accessor :base_numerator
+  
+  # @return [Array]
+  attr_accessor :base_denominator
+  
+  # @return [String]
+  attr_accessor :output
+  
+  # @return [String]
+  attr_accessor :unit_name
 
   def to_yaml_properties
     %w{@scalar @numerator @denominator @signature @base_scalar}
@@ -176,6 +196,7 @@ class Unit < Numeric
     self.scalar.kind_of?(klass)
   end
 
+  # used to copy one unit to another
   def copy(from)
     @scalar = from.scalar
     @numerator = from.numerator
@@ -188,6 +209,8 @@ class Unit < Numeric
 
   # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
   # before YAML'izing it.
+  # @param [Hash] opts
+  # @return [String]
   if RUBY_VERSION < "1.9"
     def to_yaml( opts = {} )
       YAML::quick_emit( object_id, opts ) do |out|
@@ -293,18 +316,17 @@ class Unit < Numeric
   end
 
   # return the kind of the unit (:mass, :length, etc...)
-  # @return [Boolean]
+  # @return [Symbol]
   def kind
     return @@KINDS[self.signature]
   end
 
-  # private?
   # @private
+  # @return [Hash]
   def self.cached
     return @@cached_units
   end
 
-  # private?
   # @private
   def self.clear_cache
     @@cached_units = {}
@@ -312,8 +334,8 @@ class Unit < Numeric
     Unit.new(1)
   end
 
-  # private?
   # @private
+  # @return [Hash]
   def self.base_unit_cache
     return @@base_unit_cache
   end
@@ -585,7 +607,7 @@ class Unit < Numeric
   # @return [Unit]
   # @raise [ArgumentError] when two temperatures are added
   # @raise [ArgumentError] when units are not compatible
-  # @raise [ArgumentError] when adding a Date or Time
+  # @raise [ArgumentError] when adding a fixed time or date to a time span
   def +(other)
     case other
     when Unit
@@ -616,7 +638,11 @@ class Unit < Numeric
   end
 
   # Subtract two units. Result is same units as receiver and scalar and base_scalar are updated appropriately
-  # throws an exception if the units are not compatible.
+  # @param [Numeric] other
+  # @return [Unit]
+  # @raise [ArgumentError] when subtracting a temperature from a degree
+  # @raise [ArgumentError] when units are not compatible
+  # @raise [ArgumentError] when subtracting a fixed time from a time span
   def -(other)
     case other
       when Unit
@@ -647,6 +673,9 @@ class Unit < Numeric
   end
 
   # Multiply two units.
+  # @param [Numeric] other
+  # @return [Unit]
+  # @raise [ArgumentError] when attempting to multiply two temperatures
   def *(other)
     case other
     when Unit
@@ -664,6 +693,10 @@ class Unit < Numeric
 
   # Divide two units.
   # Throws an exception if divisor is 0
+  # @param [Numeric] other
+  # @return [Unit]
+  # @raise [ZeroDivisionError] if divisor is zero
+  # @raise [ArgumentError] if attempting to divide a temperature by another temperature
   def /(other)
     case other
     when Unit
@@ -684,6 +717,8 @@ class Unit < Numeric
   # divide two units and return quotient and remainder
   # when both units are in the same units we just use divmod on the raw scalars
   # otherwise we use the scalar of the base unit which will be a float
+  # @param [Object] other
+  # @return [Array]
   def divmod(other)
     raise ArgumentError, "Incompatible Units" unless self =~ other
     if self.units == other.units
@@ -694,6 +729,8 @@ class Unit < Numeric
   end
 
   # perform a modulo on a unit, will raise an exception if the units are not compatible
+  # @param [Object] other
+  # @return [Integer]
   def %(other)
     self.divmod(other).last
   end
@@ -706,6 +743,12 @@ class Unit < Numeric
   # but, sadly, floats can't be converted to rationals.
   #
   # For now, if a rational is passed in, it will be used, otherwise we are stuck with integers and certain floats < 1
+  # @param [Numeric] other
+  # @return [Unit]
+  # @raise [ArgumentError] when raising a temperature to a power
+  # @raise [ArgumentError] when n not in the set integers from (1..9)
+  # @raise [ArgumentError] when attempting to raise to a complex number
+  # @raise [ArgumentError] when an invalid exponent is passed
   def **(other)
     raise ArgumentError, "Cannot raise a temperature to a power" if self.is_temperature?
     if other.kind_of?(Numeric)
@@ -730,7 +773,11 @@ class Unit < Numeric
     end
   end
 
-  # returns the unit raised to the n-th power.  Integers only
+  # returns the unit raised to the n-th power
+  # @param [Integer] n
+  # @return [Unit]
+  # @raise [ArgumentError] when attempting to raise a temperature to a power
+  # @raise [ArgumentError] when n is not an integer
   def power(n)
     raise ArgumentError, "Cannot raise a temperature to a power" if self.is_temperature?
     raise ArgumentError, "Exponent must an Integer" unless n.kind_of?(Integer)
@@ -744,8 +791,13 @@ class Unit < Numeric
     end
   end
 
-  # Calculates the n-th root of a unit, where n = (1..9)
+  # Calculates the n-th root of a unit
   # if n < 0, returns 1/unit^(1/n)
+  # @param [Integer] n
+  # @return [Unit]
+  # @raise [ArgumentError] when attemptint to take the root of a temperature
+  # @raise [ArgumentError] when n is not an integer
+  # @raise [ArgumentError] when n is 0
   def root(n)
     raise ArgumentError, "Cannot take the root of a temperature" if self.is_temperature?
     raise ArgumentError, "Exponent must an Integer" unless n.kind_of?(Integer)
@@ -929,31 +981,39 @@ class Unit < Numeric
   end
 
   # negates the scalar of the Unit
+  # @return [Unit]
   def -@
     return -@scalar if self.unitless?
     self.dup * -1
   end
 
+  # absolute value of a unit
+  # @return [Unit]
   def abs
     return @scalar.abs if self.unitless?
     Unit.new(@scalar.abs, @numerator, @denominator)
   end
 
+  # ceil of a unit
+  # @return [Unit]
   def ceil
     return @scalar.ceil if self.unitless?
     Unit.new(@scalar.ceil, @numerator, @denominator)
   end
 
+  # @return [Unit]
   def floor
     return @scalar.floor if self.unitless?
     Unit.new(@scalar.floor, @numerator, @denominator)
   end
 
+  # @return [Unit]
   def round
     return @scalar.round if self.unitless?
     Unit.new(@scalar.round, @numerator, @denominator)
   end
 
+  # @return [Unit]
   def truncate
     return @scalar.truncate if self.unitless?
     Unit.new(@scalar.truncate, @numerator, @denominator)
@@ -979,6 +1039,7 @@ class Unit < Numeric
   end
 
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
+  # @return [Time]
   def to_time
     Time.at(self)
   end
@@ -986,10 +1047,12 @@ class Unit < Numeric
 
   # convert a duration to a DateTime.  This will work so long as the duration is the duration from the zero date
   # defined by DateTime
+  # @return [DateTime]
   def to_datetime
     DateTime.new!(self.convert_to('d').scalar)
   end
 
+  # @return [Date]
   def to_date
     Date.new0(self.convert_to('d').scalar)
   end
@@ -1000,12 +1063,14 @@ class Unit < Numeric
     return self.base_scalar.zero?
   end
 
-  # '5 min'.unit.ago
+  # @example '5 min'.unit.ago
+  # @return [Unit]
   def ago
     self.before
   end
 
-  # '5 min'.before(time)
+  # @example '5 min'.before(time)
+  # @return [Unit]
   def before(time_point = ::Time.now)
     case time_point
     when Time, Date, DateTime
@@ -1016,7 +1081,10 @@ class Unit < Numeric
   end
   alias :before_now :before
 
-  # 'min'.since(time)
+  # @example 'min'.since(time)
+  # @param [Time, Date, DateTime] time_point
+  # @return [Unit]
+  # @raise [ArgumentError] when time point is not a Time, Date, or DateTime
   def since(time_point)
     case time_point
     when Time
@@ -1028,7 +1096,9 @@ class Unit < Numeric
     end
   end
 
-  # 'min'.until(time)
+  # @example 'min'.until(time)
+  # @param [Time, Date, DateTime] time_point
+  # @return [Unit]
   def until(time_point)
     case time_point
     when Time
@@ -1040,7 +1110,10 @@ class Unit < Numeric
     end
   end
 
-  # '5 min'.from(time)
+  # @example '5 min'.from(time)
+  # @param [Time, Date, DateTime] time_point
+  # @return [Time, Date, DateTime]
+  # @raise [ArgumentError] when passed argument is not a Time, Date, or DateTime
   def from(time_point)
     case time_point
     when Time, DateTime, Date
@@ -1071,6 +1144,8 @@ class Unit < Numeric
   # Protected and Private Functions that should only be called from this class
   protected
 
+  # figure out what the scalar part of the base unit for this unit is
+  # @return [nil]
   def update_base_scalar
     return @base_scalar unless @base_scalar.nil?
     if self.is_base?
@@ -1107,6 +1182,9 @@ class Unit < Numeric
 
   private
 
+  # used by #dup to duplicate a Unit
+  # @param [Unit] other
+  # @private
   def initialize_copy(other)
     @numerator = other.numerator.dup
     @denominator = other.denominator.dup
@@ -1125,6 +1203,10 @@ class Unit < Numeric
     @signature=vector.inject(0) {|sum,n| sum+n}
   end
 
+  # @param [Numeric] q quantity
+  # @param [Array] n numerator
+  # @param [Array] d denominator
+  # @return [Hash]
   def self.eliminate_terms(q, n, d)
     num = n.dup
     den = d.dup
@@ -1185,6 +1267,7 @@ class Unit < Numeric
   #  "GPa"  -- creates a unit with scalar 1 with units 'GPa'
   #  6'4"  -- recognized as 6 feet + 4 inches
   #  8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
+  # @return [nil | Unit]
   def parse(passed_unit_string="0")
     unit_string = passed_unit_string.dup
     if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
@@ -1298,6 +1381,8 @@ class Unit < Numeric
     self
   end
   
+  # return an array of base units
+  # @return [Array]
   def self.base_units
     @@BASE_UNITS.map {|u| Unit.new(u)}
   end
@@ -1307,6 +1392,7 @@ class Unit < Numeric
   # parse a string consisting of a number and a unit string
   # @param [String] string
   # @return [Array] consisting of [number, unit]
+  # @private
   def self.parse_into_numbers_and_units(string)
     # scientific notation.... 123.234E22, -123.456e-10
     sci = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
