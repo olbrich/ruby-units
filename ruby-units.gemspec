@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kevin Olbrich, Ph.D."]
-  s.date = "2011-11-21"
+  s.date = "2011-11-25"
   s.description = "Provides classes and methods to perform unit math and conversions"
   s.email = ["kevin.olbrich+ruby_units@gmail.com"]
   s.extra_rdoc_files = [
@@ -19,14 +19,11 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     "CHANGELOG.txt",
-    "Gemfile",
     "LICENSE.txt",
-    "Manifest.txt",
     "README.md",
     "RakeFile",
     "TODO",
     "VERSION",
-    "autotest/discover.rb",
     "lib/ruby-units.rb",
     "lib/ruby_units.rb",
     "lib/ruby_units/array.rb",
@@ -42,20 +39,7 @@ Gem::Specification.new do |s|
     "lib/ruby_units/unit.rb",
     "lib/ruby_units/unit_definitions.rb",
     "lib/ruby_units/version.rb",
-    "ruby-units.gemspec",
-    "spec/ruby-units/array_spec.rb",
-    "spec/ruby-units/complex_spec.rb",
-    "spec/ruby-units/date_spec.rb",
-    "spec/ruby-units/math_spec.rb",
-    "spec/ruby-units/numeric_spec.rb",
-    "spec/ruby-units/object_spec.rb",
-    "spec/ruby-units/string/extra_spec.rb",
-    "spec/ruby-units/string_spec.rb",
-    "spec/ruby-units/time_spec.rb",
-    "spec/ruby-units/unit_spec.rb",
-    "spec/spec_helper.rb",
-    "test/test_cache.rb",
-    "test/test_ruby-units.rb"
+    "ruby-units.gemspec"
   ]
   s.homepage = "https://github.com/olbrich/ruby-units"
   s.post_install_message = "====================\nDeprecation Warning\n====================\n\nSeveral convenience methods that ruby-units added to the string class have\nbeen deprecated in this release.  These methods include String#to, String#from, String#ago, String#before and others.\nIf your code relies on these functions, they can be added back by adding this line to your code.\n\nrequire 'ruby-units/string/extras'\n# note that these methods do not play well with Rails, which is one of the reasons they are being removed.\n\nThe extra functions mostly work the same, but will no longer properly handle cases when they are called with strings..\n\n'min'.from(\"4-1-2011\") # => Exception\n\nPass in a Date, Time, or DateTime object to get the expected result.\n\nThey will probably go away completely in an upcoming release, so it would be a good idea to refactor your code\nto avoid using them.  They will also throw deprecation warnings when they are used.\n"
