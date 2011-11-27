@@ -30,7 +30,7 @@ end
 #
 #  class Unit < Numeric
 #   @@USER_DEFINITIONS = {
-#    <name>'  => [%w{prefered_name synonyms}, conversion_to_base, :classification, %w{<base> <units> <in> <numerator>} , %w{<base> <units> <in> <denominator>} ]
+#    '<name>'  => [%w{prefered_name synonyms}, conversion_to_base, :classification, %w{<base> <units> <in> <numerator>} , %w{<base> <units> <in> <denominator>} ]
 #    }
 #  end
 #  Unit.setup
@@ -39,6 +39,7 @@ end
 class Unit < Numeric
   VERSION = Unit::Version::STRING
   @@USER_DEFINITIONS = {}
+  @@definitions = {}
   @@PREFIX_VALUES = {}
   @@PREFIX_MAP = {}
   @@UNIT_MAP = {}
@@ -51,7 +52,7 @@ class Unit < Numeric
   TIME_REGEX = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
   LBS_OZ_REGEX = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
   SCI_NUMBER = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
-  RATIONAL_NUMBER = /([+-]?\d+)\/(\d+)/
+  RATIONAL_NUMBER = /\(?([+-]?\d+)\/(\d+)\)?/
   COMPLEX_NUMBER = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
   NUMBER_REGEX = /#{SCI_NUMBER}*\s*(.+)?/
   UNIT_STRING_REGEX = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
@@ -131,9 +132,10 @@ class Unit < Numeric
   # setup internal arrays and hashes
   # @return undefined
   def self.setup
+    #puts @@USER_DEFINITIONS.inspect
     @@ALL_UNIT_DEFINITIONS = UNIT_DEFINITIONS.merge!(@@USER_DEFINITIONS)
     for unit in (@@ALL_UNIT_DEFINITIONS) do
-      key, value = unit
+    key, value = unit
       if value[2] == :prefix then
         @@PREFIX_VALUES[key]=value[1]
         for name in value[0] do
@@ -154,6 +156,31 @@ class Unit < Numeric
     @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit]}.reverse.join('|')
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/
     Unit.new(1)
+  end
+  
+  # determine if a unit is already defined
+  # @param [String] unit
+  # @return [Boolean]
+  def self.defined?(unit)
+    @@UNIT_VALUES.keys.include?("<#{unit}>")
+  end
+  
+  # return the unit definition for a unit
+  # @param [String] unit
+  # @return [Unit::Definition, nil]
+  def self.definition(unit)
+    @@definitions["<#{unit}>"]
+  end
+  
+  # @param [Hash] unit_definition
+  # unpack a unit definition and add it to the user definitions array
+  def self.define(unit_definition)
+    @@definitions[unit_definition.name] = unit_definition
+    @@USER_DEFINITIONS[unit_definition.name] = [unit_definition.aliases,
+                                                unit_definition.scalar,
+                                                unit_definition.kind,
+                                                unit_definition.numerator,
+                                                unit_definition.denominator]
   end
   
   include Comparable
@@ -1384,7 +1411,7 @@ class Unit < Numeric
   # return an array of base units
   # @return [Array]
   def self.base_units
-    @@BASE_UNITS.map {|u| Unit.new(u)}
+    @@definitions.select {|_, defn| defn.base?}.keys.map {|u| Unit.new(u)}
   end
 
   private
@@ -1419,4 +1446,4 @@ class Unit < Numeric
   end
 end
 
-Unit.setup
+#Unit.setup

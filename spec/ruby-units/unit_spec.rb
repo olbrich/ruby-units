@@ -393,8 +393,18 @@ describe Unit do
   it "is a subclass of Numeric" do
      described_class.should < Numeric
   end
+  
   it "is Comparable" do 
     described_class.should < Comparable
+  end
+  
+  describe "#defined?" do
+    it "should return true when asked about a defined unit" do
+      Unit.defined?("meter").should be_true
+    end
+    it "should return false when asked about a unit that is not defined" do
+      Unit.defined?("doohickey").should be_false
+    end
   end
 end
 
@@ -961,5 +971,99 @@ describe "pound-ounce conversions" do
     specify { Unit(ounces).convert_to("lbs").should == Unit(pounds)}
     specify { Unit(ounces).to_s(:lbs).should == pounds}
   end  
+end
+
+describe Unit do
+  describe "definition" do
+    
+    context "The requested unit is defined" do
+      before(:each) do
+        @definition = Unit.definition('mph')
+      end
+      
+      it "should return a Unit::Definition" do
+        @definition.should be_instance_of(Unit::Definition)
+      end
+      
+      specify { @definition.name.should == "<mph>"}
+      specify { @definition.aliases.should == %w{mph}}
+      specify { @definition.numerator.should == ['<meter>'] }
+      specify { @definition.denominator.should == ['<second>'] }
+      specify { @definition.kind.should == :speed }
+      specify { @definition.scalar.should === 0.44704}
+    end
+    
+    context "The requested unit is not defined" do
+      it "should return nil" do
+        Unit.definition("doohickey").should be_nil
+      end
+    end  
+  end
+  
+  describe "define" do
+    describe "a new unit" do
+      before(:each) do
+        @jiffy = Unit::Definition.new("jiffy") do |jiffy|
+          jiffy.scalar = (1/100)
+          jiffy.aliases = %w{jif}
+          jiffy.numerator = ["<second>"]
+          jiffy.kind = :time
+        end
+        Unit.define(@jiffy)
+        Unit.setup
+      end
+    
+      describe "Unit('1e6 jiffy')" do
+        # do this because the unit is not defined at the time this file is parsed, so it fails
+        subject {Unit("1e6 jiffy")}
+      
+        it {should be_a Numeric}
+        it {should be_an_instance_of Unit}
+        its(:scalar) {should == 1e6}
+        its(:scalar) {should be_an Integer}
+        its(:units) {should == "jif"}
+        its(:kind) {should == :time}
+        it {should_not be_temperature}
+        it {should_not be_degree}
+        it {should_not be_base}
+        it {should_not be_unitless}
+        it {should_not be_zero}
+        its(:base) {should == Unit("10000 s")}
+      end
+    
+      it "should register the new unit" do
+        Unit.defined?('jiffy').should be_true
+      end
+    end
+    
+    describe "an existing unit again" do
+      before(:each) do
+        @cups = Unit.definition('cup')
+        @cups.aliases = %w{cup cu cups}
+        Unit.define(@cups)
+        Unit.setup
+      end
+    
+      describe "Unit('1 cup')" do
+        # do this because the unit is going to be redefined
+        subject {Unit("1 cup")}
+      
+        it {should be_a Numeric}
+        it {should be_an_instance_of Unit}
+        its(:scalar) {should == 1}
+        its(:scalar) {should be_an Integer}
+        its(:units) {should == "cup"}
+        its(:kind) {should == :volume}
+        it {should_not be_temperature}
+        it {should_not be_degree}
+        it {should_not be_base}
+        it {should_not be_unitless}
+        it {should_not be_zero}
+      end
+          
+    end
+    
+  end
+  
 end
 

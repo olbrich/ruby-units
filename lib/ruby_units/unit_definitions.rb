@@ -1,6 +1,8 @@
 class Unit < Numeric
-UNIT_DEFINITIONS = { 
-  # prefixes
+UNIT_DEFINITIONS = {}
+end
+
+prefixes = {
   '<googol>' => [%w{googol}, 1e100, :prefix],
   '<kibi>'  =>  [%w{Ki Kibi kibi}, 2**10, :prefix],
   '<mebi>'  =>  [%w{Mi Mebi mebi}, 2**20, :prefix],
@@ -30,10 +32,12 @@ UNIT_DEFINITIONS = {
   '<atto>'  =>  [%w{a Atto atto}, Rational(1,1e18), :prefix],
   '<zepto>' =>  [%w{z Zepto zepto}, Rational(1,1e21), :prefix],
   '<yocto>' =>  [%w{y Yocto yocto}, Rational(1,1e24), :prefix],
-  '<1>'     =>  [%w{1},1,:prefix],
+  '<1>'     =>  [%w{1},1,:prefix]
+}
+
+unit_definitions = { 
 
   # length units
-  '<meter>' =>  [%w{m meter meters metre metres}, 1, :length, %w{<meter>} ],
   '<inch>'  =>  [%w{in inch inches "}, Rational(254,10_000), :length, %w{<meter>}],
   '<foot>'  =>  [%w{ft foot feet '}, Rational(3048,10_000), :length, %w{<meter>}],
   '<yard>'  =>  [%w{yd yard yards}, 0.9144, :length, %w{<meter>}],
@@ -55,7 +59,6 @@ UNIT_DEFINITIONS = {
   '<parsec>'  => [%w{pc parsec parsecs}, 30856780000000000, :length, %w{<meter>}],
 
   #mass
-  '<kilogram>' => [%w{kg kilogram kilograms}, 1, :mass, %w{<kilogram>}],
   '<AMU>' => [%w{u AMU amu}, 6.0221415e26, :mass, %w{<kilogram>}],
   '<dalton>' => [%w{Da Dalton Daltons dalton daltons}, 6.0221415e26, :mass, %w{<kilogram>}],
   '<slug>' => [%w{slug slugs}, 14.5939029, :mass, %w{<kilogram>}],
@@ -95,17 +98,14 @@ UNIT_DEFINITIONS = {
   
 
   #temperature_difference
-  '<kelvin>' => [%w{degK kelvin}, 1, :temperature, %w{<kelvin>}],
   '<celsius>' => [%w{degC celsius celsius centigrade}, 1, :temperature, %w{<kelvin>}],
   '<fahrenheit>' => [%w{degF fahrenheit}, Rational(1,1.8), :temperature, %w{<kelvin>}],
   '<rankine>' => [%w{degR rankine}, Rational(1,1.8), :temperature, %w{<kelvin>}],
-  '<tempK>'  => [%w{tempK}, 1, :temperature, %w{<tempK>}],
   '<tempC>'  => [%w{tempC}, 1, :temperature, %w{<tempK>}],
   '<tempF>'  => [%w{tempF}, Rational(1,1.8), :temperature, %w{<tempK>}],
   '<tempR>'  => [%w{tempR}, Rational(1,1.8), :temperature, %w{<tempK>}],
   
   #time
-  '<second>'=>  [%w{s sec second seconds}, 1, :time, %w{<second>}],
   '<minute>'=>  [%w{min minute minutes}, 60, :time, %w{<second>}],  
   '<hour>'=>  [%w{h hr hrs hour hours}, 3600, :time, %w{<second>}],  
   '<day>'=>  [%w{d day days}, 3600*24, :time, %w{<second>}],
@@ -132,7 +132,6 @@ UNIT_DEFINITIONS = {
   '<stokes>' => [%w{St stokes}, Rational(1,1e4), :viscosity, %w{<meter> <meter>}, %w{<second>}],
 
   #substance
-  '<mole>'  =>  [%w{mol mole}, 1, :substance, %w{<mole>}],
 
   #concentration
   '<molar>' => [%w{M molar}, 1000, :concentration, %w{<mole>}, %w{<meter> <meter> <meter>}],
@@ -149,7 +148,6 @@ UNIT_DEFINITIONS = {
   '<coulomb>' =>  [%w{C coulomb Coulomb}, 1, :charge, %w{<ampere> <second>}],
 
   #current
-  '<ampere>'  =>  [%w{A Ampere ampere amp amps}, 1, :current, %w{<ampere>}],
 
   #conductance
   '<siemens>' => [%w{S Siemens siemens}, 1, :resistance, %w{<second> <second> <second> <ampere> <ampere>}, %w{<kilogram> <meter> <meter>}],
@@ -187,25 +185,20 @@ UNIT_DEFINITIONS = {
   '<hertz>' => [%w{Hz hertz Hertz}, 1, :frequency, %w{<1>}, %{<second>}],
 
   #angle
-  '<radian>' =>[%w{rad radian radian radians}, 1, :angle, %w{<radian>}],
   '<degree>' =>[%w{deg degree degrees}, Math::PI / 180.0, :angle, %w{<radian>}],
   '<grad>'   =>[%w{grad gradian grads}, Math::PI / 200.0, :angle, %w{<radian>}],
-  '<steradian>'  => [%w{sr steradian steradians}, 1, :solid_angle, %w{<steradian>}],
 
   #rotation
   '<rotation>' => [%w{rotation}, 2.0*Math::PI, :angle, %w{<radian>}],
   '<rpm>'   =>[%w{rpm}, 2.0*Math::PI / 60.0, :angular_velocity, %w{<radian>}, %w{<second>}],
 
   #memory
-  '<byte>'  =>[%w{B byte}, 1, :memory, %w{<byte>}],
   '<bit>'  =>[%w{b bit}, 0.125, :memory, %w{<byte>}],
 
   #currency
-  '<dollar>'=>[%w{USD dollar}, 1, :currency, %w{<dollar>}],
   '<cents>' =>[%w{cents}, Rational(1,100), :currency, %w{<dollar>}],
 
   #luminosity
-  '<candela>' => [%w{cd candela}, 1, :luminosity, %w{<candela>}],
   '<lumen>' => [%w{lm lumen}, 1, :luminous_power, %w{<candela> <steradian>}],
   '<lux>' =>[%w{lux}, 1, :illuminance, %w{<candela> <steradian>}, %w{<meter> <meter>}],
 
@@ -235,7 +228,6 @@ UNIT_DEFINITIONS = {
 
   #other
   '<cell>' => [%w{cells cell}, 1, :counting, %w{<each>}],
-  '<each>' => [%w{each}, 1, :counting, %w{<each>}],
   '<count>' => [%w{count}, 1, :counting, %w{<each>}],  
   '<base-pair>'  => [%w{bp}, 1, :counting, %w{<each>}],
   '<nucleotide>' => [%w{nt}, 1, :counting, %w{<each>}],
@@ -244,9 +236,36 @@ UNIT_DEFINITIONS = {
   '<percent>'=> [%w{% percent}, Rational(1,100), :prefix_only, %w{<1>}],
   '<ppm>' =>  [%w{ppm},Rational(1,1e6),:prefix_only, %w{<1>}],
   '<ppt>' =>  [%w{ppt},Rational(1,1e9),:prefix_only, %w{<1>}],
-  '<gross>' =>  [%w{gr gross},144, :prefix_only, %w{<dozen> <dozen>}],
-  '<decibel>'  => [%w{dB decibel decibels}, 1, :logarithmic, %w{<decibel>}]
-
-
+  '<gross>' =>  [%w{gr gross},144, :prefix_only, %w{<dozen> <dozen>}]
 } # doc
+
+base_units = {
+  'meter' =>  [%w{m meter meters metre metres}, 1, :length, %w{<meter>} ],
+  'kilogram' => [%w{kg kilogram kilograms}, 1, :mass, %w{<kilogram>}],
+  'second'=>  [%w{s sec second seconds}, 1, :time, %w{<second>}],
+  'mole'  =>  [%w{mol mole}, 1, :substance, %w{<mole>}],
+  'ampere'  =>  [%w{A Ampere ampere amp amps}, 1, :current, %w{<ampere>}],
+  'radian' =>[%w{rad radian radian radians}, 1, :angle, %w{<radian>}],
+  'kelvin' => [%w{degK kelvin}, 1, :temperature, %w{<kelvin>}],
+  'tempK'  => [%w{tempK}, 1, :temperature, %w{<tempK>}],
+  'byte'  =>[%w{B byte}, 1, :memory, %w{<byte>}],
+  'dollar'=>[%w{USD dollar}, 1, :currency, %w{<dollar>}],
+  'candela' => [%w{cd candela}, 1, :luminosity, %w{<candela>}],
+  'each' => [%w{each}, 1, :counting, %w{<each>}],
+  'steradian'  => [%w{sr steradian steradians}, 1, :solid_angle, %w{<steradian>}],
+  'decibel'  => [%w{dB decibel decibels}, 1, :logarithmic, %w{<decibel>}]
+}
+
+prefixes.each do |prefix, definition|
+  Unit.define(Unit::Definition.new(prefix, definition))
 end
+
+base_units.each do |unit, definition|
+  Unit.define(Unit::Definition.new(unit, definition) {|u| u.base=true})
+end
+
+unit_definitions.each do |unit, definition|
+  Unit.define(Unit::Definition.new(unit, definition))
+end
+
+Unit.setup
