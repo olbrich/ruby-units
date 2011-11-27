@@ -38,6 +38,7 @@ end
 # @author Kevin C. Olbrich, Ph.D.
 class Unit < Numeric
   VERSION = Unit::Version::STRING
+  UNIT_DEFINITIONS = {}
   @@USER_DEFINITIONS = {}
   @@definitions = {}
   @@PREFIX_VALUES = {}
