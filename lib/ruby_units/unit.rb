@@ -488,8 +488,12 @@ class Unit < Numeric
       return false unless self =~ other
       return self.base_scalar == other.base_scalar
     else
-      x,y = coerce(other)
-      return x == y
+      begin
+        x,y = coerce(other)
+        return x == y
+      rescue ArgumentError
+        return false     # before the addition of this rescue, "Unit.new(3, 'g') == nil" would raise an exception (but .nil? worked fine)
+      end
     end      
   end
   

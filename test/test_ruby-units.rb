@@ -569,6 +569,16 @@ class TestRubyUnits < Test::Unit::TestCase
     unit2 = Unit.new("10 mm")
     assert unit1 == unit2
   end
+
+  def test_inequality_with_unit
+    unit1 = Unit.new("1 cm")
+    unit2 = Unit.new("1 mm")
+    assert unit1 != unit2
+  end
+
+  def test_inequality_with_uncoercible_object
+    assert Unit.new("1 cm") != nil
+  end
   
   def test_temperature_conversions
     assert_raises(ArgumentError) { '-1 tempK'.unit}
