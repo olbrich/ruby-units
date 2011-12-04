@@ -1,24 +1,34 @@
 class Unit < Numeric
-  # @example
-  #   Feed it a raw definition
-  #   Unit::Definition.new("rack-unit",[%w{U rack-U}, (6405920109971793/144115188075855872), :length, %w{<meter>} ])
-  #   or
-  #   Unit::Definition.new("rack-unit") do
-  #     aliases = %w{U rack-U}
-  #     scalar = (6405920109971793/144115188075855872)
-  #     numerator = %w{<meter>}
-  #     kind = :length
-  #   end
-  #
+
+  # Handle the definition of units
   class Definition
-    attr_accessor :name
-    attr_accessor :aliases
-    attr_accessor :kind
-    attr_accessor :scalar
-    attr_accessor :numerator
-    attr_accessor :denominator
-    attr_accessor :base
     
+    attr_accessor :name
+    
+    # @return [Array]
+    attr_accessor :aliases
+    
+    # @return [Symbol]
+    attr_accessor :kind
+    
+    # @return [Numeric]
+    attr_accessor :scalar
+    
+    # @return [Array]
+    attr_accessor :numerator
+
+    # @return [Array]
+    attr_accessor :denominator
+    
+    # @example Raw definition from a hash
+    #   Unit::Definition.new("rack-unit",[%w{U rack-U}, (6405920109971793/144115188075855872), :length, %w{<meter>} ])
+    # 
+    # @example Block form
+    #   Unit::Definition.new("rack-unit") do |unit|
+    #     unit.aliases = %w{U rack-U}
+    #     unit.definition = Unit("7/4 inches")
+    #   end
+    #
     def initialize(_name, _definition = [], &block)
       yield self if block_given?
       self.name    ||= _name.gsub(/[<>]/,'')
@@ -27,7 +37,6 @@ class Unit < Numeric
       @kind        ||= _definition[2]
       @numerator   ||= _definition[3] || Unit::UNITY_ARRAY
       @denominator ||= _definition[4] || Unit::UNITY_ARRAY
-      @base        ||= false
     end
     
     # name of the unit
@@ -51,6 +60,7 @@ class Unit < Numeric
     end
 
     # display name is the first one in the alias array
+    # @todo   make this customizable and used (see issue #28)
     # @return [String]
     def display_name
       aliases.first
@@ -84,9 +94,16 @@ class Unit < Numeric
       (self.numerator.first == self.name)
     end
     
-    # define this unit.  Registers it, but won't actually be used until Unit.setup is called
-    def define!
+    # Define this unit.  Registers it, but won't actually be used until Unit.setup is called
+    # @return (see Unit.define)
+    def define
       Unit.define(self)
+    end
+    
+    # Define and register this unit
+    # @return (see Unit.define!)
+    def define!
+      Unit.define!(self)
     end
   end
 end
