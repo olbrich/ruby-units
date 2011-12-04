@@ -1100,9 +1100,9 @@ describe Unit do
       expect { Unit("1 jiffy") }.to raise_exception(ArgumentError)
     end
     
-    it "should return nil when undefining an unknown unit" do
+    it "should return true when undefining an unknown unit" do
       Unit.defined?("unknown").should be_false
-      Unit.undefine!("unknown").should be_nil
+      Unit.undefine!("unknown").should be_true
     end
     
   end
