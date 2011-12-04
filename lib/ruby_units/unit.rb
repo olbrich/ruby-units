@@ -3,23 +3,15 @@ if RUBY_VERSION < "1.9"
   require 'parsedate'
   require 'rational'
 end
-# = Ruby Units
+# Copyright 2006-2011
 #
-# Copyright 2006-2011 by Kevin C. Olbrich, Ph.D.
+# @author Kevin C. Olbrich, Ph.D.
+# @see https://github.com/olbrich/ruby-units
 #
-# See https://github.com/olbrich/ruby-units
-#
-# See README for detailed usage instructions and examples
-#
-# ==Unit Definition Format
-#
-#  '<name>'  => [%w{prefered_name synonyms}, conversion_to_base, :classification, %w{<base> <units> <in> <numerator>} , %w{<base> <units> <in> <denominator>} ],
-#
-# Prefixes (e.g., a :prefix classification) get special handling
-# Note: The accuracy of unit conversions depends on the precision of the conversion factor.
-# If you have more accurate estimates for particular conversion factors, please send them
-# to me and I will incorporate them into the next release.  It is also incumbent on the end-user
-# to ensure that the accuracy of any conversions is sufficient for their intended application.
+# @note The accuracy of unit conversions depends on the precision of the conversion factor.
+#   If you have more accurate estimates for particular conversion factors, please send them
+#   to me and I will incorporate them into the next release.  It is also incumbent on the end-user
+#   to ensure that the accuracy of any conversions is sufficient for their intended application.
 #
 # While there are a large number of unit specified in the base package,
 # there are also a large number of units that are not included.
@@ -27,15 +19,12 @@ end
 # in the United States. If your favorite units are not listed here, file an issue on github.
 #
 # To add or override a unit definition, add a code block like this..
-#
-#  class Unit < Numeric
-#   @@USER_DEFINITIONS = {
-#    '<name>'  => [%w{prefered_name synonyms}, conversion_to_base, :classification, %w{<base> <units> <in> <numerator>} , %w{<base> <units> <in> <denominator>} ]
-#    }
+# @example Define a new unit 
+#  Unit.define!("foobar") do |unit|
+#    unit.aliases    = %w{foo fb foo-bar}
+#    unit.definition = Unit("1 baz")
 #  end
-#  Unit.setup
 #
-# @author Kevin C. Olbrich, Ph.D.
 class Unit < Numeric
   VERSION = Unit::Version::STRING
   UNIT_DEFINITIONS = {}
@@ -131,9 +120,14 @@ class Unit < Numeric
   @@base_unit_cache = {}
 
   # setup internal arrays and hashes
-  # @return undefined
+  # @return [true]
   def self.setup
-    #puts @@USER_DEFINITIONS.inspect
+    @@PREFIX_VALUES = {}
+    @@PREFIX_MAP    = {}
+    @@UNIT_VALUES   = {}
+    @@UNIT_MAP      = {}
+    @@OUTPUT_MAP    = {}
+    
     @@ALL_UNIT_DEFINITIONS = UNIT_DEFINITIONS.merge!(@@USER_DEFINITIONS)
     for unit in (@@ALL_UNIT_DEFINITIONS) do
     key, value = unit
@@ -157,6 +151,7 @@ class Unit < Numeric
     @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit]}.reverse.join('|')
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/
     Unit.new(1)
+    return true
   end
   
   # determine if a unit is already defined
@@ -173,15 +168,52 @@ class Unit < Numeric
     @@definitions["<#{unit}>"]
   end
   
-  # @param [Hash] unit_definition
-  # unpack a unit definition and add it to the user definitions array
-  def self.define(unit_definition)
+  # @param  [Unit::Definition|String] unit_definition
+  # @param  [Block] block
+  # @return [Unit::Definition]
+  # @raise  [ArgumentError] when passed a non-string if using the block form
+  # Unpack a unit definition and add it to the array of defined units
+  # The unit won't actually be available to use until Unit.setup is called
+  #
+  # @example Block form
+  #   Unit.define('foobar') do |foobar|
+  #     foobar.definition = Unit("1 baz")
+  #   end
+  #
+  # @example Unit::Definition form
+  #   unit_definition = Unit::Definition.new("foobar") {|foobar| foobar.definition = Unit("1 baz")}
+  #   Unit.define(unit_definition)
+  def self.define(unit_definition, &block)
+    if block_given?
+      raise ArgumentError, "When using the block form of Unit.define, pass the name of the unit" unless unit_definition.instance_of?(String)
+      unit_definition = Unit::Definition.new(unit_definition, &block)
+    end
     @@definitions[unit_definition.name] = unit_definition
     @@USER_DEFINITIONS[unit_definition.name] = [unit_definition.aliases,
                                                 unit_definition.scalar,
                                                 unit_definition.kind,
                                                 unit_definition.numerator,
                                                 unit_definition.denominator]
+    return unit_definition
+  end
+  
+  # @param see (User#define)
+  # @return (see Unit.setup)
+  # Add a unit to the definition list and make it available
+  # @note This is fine for adding one or two units, but is not performant for adding a lot of them
+  def self.define!(unit_definition, &block)
+    self.define(unit_definition, &block)
+    self.setup
+  end
+  
+  # @param [String] name of unit to undefine
+  # @return (see Unit.setup)
+  # Undefine a unit.  Will not raise an exception for unknown units.
+  def self.undefine!(unit)
+    @@ALL_UNIT_DEFINITIONS.delete("<#{unit}>")
+    @@USER_DEFINITIONS.delete("<#{unit}>")
+    @@definitions.delete("<#{unit}>")
+    Unit.setup
   end
   
   include Comparable
@@ -213,6 +245,7 @@ class Unit < Numeric
   # @return [String]
   attr_accessor :unit_name
 
+  # @return [Array]
   def to_yaml_properties
     %w{@scalar @numerator @denominator @signature @base_scalar}
   end
@@ -224,7 +257,9 @@ class Unit < Numeric
     self.scalar.kind_of?(klass)
   end
 
-  # used to copy one unit to another
+  # Used to copy one unit to another
+  # @param [Unit] from Unit to copy defintion from
+  # @return [Unit]
   def copy(from)
     @scalar = from.scalar
     @numerator = from.numerator
@@ -233,13 +268,14 @@ class Unit < Numeric
     @signature = from.signature
     @base_scalar = from.base_scalar
     @unit_name = from.unit_name rescue nil
+    return self
   end
 
-  # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
-  # before YAML'izing it.
-  # @param [Hash] opts
-  # @return [String]
   if RUBY_VERSION < "1.9"
+    # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
+    # before YAML'izing it.
+    # @param [Hash] opts
+    # @return [String]
     def to_yaml( opts = {} )
       YAML::quick_emit( object_id, opts ) do |out|
         out.map( taguri, to_yaml_style ) do |map|
@@ -356,10 +392,12 @@ class Unit < Numeric
   end
 
   # @private
+  # @return [true]
   def self.clear_cache
     @@cached_units = {}
     @@base_unit_cache = {}
     Unit.new(1)
+    return true
   end
 
   # @private
@@ -862,19 +900,18 @@ class Unit < Numeric
 
   # convert to a specified unit string or to the same units as another Unit
   #
-  #  unit >> "kg"  will covert to kilograms
-  #  unit1 >> unit2 converts to same units as unit2 object
+  #  unit.convert_to "kg"   will covert to kilograms
+  #  unit1.convert_to unit2 converts to same units as unit2 object
   #
   # To convert a Unit object to match another Unit object, use:
   #  unit1 >>= unit2
-  # Throws an exception if the requested target units are incompatible with current Unit.
   #
   # Special handling for temperature conversions is supported.  If the Unit object is converted
   # from one temperature unit to another, the proper temperature offsets will be used.
-  # Supports Kelvin, Celsius, fahrenheit, and Rankine scales.
+  # Supports Kelvin, Celsius, Fahrenheit, and Rankine scales.
   #
-  # Note that if temperature is part of a compound unit, the temperature will be treated as a differential
-  # and the units will be scaled appropriately.
+  # @note If temperature is part of a compound unit, the temperature will be treated as a differential
+  #   and the units will be scaled appropriately.
   # @param [Object] other
   # @return [Unit]
   # @raise [ArgumentError] when attempting to convert a degree to a temperature
