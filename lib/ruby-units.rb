@@ -12,4 +12,3 @@ require 'ruby_units/string'
 require 'ruby_units/unit'
 require 'ruby_units/unit_definitions'
 require 'ruby_units/fixnum'
-
