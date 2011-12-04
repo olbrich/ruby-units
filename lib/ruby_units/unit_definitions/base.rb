@@ -1,97 +1,97 @@
-Unit::Definition.new("meter") do |unit|
+Unit.define("meter") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<meter>}
   unit.aliases   = %w{m meter meters metre metres}
   unit.kind      = :length
-end.define!
+end
 
-Unit::Definition.new("kilogram") do |unit|
+Unit.define("kilogram") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<kilogram>}
   unit.aliases   = %w{kg kilogram kilograms}
   unit.kind      = :mass
-end.define!
+end
 
-Unit::Definition.new("second") do |unit|
+Unit.define("second") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<second>}
   unit.aliases   = %w{s sec second seconds}
   unit.kind      = :time
-end.define!
+end
 
-Unit::Definition.new("mole") do |unit|
+Unit.define("mole") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<mole>}
   unit.aliases   = %w{mol mole}
   unit.kind      = :substance
-end.define!
+end
 
-Unit::Definition.new("ampere") do |unit|
+Unit.define("ampere") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<ampere>}
   unit.aliases   = %w{A Ampere ampere amp amps}
   unit.kind      = :current
-end.define!
+end
 
-Unit::Definition.new("radian") do |unit|
+Unit.define("radian") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<radian>}
   unit.aliases   = %w{rad radian radians}
   unit.kind      = :angle
-end.define!
+end
 
-Unit::Definition.new("kelvin") do |unit|
+Unit.define("kelvin") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<kelvin>}
   unit.aliases   = %w{degK kelvin}
   unit.kind      = :temperature
-end.define!
+end
 
-Unit::Definition.new("tempK") do |unit|
+Unit.define("tempK") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<tempK>}
   unit.aliases   = %w{tempK}
   unit.kind      = :temperature
-end.define!
+end
 
-Unit::Definition.new("byte") do |unit|
+Unit.define("byte") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<byte>}
   unit.aliases   = %w{B byte}
   unit.kind      = :memory
-end.define!
+end
 
-Unit::Definition.new("dollar") do |unit|
+Unit.define("dollar") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<dollar>}
   unit.aliases   = %w{USD dollar}
   unit.kind      = :currency
-end.define!
+end
 
-Unit::Definition.new("candela") do |unit|
+Unit.define("candela") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<candela>}
   unit.aliases   = %w{cd candela}
   unit.kind      = :luminosity
-end.define!
+end
 
-Unit::Definition.new("each") do |unit|
+Unit.define("each") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<each>}
   unit.aliases   = %w{each}
   unit.kind      = :counting
-end.define!
+end
 
-Unit::Definition.new("steradian") do |unit|
+Unit.define("steradian") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<steradian>}
   unit.aliases   = %w{sr steradian steradians}
   unit.kind      = :solid_angle
-end.define!
+end
 
-Unit::Definition.new("decibel") do |unit|
+Unit.define("decibel") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<decibel>}
   unit.aliases   = %w{dB decibel decibels}
   unit.kind      = :logarithmic
-end.define!
+end

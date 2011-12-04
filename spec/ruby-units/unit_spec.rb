@@ -1003,13 +1003,12 @@ describe Unit do
   describe "define" do
     describe "a new unit" do
       before(:each) do
-        @jiffy = Unit::Definition.new("jiffy") do |jiffy|
+        @jiffy = Unit.define("jiffy") do |jiffy|
           jiffy.scalar = (1/100)
           jiffy.aliases = %w{jif}
           jiffy.numerator = ["<second>"]
           jiffy.kind = :time
         end
-        Unit.define(@jiffy)
         Unit.setup
       end
     
@@ -1061,6 +1060,49 @@ describe Unit do
         it {should_not be_zero}
       end
           
+    end
+    
+  end
+  
+  describe 'define!' do
+    before(:each) do
+      Unit.undefine!("jiffy")
+      Unit.defined?("jiffy").should_not be_true
+      @jiffy = Unit.define!("jiffy") do |jiffy|
+        jiffy.scalar = (1/100)
+        jiffy.aliases = %w{jif}
+        jiffy.numerator = ["<second>"]
+        jiffy.kind = :time
+      end
+    end
+    
+    it "should define a unit immediately" do
+      Unit.defined?("jiffy").should be_true
+    end
+  end
+  
+  describe 'undefine!' do
+    before(:each) do
+      @jiffy = Unit.define!("jiffy") do |jiffy|
+        jiffy.scalar = (1/100)
+        jiffy.aliases = %w{jif}
+        jiffy.numerator = ["<second>"]
+        jiffy.kind = :time
+      end
+      Unit.undefine!("jiffy")
+    end
+    
+    specify "the unit should be undefined" do
+      Unit.defined?('jiffy').should be_false
+    end
+    
+    specify "attempting to use an undefined unit fails" do
+      expect { Unit("1 jiffy") }.to raise_exception(ArgumentError)
+    end
+    
+    it "should return nil when undefining an unknown unit" do
+      Unit.defined?("unknown").should be_false
+      Unit.undefine!("unknown").should be_nil
     end
     
   end
