@@ -11,6 +11,7 @@ class Time
   
   # Convert a duration to a Time value by considering the duration to be the number of seconds since the 
   # epoch
+  # @return [Unit, Time]
   def self.at(arg)
     case arg
     when Unit
@@ -20,20 +21,23 @@ class Time
     end
   end
   
+  # @return (see Unit#initialize)
   def to_unit(other = nil)
     other ? Unit.new(self).convert_to(other) : Unit.new(self)
   end
   alias :unit :to_unit
   alias :u :to_unit
-  alias :unit_add :+
   
   unless Time.instance_methods.include?(:to_date)
+    # @return [Date]
     def to_date
       x=(Date.civil(1970,1,1)+((self.to_f+self.gmt_offset)/86400.0)-0.5)
       Date.civil(x.year, x.month, x.day)
     end
   end
   
+  alias :unit_add :+
+  # @return [Unit, Time]
   def +(other)
     case other
     when Unit
@@ -48,13 +52,16 @@ class Time
     end
   end
   
-  # usage: Time.in '5 min'
+  # @example
+  #  Time.in '5 min'
+  # @return (see Time#+)
   def self.in(duration)
     Time.now + duration.to_unit
   end
   
   alias :unit_sub :-
   
+  # @return [Unit, Time]
   def -(other)
     case other
     when Unit
