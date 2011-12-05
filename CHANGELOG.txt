@@ -1,5 +1,7 @@
 Change Log for Ruby-units
 =========================
+2011-12-04          * Documentation improvements
+                    * Add DSL for defining/redefining units
 2011-11-24          * improve yard documentation
                     * add 'tbsp' as an alias for tablespoon
 2011-10-17  1.3.2   * deprecate some string helper functions (make the gem compatible with rails)
