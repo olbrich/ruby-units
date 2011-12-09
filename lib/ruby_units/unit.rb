@@ -1454,13 +1454,14 @@ class Unit < Numeric
   # @private
   def self.parse_into_numbers_and_units(string)
     # scientific notation.... 123.234E22, -123.456e-10
-    sci = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
+    sci       = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
     # rational numbers.... -1/3, 1/5, 20/100
-    rational = %r{[+-]?\d+\/\d+}
+    rational  = %r{[+-]?\d+\/\d+}
     # complex numbers... -1.2+3i, +1.2-3.3i
-    complex = %r{#{sci}{2,2}i}
+    complex   = %r{#{sci}{2,2}i}
     anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([\D].*)?}
     num, unit = string.scan(anynumber).first
+    
     [case num
       when NilClass
         1
@@ -1477,5 +1478,3 @@ class Unit < Numeric
     end, unit.to_s.strip]
   end
 end
-
-#Unit.setup
