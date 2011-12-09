@@ -27,35 +27,35 @@ end
 #
 class Unit < Numeric
   VERSION = Unit::Version::STRING
-  UNIT_DEFINITIONS = {}
+  UNIT_DEFINITIONS   = {}
   @@USER_DEFINITIONS = {}
-  @@definitions = {}
-  @@PREFIX_VALUES = {}
-  @@PREFIX_MAP = {}
-  @@UNIT_MAP = {}
-  @@UNIT_VALUES = {}
-  @@OUTPUT_MAP = {}
-  @@BASE_UNITS = ['<meter>','<kilogram>','<second>','<mole>', '<ampere>','<radian>','<kelvin>','<tempK>','<byte>','<dollar>','<candela>','<each>','<steradian>','<decibel>']
-  UNITY = '<1>'
-  UNITY_ARRAY= [UNITY]
-  FEET_INCH_REGEX = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inches)/
-  TIME_REGEX = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
-  LBS_OZ_REGEX = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
-  SCI_NUMBER = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
-  RATIONAL_NUMBER = /\(?([+-]?\d+)\/(\d+)\)?/
-  COMPLEX_NUMBER = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
-  NUMBER_REGEX = /#{SCI_NUMBER}*\s*(.+)?/
-  UNIT_STRING_REGEX = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
-  TOP_REGEX = /([^ \*]+)(?:\^|\*\*)([\d-]+)/
-  BOTTOM_REGEX = /([^* ]+)(?:\^|\*\*)(\d+)/
-  UNCERTAIN_REGEX = /#{SCI_NUMBER}\s*\+\/-\s*#{SCI_NUMBER}\s(.+)/
-  COMPLEX_REGEX = /#{COMPLEX_NUMBER}\s?(.+)?/
-  RATIONAL_REGEX = /#{RATIONAL_NUMBER}\s?(.+)?/
-  KELVIN = ['<kelvin>']
-  FAHRENHEIT = ['<fahrenheit>']
-  RANKINE = ['<rankine>']
-  CELSIUS = ['<celsius>']
-  TEMP_REGEX = /(?:temp|deg)[CFRK]/
+  @@definitions      = {}
+  @@PREFIX_VALUES    = {}
+  @@PREFIX_MAP       = {}
+  @@UNIT_MAP         = {}
+  @@UNIT_VALUES      = {}
+  @@OUTPUT_MAP       = {}
+  @@BASE_UNITS       = ['<meter>','<kilogram>','<second>','<mole>', '<ampere>','<radian>','<kelvin>','<tempK>','<byte>','<dollar>','<candela>','<each>','<steradian>','<decibel>']
+  UNITY              = '<1>'
+  UNITY_ARRAY        = [UNITY]
+  FEET_INCH_REGEX    = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inches)/
+  TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
+  LBS_OZ_REGEX       = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
+  SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
+  RATIONAL_NUMBER    = /\(?([+-]?\d+)\/(\d+)\)?/
+  COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
+  NUMBER_REGEX       = /#{SCI_NUMBER}*\s*(.+)?/
+  UNIT_STRING_REGEX  = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
+  TOP_REGEX          = /([^ \*]+)(?:\^|\*\*)([\d-]+)/
+  BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
+  UNCERTAIN_REGEX    = /#{SCI_NUMBER}\s*\+\/-\s*#{SCI_NUMBER}\s(.+)/
+  COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(.+)?/
+  RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(.+)?/
+  KELVIN             = ['<kelvin>']
+  FAHRENHEIT         = ['<fahrenheit>']
+  RANKINE            = ['<rankine>']
+  CELSIUS            = ['<celsius>']
+  TEMP_REGEX         = /(?:temp|deg)[CFRK]/
 
   SIGNATURE_VECTOR = [:length,
                       :time,
@@ -127,28 +127,23 @@ class Unit < Numeric
     @@UNIT_VALUES   = {}
     @@UNIT_MAP      = {}
     @@OUTPUT_MAP    = {}
-    
-    @@ALL_UNIT_DEFINITIONS = UNIT_DEFINITIONS.merge!(@@USER_DEFINITIONS)
-    for unit in (@@ALL_UNIT_DEFINITIONS) do
-    key, value = unit
-      if value[2] == :prefix then
-        @@PREFIX_VALUES[key]=value[1]
-        for name in value[0] do
-          @@PREFIX_MAP[name]=key
-        end
+
+    @@definitions.each do |name, definition|
+      if definition.prefix?
+        @@PREFIX_VALUES[name] = definition.scalar
+        definition.aliases.each {|_alias| @@PREFIX_MAP[_alias] = name }
       else
-        @@UNIT_VALUES[key]={}
-        @@UNIT_VALUES[key][:scalar]=value[1]
-        @@UNIT_VALUES[key][:numerator]=value[3] if value[3]
-        @@UNIT_VALUES[key][:denominator]=value[4] if value[4]
-        for name in value[0] do
-          @@UNIT_MAP[name]=key
-        end
+        @@UNIT_VALUES[name]                = {}
+        @@UNIT_VALUES[name][:scalar]       = definition.scalar
+        @@UNIT_VALUES[name][:numerator]    = definition.numerator if definition.numerator
+        @@UNIT_VALUES[name][:denominator]  = definition.denominator if definition.denominator
+        definition.aliases.each {|_alias| @@UNIT_MAP[_alias] = name}
       end
-      @@OUTPUT_MAP[key]=value[0][0]
+      @@OUTPUT_MAP[name] = definition.display_name
     end
+    
     @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
-    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit]}.reverse.join('|')
+    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit_name]}.reverse.join('|')
     @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/
     Unit.new(1)
     return true
@@ -164,8 +159,9 @@ class Unit < Numeric
   # return the unit definition for a unit
   # @param [String] unit
   # @return [Unit::Definition, nil]
-  def self.definition(unit)
-    @@definitions["<#{unit}>"]
+  def self.definition(_unit)
+    unit = (_unit =~ /^<.+>$/) ? _unit : "<#{_unit}>"
+    @@definitions[unit]
   end
   
   # @param  [Unit::Definition|String] unit_definition
@@ -210,7 +206,7 @@ class Unit < Numeric
   # @return (see Unit.setup)
   # Undefine a unit.  Will not raise an exception for unknown units.
   def self.undefine!(unit)
-    @@ALL_UNIT_DEFINITIONS.delete("<#{unit}>")
+    #@@ALL_UNIT_DEFINITIONS.delete("<#{unit}>")
     @@USER_DEFINITIONS.delete("<#{unit}>")
     @@definitions.delete("<#{unit}>")
     Unit.setup
@@ -1229,20 +1225,18 @@ class Unit < Numeric
   def unit_signature_vector
     return self.to_base.unit_signature_vector unless self.is_base?
     vector = Array.new(SIGNATURE_VECTOR.size,0)
-    for element in @numerator
-      if r=@@ALL_UNIT_DEFINITIONS[element]
-        n = SIGNATURE_VECTOR.index(r[2])
-        vector[n] = vector[n] + 1 if n
-      end
+    # it's possible to have a kind that misses the array... kinds like :counting
+    # are more like prefixes, so don't use them to calculate the vector
+    @numerator.map {|element| Unit.definition(element)}.each do |definition|
+      index = SIGNATURE_VECTOR.index(definition.kind)
+      vector[index] += 1 if index
     end
-    for element in @denominator
-      if r=@@ALL_UNIT_DEFINITIONS[element]
-        n = SIGNATURE_VECTOR.index(r[2])
-        vector[n] = vector[n] - 1 if n
-      end
+    @denominator.map {|element| Unit.definition(element)}.each do |definition|
+      index = SIGNATURE_VECTOR.index(definition.kind)
+      vector[index] -= 1 if index
     end
     raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? {|x| x.abs >=20}
-    vector
+    return vector
   end
 
   private
