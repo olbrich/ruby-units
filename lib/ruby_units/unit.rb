@@ -257,13 +257,13 @@ class Unit < Numeric
   # @param [Unit] from Unit to copy defintion from
   # @return [Unit]
   def copy(from)
-    @scalar = from.scalar
-    @numerator = from.numerator
+    @scalar      = from.scalar
+    @numerator   = from.numerator
     @denominator = from.denominator
-    @is_base = from.is_base?
-    @signature = from.signature
+    @is_base     = from.is_base?
+    @signature   = from.signature
     @base_scalar = from.base_scalar
-    @unit_name = from.unit_name rescue nil
+    @unit_name   = from.unit_name rescue nil
     return self
   end
 
