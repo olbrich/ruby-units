@@ -417,13 +417,13 @@ class Unit < Numeric
   end
   alias :unit :to_unit
 
+  # Is this unit in base form?
   # @return [Boolean]
   def is_base?
     return @is_base if defined? @is_base
     return @is_base=true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(?:deg|temp)K/
-    n = @numerator + @denominator
-    for x in n.compact do
-      return @is_base=false unless x == UNITY || (@@BASE_UNITS.include?((x)))
+    for x in (@numerator + @denominator).compact do
+      return @is_base = false unless x == UNITY || (@@BASE_UNITS.include?((x)))
     end
     return @is_base = true
   end
