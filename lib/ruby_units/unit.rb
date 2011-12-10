@@ -122,6 +122,7 @@ class Unit < Numeric
   # setup internal arrays and hashes
   # @return [true]
   def self.setup
+    self.clear_cache
     @@PREFIX_VALUES = {}
     @@PREFIX_MAP    = {}
     @@UNIT_VALUES   = {}
@@ -200,6 +201,18 @@ class Unit < Numeric
   def self.define!(unit_definition, &block)
     self.define(unit_definition, &block)
     self.setup
+  end
+  
+  # @param [String] name Name of unit to redefine
+  # @param [Block] block
+  # @raise [ArgumentError] if a block is not given
+  # @return (see Unit.define!)
+  # Get the definition for a unit and allow it to be redefined
+  def self.redefine!(name, &block)
+    raise ArgumentError, "A block is required to redefine a unit" unless block_given?
+    _unit = self.definition(name)
+    yield _unit
+    self.define!(_unit)
   end
   
   # @param [String] name of unit to undefine
@@ -432,6 +445,7 @@ class Unit < Numeric
   # convert to base SI units
   # results of the conversion are cached so subsequent calls to this will be fast
   # @return [Unit]
+  # @todo this is brittle as it depends on the display_name of a unit, which can be changed
   def to_base
     return self if self.is_base?
     if self.units =~ /\A(?:temp|deg)[CRF]\Z/

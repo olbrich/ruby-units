@@ -939,6 +939,19 @@ describe "Unit Output formatting" do
     specify { expect {subject.to_s("random string")}.to raise_error(ArgumentError,"'random' Unit not recognized")}
   end
   
+  context "for a unit with a custom display_name" do
+    before(:each) do
+      @cups = Unit.definition("cup")
+      @cups.display_name = "cupz"
+      Unit.define!(@cups)
+    end
+    
+    subject { Unit("8 cups")}
+    
+    specify { subject.to_s.should == "8 cupz" }
+    
+  end
+  
 end
 
 describe "Foot-inch conversions" do
@@ -1011,6 +1024,10 @@ describe Unit do
         end
         Unit.setup
       end
+      
+      after(:each) do
+        Unit.undefine!('jiffy')
+      end
     
       describe "Unit('1e6 jiffy')" do
         # do this because the unit is not defined at the time this file is parsed, so it fails
@@ -1063,6 +1080,28 @@ describe Unit do
     end
     
   end
+
+  describe 'redefine!' do
+    before(:each) do
+      @jiffy = Unit.define!("jiffy") do |jiffy|
+        jiffy.scalar = (1/100)
+        jiffy.aliases = %w{jif}
+        jiffy.numerator = ["<second>"]
+        jiffy.kind = :time
+      end
+
+      Unit.redefine!('jiffy') do |jiffy|
+        jiffy.scalar = (1/1000)
+      end
+    end
+    
+    after(:each) do
+      Unit.undefine!("jiffy")
+    end
+    
+    specify { Unit('1 jiffy').to_base.scalar.should == (1/1000) }
+  end
+
   
   describe 'define!' do
     before(:each) do
@@ -1106,6 +1145,8 @@ describe Unit do
     end
     
   end
+  
+  
   
 end
 
