@@ -20,6 +20,9 @@ class Unit < Numeric
     # @return [Array]
     attr_accessor :denominator
     
+    # @return [String]
+    attr_accessor :display_name
+    
     # @example Raw definition from a hash
     #   Unit::Definition.new("rack-unit",[%w{U rack-U}, (6405920109971793/144115188075855872), :length, %w{<meter>} ])
     # 
@@ -31,17 +34,19 @@ class Unit < Numeric
     #
     def initialize(_name, _definition = [], &block)
       yield self if block_given?
-      self.name    ||= _name.gsub(/[<>]/,'')
-      @aliases     ||= _definition[0]
-      @scalar      ||= _definition[1]
-      @kind        ||= _definition[2]
-      @numerator   ||= _definition[3] || Unit::UNITY_ARRAY
-      @denominator ||= _definition[4] || Unit::UNITY_ARRAY
+      self.name     ||= _name.gsub(/[<>]/,'')
+      @aliases      ||= _definition[0]
+      @scalar       ||= _definition[1]
+      @kind         ||= _definition[2]
+      @numerator    ||= _definition[3] || Unit::UNITY_ARRAY
+      @denominator  ||= _definition[4] || Unit::UNITY_ARRAY
+      @display_name ||= @aliases.first
     end
     
     # name of the unit
     # nil if name is not set, adds '<' and '>' around the name
     # @return [String, nil]
+    # @todo refactor Unit and Unit::Definition so we don't need to wrap units with angle brackets
     def name
       "<#{@name}>" if @name
     end
@@ -62,10 +67,10 @@ class Unit < Numeric
     # display name is the first one in the alias array
     # @todo   make this customizable and used (see issue #28)
     # @return [String]
-    def display_name
-      aliases.first
-    end
-    
+    # def display_name
+    #   aliases.first
+    # end
+      
     # define a unit in terms of another unit
     # @param [Unit] unit
     # @return [Unit::Definition]
