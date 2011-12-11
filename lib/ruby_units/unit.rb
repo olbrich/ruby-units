@@ -535,11 +535,11 @@ class Unit < Numeric
             else
               "#{$1 % @scalar} #{$2 || self.units}".strip
             end
-          rescue
+          rescue # parse it like a strftime format string
             (DateTime.new(0) + self).strftime(target_units)
           end
         when /(\S+)/ #unit only 'mm' or '1/mm'
-          "#{self.convert_to($1).to_s}"
+          self.convert_to($1).to_s
         else
           raise "unhandled case"
         end
@@ -1020,37 +1020,42 @@ class Unit < Numeric
   def units
     return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
     return @unit_name unless @unit_name.nil?
-    output_n = []
-    output_d =[]
-    num = @numerator.clone.compact
-    den = @denominator.clone.compact
+    output_numerator   = []
+    output_denominator = []
+    num                = @numerator.clone.compact
+    den                = @denominator.clone.compact
+        
     if @numerator == UNITY_ARRAY
-      output_n << "1"
+      output_numerator << "1"
     else
-      num.each_with_index do |token,index|
-        if token && @@PREFIX_VALUES[token] then
-          output_n << "#{@@OUTPUT_MAP[token]}#{@@OUTPUT_MAP[num[index+1]]}"
-          num[index+1]=nil
+      while defn = Unit.definition(num.shift) do
+        if defn && defn.prefix?
+          output_numerator << defn.display_name + Unit.definition(num.shift).display_name
         else
-          output_n << "#{@@OUTPUT_MAP[token]}" if token
+          output_numerator << defn.display_name          
         end
       end
     end
+    
     if @denominator == UNITY_ARRAY
-      output_d = ['1']
+      output_denominator = []
     else
-      den.each_with_index do |token,index|
-        if token && @@PREFIX_VALUES[token] then
-          output_d << "#{@@OUTPUT_MAP[token]}#{@@OUTPUT_MAP[den[index+1]]}"
-          den[index+1]=nil
+      while defn = Unit.definition(den.shift) do
+        if defn && defn.prefix?
+          output_denominator << defn.display_name + Unit.definition(den.shift).display_name
         else
-          output_d << "#{@@OUTPUT_MAP[token]}" if token
+          output_denominator << defn.display_name          
         end
       end
     end
-    on = output_n.reject {|x| x.empty?}.map {|x| [x, output_n.find_all {|z| z==x}.size]}.uniq.map {|x| ("#{x[0]}".strip+ (x[1] > 1 ? "^#{x[1]}" : ''))}
-    od = output_d.reject {|x| x.empty?}.map {|x| [x, output_d.find_all {|z| z==x}.size]}.uniq.map {|x| ("#{x[0]}".strip+ (x[1] > 1 ? "^#{x[1]}" : ''))}
-    out = "#{on.join('*')}#{od == ['1'] ? '': '/'+od.join('*')}".strip
+    
+    on = output_numerator.uniq.
+          map {|x| [x, output_numerator.count(x)]}.
+          map {|element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : ''))}
+    od = output_denominator.uniq.
+          map {|x| [x, output_denominator.count(x)]}.
+          map {|element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : ''))}
+    out = "#{on.join('*')}#{od.empty? ? '': '/' + od.join('*')}".strip
     @unit_name = out unless self.kind == :temperature
     return out
   end

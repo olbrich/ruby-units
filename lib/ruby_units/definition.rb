@@ -88,6 +88,10 @@ class Unit < Numeric
       self.kind == :prefix
     end
     
+    def unity?
+      self.prefix? && self.numerator == Unit::UNITY_ARRAY && self.denominator == Unit::UNITY_ARRAY
+    end
+    
     # is this a base unit?
     # units are base units if the scalar is one, and the unit is defined in terms of itself.
     # @return [Boolean]

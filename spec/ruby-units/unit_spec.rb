@@ -924,8 +924,6 @@ describe "Unit Math" do
     end
   
   end
-  
-  
 
 end
 
@@ -941,9 +939,15 @@ describe "Unit Output formatting" do
   
   context "for a unit with a custom display_name" do
     before(:each) do
-      @cups = Unit.definition("cup")
-      @cups.display_name = "cupz"
-      Unit.define!(@cups)
+      Unit.redefine!("cup") do |cup|
+        cup.display_name = "cupz"
+      end
+    end
+    
+    after(:each) do
+      Unit.redefine!("cup") do |cup|
+        cup.display_name = cup.aliases.first
+      end
     end
     
     subject { Unit("8 cups")}
@@ -1055,9 +1059,16 @@ describe Unit do
     describe "an existing unit again" do
       before(:each) do
         @cups = Unit.definition('cup')
-        @cups.aliases = %w{cup cu cups}
+        @original_display_name = @cups.display_name
+        @cups.display_name = "cupz"
         Unit.define(@cups)
         Unit.setup
+      end
+      
+      after(:each) do
+        Unit.redefine!("cup") do |cup|
+          cup.display_name = @original_display_name
+        end
       end
     
       describe "Unit('1 cup')" do
@@ -1068,7 +1079,7 @@ describe Unit do
         it {should be_an_instance_of Unit}
         its(:scalar) {should == 1}
         its(:scalar) {should be_an Integer}
-        its(:units) {should == "cup"}
+        its(:units) {should == "cupz"}
         its(:kind) {should == :volume}
         it {should_not be_temperature}
         it {should_not be_degree}
