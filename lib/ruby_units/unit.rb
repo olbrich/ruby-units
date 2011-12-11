@@ -34,7 +34,6 @@ class Unit < Numeric
   @@PREFIX_MAP       = {}
   @@UNIT_MAP         = {}
   @@UNIT_VALUES      = {}
-  @@OUTPUT_MAP       = {}
   @@BASE_UNITS       = ['<meter>','<kilogram>','<second>','<mole>', '<ampere>','<radian>','<kelvin>','<tempK>','<byte>','<dollar>','<candela>','<each>','<steradian>','<decibel>']
   UNITY              = '<1>'
   UNITY_ARRAY        = [UNITY]
@@ -127,7 +126,6 @@ class Unit < Numeric
     @@PREFIX_MAP    = {}
     @@UNIT_VALUES   = {}
     @@UNIT_MAP      = {}
-    @@OUTPUT_MAP    = {}
 
     @@definitions.each do |name, definition|
       if definition.prefix?
@@ -140,7 +138,6 @@ class Unit < Numeric
         @@UNIT_VALUES[name][:denominator]  = definition.denominator if definition.denominator
         definition.aliases.each {|_alias| @@UNIT_MAP[_alias] = name}
       end
-      @@OUTPUT_MAP[name] = definition.display_name
     end
     
     @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
