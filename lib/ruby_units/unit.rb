@@ -27,7 +27,6 @@ end
 #
 class Unit < Numeric
   VERSION = Unit::Version::STRING
-  @@USER_DEFINITIONS = {}
   @@definitions      = {}
   @@PREFIX_VALUES    = {}
   @@PREFIX_MAP       = {}
@@ -182,11 +181,6 @@ class Unit < Numeric
       unit_definition = Unit::Definition.new(unit_definition, &block)
     end
     @@definitions[unit_definition.name] = unit_definition
-    @@USER_DEFINITIONS[unit_definition.name] = [unit_definition.aliases,
-                                                unit_definition.scalar,
-                                                unit_definition.kind,
-                                                unit_definition.numerator,
-                                                unit_definition.denominator]
     return unit_definition
   end
   
@@ -215,7 +209,6 @@ class Unit < Numeric
   # @return (see Unit.setup)
   # Undefine a unit.  Will not raise an exception for unknown units.
   def self.undefine!(unit)
-    @@USER_DEFINITIONS.delete("<#{unit}>")
     @@definitions.delete("<#{unit}>")
     Unit.setup
   end
