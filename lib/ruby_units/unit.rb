@@ -196,13 +196,14 @@ class Unit < Numeric
   # @param [String] name Name of unit to redefine
   # @param [Block] block
   # @raise [ArgumentError] if a block is not given
+  # @yield [Unit::Definition]
   # @return (see Unit.define!)
   # Get the definition for a unit and allow it to be redefined
   def self.redefine!(name, &block)
     raise ArgumentError, "A block is required to redefine a unit" unless block_given?
-    _unit = self.definition(name)
-    yield _unit
-    self.define!(_unit)
+    unit_definition = self.definition(name)
+    yield unit_definition
+    self.define!(unit_definition)
   end
   
   # @param [String] name of unit to undefine
@@ -419,11 +420,13 @@ class Unit < Numeric
   alias :unit :to_unit
 
   # Is this unit in base form?
+  # @todo eliminate usage of @@BASE_UNITS
   # @return [Boolean]
   def is_base?
     return @is_base if defined? @is_base
-    return @is_base=true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(?:deg|temp)K/
+    return @is_base = true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(?:deg|temp)K/
     for x in (@numerator + @denominator).compact do
+
       return @is_base = false unless x == UNITY || (@@BASE_UNITS.include?((x)))
     end
     return @is_base = true
