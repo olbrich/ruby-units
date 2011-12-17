@@ -12,7 +12,7 @@ describe "Unit::Definition('eV')" do
   its(:name)          {should == "<eV>"}
   its(:aliases)       {should == %w{eV electron-volt}}
   its(:scalar)        {should == 1.602E-19}
-  its(:numerator)     {should == %w{<meter> <meter> <kilogram>}}
+  its(:numerator)     {should == %w{<kilogram> <meter> <meter>}}
   its(:denominator)   {should == %w{<second> <second>}}
   its(:display_name)  {should == "electron-volt"}
 end

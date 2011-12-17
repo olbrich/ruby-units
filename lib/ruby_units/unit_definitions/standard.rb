@@ -132,7 +132,7 @@ unit_definitions = {
   '<oersted>'  => [%w{Oe oersted oersteds}, 250.0/Math::PI, :magnetism, %w{<ampere>}, %w{<meter>}],
 
   #energy
-  '<joule>' =>  [%w{J joule Joule joules}, 1, :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
+  '<joule>' =>  [%w{J joule Joule joules}, 1, :energy, %w{<kilogram> <meter> <meter>}, %w{<second> <second>}],
   '<erg>'   =>  [%w{erg ergs}, Rational(1,1e7), :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
   '<btu>'   =>  [%w{BTU btu BTUs}, 1055.056, :energy, %w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
   '<calorie>' =>  [%w{cal calorie calories}, 4.18400, :energy,%w{<meter> <meter> <kilogram>}, %w{<second> <second>}],
