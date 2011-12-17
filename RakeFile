@@ -80,29 +80,27 @@ task :specs => :spec
 desc "Run tests against several ruby versions, requires rvm"
 task :multitest do
   rubies = %w{
-      ruby-1.8.7@ruby-units
-      ruby-1.8.7@ruby-units-with-chronic
-      ruby-1.9.2@ruby-units
-      ruby-1.9.2@ruby-units-with-chronic
-      ruby-1.9.3@ruby-units
-      rbx@ruby-units
-      jruby-1.6.4@ruby-units
+      ruby-1.8.7-p352@ruby-units
+      ruby-1.8.7-p352@ruby-units-with-chronic
+      ruby-1.9.2-p290@ruby-units
+      ruby-1.9.2-p290@ruby-units-with-chronic
+      rbx-head@ruby-units
+      jruby-1.6.5@ruby-units
       }
-  exec "rvm #{rubies.join(',')} tests"
+  exec "rvm #{rubies.join(',')} do rake tests"
 end
 
 desc "Run specs against several ruby versions, requires rvm"
 task :multispec do
   rubies = %w{
-      ruby-1.8.7@ruby-units
-      ruby-1.8.7@ruby-units-with-chronic
-      ruby-1.9.2@ruby-units
-      ruby-1.9.2@ruby-units-with-chronic
-      ruby-1.9.3@ruby-units
-      rbx@ruby-units
-      jruby-1.6.4@ruby-units
+      ruby-1.8.7-p352@ruby-units
+      ruby-1.8.7-p352@ruby-units-with-chronic
+      ruby-1.9.2-p290@ruby-units
+      ruby-1.9.2-p290@ruby-units-with-chronic
+      rbx-head@ruby-units
+      jruby-1.6.5@ruby-units
       }
-  exec "rvm #{rubies.join(',')} specs"
+  exec "rvm #{rubies.join(',')} do rake spec"
 end
 
 task :default => :test
