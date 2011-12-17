@@ -1453,7 +1453,7 @@ class Unit < Numeric
   # return an array of base units
   # @return [Array]
   def self.base_units
-    @@base_units ||= @@definitions.select {|_, defn| defn.base?}.keys.map {|u| Unit.new(u)}
+    @@base_units ||= @@definitions.dup.delete_if {|_, defn| !defn.base?}.keys.map {|u| Unit.new(u)}
   end
 
   private
