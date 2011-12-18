@@ -51,6 +51,16 @@ rescue LoadError
 end
 
 begin
+  require 'simplecov'
+  desc "code coverage report"
+  task :coverage do
+    ENV['SIMPLECOV']='true'
+    Rake::Task['spec'].invoke
+  end
+rescue LoadError
+end
+
+begin
   require 'rspec/core/rake_task'
 
   desc "Run specs"
