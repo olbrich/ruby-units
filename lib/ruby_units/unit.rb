@@ -32,7 +32,6 @@ class Unit < Numeric
   @@PREFIX_MAP       = {}
   @@UNIT_MAP         = {}
   @@UNIT_VALUES      = {}
-  @@BASE_UNITS       = ['<meter>','<kilogram>','<second>','<mole>', '<ampere>','<radian>','<kelvin>','<tempK>','<byte>','<dollar>','<candela>','<each>','<steradian>','<decibel>']
   UNITY              = '<1>'
   UNITY_ARRAY        = [UNITY]
   FEET_INCH_REGEX    = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inches)/
@@ -420,16 +419,14 @@ class Unit < Numeric
   alias :unit :to_unit
 
   # Is this unit in base form?
-  # @todo eliminate usage of @@BASE_UNITS
   # @return [Boolean]
   def is_base?
     return @is_base if defined? @is_base
-    return @is_base = true if self.degree? && self.numerator.size == 1 && self.denominator == UNITY_ARRAY && self.units =~ /(?:deg|temp)K/
-    for x in (@numerator + @denominator).compact do
-
-      return @is_base = false unless x == UNITY || (@@BASE_UNITS.include?((x)))
-    end
-    return @is_base = true
+    # return @is_base = true if self.degree? && 
+    #                           self.numerator.size == 1 && 
+    #                           self.denominator == UNITY_ARRAY && 
+    #                           self.units =~ /(?:deg|temp)K/
+    @is_base = (@numerator + @denominator).compact.uniq.all? {|element| element == UNITY || Unit.definition(element).base? }
   end
   alias :base? :is_base?
 
