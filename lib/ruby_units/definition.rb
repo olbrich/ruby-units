@@ -3,10 +3,8 @@ class Unit < Numeric
   # Handle the definition of units
   class Definition
     
-    attr_accessor :name
-    
     # @return [Array]
-    attr_accessor :aliases
+    attr_writer :aliases
     
     # @return [Symbol]
     attr_accessor :kind
@@ -48,7 +46,7 @@ class Unit < Numeric
     # @return [String, nil]
     # @todo refactor Unit and Unit::Definition so we don't need to wrap units with angle brackets
     def name
-      "<#{@name}>" if @name
+      "<#{@name}>" if (defined?(@name) && @name)
     end
     
     # set the name, strip off '<' and '>'
@@ -64,13 +62,6 @@ class Unit < Numeric
       [[@aliases], @name].flatten.compact.uniq
     end
 
-    # display name is the first one in the alias array
-    # @todo   make this customizable and used (see issue #28)
-    # @return [String]
-    # def display_name
-    #   aliases.first
-    # end
-      
     # define a unit in terms of another unit
     # @param [Unit] unit
     # @return [Unit::Definition]
@@ -82,14 +73,17 @@ class Unit < Numeric
       @denominator  = _base.denominator
       self
     end
-    
+
+    # is this definition for a prefix?
     # @return [Boolean]
     def prefix?
       self.kind == :prefix
     end
     
+    # Is this definition the unity definition?
+    # @return [Boolean]
     def unity?
-      self.prefix? && self.numerator == Unit::UNITY_ARRAY && self.denominator == Unit::UNITY_ARRAY
+      self.prefix? && self.scalar == 1
     end
     
     # is this a base unit?
@@ -101,18 +95,6 @@ class Unit < Numeric
       (self.numerator.size  == 1) &&
       (self.scalar          == 1) &&
       (self.numerator.first == self.name)
-    end
-    
-    # Define this unit.  Registers it, but won't actually be used until Unit.setup is called
-    # @return (see Unit.define)
-    def define
-      Unit.define(self)
-    end
-    
-    # Define and register this unit
-    # @return (see Unit.define!)
-    def define!
-      Unit.define!(self)
     end
   end
 end
