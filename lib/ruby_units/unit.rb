@@ -1,7 +1,9 @@
 require 'date'
 if RUBY_VERSION < "1.9"
+  # :nocov_19:
   require 'parsedate'
   require 'rational'
+  # :nocov_19:
 end
 # Copyright 2006-2011
 #
@@ -242,11 +244,6 @@ class Unit < Numeric
   # @return [String]
   attr_accessor :unit_name
 
-  # @return [Array]
-  def to_yaml_properties
-    %w{@scalar @numerator @denominator @signature @base_scalar}
-  end
-
   # needed to make complex units play nice -- otherwise not detected as a complex_generic
   # @param [Class]
   # @return [Boolean]
@@ -269,6 +266,14 @@ class Unit < Numeric
   end
 
   if RUBY_VERSION < "1.9"
+    # :nocov_19:
+  
+    # a list of properties to emit to yaml
+    # @return [Array]
+    def to_yaml_properties
+      %w{@scalar @numerator @denominator @signature @base_scalar}
+    end
+
     # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
     # before YAML'izing it.
     # @param [Hash] opts
@@ -282,6 +287,7 @@ class Unit < Numeric
         end
       end
     end
+    # :nocov_19:
   end
 
   # Create a new Unit object.  Can be initialized using a String, a Hash, an Array, Time, DateTime
@@ -426,7 +432,9 @@ class Unit < Numeric
     #                           self.numerator.size == 1 && 
     #                           self.denominator == UNITY_ARRAY && 
     #                           self.units =~ /(?:deg|temp)K/
-    @is_base = (@numerator + @denominator).compact.uniq.all? {|element| element == UNITY || Unit.definition(element).base? }
+    @is_base = (@numerator + @denominator).compact.uniq.
+                                            map {|unit| Unit.definition(unit)}.
+                                            all? {|element| element.unity? || element.base? }
   end
   alias :base? :is_base?
 
@@ -438,7 +446,9 @@ class Unit < Numeric
     return self if self.is_base?
     if self.units =~ /\A(?:temp|deg)[CRF]\Z/
       if RUBY_VERSION < "1.9"
+        # :nocov_19:
         @signature = @@KINDS.index(:temperature)
+        # :nocov_19:
       else
         #:nocov:
         @signature = @@KINDS.key(:temperature)
