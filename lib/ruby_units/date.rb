@@ -53,10 +53,12 @@ class Date
   end
   
   unless Date.instance_methods.include?(:to_date)
+    # :nocov_19:
     # @return [Date]
     def to_date
       Date.civil(self.year, self.month, self.day)
     end
+    # :nocov_19:
   end
   
 end

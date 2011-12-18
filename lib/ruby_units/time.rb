@@ -29,11 +29,13 @@ class Time
   alias :u :to_unit
   
   unless Time.instance_methods.include?(:to_date)
+    # :nocov_19:
     # @return [Date]
     def to_date
       x=(Date.civil(1970,1,1)+((self.to_f+self.gmt_offset)/86400.0)-0.5)
       Date.civil(x.year, x.month, x.day)
     end
+    # :nocov_19:
   end
   
   alias :unit_add :+
