@@ -628,8 +628,12 @@ class Unit < Numeric
       return false unless self =~ other
       return self.base_scalar == other.base_scalar
     else
-      x,y = coerce(other)
-      return x == y
+      begin
+        x,y = coerce(other)
+        return x == y
+      rescue ArgumentError # return false when object cannot be coerced
+        return false
+      end
     end
   end
 

@@ -420,6 +420,12 @@ describe "Unit Comparisons" do
   end
   
   context "Equality" do
+    
+    context "with uncoercable objects" do
+      specify { Unit("1 mm").should_not == nil }
+      
+    end
+    
     context "units of same kind" do
       specify { Unit("1000 m").should == Unit('1 km')}
       specify { Unit("100 m").should_not == Unit('1 km')}
