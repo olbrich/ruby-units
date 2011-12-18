@@ -1,5 +1,6 @@
 Change Log for Ruby-units
 =========================
+2011-12-18          * Can define a display_name for units
 2011-12-04          * Documentation improvements
                     * Add DSL for defining/redefining units
 2011-11-24          * improve yard documentation
