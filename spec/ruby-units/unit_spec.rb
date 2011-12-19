@@ -11,6 +11,7 @@ end
 
 describe "Create some simple units" do
 
+  # zero string
   describe Unit("0") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -26,6 +27,7 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  # non-zero string
   describe Unit("1") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -41,6 +43,7 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  # numeric
   describe Unit(1) do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -56,6 +59,7 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
   
+  # rational
   describe Unit(Rational(1,2)) do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -71,6 +75,7 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  # float
   describe Unit(0.5) do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -86,6 +91,7 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  # complex
   describe Unit(Complex(1,1)) do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -101,6 +107,7 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  # scalar and unit
   describe Unit("1 mm") do
     it {should be_a Numeric}
     it {should be_an_instance_of Unit}
@@ -116,6 +123,7 @@ describe "Create some simple units" do
     its(:base) {should == Unit("0.001 m")}
   end
 
+  # scalar and unit with powers
   describe Unit("10 m/s^2") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should == 10}
@@ -130,6 +138,7 @@ describe "Create some simple units" do
     its(:base) {should == Unit("10 m/s^2")}  
   end
 
+  # feet/in form
   describe Unit("5ft 6in") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should == 5.5}
@@ -144,6 +153,7 @@ describe "Create some simple units" do
     specify { subject.to_s(:ft).should == %{5'6"} }
   end
 
+  # pound/ounces form
   describe Unit("6lbs 5oz") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_within(0.001).of 6.312}
@@ -158,6 +168,7 @@ describe "Create some simple units" do
     specify { subject.to_s(:lbs).should == "6 lbs, 5 oz" }
   end
 
+  # temperature
   describe Unit("100 tempC") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_within(0.001).of 100}
@@ -172,6 +183,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should == "degC"}
   end
 
+  # Time
   describe Unit(Time.now) do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_a(Numeric)}
@@ -186,6 +198,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}
   end
 
+  # degrees
   describe Unit("100 degC") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_within(0.001).of 100}
@@ -198,6 +211,7 @@ describe "Create some simple units" do
     its(:base) {should be_within(Unit("0.01 degK")).of Unit("100 degK")}
   end
       
+  # percent
   describe Unit("75%") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
@@ -212,6 +226,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+  # angle
   describe Unit("180 deg") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_a Numeric}
@@ -226,6 +241,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
   
+  # radians
   describe Unit("1 radian") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_a Numeric}
@@ -240,6 +256,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+  # counting
   describe Unit("12 dozen") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
@@ -254,6 +271,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+  # rational scalar with unit
   describe Unit("1/2 kg") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Rational}
@@ -268,6 +286,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+  # rational scalar with compound unit
   describe Unit("1/2 kg/m") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Rational}
@@ -282,6 +301,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
   
+  # time string
   describe Unit("1:23:45") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Rational}
@@ -312,6 +332,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
 
+  # funky unit
   describe Unit.new("1 attoparsec/microfortnight") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
@@ -327,6 +348,7 @@ describe "Create some simple units" do
     it { subject.convert_to("in/s").should be_within(Unit("0.0001 in/s")).of(Unit("1.0043269330917 in/s"))}
   end
   
+  # Farads
   describe Unit.new("1 F") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
@@ -423,7 +445,6 @@ describe "Unit Comparisons" do
     
     context "with uncoercable objects" do
       specify { Unit("1 mm").should_not == nil }
-      
     end
     
     context "units of same kind" do

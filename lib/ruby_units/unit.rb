@@ -382,6 +382,7 @@ class Unit < Numeric
     self
   end
 
+  # @todo: figure out how to handle :counting units.  This method should probably return :counting instead of :unitless for 'each'
   # return the kind of the unit (:mass, :length, etc...)
   # @return [Symbol]
   def kind
