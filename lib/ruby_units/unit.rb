@@ -662,8 +662,12 @@ class Unit < Numeric
     when Unit
       self.signature == other.signature
     else
-      x,y = coerce(other)
-      x =~ y
+      begin
+        x,y = coerce(other)
+        return x =~ y
+      rescue ArgumentError
+        return false
+      end
     end
   end
 
@@ -681,8 +685,12 @@ class Unit < Numeric
     when Unit
       (self.scalar == other.scalar) && (self.units == other.units)
     else
-      x,y = coerce(other)
-      x === y
+      begin
+        x,y = coerce(other)
+        return x === y
+      rescue ArgumentError
+        return false
+      end
     end
   end
 
