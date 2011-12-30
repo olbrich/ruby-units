@@ -13,6 +13,7 @@ begin
     gem.email = ["kevin.olbrich+ruby_units@gmail.com"]
     gem.homepage = "https://github.com/olbrich/ruby-units"
     gem.files.exclude(".*","test/**/*","spec/**/*","autotest/**/*", "Gemfile")
+    gem.license = "MIT"
 	gem.post_install_message = <<-EOS
 ====================
 Deprecation Warning
@@ -31,7 +32,7 @@ The extra functions mostly work the same, but will no longer properly handle cas
 
 Pass in a Date, Time, or DateTime object to get the expected result.
 
-They will probably go away completely in an upcoming release, so it would be a good idea to refactor your code
+They will go away completely in the next release, so it would be a good idea to refactor your code
 to avoid using them.  They will also throw deprecation warnings when they are used.
 EOS
   end

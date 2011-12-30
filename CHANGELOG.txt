@@ -1,6 +1,8 @@
 Change Log for Ruby-units
 =========================
-2011-12-18          * Can define a display_name for units
+2011-12-30  1.4.0   * Bump version and release new gem
+                    * Fix issue #27
+2011-12-18          * Can define a display_name for units (fixes #26)
 2011-12-04          * Documentation improvements
                     * Add DSL for defining/redefining units
 2011-11-24          * improve yard documentation
