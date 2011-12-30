@@ -439,6 +439,7 @@ describe "Unit Comparisons" do
     specify { Unit("1 m").should be_compatible_with Unit('1 kg*m/kg')}    
     specify { Unit("1 ft").should_not =~ Unit('1 kg')}
     specify { Unit("1 ft").should_not be_compatible_with Unit('1 kg')}
+    specify { Unit("1 ft").should_not be_compatible_with nil}
   end
   
   context "Equality" do
@@ -494,6 +495,8 @@ describe "Unit Comparisons" do
       specify { Unit("1 m").should_not be_same Unit("2 m")}
       specify { Unit("1 m").should_not be_same_as Unit("2 m")}      
     end
+    
+    specify { Unit("1 m").should_not === nil}
   end
   
   context "Comparisons" do
@@ -504,6 +507,7 @@ describe "Unit Comparisons" do
       specify { Unit("2 m").should > Unit("1 ft")}
       specify { Unit("70 tempF").should > Unit("10 degC")}
       specify { Unit("1 m").should > 0 }
+      specify { expect { Unit("1 m").should_not > nil}.to raise_error(ArgumentError, "comparison of Unit with nil failed") }
     end
     
     context "incompatible units cannot be compared" do

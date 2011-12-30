@@ -765,7 +765,7 @@ class Unit < Numeric
       raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be subtracted from to a Unit, which can only represent time spans"
     else
         x,y = coerce(other)
-        y-x
+        return y-x
     end
   end
 
@@ -779,12 +779,12 @@ class Unit < Numeric
       raise ArgumentError, "Cannot multiply by temperatures" if [other,self].any? {|x| x.is_temperature?}
       opts = Unit.eliminate_terms(@scalar*other.scalar, @numerator + other.numerator ,@denominator + other.denominator)
       opts.merge!(:signature => @signature + other.signature)
-      Unit.new(opts)
+      return Unit.new(opts)
     when Numeric
-      Unit.new(:scalar=>@scalar*other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
+      return Unit.new(:scalar=>@scalar*other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
     else
       x,y = coerce(other)
-      x * y
+      return x * y
     end
   end
 
@@ -801,13 +801,13 @@ class Unit < Numeric
       raise ArgumentError, "Cannot divide with temperatures" if [other,self].any? {|x| x.is_temperature?}
       opts = Unit.eliminate_terms(@scalar/other.scalar, @numerator + other.denominator ,@denominator + other.numerator)
       opts.merge!(:signature=> @signature - other.signature)
-      Unit.new(opts)
+      return Unit.new(opts)
     when Numeric
       raise ZeroDivisionError if other.zero?
-      Unit.new(:scalar=>@scalar/other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
+      return Unit.new(:scalar=>@scalar/other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
     else
       x,y = coerce(other)
-      y / x
+      return y / x
     end
   end
 
@@ -829,7 +829,7 @@ class Unit < Numeric
   # @param [Object] other
   # @return [Integer]
   def %(other)
-    self.divmod(other).last
+    return self.divmod(other).last
   end
 
   # Exponentiate.  Only takes integer powers.
@@ -855,14 +855,14 @@ class Unit < Numeric
     end
     case other
     when Rational
-      self.power(other.numerator).root(other.denominator)
+      return self.power(other.numerator).root(other.denominator)
     when Integer
-      self.power(other)
+      return self.power(other)
     when Float
       return self**(other.to_i) if other == other.to_i
       valid = (1..9).map {|x| 1/x}
       raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
-      self.root((1/other).to_int)
+      return self.root((1/other).to_int)
     when Complex
       raise ArgumentError, "exponentiation of complex numbers is not yet supported."
     else
@@ -882,9 +882,9 @@ class Unit < Numeric
     return 1 if n.zero?
     return self if n == 1
     if n > 0 then
-      (1..(n-1).to_i).inject(self) {|product, x| product * self}
+      return (1..(n-1).to_i).inject(self) {|product, x| product * self}
     else
-      (1..-(n-1).to_i).inject(self) {|product, x| product / self}
+      return (1..-(n-1).to_i).inject(self) {|product, x| product / self}
     end
   end
 
@@ -920,13 +920,13 @@ class Unit < Numeric
       r.times {|y| den.delete_at(den.index(item))}
     end
     q = @scalar < 0 ? (-1)**Rational(1,n) * (@scalar.abs)**Rational(1,n) : @scalar**Rational(1,n)
-    Unit.new(:scalar=>q,:numerator=>num,:denominator=>den)
+    return Unit.new(:scalar=>q,:numerator=>num,:denominator=>den)
   end
 
   # returns inverse of Unit (1/unit)
   # @return [Unit]
   def inverse
-    Unit("1") / self
+    return Unit("1") / self
   end
 
   # convert to a specified unit string or to the same units as another Unit
@@ -978,7 +978,7 @@ class Unit < Numeric
       when 'tempR'
         @base_scalar * Rational(9,5)
       end
-      Unit.new("#{q} #{target_unit}")
+      return Unit.new("#{q} #{target_unit}")
     else
       case other
       when Unit
@@ -997,7 +997,7 @@ class Unit < Numeric
 
       q = @scalar * ( (_numerator1 + _denominator2).inject(1) {|product,n| product*n} ) /
           ( (_numerator2 + _denominator1).inject(1) {|product,n| product*n} )
-      Unit.new(:scalar=>q, :numerator=>target.numerator, :denominator=>target.denominator, :signature => target.signature)
+      return Unit.new(:scalar=>q, :numerator=>target.numerator, :denominator=>target.denominator, :signature => target.signature)
     end
   end
   alias :>> :convert_to
@@ -1082,42 +1082,42 @@ class Unit < Numeric
   end
 
   # negates the scalar of the Unit
-  # @return [Unit]
+  # @return [Numeric,Unit]
   def -@
     return -@scalar if self.unitless?
-    self.dup * -1
+    return (self.dup * -1)
   end
 
   # absolute value of a unit
-  # @return [Unit]
+  # @return [Numeric,Unit]
   def abs
     return @scalar.abs if self.unitless?
-    Unit.new(@scalar.abs, @numerator, @denominator)
+    return Unit.new(@scalar.abs, @numerator, @denominator)
   end
 
   # ceil of a unit
-  # @return [Unit]
+  # @return [Numeric,Unit]
   def ceil
     return @scalar.ceil if self.unitless?
-    Unit.new(@scalar.ceil, @numerator, @denominator)
+    return Unit.new(@scalar.ceil, @numerator, @denominator)
   end
 
-  # @return [Unit]
+  # @return [Numeric,Unit]
   def floor
     return @scalar.floor if self.unitless?
-    Unit.new(@scalar.floor, @numerator, @denominator)
+    return Unit.new(@scalar.floor, @numerator, @denominator)
   end
 
-  # @return [Unit]
+  # @return [Numeric,Unit]
   def round
     return @scalar.round if self.unitless?
-    Unit.new(@scalar.round, @numerator, @denominator)
+    return Unit.new(@scalar.round, @numerator, @denominator)
   end
 
-  # @return [Unit]
+  # @return [Numeric, Unit]
   def truncate
     return @scalar.truncate if self.unitless?
-    Unit.new(@scalar.truncate, @numerator, @denominator)
+    return Unit.new(@scalar.truncate, @numerator, @denominator)
   end
 
   # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
@@ -1126,7 +1126,7 @@ class Unit < Numeric
   # @raise [ArgumentError] when scalar is not equal to an integer
   def succ
     raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
-    Unit.new(@scalar.to_i.succ, @numerator, @denominator)
+    return Unit.new(@scalar.to_i.succ, @numerator, @denominator)
   end
   alias :next :succ
 
@@ -1136,13 +1136,13 @@ class Unit < Numeric
   # @raise [ArgumentError] when scalar is not equal to an integer
   def pred
     raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
-    Unit.new(@scalar.to_i.pred, @numerator, @denominator)
+    return Unit.new(@scalar.to_i.pred, @numerator, @denominator)
   end
 
   # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
   # @return [Time]
   def to_time
-    Time.at(self)
+    return Time.at(self)
   end
   alias :time :to_time
 
@@ -1150,12 +1150,12 @@ class Unit < Numeric
   # defined by DateTime
   # @return [DateTime]
   def to_datetime
-    DateTime.new!(self.convert_to('d').scalar)
+    return DateTime.new!(self.convert_to('d').scalar)
   end
 
   # @return [Date]
   def to_date
-    Date.new0(self.convert_to('d').scalar)
+    return Date.new0(self.convert_to('d').scalar)
   end
 
   # true if scalar is zero
@@ -1167,7 +1167,7 @@ class Unit < Numeric
   # @example '5 min'.unit.ago
   # @return [Unit]
   def ago
-    self.before
+    return self.before
   end
 
   # @example '5 min'.before(time)
@@ -1175,7 +1175,7 @@ class Unit < Numeric
   def before(time_point = ::Time.now)
     case time_point
     when Time, Date, DateTime
-      time_point - self rescue time_point.to_datetime - self
+      return (time_point - self rescue time_point.to_datetime - self)
     else
       raise ArgumentError, "Must specify a Time, Date, or DateTime"
     end
@@ -1189,9 +1189,9 @@ class Unit < Numeric
   def since(time_point)
     case time_point
     when Time
-      (Time.now - time_point).unit('s').convert_to(self)
+      return (Time.now - time_point).unit('s').convert_to(self)
     when DateTime, Date
-      (DateTime.now - time_point).unit('d').convert_to(self)
+      return (DateTime.now - time_point).unit('d').convert_to(self)
     else
       raise ArgumentError, "Must specify a Time, Date, or DateTime"
     end
@@ -1203,9 +1203,9 @@ class Unit < Numeric
   def until(time_point)
     case time_point
     when Time
-      (time_point - Time.now).unit('s').convert_to(self)
+      return (time_point - Time.now).unit('s').convert_to(self)
     when DateTime, Date
-      (time_point - DateTime.now).unit('d').convert_to(self)
+      return (time_point - DateTime.now).unit('d').convert_to(self)
     else
       raise ArgumentError, "Must specify a Time, Date, or DateTime"
     end
@@ -1218,7 +1218,7 @@ class Unit < Numeric
   def from(time_point)
     case time_point
     when Time, DateTime, Date
-      time_point + self rescue time_point.to_datetime + self
+      return (time_point + self rescue time_point.to_datetime + self)
     else
       raise ArgumentError, "Must specify a Time, Date, or DateTime"
     end
@@ -1236,9 +1236,9 @@ class Unit < Numeric
     end
     case other
     when Unit
-      [other, self]
+      return [other, self]
     else
-      [Unit.new(other), self]
+      return [Unit.new(other), self]
     end
   end
 
@@ -1248,7 +1248,6 @@ class Unit < Numeric
   # figure out what the scalar part of the base unit for this unit is
   # @return [nil]
   def update_base_scalar
-    return @base_scalar unless @base_scalar.nil?
     if self.is_base?
       @base_scalar = @scalar
       @signature = unit_signature
@@ -1300,6 +1299,7 @@ class Unit < Numeric
     vector = unit_signature_vector
     vector.each_with_index {|item,index| vector[index] = item * 20**index}
     @signature=vector.inject(0) {|sum,n| sum+n}
+    return @signature
   end
 
   # @param [Numeric] q quantity
@@ -1352,7 +1352,7 @@ class Unit < Numeric
     end
     num = UNITY_ARRAY if num.empty?
     den = UNITY_ARRAY if den.empty?
-    {:scalar=>q, :numerator=>num.flatten.compact, :denominator=>den.flatten.compact}
+    return {:scalar=>q, :numerator=>num.flatten.compact, :denominator=>den.flatten.compact}
   end
 
   # parse a string into a unit object.
@@ -1367,6 +1367,7 @@ class Unit < Numeric
   #  6'4"  -- recognized as 6 feet + 4 inches
   #  8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
   # @return [nil | Unit]
+  # @todo This should either be a separate class or at least a class method
   def parse(passed_unit_string="0")
     unit_string = passed_unit_string.dup
     if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
@@ -1394,10 +1395,10 @@ class Unit < Numeric
     end
 
     if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
-        numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
-        result = Unit(unit_s || '1') * Rational(numerator.to_i,denominator.to_i)
-        copy(result)
-        return
+      numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
+      result = Unit(unit_s || '1') * Rational(numerator.to_i,denominator.to_i)
+      copy(result)
+      return
     end
 
     unit_string =~ NUMBER_REGEX
@@ -1477,20 +1478,20 @@ class Unit < Numeric
 
     @numerator = UNITY_ARRAY if @numerator.empty?
     @denominator = UNITY_ARRAY if @denominator.empty?
-    self
+    return self
   end
   
   # return an array of base units
   # @return [Array]
   def self.base_units
-    @@base_units ||= @@definitions.dup.delete_if {|_, defn| !defn.base?}.keys.map {|u| Unit.new(u)}
+    return @@base_units ||= @@definitions.dup.delete_if {|_, defn| !defn.base?}.keys.map {|u| Unit.new(u)}
   end
 
   private
 
   # parse a string consisting of a number and a unit string
   # @param [String] string
-  # @return [Array] consisting of [number, unit]
+  # @return [Array] consisting of [Numeric, "unit"]
   # @private
   def self.parse_into_numbers_and_units(string)
     # scientific notation.... 123.234E22, -123.456e-10
@@ -1502,7 +1503,7 @@ class Unit < Numeric
     anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([\D].*)?}
     num, unit = string.scan(anynumber).first
     
-    [case num
+    return [case num
       when NilClass
         1
       when complex
