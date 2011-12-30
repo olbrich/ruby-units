@@ -27,6 +27,10 @@ end
 #    unit.definition = Unit("1 baz")
 #  end
 #
+# @todo fix class variables so they conform to standard naming conventions and refactor away as many of them as possible
+# @todo pull caching out into its own class
+# @todo refactor internal representation of units
+# @todo method to determine best natural prefix
 class Unit < Numeric
   VERSION = Unit::Version::STRING
   @@definitions      = {}
@@ -55,7 +59,8 @@ class Unit < Numeric
   CELSIUS            = ['<celsius>']
   TEMP_REGEX         = /(?:temp|deg)[CFRK]/
 
-  SIGNATURE_VECTOR = [:length,
+  SIGNATURE_VECTOR = [
+                      :length,
                       :time,
                       :temperature,
                       :mass,
@@ -64,7 +69,8 @@ class Unit < Numeric
                       :luminosity,
                       :currency,
                       :memory,
-                      :angle]
+                      :angle
+                      ]
   @@KINDS = {
     -312078       =>  :elastance,
     -312058       =>  :resistance,
@@ -150,7 +156,7 @@ class Unit < Numeric
   # @param [String] unit
   # @return [Boolean]
   def self.defined?(unit)
-    @@UNIT_VALUES.keys.include?("<#{unit}>")
+    return @@UNIT_VALUES.keys.include?("<#{unit}>")
   end
   
   # return the unit definition for a unit
@@ -158,7 +164,7 @@ class Unit < Numeric
   # @return [Unit::Definition, nil]
   def self.definition(_unit)
     unit = (_unit =~ /^<.+>$/) ? _unit : "<#{_unit}>"
-    @@definitions[unit]
+    return @@definitions[unit]
   end
   
   # @param  [Unit::Definition|String] unit_definition
@@ -311,11 +317,11 @@ class Unit < Numeric
   # @raise [ArgumentError] if no unit is specified
   # @raise [ArgumentError] if an invalid unit is specified
   def initialize(*options)
-    @scalar = nil
+    @scalar      = nil
     @base_scalar = nil
-    @unit_name = nil
-    @signature = nil
-    @output = {}
+    @unit_name   = nil
+    @signature   = nil
+    @output      = {}
     if options.size == 2
       # options[0] is the scalar
       # options[1] is a unit string
@@ -341,10 +347,10 @@ class Unit < Numeric
 
     case options[0]
     when Hash
-      @scalar = options[0][:scalar] || 1
-      @numerator = options[0][:numerator] || UNITY_ARRAY
+      @scalar      = options[0][:scalar] || 1
+      @numerator   = options[0][:numerator] || UNITY_ARRAY
       @denominator = options[0][:denominator] || UNITY_ARRAY
-      @signature = options[0][:signature]
+      @signature   = options[0][:signature]
     when Array
       initialize(*options[0])
       return
@@ -375,11 +381,11 @@ class Unit < Numeric
         @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
       end
     end
-      unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{TEMP_REGEX}/) then
-        @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
-      end
+    unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{TEMP_REGEX}/) then
+      @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
+    end
     [@scalar, @numerator, @denominator, @base_scalar, @signature, @is_base].each {|x| x.freeze}
-    self
+    return self
   end
 
   # @todo: figure out how to handle :counting units.  This method should probably return :counting instead of :unitless for 'each'
@@ -398,7 +404,7 @@ class Unit < Numeric
   # @private
   # @return [true]
   def self.clear_cache
-    @@cached_units = {}
+    @@cached_units    = {}
     @@base_unit_cache = {}
     Unit.new(1)
     return true
@@ -416,7 +422,7 @@ class Unit < Numeric
   # @return [Unit]
   def self.parse(input)
     first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
-    second.nil? ? first.unit : first.unit.convert_to(second)
+    return second.nil? ? first.unit : first.unit.convert_to(second)
   end
 
   # @return [Unit]
@@ -436,6 +442,7 @@ class Unit < Numeric
     @is_base = (@numerator + @denominator).compact.uniq.
                                             map {|unit| Unit.definition(unit)}.
                                             all? {|element| element.unity? || element.base? }
+    return @is_base
   end
   alias :base? :is_base?
 
@@ -557,22 +564,24 @@ class Unit < Numeric
 
   # Normally pretty prints the unit, but if you really want to see the guts of it, pass ':dump'
   # @deprecated
+  # @return [String]
   def inspect(option=nil)
     return super() if option == :dump
-    self.to_s
+    return self.to_s
   end
 
   # true if unit is a 'temperature', false if a 'degree' or anything else
   # @return [Boolean]
+  # @todo use unit definition to determine if it's a temperature instead of a regex
   def is_temperature?
-    self.is_degree? && (!(self.units =~ /temp[CFRK]/).nil?)
+    return self.is_degree? && (!(self.units =~ /temp[CFRK]/).nil?)
   end
   alias :temperature? :is_temperature?
 
   # true if a degree unit or equivalent.
   # @return [Boolean]
   def is_degree?
-    self.kind == :temperature
+    return self.kind == :temperature
   end
   alias :degree? :is_degree?
 
@@ -581,27 +590,28 @@ class Unit < Numeric
   # @return [String] possible values: degC, degF, degR, or degK
   def temperature_scale
     return nil unless self.is_temperature?
-    self.units =~ /temp([CFRK])/
-    "deg#{$1}"
+    return "deg#{self.units[/temp([CFRK])/,1]}"
   end
 
   # returns true if no associated units
   # false, even if the units are "unitless" like 'radians, each, etc'
   # @return [Boolean]
   def unitless?
-    (@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
+    return (@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
   end
 
   # Compare two Unit objects. Throws an exception if they are not of compatible types.
   # Comparisons are done based on the value of the unit in base SI units.
   # @param [Object] other
-  # @return [-1|0|1]
+  # @return [-1|0|1|nil]
   # @raise [NoMethodError] when other does not define <=>
   # @raise [ArgumentError] when units are not compatible
   def <=>(other)
     case
     when !self.base_scalar.respond_to?(:<=>)
       raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspect}"
+    when other.nil?
+      return self.base_scalar <=> nil
     when !self.is_temperature? && other.zero?
       return self.base_scalar <=> 0
     when other.instance_of?(Unit)
