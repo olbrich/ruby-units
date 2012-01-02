@@ -123,7 +123,7 @@ end
 # defined as a rational number to preserve accuracy and minimize round-off errors during
 # calculations
 Unit.define!('pound') do |pound|
-  pound.definition = Unit(Rational(8171193714040401,18014398509481984), 'kg')
+  pound.definition = Unit(Rational(45359237,1e8), 'kg')
   pound.aliases    = %w{lbs lb lbm pound-mass pound pounds #}
 end
 
@@ -278,7 +278,7 @@ end
 
 Unit.define!('gee') do |gee|
   # approximated as a rational number to minimize round-off errors
-  gee.definition    = Unit(Rational(5520596865723767,562949953421312), 'm/s^2') # equivalent to 9.80655 m/s^2
+  gee.definition    = Unit(Rational(196131,20000), 'm/s^2') # equivalent to 9.80655 m/s^2
   gee.aliases       = %w{gee standard-gravitation}
 end
 
