@@ -1,3 +1,6 @@
+# seed the cache
+Unit('1')
+
 Unit.define("meter") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<meter>}
@@ -29,7 +32,7 @@ end
 Unit.define("ampere") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<ampere>}
-  unit.aliases   = %w{A Ampere ampere amp amps}
+  unit.aliases   = %w{A ampere amperes amp amps}
   unit.kind      = :current
 end
 
@@ -96,5 +99,5 @@ Unit.define("decibel") do |unit|
   unit.kind      = :logarithmic
 end
 
-Unit.setup
+
 
