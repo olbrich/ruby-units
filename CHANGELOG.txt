@@ -1,6 +1,17 @@
 Change Log for Ruby-units
 =========================
-2011-12-30  1.4.0   * Bump version and release new gem
+2012-01-02  1.4.0   * Fix some definitions that were just wrong (amu, dalton)
+                    * Definition uses name of unit if no aliases provided
+                    
+2011-12-31          * Define standard units in terms of base and other standard units -- more internally consistent 
+                      and less prone to round-off errors.
+                    * add 'poundal'
+                    * remove 'wtpercent'
+2011-12-30          * Bump version
+                    * Define compound units with base units for consistency
+                    * distinguish between a league and a nautical league
+                    * NOTE: the new unit definition DSL is not backwardly compatible with the old method
+                      (which is now deprecated).  
                     * Fix issue #27
 2011-12-18          * Can define a display_name for units (fixes #26)
 2011-12-04          * Documentation improvements
