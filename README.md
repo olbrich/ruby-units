@@ -146,7 +146,7 @@ Conversions are probably better done like this...
     
     Unit('0 tempC') + Unit('100 degC') #=> Unit('100 tempC')
 
-## Defininig Units
+## Defining Units
 
 It is possible to define new units or redefine existing ones.
 
