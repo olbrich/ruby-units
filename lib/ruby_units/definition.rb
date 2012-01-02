@@ -33,7 +33,7 @@ class Unit < Numeric
     def initialize(_name, _definition = [], &block)
       yield self if block_given?
       self.name     ||= _name.gsub(/[<>]/,'')
-      @aliases      ||= _definition[0]
+      @aliases      ||= (_definition[0] || [_name])
       @scalar       ||= _definition[1]
       @kind         ||= _definition[2]
       @numerator    ||= _definition[3] || Unit::UNITY_ARRAY
