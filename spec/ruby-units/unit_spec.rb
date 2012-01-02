@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe Unit.base_units do
   it {should be_a Array}
   it {should have(14).elements}
-  %w{kilogram meter second Ampere degK tempK mole candela each dollar steradian radian decibel byte}.each do |u|
+  %w{kilogram meter second ampere degK tempK mole candela each dollar steradian radian decibel byte}.each do |u|
     it {should include(Unit(u))}
   end
 end
@@ -1125,7 +1125,7 @@ describe Unit do
 
   describe 'redefine!' do
     before(:each) do
-      @jiffy = Unit.define!("jiffy") do |jiffy|
+      @jiffy = Unit.define("jiffy") do |jiffy|
         jiffy.scalar = (1/100)
         jiffy.aliases = %w{jif}
         jiffy.numerator = ["<second>"]
@@ -1143,28 +1143,10 @@ describe Unit do
     
     specify { Unit('1 jiffy').to_base.scalar.should == (1/1000) }
   end
-
-  
-  describe 'define!' do
-    before(:each) do
-      Unit.undefine!("jiffy")
-      Unit.defined?("jiffy").should_not be_true
-      @jiffy = Unit.define!("jiffy") do |jiffy|
-        jiffy.scalar = (1/100)
-        jiffy.aliases = %w{jif}
-        jiffy.numerator = ["<second>"]
-        jiffy.kind = :time
-      end
-    end
-    
-    it "should define a unit immediately" do
-      Unit.defined?("jiffy").should be_true
-    end
-  end
   
   describe 'undefine!' do
     before(:each) do
-      @jiffy = Unit.define!("jiffy") do |jiffy|
+      @jiffy = Unit.define("jiffy") do |jiffy|
         jiffy.scalar = (1/100)
         jiffy.aliases = %w{jif}
         jiffy.numerator = ["<second>"]

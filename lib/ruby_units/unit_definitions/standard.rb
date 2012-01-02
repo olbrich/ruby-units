@@ -1,11 +1,11 @@
 # length units
 
-Unit.define!('inch') do |inch|
+Unit.define('inch') do |inch|
   inch.definition = Unit('254/10000 meter')
   inch.aliases    = %w{in inch inches "}
 end
 
-Unit.define!('foot') do |foot|
+Unit.define('foot') do |foot|
   foot.definition = Unit('12 inches')
   foot.aliases    = %w{ft foot feet '}
 end
@@ -20,12 +20,12 @@ Unit.define('yard') do |yard|
   yard.aliases    = %w{yd yard yards}
 end
 
-Unit.define!('mile') do |mile|
+Unit.define('mile') do |mile|
   mile.definition = Unit('5280 ft')
   mile.aliases    = %w{mi mile miles}
 end
 
-Unit.define!('naut-mile') do |naut|
+Unit.define('naut-mile') do |naut|
   naut.definition = Unit('1852 m')
   naut.aliases    = %w{nmi M NM}
 end
@@ -69,7 +69,7 @@ end
 
 # typesetting
 
-Unit.define!('point') do |point|
+Unit.define('point') do |point|
   point.definition = Unit('1/72 ft')
   point.aliases    = %w{pt point points}
 end
@@ -79,13 +79,13 @@ Unit.define('pica') do |pica|
   pica.aliases    = %w{P pica picas}
 end
 
-Unit.define!('dot') do |dot|
+Unit.define('dot') do |dot|
   dot.definition  = Unit('1 each')
   dot.aliases     = %w{dot dots}
   dot.kind        = :counting
 end
 
-Unit.define!('pixel') do |pixel|
+Unit.define('pixel') do |pixel|
   pixel.definition  = Unit('1 each')
   pixel.aliases     = %w{px pixel pixels}
   pixel.kind        = :counting
@@ -103,7 +103,7 @@ end
 
 avagadro_constant = Unit('6.02214129e23 1/mol')
 
-Unit.define!('AMU') do |amu|
+Unit.define('AMU') do |amu|
   amu.definition = Unit('12 kg/mol') / (12 * avagadro_constant)
   amu.aliases    = %w{u AMU amu}
 end
@@ -122,7 +122,7 @@ end
 
 # defined as a rational number to preserve accuracy and minimize round-off errors during
 # calculations
-Unit.define!('pound') do |pound|
+Unit.define('pound') do |pound|
   pound.definition = Unit(Rational(45359237,1e8), 'kg')
   pound.aliases    = %w{lbs lb lbm pound-mass pound pounds #}
 end
@@ -149,22 +149,22 @@ end
 
 # time
 
-Unit.define!('minute') do |min|
+Unit.define('minute') do |min|
   min.definition = Unit('60 seconds')
   min.aliases    = %w{min minute minutes}
 end
 
-Unit.define!('hour') do |hour|
+Unit.define('hour') do |hour|
   hour.definition = Unit('60 minutes')
   hour.aliases    = %w{h hr hrs hour hours}
 end
 
-Unit.define!('day') do |day|
+Unit.define('day') do |day|
   day.definition  = Unit('24 hours')
   day.aliases     = %w{d day days}
 end
 
-Unit.define!('week') do |week|
+Unit.define('week') do |week|
   week.definition   = Unit('7 days')
   week.aliases      = %w{wk week weeks}
 end
@@ -174,7 +174,7 @@ Unit.define('fortnight') do |fortnight|
   fortnight.aliases     = %w{fortnight fortnights}
 end
 
-Unit.define!('year') do |year|
+Unit.define('year') do |year|
   year.definition = Unit('31556926 seconds') # works out to 365.24219907407405 days
   year.aliases    = %w{y yr year years annum}
 end
@@ -215,7 +215,7 @@ Unit.define('liter') do |liter|
   liter.aliases    = %w{l L liter liters litre litres}
 end
 
-Unit.define!('gallon') do |gallon|
+Unit.define('gallon') do |gallon|
   gallon.definition = Unit('231 in^3')
   gallon.aliases    = %w{gal gallon gallons}
 end
@@ -235,12 +235,12 @@ Unit.define('cup') do |cup|
   cup.aliases    = %w{cu cup cups}
 end
 
-Unit.define!('fluid-ounce') do |floz|
+Unit.define('fluid-ounce') do |floz|
   floz.definition = Unit('1/128 gal')
   floz.aliases    = %w{floz fluid-ounce}
 end
 
-Unit.define!('tablespoon') do |tbsp|
+Unit.define('tablespoon') do |tbsp|
   tbsp.definition = Unit('1/2 floz')
   tbsp.aliases    = %w{tbs tbsp tablespoon tablespoons}
 end
@@ -276,7 +276,7 @@ Unit.define('knot') do |knot|
   knot.aliases      = %w{kt kn kts knot knots}
 end
 
-Unit.define!('gee') do |gee|
+Unit.define('gee') do |gee|
   # approximated as a rational number to minimize round-off errors
   gee.definition    = Unit(Rational(196131,20000), 'm/s^2') # equivalent to 9.80655 m/s^2
   gee.aliases       = %w{gee standard-gravitation}
@@ -284,7 +284,7 @@ end
 
 # temperature differences
 
-Unit.define!('newton') do |newton|
+Unit.define('newton') do |newton|
   newton.definition = Unit('1 kg*m/s^2')
   newton.aliases    = %w{N newton newtons}
 end
@@ -294,7 +294,7 @@ Unit.define('dyne') do |dyne|
   dyne.aliases    = %w{dyn dyne}
 end
 
-Unit.define!('pound-force') do |lbf|
+Unit.define('pound-force') do |lbf|
   lbf.definition  = Unit('1 lb') * Unit('1 gee')
   lbf.aliases     = %w{lbf pound-force}
 end
@@ -311,7 +311,7 @@ Unit.define('celsius') do |celsius|
   celsius.aliases     = %w{degC celsius centigrade}
 end
 
-Unit.define!('fahrenheit') do |fahrenheit|
+Unit.define('fahrenheit') do |fahrenheit|
   fahrenheit.definition = Unit(temp_convert_factor, 'degK')  
   fahrenheit.aliases    = %w{degF fahrenheit}
 end
@@ -325,7 +325,7 @@ Unit.define('tempC') do |tempC|
   tempC.definition  = Unit('1 tempK')
 end
 
-Unit.define!('tempF') do |tempF|
+Unit.define('tempF') do |tempF|
   tempF.definition  = Unit(temp_convert_factor, 'tempK')
 end
 
@@ -347,7 +347,7 @@ Unit.define('light-minute') do |lmin|
   lmin.aliases    = %w{lmin light-minute}
 end
 
-Unit.define!('light-year') do |ly|
+Unit.define('light-year') do |ly|
   ly.definition = Unit('1 y') * speed_of_light
   ly.aliases    = %w{ly light-year}
 end
@@ -378,7 +378,7 @@ end
 
 # pressure
 
-Unit.define!('pascal') do |pascal|
+Unit.define('pascal') do |pascal|
   pascal.definition = Unit('1 kg/m*s^2')
   pascal.aliases    = %w{Pa pascal pascals}
 end
@@ -388,7 +388,7 @@ Unit.define('bar') do |bar|
   bar.aliases     = %w{bar bars}
 end
 
-Unit.define!('atm') do |atm|
+Unit.define('atm') do |atm|
   atm.definition  = Unit('101325 Pa')
   atm.aliases     = %w{atm ATM atmosphere atmospheres}
 end
@@ -438,7 +438,7 @@ end
 
 # #energy
 
-Unit.define!('joule') do |joule|
+Unit.define('joule') do |joule|
   joule.definition  = Unit('1 N*m')
   joule.aliases     = %w{J joule joules}
 end
@@ -450,7 +450,7 @@ end
 
 #power
 
-Unit.define!('watt') do |watt|
+Unit.define('watt') do |watt|
   watt.definition = Unit('1 N*m/s')
   watt.aliases    = %w{W Watt watt watts}
 end
@@ -461,7 +461,7 @@ Unit.define('horsepower') do |hp|
 end
 
 # energy
-Unit.define!('btu') do |btu|
+Unit.define('btu') do |btu|
   btu.definition  = Unit('2320092679909671/2199023255552 J') # 1055.056 J  --- ISO standard
   btu.aliases     = %w{Btu btu Btus btus}
 end
@@ -472,7 +472,7 @@ Unit.define('therm') do |therm|
 end
 
 # "small" calorie
-Unit.define!('calorie') do |calorie|
+Unit.define('calorie') do |calorie|
   calorie.definition  = Unit('4.184 J')
   calorie.aliases     = %w{cal calorie calories}
 end
@@ -489,7 +489,7 @@ Unit.define('molar') do |molar|
 end
 
 # potential
-Unit.define!('volt') do |volt|
+Unit.define('volt') do |volt|
   volt.definition = Unit('1 W/A')
   volt.aliases    = %w{V volt volts}
 end
@@ -531,12 +531,12 @@ Unit.define('weber') do |weber|
   weber.aliases     = %w{Wb weber webers}
 end
 
-Unit.define!('tesla') do |tesla|
+Unit.define('tesla') do |tesla|
   tesla.definition  = Unit('1 V*s/m^2')
   tesla.aliases     = %w{T tesla teslas}
 end
 
-Unit.define!('gauss') do |gauss|
+Unit.define('gauss') do |gauss|
   gauss.definition  = Unit('100 microT')
   gauss.aliases     = %w{G gauss}
 end
@@ -552,7 +552,7 @@ Unit.define('oersted') do |oersted|
 end
 
 #activity
-Unit.define!('katal') do |katal|
+Unit.define('katal') do |katal|
   katal.definition  = Unit('1 mole/sec')
   katal.aliases     = %w{kat katal}
 end
@@ -581,7 +581,7 @@ Unit.define('grad') do |grad|
 end
 
 #rotation
-Unit.define!('rotation') do |rotation|
+Unit.define('rotation') do |rotation|
   rotation.definition = Unit(2.0*Math::PI, 'radian')
 end
 
@@ -601,7 +601,7 @@ Unit.define('cents') do |cents|
 end
 
 #luminosity
-Unit.define!('lumen') do |lumen|
+Unit.define('lumen') do |lumen|
   lumen.definition  = Unit('1 cd*steradian')
   lumen.aliases     = %w{lm lumen}
 end
@@ -626,7 +626,7 @@ Unit.define('sievert') do |sievert|
   sievert.aliases     = %w{Sv sievert sieverts}
 end
 
-Unit.define!('becquerel') do |becquerel|
+Unit.define('becquerel') do |becquerel|
   becquerel.definition  = Unit('1 1/s')
   becquerel.aliases     = %w{Bq becquerel becquerels}
 end
@@ -636,7 +636,7 @@ Unit.define('curie') do |curie|
   curie.aliases     = %w{Ci curie curies}
 end
 
-Unit.define!('count') do |count|
+Unit.define('count') do |count|
   count.definition  = Unit('1 each')
   count.kind        = :counting
 end
@@ -655,7 +655,7 @@ Unit.define('bpm') do |bpm|
 end
 
 # misc
-Unit.define!('dozen') do |dozen|
+Unit.define('dozen') do |dozen|
   dozen.definition  = Unit('12 each')
   dozen.aliases     = %w{doz dz dozen}
   dozen.kind       = :counting

@@ -22,7 +22,7 @@ end
 #
 # To add or override a unit definition, add a code block like this..
 # @example Define a new unit 
-#  Unit.define!("foobar") do |unit|
+#  Unit.define("foobar") do |unit|
 #    unit.aliases    = %w{foo fb foo-bar}
 #    unit.definition = Unit("1 baz")
 #  end
@@ -38,6 +38,8 @@ class Unit < Numeric
   @@PREFIX_MAP       = {}
   @@UNIT_MAP         = {}
   @@UNIT_VALUES      = {}
+  @@UNIT_REGEX       = nil
+  @@UNIT_MATCH_REGEX = nil
   UNITY              = '<1>'
   UNITY_ARRAY        = [UNITY]
   FEET_INCH_REGEX    = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inches)/
@@ -132,26 +134,18 @@ class Unit < Numeric
     @@PREFIX_MAP    = {}
     @@UNIT_VALUES   = {}
     @@UNIT_MAP      = {}
+    @@UNIT_REGEX    = nil
+    @@UNIT_MATCH_REGEX = nil
+    @@PREFIX_REGEX  = nil
 
     @@definitions.each do |name, definition|
-      if definition.prefix?
-        @@PREFIX_VALUES[name] = definition.scalar
-        definition.aliases.each {|_alias| @@PREFIX_MAP[_alias] = name }
-      else
-        @@UNIT_VALUES[name]                = {}
-        @@UNIT_VALUES[name][:scalar]       = definition.scalar
-        @@UNIT_VALUES[name][:numerator]    = definition.numerator if definition.numerator
-        @@UNIT_VALUES[name][:denominator]  = definition.denominator if definition.denominator
-        definition.aliases.each {|_alias| @@UNIT_MAP[_alias] = name}
-      end
+      self.use_definition(definition)
     end
     
-    @@PREFIX_REGEX = @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
-    @@UNIT_REGEX = @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit_name]}.reverse.join('|')
-    @@UNIT_MATCH_REGEX = /(#{@@PREFIX_REGEX})*?(#{@@UNIT_REGEX})\b/
     Unit.new(1)
     return true
   end
+ 
   
   # determine if a unit is already defined
   # @param [String] unit
@@ -194,30 +188,22 @@ class Unit < Numeric
       raise ArgumentError, "When using the block form of Unit.define, pass the name of the unit" unless unit_definition.instance_of?(String)
       unit_definition = Unit::Definition.new(unit_definition, &block)
     end
-    @@definitions[unit_definition.name] = unit_definition
+    Unit.definitions[unit_definition.name] = unit_definition
+    Unit.use_definition(unit_definition)
     return unit_definition
   end
-  
-  # @param see (User#define)
-  # @return (see Unit.setup)
-  # Add a unit to the definition list and make it available
-  # @note This is fine for adding one or two units, but is not performant for adding a lot of them
-  def self.define!(unit_definition, &block)
-    self.define(unit_definition, &block)
-    self.setup
-  end
-  
+    
   # @param [String] name Name of unit to redefine
   # @param [Block] block
   # @raise [ArgumentError] if a block is not given
   # @yield [Unit::Definition]
-  # @return (see Unit.define!)
+  # @return (see Unit.define)
   # Get the definition for a unit and allow it to be redefined
   def self.redefine!(name, &block)
     raise ArgumentError, "A block is required to redefine a unit" unless block_given?
     unit_definition = self.definition(name)
     yield unit_definition
-    self.define!(unit_definition)
+    self.define(unit_definition)
   end
   
   # @param [String] name of unit to undefine
@@ -1469,10 +1455,10 @@ class Unit < Numeric
 
     @numerator ||= UNITY_ARRAY
     @denominator ||= UNITY_ARRAY
-    @numerator = top.scan(@@UNIT_MATCH_REGEX).delete_if {|x| x.empty?}.compact if top
-    @denominator = bottom.scan(@@UNIT_MATCH_REGEX).delete_if {|x| x.empty?}.compact if bottom
+    @numerator = top.scan(Unit.unit_match_regex).delete_if {|x| x.empty?}.compact if top
+    @denominator = bottom.scan(Unit.unit_match_regex).delete_if {|x| x.empty?}.compact if bottom
 
-    us = "#{(top || '' + bottom || '')}".to_s.gsub(@@UNIT_MATCH_REGEX,'').gsub(/[\d\*, "'_^\/\$]/,'')
+    us = "#{(top || '' + bottom || '')}".to_s.gsub(Unit.unit_match_regex,'').gsub(/[\d\*, "'_^\/\$]/,'')
     raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless us.empty?
 
     @numerator = @numerator.map do |item|
@@ -1525,4 +1511,45 @@ class Unit < Numeric
         num.to_f
     end, unit.to_s.strip]
   end
+  
+  # return a fragment of a regex to be used for matching units or reconstruct it if hasn't been used yet.
+  # Unit names are reverse sorted by length so the regexp matcher will prefer longer and more specific names
+  # @return [String]
+  # @private
+  def self.unit_regex
+    @@UNIT_REGEX ||= @@UNIT_MAP.keys.sort_by {|unit_name| [unit_name.length, unit_name]}.reverse.join('|')
+  end
+  
+  # return a regex used to match units
+  # @return [RegExp]
+  # @private
+  def self.unit_match_regex
+    @@UNIT_MATCH_REGEX ||= /(#{Unit.prefix_regex})*?(#{Unit.unit_regex})\b/
+  end
+
+  # return a regexp fragment used to match prefixes
+  # @return [String]
+  # @private
+  def self.prefix_regex
+    return @@PREFIX_REGEX ||= @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
+  end
+  
+  # inject a definition into the internal array and set it up for use
+  # @private
+  def self.use_definition(definition)
+    @@UNIT_MATCH_REGEX = nil #invalidate the unit match regex
+    if definition.prefix?
+      @@PREFIX_VALUES[definition.name] = definition.scalar
+      definition.aliases.each {|_alias| @@PREFIX_MAP[_alias] = definition.name }
+      @@PREFIX_REGEX = nil  #invalidate the prefix regex
+    else
+      @@UNIT_VALUES[definition.name]                = {}
+      @@UNIT_VALUES[definition.name][:scalar]       = definition.scalar
+      @@UNIT_VALUES[definition.name][:numerator]    = definition.numerator if definition.numerator
+      @@UNIT_VALUES[definition.name][:denominator]  = definition.denominator if definition.denominator
+      definition.aliases.each {|_alias| @@UNIT_MAP[_alias] = definition.name}
+      @@UNIT_REGEX    = nil #invalidate the unit regex
+    end
+  end
+  
 end
