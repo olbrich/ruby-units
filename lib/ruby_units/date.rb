@@ -38,12 +38,14 @@ class Date
   end
   alias :unit :to_unit
   
+  # :nocov_19:
   unless Date.instance_methods.include?(:to_time)
     # @return [Time]
     def to_time
       Time.local(*ParseDate.parsedate(self.to_s))
     end
   end
+  # :nocov_19:
   
   alias :units_datetime_inspect :inspect
   # @deprecated

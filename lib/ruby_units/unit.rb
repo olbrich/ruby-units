@@ -1371,6 +1371,7 @@ class Unit < Numeric
     unit_string.gsub!(/#/,'pound')
 
     #:nocov:
+    #:nocov_19:
     if defined?(Uncertain) && unit_string =~ /(\+\/-|&plusmn;)/
       value, uncertainty, unit_s = unit_string.scan(UNCERTAIN_REGEX)[0]
       result = unit_s.unit * Uncertain.new(value.to_f,uncertainty.to_f)
@@ -1378,6 +1379,7 @@ class Unit < Numeric
       return
     end
     #:nocov:
+    #:nocov_19:
 
     if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
       real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]
@@ -1502,7 +1504,9 @@ class Unit < Numeric
         if num.respond_to?(:to_c)
           num.to_c
         else
+          #:nocov_19:
           Complex(*num.scan(/(#{sci})(#{sci})i/).flatten.map {|n| n.to_i})
+          #:nocov_19:
         end
       when rational
         Rational(*num.split("/").map {|x| x.to_i})
