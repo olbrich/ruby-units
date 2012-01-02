@@ -2,7 +2,7 @@ Change Log for Ruby-units
 =========================
 2012-01-02  1.4.0   * Fix some definitions that were just wrong (amu, dalton)
                     * Definition uses name of unit if no aliases provided
-                    
+                    * Refactor definition process.  New units are immediately available
 2011-12-31          * Define standard units in terms of base and other standard units -- more internally consistent 
                       and less prone to round-off errors.
                     * add 'poundal'
