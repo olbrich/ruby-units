@@ -1057,7 +1057,6 @@ describe Unit do
           jiffy.numerator = ["<second>"]
           jiffy.kind = :time
         end
-        Unit.setup
       end
       
       after(:each) do
@@ -1093,7 +1092,6 @@ describe Unit do
         @original_display_name = @cups.display_name
         @cups.display_name = "cupz"
         Unit.define(@cups)
-        Unit.setup
       end
       
       after(:each) do

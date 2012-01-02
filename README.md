@@ -154,7 +154,7 @@ It is possible to define new units or redefine existing ones.
 
 The easiest approach is to define a unit in terms of other units.
 
-    Unit.define!("foobar") do |foobar|
+    Unit.define("foobar") do |foobar|
       foobar.definition   = Unit("1 foo") * Unit("1 bar")   # anything that results in a Unit object
       foobar.aliases      = %w{foobar fb}                   # array of synonyms for the unit
       foobar.display_name = "Foobar"                        # How unit is displayed when output

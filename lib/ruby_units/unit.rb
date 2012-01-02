@@ -130,13 +130,13 @@ class Unit < Numeric
   # @return [true]
   def self.setup
     self.clear_cache
-    @@PREFIX_VALUES = {}
-    @@PREFIX_MAP    = {}
-    @@UNIT_VALUES   = {}
-    @@UNIT_MAP      = {}
-    @@UNIT_REGEX    = nil
+    @@PREFIX_VALUES    = {}
+    @@PREFIX_MAP       = {}
+    @@UNIT_VALUES      = {}
+    @@UNIT_MAP         = {}
+    @@UNIT_REGEX       = nil
     @@UNIT_MATCH_REGEX = nil
-    @@PREFIX_REGEX  = nil
+    @@PREFIX_REGEX     = nil
 
     @@definitions.each do |name, definition|
       self.use_definition(definition)
@@ -173,7 +173,6 @@ class Unit < Numeric
   # @return [Unit::Definition]
   # @raise  [ArgumentError] when passed a non-string if using the block form
   # Unpack a unit definition and add it to the array of defined units
-  # The unit won't actually be available to use until Unit.setup is called
   #
   # @example Block form
   #   Unit.define('foobar') do |foobar|
