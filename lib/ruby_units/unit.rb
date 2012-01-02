@@ -5,7 +5,7 @@ if RUBY_VERSION < "1.9"
   require 'rational'
   # :nocov_19:
 end
-# Copyright 2006-2011
+# Copyright 2006-2012
 #
 # @author Kevin C. Olbrich, Ph.D.
 # @see https://github.com/olbrich/ruby-units
@@ -32,7 +32,7 @@ end
 # @todo refactor internal representation of units
 # @todo method to determine best natural prefix
 class Unit < Numeric
-  VERSION = Unit::Version::STRING
+  VERSION            = Unit::Version::STRING
   @@definitions      = {}
   @@PREFIX_VALUES    = {}
   @@PREFIX_MAP       = {}
