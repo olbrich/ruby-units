@@ -57,7 +57,7 @@ end
 Unit.define("byte") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<byte>}
-  unit.aliases   = %w{B byte}
+  unit.aliases   = %w{B byte bytes}
   unit.kind      = :memory
 end
 
@@ -95,3 +95,6 @@ Unit.define("decibel") do |unit|
   unit.aliases   = %w{dB decibel decibels}
   unit.kind      = :logarithmic
 end
+
+Unit.setup
+
