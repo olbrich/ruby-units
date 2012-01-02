@@ -105,6 +105,7 @@ class Unit < Numeric
     7997          =>  :density,
     7998          =>  :area_density,
     8000          =>  :mass,
+    152020        =>  :radiation_exposure,
     159999        =>  :magnetism,
     160000        =>  :current,
     160020        =>  :charge,
@@ -165,6 +166,12 @@ class Unit < Numeric
   def self.definition(_unit)
     unit = (_unit =~ /^<.+>$/) ? _unit : "<#{_unit}>"
     return @@definitions[unit]
+  end
+  
+  # return a list of all defined units
+  # @return [Array]
+  def self.definitions
+    return @@definitions
   end
   
   # @param  [Unit::Definition|String] unit_definition
@@ -597,7 +604,7 @@ class Unit < Numeric
   # false, even if the units are "unitless" like 'radians, each, etc'
   # @return [Boolean]
   def unitless?
-    return (@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
+    return(@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
   end
 
   # Compare two Unit objects. Throws an exception if they are not of compatible types.
