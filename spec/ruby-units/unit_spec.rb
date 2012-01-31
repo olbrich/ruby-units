@@ -123,6 +123,54 @@ describe "Create some simple units" do
     its(:base) {should == Unit("0.001 m")}
   end
 
+  # with a zero power
+  describe Unit("1 m^0") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should == 1}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == ""}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should     be_base}
+    it {should     be_unitless}
+    it {should_not be_zero}
+    its(:base) {should == Unit("1")}
+  end
+  
+  # unit only
+  describe Unit("mm") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should == 1}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "mm"}
+    its(:kind) {should == :length}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should == Unit("0.001 m")}
+  end
+  
+  # Compound unit
+  describe Unit("1 N*m") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should == 1}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "N*m"}
+    its(:kind) {should == :energy}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should == Unit("1 kg*m^2/s^2")}
+  end
+
   # scalar and unit with powers
   describe Unit("10 m/s^2") do
     it {should be_an_instance_of Unit}
@@ -333,7 +381,7 @@ describe "Create some simple units" do
   end
 
   # funky unit
-  describe Unit.new("1 attoparsec/microfortnight") do
+  describe Unit("1 attoparsec/microfortnight") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
     its(:units) {should == "apc/ufortnight"}
@@ -349,7 +397,7 @@ describe "Create some simple units" do
   end
   
   # Farads
-  describe Unit.new("1 F") do
+  describe Unit("1 F") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
     its(:units) {should == "F"}
@@ -428,6 +476,157 @@ describe Unit do
       Unit.defined?("doohickey").should be_false
     end
   end
+  
+  describe '#to_yaml' do
+    subject { Unit('1 mm') }
+    its(:to_yaml) {should =~ /--- !ruby\/object:Unit/ }
+  end
+
+  describe "#definition" do    
+    context "The requested unit is defined" do
+      before(:each) do
+        @definition = Unit.definition('mph')
+      end
+      
+      it "should return a Unit::Definition" do
+        @definition.should be_instance_of(Unit::Definition)
+      end
+      
+      specify { @definition.name.should == "<mph>"}
+      specify { @definition.aliases.should == %w{mph}}
+      specify { @definition.numerator.should == ['<meter>'] }
+      specify { @definition.denominator.should == ['<second>'] }
+      specify { @definition.kind.should == :speed }
+      specify { @definition.scalar.should === 0.44704}
+    end
+    
+    context "The requested unit is not defined" do
+      it "should return nil" do
+        Unit.definition("doohickey").should be_nil
+      end
+    end  
+  end
+  
+  describe "#define" do
+    describe "a new unit" do
+      before(:each) do
+        @jiffy = Unit.define("jiffy") do |jiffy|
+          jiffy.scalar = (1/100)
+          jiffy.aliases = %w{jif}
+          jiffy.numerator = ["<second>"]
+          jiffy.kind = :time
+        end
+      end
+      
+      after(:each) do
+        Unit.undefine!('jiffy')
+      end
+    
+      describe "Unit('1e6 jiffy')" do
+        # do this because the unit is not defined at the time this file is parsed, so it fails
+        subject {Unit("1e6 jiffy")}
+      
+        it {should be_a Numeric}
+        it {should be_an_instance_of Unit}
+        its(:scalar) {should == 1e6}
+        its(:scalar) {should be_an Integer}
+        its(:units) {should == "jif"}
+        its(:kind) {should == :time}
+        it {should_not be_temperature}
+        it {should_not be_degree}
+        it {should_not be_base}
+        it {should_not be_unitless}
+        it {should_not be_zero}
+        its(:base) {should == Unit("10000 s")}
+      end
+    
+      it "should register the new unit" do
+        Unit.defined?('jiffy').should be_true
+      end
+    end
+    
+    describe "an existing unit again" do
+      before(:each) do
+        @cups = Unit.definition('cup')
+        @original_display_name = @cups.display_name
+        @cups.display_name = "cupz"
+        Unit.define(@cups)
+      end
+      
+      after(:each) do
+        Unit.redefine!("cup") do |cup|
+          cup.display_name = @original_display_name
+        end
+      end
+    
+      describe "Unit('1 cup')" do
+        # do this because the unit is going to be redefined
+        subject {Unit("1 cup")}
+      
+        it {should be_a Numeric}
+        it {should be_an_instance_of Unit}
+        its(:scalar) {should == 1}
+        its(:scalar) {should be_an Integer}
+        its(:units) {should == "cupz"}
+        its(:kind) {should == :volume}
+        it {should_not be_temperature}
+        it {should_not be_degree}
+        it {should_not be_base}
+        it {should_not be_unitless}
+        it {should_not be_zero}
+      end
+          
+    end
+    
+  end
+
+  describe '#redefine!' do
+    before(:each) do
+      @jiffy = Unit.define("jiffy") do |jiffy|
+        jiffy.scalar = (1/100)
+        jiffy.aliases = %w{jif}
+        jiffy.numerator = ["<second>"]
+        jiffy.kind = :time
+      end
+
+      Unit.redefine!('jiffy') do |jiffy|
+        jiffy.scalar = (1/1000)
+      end
+    end
+    
+    after(:each) do
+      Unit.undefine!("jiffy")
+    end
+    
+    specify { Unit('1 jiffy').to_base.scalar.should == (1/1000) }
+  end
+  
+  describe '#undefine!' do
+    before(:each) do
+      @jiffy = Unit.define("jiffy") do |jiffy|
+        jiffy.scalar = (1/100)
+        jiffy.aliases = %w{jif}
+        jiffy.numerator = ["<second>"]
+        jiffy.kind = :time
+      end
+      Unit.undefine!("jiffy")
+    end
+    
+    specify "the unit should be undefined" do
+      Unit.defined?('jiffy').should be_false
+    end
+    
+    specify "attempting to use an undefined unit fails" do
+      expect { Unit("1 jiffy") }.to raise_exception(ArgumentError)
+    end
+    
+    it "should return true when undefining an unknown unit" do
+      Unit.defined?("unknown").should be_false
+      Unit.undefine!("unknown").should be_true
+    end
+    
+  end
+
 end
 
 describe "Unit Comparisons" do
@@ -507,7 +706,7 @@ describe "Unit Comparisons" do
       specify { Unit("2 m").should > Unit("1 ft")}
       specify { Unit("70 tempF").should > Unit("10 degC")}
       specify { Unit("1 m").should > 0 }
-      specify { expect { Unit("1 m").should_not > nil}.to raise_error(ArgumentError, "comparison of Unit with nil failed") }
+      specify { expect { Unit("1 m").should_not > nil}.to raise_error(ArgumentError, /comparison of Unit with (nil failed|NilClass)/) }
     end
     
     context "incompatible units cannot be compared" do
@@ -569,6 +768,38 @@ describe "Unit Conversions" do
   context "reported bugs" do
     specify { (Unit("189 Mtonne") * Unit("1189 g/tonne")).should == Unit("224721 tonne") }
     specify { (Unit("189 Mtonne") * Unit("1189 g/tonne")).convert_to("tonne").should == Unit("224721 tonne") }
+  end
+  
+  describe "Foot-inch conversions" do
+    [
+      ["76 in", %Q{6'4"}],
+      ["77 in", %Q{6'5"}],
+      ["78 in", %Q{6'6"}],
+      ["79 in", %Q{6'7"}],
+      ["80 in", %Q{6'8"}],
+      ["87 in", %Q{7'3"}],
+      ["88 in", %Q{7'4"}],
+      ["89 in", %Q{7'5"}]
+      ].each do |inches, feet|
+      specify { Unit(inches).convert_to("ft").should == Unit(feet)}
+      specify { Unit(inches).to_s(:ft).should == feet}
+    end
+  end
+
+  describe "pound-ounce conversions" do
+    [
+      ["76 oz", "4 lbs, 12 oz"],
+      ["77 oz", "4 lbs, 13 oz"],
+      ["78 oz", "4 lbs, 14 oz"],
+      ["79 oz", "4 lbs, 15 oz"],
+      ["80 oz", "5 lbs, 0 oz"],
+      ["87 oz", "5 lbs, 7 oz"],
+      ["88 oz", "5 lbs, 8 oz"],
+      ["89 oz", "5 lbs, 9 oz"]
+      ].each do |ounces, pounds|
+      specify { Unit(ounces).convert_to("lbs").should == Unit(pounds)}
+      specify { Unit(ounces).to_s(:lbs).should == pounds}
+    end  
   end
 end
 
@@ -737,6 +968,14 @@ describe "Unit Math" do
       specify "incompatible units raises an exception" do 
         expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units")
       end
+    end
+    
+    context "unary negation (-)" do
+      specify { (-Unit("1 mm")).should == Unit("-1 mm")}
+    end
+    
+    context "unary plus (+)" do
+      specify { (+Unit('1 mm')).should == Unit('1 mm')}
     end
   end
   
@@ -907,7 +1146,14 @@ describe "Unit Math" do
   context '#divmod' do
     specify { Unit("5 mm").divmod(Unit("2 mm")).should == [2,1] }
     specify { Unit("1 km").divmod(Unit("2 m")).should == [500,0] }
+    specify { expect {Unit('1 m').divmod(Unit('2 kg'))}.to raise_error(ArgumentError,"Incompatible Units")}
   end
+  
+  context '#div' do
+    specify { Unit('23 m').div(Unit('2 m')).should == 11 }
+  end
+
+  
 
   context "Time helper functions" do
     before do
@@ -986,189 +1232,6 @@ describe "Unit Output formatting" do
     specify { subject.to_s.should == "8 cupz" }
     
   end
-  
-end
-
-describe "Foot-inch conversions" do
-  [
-    ["76 in", %Q{6'4"}],
-    ["77 in", %Q{6'5"}],
-    ["78 in", %Q{6'6"}],
-    ["79 in", %Q{6'7"}],
-    ["80 in", %Q{6'8"}],
-    ["87 in", %Q{7'3"}],
-    ["88 in", %Q{7'4"}],
-    ["89 in", %Q{7'5"}]
-    ].each do |inches, feet|
-    specify { Unit(inches).convert_to("ft").should == Unit(feet)}
-    specify { Unit(inches).to_s(:ft).should == feet}
-  end
-end
-
-describe "pound-ounce conversions" do
-  [
-    ["76 oz", "4 lbs, 12 oz"],
-    ["77 oz", "4 lbs, 13 oz"],
-    ["78 oz", "4 lbs, 14 oz"],
-    ["79 oz", "4 lbs, 15 oz"],
-    ["80 oz", "5 lbs, 0 oz"],
-    ["87 oz", "5 lbs, 7 oz"],
-    ["88 oz", "5 lbs, 8 oz"],
-    ["89 oz", "5 lbs, 9 oz"]
-    ].each do |ounces, pounds|
-    specify { Unit(ounces).convert_to("lbs").should == Unit(pounds)}
-    specify { Unit(ounces).to_s(:lbs).should == pounds}
-  end  
-end
-
-describe Unit do
-  describe "definition" do
-    
-    context "The requested unit is defined" do
-      before(:each) do
-        @definition = Unit.definition('mph')
-      end
-      
-      it "should return a Unit::Definition" do
-        @definition.should be_instance_of(Unit::Definition)
-      end
-      
-      specify { @definition.name.should == "<mph>"}
-      specify { @definition.aliases.should == %w{mph}}
-      specify { @definition.numerator.should == ['<meter>'] }
-      specify { @definition.denominator.should == ['<second>'] }
-      specify { @definition.kind.should == :speed }
-      specify { @definition.scalar.should === 0.44704}
-    end
-    
-    context "The requested unit is not defined" do
-      it "should return nil" do
-        Unit.definition("doohickey").should be_nil
-      end
-    end  
-  end
-  
-  describe "define" do
-    describe "a new unit" do
-      before(:each) do
-        @jiffy = Unit.define("jiffy") do |jiffy|
-          jiffy.scalar = (1/100)
-          jiffy.aliases = %w{jif}
-          jiffy.numerator = ["<second>"]
-          jiffy.kind = :time
-        end
-      end
-      
-      after(:each) do
-        Unit.undefine!('jiffy')
-      end
-    
-      describe "Unit('1e6 jiffy')" do
-        # do this because the unit is not defined at the time this file is parsed, so it fails
-        subject {Unit("1e6 jiffy")}
-      
-        it {should be_a Numeric}
-        it {should be_an_instance_of Unit}
-        its(:scalar) {should == 1e6}
-        its(:scalar) {should be_an Integer}
-        its(:units) {should == "jif"}
-        its(:kind) {should == :time}
-        it {should_not be_temperature}
-        it {should_not be_degree}
-        it {should_not be_base}
-        it {should_not be_unitless}
-        it {should_not be_zero}
-        its(:base) {should == Unit("10000 s")}
-      end
-    
-      it "should register the new unit" do
-        Unit.defined?('jiffy').should be_true
-      end
-    end
-    
-    describe "an existing unit again" do
-      before(:each) do
-        @cups = Unit.definition('cup')
-        @original_display_name = @cups.display_name
-        @cups.display_name = "cupz"
-        Unit.define(@cups)
-      end
-      
-      after(:each) do
-        Unit.redefine!("cup") do |cup|
-          cup.display_name = @original_display_name
-        end
-      end
-    
-      describe "Unit('1 cup')" do
-        # do this because the unit is going to be redefined
-        subject {Unit("1 cup")}
-      
-        it {should be_a Numeric}
-        it {should be_an_instance_of Unit}
-        its(:scalar) {should == 1}
-        its(:scalar) {should be_an Integer}
-        its(:units) {should == "cupz"}
-        its(:kind) {should == :volume}
-        it {should_not be_temperature}
-        it {should_not be_degree}
-        it {should_not be_base}
-        it {should_not be_unitless}
-        it {should_not be_zero}
-      end
-          
-    end
-    
-  end
-
-  describe 'redefine!' do
-    before(:each) do
-      @jiffy = Unit.define("jiffy") do |jiffy|
-        jiffy.scalar = (1/100)
-        jiffy.aliases = %w{jif}
-        jiffy.numerator = ["<second>"]
-        jiffy.kind = :time
-      end
-
-      Unit.redefine!('jiffy') do |jiffy|
-        jiffy.scalar = (1/1000)
-      end
-    end
-    
-    after(:each) do
-      Unit.undefine!("jiffy")
-    end
-    
-    specify { Unit('1 jiffy').to_base.scalar.should == (1/1000) }
-  end
-  
-  describe 'undefine!' do
-    before(:each) do
-      @jiffy = Unit.define("jiffy") do |jiffy|
-        jiffy.scalar = (1/100)
-        jiffy.aliases = %w{jif}
-        jiffy.numerator = ["<second>"]
-        jiffy.kind = :time
-      end
-      Unit.undefine!("jiffy")
-    end
-    
-    specify "the unit should be undefined" do
-      Unit.defined?('jiffy').should be_false
-    end
-    
-    specify "attempting to use an undefined unit fails" do
-      expect { Unit("1 jiffy") }.to raise_exception(ArgumentError)
-    end
-    
-    it "should return true when undefining an unknown unit" do
-      Unit.defined?("unknown").should be_false
-      Unit.undefine!("unknown").should be_true
-    end
-    
-  end
-  
-  
   
 end
 
