@@ -14,12 +14,6 @@ rescue LoadError
 end
 
 
-class Unit < Numeric
-  @@USER_DEFINITIONS = {'<inchworm>' =>  [%w{inworm inchworm}, 0.0254, :length, %w{<meter>} ],
-                        '<habenero>'   => [%w{degH}, 100, :temperature, %w{<celsius>}]}
-  Unit.setup
-end
-
 class Time
   @@forced_now = nil
   @@forced_gmt = nil
@@ -83,50 +77,7 @@ class TestRubyUnits < Test::Unit::TestCase
     Time.forced_now = nil
     DateTime.forced_now = nil
   end
-  
-  def test_to_yaml
-    unit = "1 mm".u
-    if RUBY_PLATFORM == "java"
-      # apparently jruby's implementation of yaml has some white space differences
-      assert_equal "--- !ruby/object:Unit \nscalar: 1\nnumerator: \n  - <milli>\n  - <meter>\ndenominator: \n  - <1>\nsignature: 1\nbase_scalar: !ruby/object:Rational \n  denominator: 1000\n  numerator: 1\n", unit.to_yaml
-    else
-      assert_equal "--- !ruby/object:Unit \nscalar: 1\nnumerator: \n- <milli>\n- <meter>\ndenominator: \n- <1>\nsignature: 1\nbase_scalar: !ruby/object:Rational \n  denominator: 1000\n  numerator: 1\n", unit.to_yaml
-    end
-  end
-
-  def test_time
-    a = Time.now
-    assert_equal "s", a.to_unit.units
-    assert_equal a + 3600, a + "1 h".unit
-    assert_equal a - 3600, a - "1 h".unit
-    assert_in_delta Time.now - "1 h".unit, Unit("1 h").ago, 1
-    assert_in_delta Time.now + 3600, Unit("1 h").from(Time.now), 1
-    assert_in_delta Time.now + "1 h".unit, Unit("1 h").from(Time.now), 1
-    assert_in_delta Time.now - 3600, Unit("1 h").before_now, 1
-    assert_equal "60 min", Unit("min").until(Time.now + 3600).to_s
-    assert_equal "01:00", Unit("min").since(Time.now - 3600).to_s("%H:%M")
-  end
-  
-  def test_time_helpers
-    assert_equal @april_fools, Time.now
-    assert_equal @april_fools_datetime, DateTime.now
-    assert_equal 1143910800, Unit.new(Time.now).scalar
-    assert_equal @april_fools.unit.to_time, @april_fools
-    assert_equal Time.in('1 day'), @april_fools + 86400
-    assert_equal "2006-04-01T12:00:00-05:00", @april_fools_datetime.inspect
-    assert_equal "2006-04-01T00:00:00+00:00", '2453826.5 days'.unit.to_datetime.to_s 
-  end
-  
-  def test_string_helpers
-    assert_equal '1 mm'.convert_to('in'), Unit('1 mm').convert_to('in')
-  end
-
-  [:sin, :cos, :tan, :sinh, :cosh, :tanh].each do |trig|
-		define_method("test_#{trig}") do
-			assert_equal Math.send(trig, Math::PI), Math.send(trig, "180 deg".unit)
-		end
-	end
-	
+      
   def test_clone
     unit1= "1 mm".unit
     unit2 = unit1.clone
@@ -134,31 +85,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_not_equal unit1.denominator.object_id, unit2.denominator.object_id
     assert unit1 === unit2
   end 
-  
-  def test_unary_minus
-    unit1 = Unit.new("1 mm^2")
-    unit2 = Unit.new("-1 mm^2")
-    assert_equal unit1, -unit2
-  end
-  
-  def test_unary_plus
-    unit1 = Unit.new("1 mm")
-    assert_equal unit1, +unit1
-  end
-
-  def test_create_unit_only
-    unit1 = Unit.new("m")
-    assert_equal ['<meter>'], unit1.numerator
-    assert_equal 1.0, unit1.scalar
-  end
-  
-  def test_to_base
-    unit1 = Unit.new("100 cm")
-    assert_in_delta 1, unit1.to_base.scalar, 0.001
-    unit2 = Unit("1 mm^2 ms^-2")
-    assert_in_delta 1,  unit2.to_base.scalar, 0.001 
-  end
-  
+      
   def test_to_unit
     unit1 = "1 mm".to_unit
     assert_equal unit1, unit1.to_unit
@@ -179,57 +106,6 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_in_delta 1, unit1.scalar, 0.001
     assert_equal ['<milli>','<meter>'], unit1.numerator
   end
-  
-  def test_create_unitless
-    unit1 = Unit("1")
-    assert_equal 1, unit1.to_f
-    assert_equal ['<1>'],unit1.numerator
-    assert_equal ['<1>'],unit1.denominator
-    unit1 = Unit.new("1.5")
-    assert_equal 1.5,unit1.to_f
-    assert_equal ['<1>'],unit1.numerator
-    assert_equal ['<1>'],unit1.denominator
-  end
-  
-  def test_create_simple
-    unit1 = Unit.new("1 m")
-    assert_equal 1,unit1.scalar
-    assert_equal ['<meter>'], unit1.numerator
-    assert_equal ['<1>'],unit1.denominator
-  end
-  
-  def test_create_compound
-    unit1 = Unit.new("1 N*m")
-    assert_equal 1,unit1.scalar 
-    assert_equal ['<newton>','<meter>'],unit1.numerator
-    assert_equal ['<1>'],unit1.denominator
-  end
-  
-  def test_create_with_denominator
-    unit1 = Unit.new("1 m/s")
-    assert_equal 1, unit1.scalar
-    assert_equal ['<meter>'],unit1.numerator
-    assert_equal ['<second>'],unit1.denominator
-  end
-  
-  def test_create_with_powers
-    unit1 = Unit.new("1 m^2/s^2")
-    assert_equal 1, unit1.scalar
-    assert_equal ['<meter>','<meter>'],unit1.numerator
-    assert_equal ['<second>','<second>'],unit1.denominator
-    unit1 = Unit.new("1 m^2 kg^2 J^2/s^2")
-    assert_equal 1, unit1.scalar
-    assert_equal ['<meter>','<meter>','<kilogram>','<kilogram>','<joule>','<joule>'],unit1.numerator
-    assert_equal ['<second>','<second>'],unit1.denominator
-    
-  end
-
-  def test_create_with_zero_power
-    unit1 = Unit.new("1 m^0")
-    assert_equal 1,unit1.scalar
-    assert_equal ['<1>'],unit1.numerator
-    assert_equal ['<1>'],unit1.denominator
-  end
 
   def test_create_with_negative_powers
     unit1 = Unit.new("1 m^2 s^-2")
@@ -244,57 +120,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal ['<milli>','<meter>','<milli>','<meter>'], unit1.numerator
     assert_equal ['<micro>','<liter>','<micro>','<liter>'], unit1.denominator
   end
-  
-  def test_bad_create
-    assert_raises(ArgumentError) { Unit.new(nil)}
-    assert_raises(ArgumentError) { Unit.new(true)}
-    assert_raises(ArgumentError) { Unit.new(false)}
-    assert_raises(ArgumentError) { Unit.new(/(.+)/)}
-  end
-  
-  def test_convert
-    unit1 = Unit.new("1 attoparsec/microfortnight")
-    assert_nothing_raised {
-      unit2 = unit1 >> "in/s"
-      assert_equal ['<inch>'],unit2.numerator
-      assert_equal ['<second>'],unit2.denominator
-      assert_in_delta 1.0043269330917,unit2.scalar,0.00001 
-    }
-  end
-  
-  def test_add_operator
-    a = '0 mm'.unit
-    b = '10 cm'.unit
-    c = '1 in'.unit
-    d = '1 ml'.unit
-    
-    assert_equal((a+b), b)
-    assert_equal((a+b).units, b.units)
-    assert_equal((b+a), b)
-    assert_equal((b+a).units, b.units)
-    assert_in_delta((b+c).scalar, 12.54, 0.01)
-    assert_equal((b+c).units, 'cm')
-    assert_raises(ArgumentError) {
-      b + d
-    }
-  end
-  
-  def test_subtract_operator
-    a = '0 mm'.unit
-    b = '10 cm'.unit
-    c = '1 in'.unit
-    d = '1 ml'.unit
-    
-    assert_equal((a-b), -b)
-    assert_equal((a-b).units, b.units)
-    assert_equal((b-a), b)
-    assert_equal((b-a).units, b.units)
-    assert_in_delta((b-c).scalar, 7.46, 0.01)
-    assert_equal((b-c).units, 'cm')
-    assert_raises(ArgumentError) {
-      b - d
-    }
-  end
+      
   
   def test_convert_to
     unit1 = Unit.new("1 mm")
@@ -312,33 +138,12 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal unit1, unit1.convert_to(false)
     assert_equal unit1, unit1.convert_to(nil)
   end
-  
-  def test_compare 
-    unit1 = "1 mm".unit
-    unit2 = "1 mm".unit
-    unit3 = unit2 >> "in"
-    assert unit1 === unit2
-    assert !(unit1 === unit3)
-    assert unit1 === "1 mm"
-  end
-  
-  def test_matched_units
-    unit1 = Unit.new("1 m*kg/s")
-    unit2 = Unit.new("1 in*pound/min")
-    assert unit1 =~ unit2
-  end
-  
+      
   def test_matched_units_using_string
     unit1 = Unit.new("1 m*kg/s")
     assert unit1 =~ "in*pound/min"
   end
-  
-  def test_unmatched_units
-    unit1 = Unit.new("1 m*kg/s")
-    unit2 = Unit.new("1 mm")
-    assert unit1 !~ unit2
-  end
-  
+    
   def test_comparison_like_units
     unit1 = Unit.new("1 in")
     unit2 = Unit.new("1 mm")
@@ -551,19 +356,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal unit2, unit1.round
     assert_equal((unit1/unit2).round, 1)
   end
-  
-  def test_zero?
-    unit1 = Unit.new("0")
-    assert unit1.zero?
-  end
-  
-  def test_nonzero?
-    unit1 = Unit.new("0")
-    unit2 = Unit.new("1 mm")
-    assert_nil unit1.nonzero?
-    assert_equal unit2, unit2.nonzero?
-  end
-  
+    
   def test_equality
     unit1 = Unit.new("1 cm")
     unit2 = Unit.new("10 mm")
@@ -605,23 +398,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { c - '400 degK'.unit}
     assert_equal a, a.convert_to('tempF')
   end
-  
-  def test_feet
-    unit1 = Unit.new("6'6\"")
-    assert_in_delta 6.5, unit1.scalar, 0.01
-    unit2 = "6'".unit
-    assert_equal unit2, '6 feet'.unit
-    unit3 = '6"'.unit
-    assert_equal unit3, '6 inch'.unit
-
-  end
-  
-  def test_pounds
-    unit1 = Unit.new("8 pounds, 8 ounces")
-    assert_in_delta 8.5, unit1.scalar, 0.01
-    assert_equal '150#'.unit, '150 lbs'.unit
-  end
-  
+    
   # these units are 'ambiguous' and could be mis-parsed
   def test_parse_tricky_units
     unit1 = Unit.new('1 mm')      #sometimes parsed as 'm*m'
@@ -659,30 +436,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal("1.5 mm", Unit.new("1.5 mm").to_s)
     assert_equal("1.5 mm", "#{Unit.new('1.5 mm')}")
   end
-  
-  def test_to_feet_inches
-    unit1 = Unit.new("6'5\"")
-    assert_equal "6'5\"", unit1.to_s(:ft)
-    assert_raises(ArgumentError) {
-      unit1 = Unit.new("1 kg")
-      unit1.to_s(:ft)
-    }
-  end
-  
-  def test_to_lbs_oz
-    unit1 = Unit.new("8 lbs 8 oz")
-    assert_equal "8 lbs, 8 oz", unit1.to_s(:lbs)
-    assert_raises(ArgumentError) {
-      unit1 = Unit.new("1 m")
-      unit1.to_s(:lbs)
-    }
-  end
-  
-  def test_add_units
-    a = Unit.new("1 inchworm")
-    assert_equal "1 inworm", a.to_s
-  end
-  
+      
   def test_ideal_gas_law
     p = Unit "100 kPa"
     v = Unit "1 m^3"
@@ -824,12 +578,6 @@ class TestRubyUnits < Test::Unit::TestCase
     b = '10 mg/ml'.unit
     assert_equal a/b, 1
   end
-
-  def test_wt_percent
-    a = '1 wt%'.unit
-    b = '1 g/dl'.unit
-    assert_equal a,b
-  end
   
   def test_parse_durations
     assert_equal "1:00".unit, '1 hour'.unit
@@ -849,65 +597,16 @@ class TestRubyUnits < Test::Unit::TestCase
     b = 0.unit(a)
     assert_equal b, '0 g'.unit
   end
-  
-  def test_sqrt
-    a = '-9 mm^2'.unit
-    b = a**(0.5)
-    assert_in_delta Math.sqrt(a).to_unit.scalar.real, b.scalar.real, 0.00001
-		# ruby 1.8.x uses .image while 1.9.x uses .imaginary
-		if Complex.instance_methods.include?(:imaginary)
-    	assert_in_delta Math.sqrt(a).to_unit.scalar.imaginary, b.scalar.imaginary, 0.00001
-		else
-			assert_in_delta Math.sqrt(a).to_unit.scalar.image, b.scalar.image, 0.00001
-		end
-  end
-
-	def test_div
-		assert_equal 11,"23 m".unit.div('2 m'.unit)
-	end
-	
-	def test_divmod
-		assert_equal [277,1], 555.unit('mm').divmod(2.unit('mm'))
-		assert_equal [277, 0.0010000000000000373], '0.555 m'.unit.divmod('2 mm'.unit)
-		assert_raises(ArgumentError) { '1 m'.unit.divmod('1 kg'.unit) }
-	end
-
-	if Math.respond_to?(:cbrt)
-		def test_cbrt
-			assert_in_delta '2 mm'.to_unit, Math.cbrt('8 mm^3'.to_unit), 0.0001
-		end
-	end
-  
-  def test_hypot
-    assert_equal Math.hypot('3 mm'.unit,'4 mm'.unit), '5 mm'.unit
-    assert_raises(ArgumentError) { Math.hypot('3 mm'.unit, '4 kg'.unit)}
-  end
-  
+  	    
   def test_complex
     assert_equal '1+1i mm'.unit.scalar, Complex(1,1)
     assert_equal '1+1i'.unit.scalar, Complex(1,1)
     assert_raises(RuntimeError) { '1+1i mm'.unit.to_c}
   end
-
-  def test_atan2
-    assert_equal Math.atan2('1 mm'.unit,'1 mm'.unit), Math.atan2(1,1)
-    assert_raises(ArgumentError) {Math.atan2('1 mm'.unit, '1 lb'.unit)}
-    assert_raises(RuntimeError) {Math.atan2('1 mm'.unit, 1)}
-  end
-
-  def test_rational_units
-    assert_equal '1/4 cup'.unit, '0.25 cup'.unit
-    assert_equal '1/4 in/s'.unit, '0.25 in/s'.unit
-    assert_equal '1/4'.unit, 0.25
-  end
   
   def test_to_date
     a = Time.now
     assert_equal a.send(:to_date), Date.today
-  end
-  
-  def test_natural_language
-    assert_equal Unit.parse("10 mm in cm"), '10 mm'.unit.convert_to('cm')
   end
   
   def test_round_pounds
@@ -934,28 +633,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal('1/1000 m', a.to_s('m'))
     assert_equal('1/1000 m', a.output['m'])
   end
-    
-  def test_version
-    assert_equal('1.3.2', Unit::VERSION)
-  end
-  
-  def test_negation
-    a = 1.to_unit
-    assert_equal(a.class, (1-a).class)
-  end
-  
-  def test_degree
-    assert "100 tempF".unit.degree?
-    assert "100 degC".unit.degree?
-    assert !"1 mm".unit.degree?
-  end
-
-  def test_temperature
-    assert "100 tempF".unit.temperature?
-    assert !"100 degC".unit.temperature?
-    assert !"1 mm".unit.temperature?    
-  end
-  
+      
   def test_parse_into_numbers_and_units
     assert_equal([1,"m"], Unit.parse_into_numbers_and_units("1 m"))
     assert_equal([1.0,"m"], Unit.parse_into_numbers_and_units("1.0 m"))
