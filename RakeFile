@@ -91,29 +91,33 @@ task :specs => :spec
 desc "Run tests against several ruby versions, requires rvm"
 task :multitest do
   rubies = %w{
-      ruby-1.8.7-p352@ruby-units
-      ruby-1.8.7-p352@ruby-units-with-chronic
+      ruby-1.8.7-p357@ruby-units
+      ruby-1.8.7-p357@ruby-units-with-chronic
       ruby-1.9.2-p290@ruby-units
       ruby-1.9.2-p290@ruby-units-with-chronic
       rbx-head@ruby-units
-      jruby-1.6.5@ruby-units
+      jruby-1.6.5.1@ruby-units
       }
   exec "rvm #{rubies.join(',')} do rake tests"
 end
 
-desc "Run specs against several ruby versions, requires rvm"
-task :multispec do
-  rubies = %w{
-      ruby-1.8.7-p352@ruby-units
-      ruby-1.8.7-p352@ruby-units-with-chronic
-      ruby-1.9.2-p290@ruby-units
-      ruby-1.9.2-p290@ruby-units-with-chronic
-      rbx-head@ruby-units
-      jruby-1.6.5@ruby-units
-      }
-  exec "rvm #{rubies.join(',')} do rake spec"
+rubies = {
+      "ruby-1.8.7" => %w{ruby-1.8.7-p357@ruby-units ruby-1.8.7-p357@ruby-units-with-chronic},
+      "ruby-1.9.2" => %w{ruby-1.9.2-p290@ruby-units ruby-1.9.2-p290@ruby-units-with-chronic},
+      "rbx"        => %w{rbx-head@ruby-units},
+      "jruby"      => %w{jruby-1.6.5.1@ruby-units}
+    }
+
+rubies.each do |name, ruby|
+  desc "Run Spec against #{name}"
+  task "spec:#{name}" do
+    sh "rvm #{ruby.join(',')} do rake spec"
+  end
 end
 
-task :default => :test
+desc "Run specs against several ruby versions, requires rvm"
+task "spec:all" => rubies.keys.map {|name| "spec:#{name}"}
+
+task :default => :spec
 
 task :tests => :test
