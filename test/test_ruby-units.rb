@@ -105,25 +105,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal ['<milli>','<meter>','<milli>','<meter>'], unit1.numerator
     assert_equal ['<micro>','<liter>','<micro>','<liter>'], unit1.denominator
   end
-      
-  
-  def test_convert_to
-    unit1 = Unit.new("1 mm")
-    unit2 = Unit.new("1 ft")
-    assert_nothing_raised {
-      unit3 = unit1 >> unit2
-      assert_equal ['<foot>'], unit3.numerator
-      assert_equal ['<1>'],unit3.denominator
-      unit3 = unit1 >> "ft"
-      assert_equal ['<foot>'], unit3.numerator
-      assert_equal ['<1>'],unit3.denominator
-    }
-    assert_raises(ArgumentError) { unit1 >> 5.0}
-    assert_equal unit1, unit1.convert_to(true)
-    assert_equal unit1, unit1.convert_to(false)
-    assert_equal unit1, unit1.convert_to(nil)
-  end
-      
+            
   def test_matched_units_using_string
     unit1 = Unit.new("1 m*kg/s")
     assert unit1 =~ "in*pound/min"
