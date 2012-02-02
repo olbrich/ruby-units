@@ -98,13 +98,6 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_in_delta 1, unit1.scalar, 0.001
     assert_equal ['<milli>','<meter>'], unit1.numerator
   end
-
-  def test_create_with_negative_powers
-    unit1 = Unit.new("1 m^2 s^-2")
-    assert_equal 1, unit1.scalar
-    assert_equal ['<meter>','<meter>'],unit1.numerator
-    assert_equal ['<second>','<second>'],unit1.denominator
-  end
   
   def test_create_from_array
     unit1 = Unit.new(1, "mm^2", "ul^2")
