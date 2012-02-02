@@ -627,6 +627,10 @@ describe Unit do
     
   end
 
+  describe '#clone' do
+    subject { Unit('1 mm') }
+    its(:clone) {should === subject}
+  end
 end
 
 describe "Unit Comparisons" do

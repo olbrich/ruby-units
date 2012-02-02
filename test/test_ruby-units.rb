@@ -78,14 +78,6 @@ class TestRubyUnits < Test::Unit::TestCase
     DateTime.forced_now = nil
   end
       
-  def test_clone
-    unit1= "1 mm".unit
-    unit2 = unit1.clone
-    assert_not_equal unit1.numerator.object_id, unit2.numerator.object_id
-    assert_not_equal unit1.denominator.object_id, unit2.denominator.object_id
-    assert unit1 === unit2
-  end 
-      
   def test_to_unit
     unit1 = "1 mm".to_unit
     assert_equal unit1, unit1.to_unit
