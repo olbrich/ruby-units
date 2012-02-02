@@ -1,5 +1,7 @@
 # Ruby Units
 
+[![Dependency Status](https://gemnasium.com/olbrich/ruby-units.png)](https://gemnasium.com/olbrich/ruby-units)
+
 Kevin C. Olbrich, Ph.D. 
 
 [Sciwerks.com](http://www.sciwerks.com)
