@@ -1,5 +1,7 @@
 Change Log for Ruby-units
 =========================
+2012-02-01          * Fix issue #34 -- Time.at takes more than one parameter
+                    * Fix issue #35 -- 'pt' is ambiguous
 2012-01-02  1.4.0   * Fix some definitions that were just wrong (amu, dalton)
                     * Definition uses name of unit if no aliases provided
                     * Refactor definition process.  New units are immediately available
