@@ -71,11 +71,11 @@ end
 
 Unit.define('point') do |point|
   point.definition = Unit('1/72 ft')
-  point.aliases    = %w{pt point points}
+  point.aliases    = %w{point points}
 end
 
 Unit.define('pica') do |pica|
-  pica.definition = Unit('12 pt')
+  pica.definition = Unit('12 point')
   pica.aliases    = %w{P pica picas}
 end
 

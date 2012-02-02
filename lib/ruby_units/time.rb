@@ -11,13 +11,15 @@ class Time
   
   # Convert a duration to a Time value by considering the duration to be the number of seconds since the 
   # epoch
+  # @param [Time] arg
+  # @param [Integer] ms
   # @return [Unit, Time]
-  def self.at(arg)
+  def self.at(arg,ms=0)
     case arg
     when Unit
-      unit_time_at(arg.convert_to("s").scalar)
+      unit_time_at(arg.convert_to("s").scalar, ms)
     else
-      unit_time_at(arg)
+      unit_time_at(arg, ms)
     end
   end
   
