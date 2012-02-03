@@ -836,11 +836,17 @@ describe "Unit Math" do
       context "between incompatible units" do
         specify { expect {Unit("10 kg") + Unit("10 m")}.to raise_error(ArgumentError)}
         specify { expect {Unit("10 m") + Unit("10 kg")}.to raise_error(ArgumentError)}
+        specify { expect {Unit("10 m") + nil}.to raise_error(ArgumentError)}
       end
 
       context "a number from a unit" do
         specify { expect { Unit("10 kg") + 1 }.to raise_error(ArgumentError)}
         specify { expect { 10 + Unit("10 kg") }.to raise_error(ArgumentError)}
+      end
+      
+      context "between a unit and coerceable types" do
+        specify { (Unit('10 kg') + %w{1 kg}).should == Unit('11 kg') }
+        specify { (Unit('10 kg') + "1 kg").should == Unit('11 kg') }
       end
       
       context "between two temperatures" do
@@ -871,6 +877,12 @@ describe "Unit Math" do
       context "incompatible units" do
         specify { expect {Unit("10 kg") - Unit("10 m")}.to raise_error(ArgumentError)}
         specify { expect {Unit("10 m") - Unit("10 kg")}.to raise_error(ArgumentError)}
+        specify { expect {Unit("10 m") - nil}.to raise_error(ArgumentError)}
+      end
+
+      context "between a unit and coerceable types" do
+        specify { (Unit('10 kg') - %w{1 kg}).should == Unit('9 kg') }
+        specify { (Unit('10 kg') - "1 kg").should == Unit('9 kg') }
       end
     
       context "a number from a unit" do
@@ -901,6 +913,12 @@ describe "Unit Math" do
       context "between incompatible units" do
         specify { (Unit("0 m") * Unit("10 kg")).should == Unit("0 kg*m")}
         specify { (Unit("5 m") * Unit("10 kg")).should == Unit("50 kg*m")}
+        specify { expect {Unit("10 m") * nil}.to raise_error(ArgumentError)}
+      end
+
+      context "between a unit and coerceable types" do
+        specify { (Unit('10 kg') * %w{1 kg}).should == Unit('10 kg^2') }
+        specify { (Unit('10 kg') * "1 kg").should == Unit('10 kg^2') }
       end
     
       context "by a temperature" do
@@ -922,8 +940,14 @@ describe "Unit Math" do
       context "incompatible units" do
         specify { (Unit("0 m") / Unit("10 kg")).should == Unit("0 m/kg")}
         specify { (Unit("5 m") / Unit("10 kg")).should == Unit("1/2 m/kg")}
+        specify { expect {Unit("10 m") / nil}.to raise_error(ArgumentError)}
       end
     
+      context "between a unit and coerceable types" do
+        specify { (Unit('10 kg^2') / %w{1 kg}).should == Unit('10 kg') }
+        specify { (Unit('10 kg^2') / "1 kg").should == Unit('10 kg') }
+      end
+          
       context "by a temperature" do
         specify { expect { Unit("5 kg") / Unit("100 tempF")}.to raise_exception(ArgumentError) }
       end
