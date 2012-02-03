@@ -109,93 +109,13 @@ class TestRubyUnits < Test::Unit::TestCase
   def test_signature #"1 m s deg K kg A mol cd byte rad
     unit1 = Unit.new("1 m*s*degK*kg*A*mol*cd*byte*rad*dollar")
     assert_equal unit1.signature, (0..9).inject(0) {|product, n| product + 20**n}
-  end
-      
-  def test_inverse
-    unit1 = Unit.new("1 m")
-    unit2 = Unit.new("1 1/m")
-    assert_equal unit2, unit1.inverse
-    assert_raises((ZeroDivisionError)) { 0.unit.inverse }
-  end
-  
-  def test_exponentiate_positive
-    unit1 = Unit.new("1 mm")
-    unit2 = Unit.new("1 mm^2")
-    assert_nothing_raised {
-      assert_equal unit2, unit1**2
-      }
-  end
-  
-  def test_exponentiate_float
-    unit1 = Unit.new("1 mm")
-    assert_raise(ArgumentError) {unit1**2.5}
-  end
-   
-  def test_exponentiate_negative
-    unit1 = Unit.new("1 m")
-    unit2 = Unit.new("1 m^-2")
-    assert_nothing_raised {
-      assert_equal unit2, unit1**-2
-      }
-    assert_raises(ZeroDivisionError) {
-      "0 mm".unit**-1
-    }
-  end
-
-  def test_exponentiate_zero
-    unit1 = Unit.new("10 mm")
-    unit2 = Unit.new("1")
-    assert_nothing_raised {
-      assert_equal unit2, unit1**0
-    }
-    assert_equal 1, "0 mm".unit**0
-  end
-  
-  def test_abs
-    unit1 = Unit.new("-1 mm")
-    assert_equal "1 mm".unit, unit1.abs
-  end
-  
-  def test_ceil
-    unit1 = Unit.new("1.1 mm")
-    unit2 = Unit.new("2 mm")
-    assert_equal unit2, unit1.ceil
-    assert_equal(('1 mm'.unit / '1 mm'.unit).ceil, 1)  
-    assert_equal("11 kg*m".unit, ("1003 kg*m".unit / 100).ceil)
-  end
-  
-  def test_floor
-    unit1 = Unit.new("1.1 mm")
-    unit2 = Unit.new("1 mm")
-    assert_equal unit2, unit1.floor
-    assert_equal(('1 mm'.unit / '1 mm'.unit).floor, 1)
-  end
-  
+  end      
+    
   def test_to_int
     assert_raises(RuntimeError)  {Unit.new("1.1 mm").to_i}
     assert_nothing_raised {Unit.new(10.5).to_i}
   end
-  
-  def test_truncate
-    unit1 = Unit.new("1.1 mm")
-    unit2 = Unit.new("1 mm")
-    assert_equal unit2, unit1.truncate
-    assert_equal((unit1/unit2).truncate, 1)
-  end
-  
-  def test_round
-    unit1 = Unit.new("1.1 mm")
-    unit2 = Unit.new("1 mm")
-    assert_equal unit2, unit1.round
-    assert_equal((unit1/unit2).round, 1)
-  end
     
-  def test_equality
-    unit1 = Unit.new("1 cm")
-    unit2 = Unit.new("10 mm")
-    assert unit1 == unit2
-  end
-  
   def test_temperature_conversions
     assert_raises(ArgumentError) { '-1 tempK'.unit}
     assert_raises(ArgumentError) { '-1 tempR'.unit}
@@ -305,28 +225,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal "1 mm", unit1.inspect
     assert_not_equal "1.0 mm", unit1.inspect(:dump)
   end
-  
-  def test_to_f
-    assert_equal 1, 1.unit.to_f
-    assert_raises(RuntimeError) {
-      assert_equal 1, "1 mm".unit.to_f
-    }
-  end
-  
-  def test_exponentiate_float2
-    assert_equal "2 m".unit, "4 m^2".unit**(0.5) 
-    assert_raises(ArgumentError) { "1 mm".unit**(2/3)}
-    assert_raises(ArgumentError) { "1 mm".unit**("A")}
-    
-  end
-  
-  def test_range
-    a = Unit "1 mm"
-    b = Unit "3 mm"
-    c = (a..b).to_a
-    assert_equal ["1 mm".unit, "2 mm".unit, "3 mm".unit], c
-  end
-  
+      
   def test_scientific
     a = Unit "1e6 cells"
     assert_equal 1e6, a.scalar
@@ -340,10 +239,6 @@ class TestRubyUnits < Test::Unit::TestCase
 		end  
 	end
   
-  def test_format
-    assert_equal "%0.2f" % "1 mm".unit, "1.00 mm" 
-  end
-  
   def test_bad_units
     assert_raises(ArgumentError) { '1 doohickey / thingamabob'.unit}
     assert_raises(ArgumentError) { '1 minimeter'.unit}
@@ -352,12 +247,7 @@ class TestRubyUnits < Test::Unit::TestCase
   def test_currency
     assert_nothing_raised {"$1".unit}
   end
-  
-  def test_kind
-    a = "1 mm".unit
-    assert_equal a.kind, :length
-  end
-  
+    
   def test_percent
       assert_nothing_raised {
       	"1 percent".unit
@@ -371,39 +261,11 @@ class TestRubyUnits < Test::Unit::TestCase
       assert_in_delta '50 ml'.unit.scalar, c.scalar, 0.0001
   end
   
-  def test_parse
-    assert_nothing_raised { "1 1/m".unit }
-    assert_raises(ArgumentError) { "3 s/s/ft".unit }
-    assert_raises(ArgumentError) { "3 s**2|,s**2".unit }
-    assert_raises(ArgumentError) { "3 s**2 4s s**2".unit }
-    assert_raises(ArgumentError) { "3 s 5^6".unit }
-    assert_raises(ArgumentError) { "".unit }
-    assert_raises(ArgumentError) { " ".unit }
-    assert_raises(ArgumentError) { "\t".unit }
-    assert_raises(ArgumentError) { "\t\t".unit }
-    assert_raises(ArgumentError) { "\n".unit }
-  end
-  
-  def test_inline_conversions
-    assert_equal "60 s".unit, Unit.parse("1 min to seconds")
-    assert_equal "60 s".unit, Unit.parse("1 min as seconds")
-    assert_equal "60 s".unit, Unit.parse("1 min in seconds")
-  end
-  
   def test_time_conversions
     today = Time.now
     assert_equal today,@april_fools
     last_century = today - '150 years'.unit
     assert_equal last_century.to_date, DateTime.parse('1856-04-01')
-  end
-  
-  def test_coercion
-    assert_nothing_raised { 1.0 * '1 mm'.unit}
-    assert_nothing_raised { '1 mm'.unit * 1.0}
-  end
-  
-  def test_zero
-    assert_nothing_raised { Unit.new(0) }
   end
   
   def test_divide_results_in_unitless
@@ -418,13 +280,7 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal "1:30:30".unit, "1.5 hour".unit + '30 sec'.unit
     assert_equal "1:30:30,200".unit, "1.5 hour".unit + '30 sec'.unit + '200 usec'.unit
   end
-  
-  def test_coercion_2
-    a = Dummy.new
-    b = '1 mm'.unit
-    assert_equal '2 mm'.unit, b + a
-  end
-  
+    
   def test_create_with_other_unit
     a = '1 g'.unit
     b = 0.unit(a)

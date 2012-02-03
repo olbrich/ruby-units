@@ -444,6 +444,22 @@ describe "Unit handles attempts to create bad units" do
     expect {Unit("\n")}.to raise_error(ArgumentError,"No Unit Specified")
   end
 
+  specify "no double slashes" do
+    expect {Unit("3 s/s/ft")}.to raise_error(ArgumentError,/Unit not recognized/)
+  end
+
+  specify "no pipes or commas" do
+    expect {Unit("3 s**2|,s**2")}.to raise_error(ArgumentError,/Unit not recognized/)
+  end
+
+  specify "no multiple spaces" do
+    expect {Unit("3 s**2 4s s**2")}.to raise_error(ArgumentError,/Unit not recognized/)
+  end
+
+  specify "no exponentiation of numbers" do
+    expect {Unit("3 s 5^6")}.to raise_error(ArgumentError,/Unit not recognized/)
+  end
+  
   specify "no strings that don't specify a valid unit" do
     expect {Unit("random string")}.to raise_error(ArgumentError,"'random string' Unit not recognized")
   end
@@ -1275,4 +1291,3 @@ describe "Unit Output formatting" do
   end
   
 end
-
