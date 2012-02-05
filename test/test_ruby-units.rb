@@ -226,41 +226,13 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_not_equal "1.0 mm", unit1.inspect(:dump)
   end
       
-  def test_scientific
-    a = Unit "1e6 cells"
-    assert_equal 1e6, a.scalar
-    assert_equal "cells", a.units
-  end
-  
 	if defined?(Uncertain)
 		def test_uncertain
 			a = '1 +/- 1 mm'.unit
 			assert_equal a.to_s, '1 +/- 1 mm' 
 		end  
 	end
-  
-  def test_bad_units
-    assert_raises(ArgumentError) { '1 doohickey / thingamabob'.unit}
-    assert_raises(ArgumentError) { '1 minimeter'.unit}
-  end
-  
-  def test_currency
-    assert_nothing_raised {"$1".unit}
-  end
-    
-  def test_percent
-      assert_nothing_raised {
-      	"1 percent".unit
-        "1%".unit
-        "0.01%".unit
-      }
-      a = '100 ml'.unit
-      b = '50%'.unit
-      c = a*b >> 'ml'
-      assert c =~ a
-      assert_in_delta '50 ml'.unit.scalar, c.scalar, 0.0001
-  end
-  
+        
   def test_time_conversions
     today = Time.now
     assert_equal today,@april_fools

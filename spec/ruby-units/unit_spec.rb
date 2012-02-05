@@ -424,6 +424,22 @@ describe "Create some simple units" do
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
+  
+  #scientific notation
+  describe Unit.new("1e6 cells") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Integer}
+    its(:scalar) {should == 1e6 }
+    its(:units) {should == "cells"}
+    its(:kind) {should == :unitless}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should_not be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}    
+  end
 
 end
 
