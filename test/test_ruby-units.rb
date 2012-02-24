@@ -77,45 +77,7 @@ class TestRubyUnits < Test::Unit::TestCase
     Time.forced_now = nil
     DateTime.forced_now = nil
   end
-      
-  def test_to_unit
-    unit1 = "1 mm".to_unit
-    assert_equal unit1, unit1.to_unit
-    assert Unit === unit1
-    unit2 = Unit("1 mm")
-    assert Unit === unit1
-    assert unit1 == unit2
-    unit1 = "2.54 cm".to_unit("in")
-    assert_in_delta 1, unit1.scalar, 0.001 
-    assert_equal ['<inch>'], unit1.numerator
-    unit1 = "2.54 cm".unit("in")
-    assert_in_delta 1, unit1.scalar, 0.001
-    assert_equal ['<inch>'], unit1.numerator
-    unit1 = 1.unit
-    assert_in_delta 1, unit1.scalar, 0.001
-    assert_equal ['<1>'], unit1.numerator
-    unit1 = [1,'mm'].unit
-    assert_in_delta 1, unit1.scalar, 0.001
-    assert_equal ['<milli>','<meter>'], unit1.numerator
-  end
-  
-  def test_create_from_array
-    unit1 = Unit.new(1, "mm^2", "ul^2")
-    assert_equal 1, unit1.scalar
-    assert_equal ['<milli>','<meter>','<milli>','<meter>'], unit1.numerator
-    assert_equal ['<micro>','<liter>','<micro>','<liter>'], unit1.denominator
-  end
-
-  def test_signature #"1 m s deg K kg A mol cd byte rad
-    unit1 = Unit.new("1 m*s*degK*kg*A*mol*cd*byte*rad*dollar")
-    assert_equal unit1.signature, (0..9).inject(0) {|product, n| product + 20**n}
-  end      
-    
-  def test_to_int
-    assert_raises(RuntimeError)  {Unit.new("1.1 mm").to_i}
-    assert_nothing_raised {Unit.new(10.5).to_i}
-  end
-    
+        
   def test_temperature_conversions
     assert_raises(ArgumentError) { '-1 tempK'.unit}
     assert_raises(ArgumentError) { '-1 tempR'.unit}
@@ -151,22 +113,6 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { c - '400 degK'.unit}
     assert_equal a, a.convert_to('tempF')
   end
-    
-  # these units are 'ambiguous' and could be mis-parsed
-  def test_parse_tricky_units
-    unit1 = Unit.new('1 mm')      #sometimes parsed as 'm*m'
-    assert_equal ['<milli>','<meter>'], unit1.numerator
-    unit2 = Unit.new('1 cd')      # could be a 'centi-day' instead of a candela
-    assert_equal ['<candela>'], unit2.numerator
-    unit3 = Unit.new('1 min')      # could be a 'milli-inch' instead of a minute
-    assert_equal ['<minute>'], unit3.numerator
-    unit4 = Unit.new('1 ft')      # could be a 'femto-ton' instead of a foot
-    assert_equal ['<foot>'], unit4.numerator  
-    unit5 = "1 atm".unit
-    assert_equal ['<atm>'], unit5.numerator
-    unit6 = "1 doz".unit
-    assert_equal ['<dozen>'], unit6.numerator
-  end
    
   def test_to_s
     unit1 = Unit.new("1")
@@ -198,8 +144,7 @@ class TestRubyUnits < Test::Unit::TestCase
     t = ((p*v)/(n*r)).convert_to('tempK')
     assert_in_delta 12027.16,t.base_scalar, 0.1
   end
-  
-  
+    
   def test_eliminate_terms
     a = ['<meter>','<meter>','<kelvin>','<second>']
     b = ['<meter>','<meter>','<second>']
@@ -220,32 +165,13 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal unit3**(1/3), unit1
   end
   
-  def test_inspect
-    unit1 = Unit "1 mm"
-    assert_equal "1 mm", unit1.inspect
-    assert_not_equal "1.0 mm", unit1.inspect(:dump)
-  end
-      
-	if defined?(Uncertain)
-		def test_uncertain
-			a = '1 +/- 1 mm'.unit
-			assert_equal a.to_s, '1 +/- 1 mm' 
-		end  
-	end
-        
   def test_time_conversions
     today = Time.now
     assert_equal today,@april_fools
     last_century = today - '150 years'.unit
     assert_equal last_century.to_date, DateTime.parse('1856-04-01')
   end
-  
-  def test_divide_results_in_unitless
-    a = '10 mg/ml'.unit
-    b = '10 mg/ml'.unit
-    assert_equal a/b, 1
-  end
-  
+    
   def test_parse_durations
     assert_equal "1:00".unit, '1 hour'.unit
     assert_equal "1:30".unit, "1.5 hour".unit
@@ -253,36 +179,15 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_equal "1:30:30,200".unit, "1.5 hour".unit + '30 sec'.unit + '200 usec'.unit
   end
     
-  def test_create_with_other_unit
-    a = '1 g'.unit
-    b = 0.unit(a)
-    assert_equal b, '0 g'.unit
-  end
-  	    
-  def test_complex
-    assert_equal '1+1i mm'.unit.scalar, Complex(1,1)
-    assert_equal '1+1i'.unit.scalar, Complex(1,1)
-    assert_raises(RuntimeError) { '1+1i mm'.unit.to_c}
-  end
-  
   def test_to_date
     a = Time.now
     assert_equal a.send(:to_date), Date.today
   end
   
-  def test_round_pounds
-    assert_equal '1 lbs'.unit, '1.1 lbs'.unit.round
-  end
-
   def test_explicit_init
     assert_equal '1 lbf'.unit, '1 <pound-force>'.unit
     assert_equal '1 lbs'.unit, '1 <pound>'.unit
     assert_equal('1 kg*m'.unit, '1 <kilogram>*<meter>'.unit)
-  end
-  
-  def test_format_nil_string
-    assert_nothing_raised {"" % nil}
-    assert_nothing_raised {"" % false}
   end
   
   def test_to_s_cache

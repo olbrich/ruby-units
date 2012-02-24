@@ -107,6 +107,21 @@ describe "Create some simple units" do
     its(:base) {should == subject}  
   end
 
+  describe Unit("1+1i m") do
+    it {should be_a Numeric}
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should === Complex(1,1)}
+    its(:scalar) {should be_a Complex}
+    its(:units) {should == "m"}
+    its(:kind) {should == :length}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should == subject}  
+  end
+
   # scalar and unit
   describe Unit("1 mm") do
     it {should be_a Numeric}
@@ -425,6 +440,20 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
   
+  describe Unit.new(1,"m^2","s^2") do
+    it {should be_an_instance_of Unit}
+    its(:scalar) {should be_an Integer}
+    its(:units) {should == "m^2/s^2"}
+    its(:kind) {should == :radiation}
+    it {should_not be_temperature}
+    it {should_not be_degree}
+    it {should be_base}
+    it {should_not be_unitless}
+    it {should_not be_zero}
+    its(:base) {should be_a Numeric}
+    its(:temperature_scale) {should be_nil}    
+  end
+  
   #scientific notation
   describe Unit.new("1e6 cells") do
     it {should be_an_instance_of Unit}
@@ -440,7 +469,37 @@ describe "Create some simple units" do
     its(:base) {should be_a Numeric}
     its(:temperature_scale) {should be_nil}    
   end
+  
+  #could be m*m
+  describe Unit("1 mm") do
+    its(:kind)  {should == :length}
+  end
+  
+  #could be centi-day
+  describe Unit("1 cd") do
+    its(:kind)  {should == :luminous_power}
+  end
 
+  # could be milli-inch
+  describe Unit("1 min") do
+    its(:kind)  {should == :time}
+  end
+  
+  #could be femto-tons
+  describe Unit("1 ft") do
+    its(:kind)  {should == :length}
+  end
+  
+  #could be deci-ounce
+  describe Unit("1 doz") do
+    its(:kind)  {should == :unitless}
+  end
+  
+  describe 10.unit(Unit("1 mm")) do
+    its(:units)   {should == "mm"}
+    its(:scalar)  {should == 10}
+  end
+  
 end
 
 describe "Unit handles attempts to create bad units" do
@@ -967,6 +1026,7 @@ describe "Unit Math" do
       context "compatible units" do
         specify { (Unit("0 m") / Unit("10 m")).should == Unit(0)}
         specify { (Unit("5 kg") / Unit("10 kg")).should == Rational(1,2)}
+        specify { (Unit("5 kg") / Unit("5 kg")).should == 1}
       end
         
       context "incompatible units" do
