@@ -365,8 +365,9 @@ describe "Create some simple units" do
   end
   
   # time string
-  describe Unit("1:23:45") do
+  describe Unit("1:23:45,200") do
     it {should be_an_instance_of Unit}
+    it {should == Unit("1 h") + Unit("23 min") + Unit("45 seconds") + Unit("200 usec")}
     its(:scalar) {should be_an Rational}
     its(:units) {should == "h"}
     its(:kind) {should == :time}
@@ -495,9 +496,16 @@ describe "Create some simple units" do
     its(:kind)  {should == :unitless}
   end
   
+  # create with another unit
   describe 10.unit(Unit("1 mm")) do
     its(:units)   {should == "mm"}
     its(:scalar)  {should == 10}
+  end
+  
+  #explicit create
+  describe Unit("1 <meter>/<second>") do
+    its(:kind)    {should == :speed}
+    its(:units)   {should == "m/s"}
   end
   
 end
