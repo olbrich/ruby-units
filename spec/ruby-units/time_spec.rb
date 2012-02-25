@@ -1,8 +1,9 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe Time do
+  let(:now) { Time.at(1303656390) }
   before(:each) do
-    Time.stub(:now).and_return(Time.at(1303656390))
+    Time.stub(:now).and_return(now)
   end
 
   context ".at" do
@@ -24,6 +25,7 @@ describe Time do
   context 'subtraction (-)' do
     specify { (Time.now - 1).should == Time.at(1303656390 - 1)}
     specify { (Time.now - Unit("10 min")).should == Time.at(1303656390 - 600)}
+    specify { (Time.now - Unit("150 years")).should == Time.parse("1861-04-24 09:46:30 -0500")}
   end
 
 end

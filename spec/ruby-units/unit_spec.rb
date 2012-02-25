@@ -1294,8 +1294,6 @@ describe "Unit Math" do
     specify { Unit('23 m').div(Unit('2 m')).should == 11 }
   end
 
-  
-
   context "Time helper functions" do
     before do
       Time.stub!(:now).and_return(Time.utc(2011,10,16))
