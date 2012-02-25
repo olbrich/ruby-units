@@ -17,6 +17,14 @@ describe Time do
     specify { Time.in("5 min").should > Time.now}
   end
   
+  context '#to_unit' do
+    subject { now }
+    its(:to_unit)         { should be_an_instance_of(Unit) }
+    its('to_unit.units')  { should == "s" }
+    specify               { subject.to_unit('h').kind.should == :time}
+    specify               { subject.to_unit('h').units.should == 'h'}
+  end
+  
   context 'addition (+)' do
     specify { (Time.now + 1).should == Time.at(1303656390 + 1)}
     specify { (Time.now + Unit("10 min")).should == Time.at(1303656390 + 600)}
