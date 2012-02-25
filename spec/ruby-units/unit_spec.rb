@@ -1375,3 +1375,13 @@ describe "Unit Output formatting" do
   end
   
 end
+
+describe "Equations with Units" do
+  context "Ideal Gas Law" do
+      let(:p) { Unit('100 kPa') }
+      let(:v) { Unit('1 m^3') }
+      let(:n) { Unit("1 mole") }
+      let(:r) { Unit("8.31451 J/mol*degK") }
+      specify { ((p*v)/(n*r)).convert_to('tempK').should be_within(Unit("0.1 degK")).of(Unit("12027.2 tempK")) }
+  end
+end
