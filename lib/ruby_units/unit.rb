@@ -427,10 +427,6 @@ class Unit < Numeric
   # @return [Boolean]
   def is_base?
     return @is_base if defined? @is_base
-    # return @is_base = true if self.degree? && 
-    #                           self.numerator.size == 1 && 
-    #                           self.denominator == UNITY_ARRAY && 
-    #                           self.units =~ /(?:deg|temp)K/
     @is_base = (@numerator + @denominator).compact.uniq.
                                             map {|unit| Unit.definition(unit)}.
                                             all? {|element| element.unity? || element.base? }
