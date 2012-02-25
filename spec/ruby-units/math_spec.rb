@@ -50,6 +50,7 @@ describe Math do
 
     specify { Math.hypot(Unit("1 m"), Unit("2 m")).should be_within(Unit("0.01 m")).of(Unit("2.23607 m")) }
     specify { Math.hypot(Unit("1 m"), Unit("2 ft")).should be_within(Unit("0.01 m")).of(Unit("1.17116 m")) }
+    specify { Math.hypot(3,4).should == 5}
     specify { expect {Math.hypot(Unit("1 m"), Unit("2 lbs")) }.to raise_error(ArgumentError) }
 
     specify { Math.atan2(Unit("1 m"), Unit("2 m")).should be_within(0.01).of(0.4636476090008061) }
