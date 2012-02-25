@@ -113,15 +113,6 @@ class TestRubyUnits < Test::Unit::TestCase
     assert_raises(ArgumentError) { c - '400 degK'.unit}
     assert_equal a, a.convert_to('tempF')
   end
-      
-  def test_ideal_gas_law
-    p = Unit "100 kPa"
-    v = Unit "1 m^3"
-    n = Unit "1 mole"
-    r = Unit "8.31451 J/mol*degK"
-    t = ((p*v)/(n*r)).convert_to('tempK')
-    assert_in_delta 12027.16,t.base_scalar, 0.1
-  end
   
   def test_time_conversions
     today = Time.now
