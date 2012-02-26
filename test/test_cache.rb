@@ -1,3 +1,4 @@
+require 'test_helper'
 require 'rubygems'
 require 'test/unit'
 require 'ruby-units'
