@@ -162,6 +162,14 @@ class Unit < Numeric
     return @@definitions[unit]
   end
   
+  # return the unit definition for a unit, searching aliases too
+  # throw error if not found
+  def self.definition_or_alias(_unit)
+    return if !_unit
+    self.definition(_unit) || self.definition(@@UNIT_MAP[_unit]) || raise(ArgumentError, "'#{_unit}' Unit not recognized")
+  end
+  
+  
   # return a list of all defined units
   # @return [Array]
   def self.definitions
@@ -343,6 +351,19 @@ class Unit < Numeric
       @numerator   = options[0][:numerator] || UNITY_ARRAY
       @denominator = options[0][:denominator] || UNITY_ARRAY
       @signature   = options[0][:signature]
+
+      # numerator needs to be an array, 'pounds' => ['pounds']
+      @numerator = [@numerator] unless @numerator.is_a?(Array)
+
+      # numerator needs to be based on a definition
+      @numerator = @numerator.collect{|n| Unit.definition_or_alias(n).name}.flatten.compact
+       
+      # denominator needs to be an array, 'pounds' => ['pounds'] 
+      @denominator = [@denominator] unless @denominator.kind_of?(Array)
+      
+      # denominator needs to be based on a definition
+      @denominator = @denominator.collect{|n| Unit.definition_or_alias(n).name}.flatten.compact
+
     when Array
       initialize(*options[0])
       return
