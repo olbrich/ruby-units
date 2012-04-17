@@ -508,6 +508,44 @@ describe "Create some simple units" do
     its(:units)   {should == "m/s"}
   end
   
+  #hash
+  describe Unit(:scalar => 1.345, :numerator => 'oz') do
+    its(:kind)    {should == :mass}
+    its(:units)   {should == 'oz'}
+    its(:scalar)  {should == 1.345}
+    its(:numerator) {should == ["<ounce>"]}
+  end
+  
+  # hash with speed
+  describe Unit(:scalar => 62.5, :numerator => 'feet', :denominator => 's') do
+    its(:kind)    {should == :speed}
+    its(:units)   {should == 'ft/s'}
+    its(:scalar)  {should == 62.5}
+    its(:numerator) {should == ["<foot>"]}
+    its(:denominator) {should == ["<second>"]}
+  end
+  
+  # hash with array numerator
+  describe Unit(:scalar => 199.9, :numerator => ['inches', 'inch'], :denominator => 'pounds') do
+    its(:kind)    {should == nil}
+    its(:units)   {should == 'in^2/lbs'}
+    its(:scalar)  {should == 199.9}
+    its(:numerator) {should ==  ["<inch>", "<inch>"] }
+    its(:denominator) {should == ["<pound>"]}
+  end
+  
+  # hash - handle zero-decimal floats properly
+  describe Unit(:scalar => 97.00000, :numerator => 'kelvin') do
+    its(:kind)    {should == :temperature}
+    its(:units)   {should == 'degK'}
+    its(:scalar)  {should == 97}
+    its(:scalar)  {should be_a(Float)}
+    its(:numerator) {should ==  ["<kelvin>"]}
+  end
+  
+  
+  # tbd: test setting signature manually in a hash?
+  
 end
 
 describe "Unit handles attempts to create bad units" do
@@ -553,6 +591,8 @@ describe "Unit handles attempts to create bad units" do
 
   specify "no undefined units" do
     expect {Unit("1 mFoo")}.to raise_error(ArgumentError,"'1 mFoo' Unit not recognized")
+    expect {Unit(:scalar => 2.444, :numerator => "mFoo")}.to raise_error(ArgumentError,"'mFoo' Unit not recognized")
+    expect {Unit(:scalar => 2.444, :numerator => "m", :denominator => "mFoo")}.to raise_error(ArgumentError,"'mFoo' Unit not recognized")
   end
 
   specify "no units with powers greater than 19" do
