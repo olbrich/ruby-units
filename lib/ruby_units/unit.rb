@@ -314,6 +314,7 @@ class Unit < Numeric
     @unit_name   = nil
     @signature   = nil
     @output      = {}
+    raise ArgumentError, "Invalid Unit Format" if options[0].nil?
     if options.size == 2
       # options[0] is the scalar
       # options[1] is a unit string
