@@ -35,7 +35,6 @@ Gem::Specification.new do |s|
     "lib/ruby_units/numeric.rb",
     "lib/ruby_units/object.rb",
     "lib/ruby_units/string.rb",
-    "lib/ruby_units/string/extra.rb",
     "lib/ruby_units/time.rb",
     "lib/ruby_units/unit.rb",
     "lib/ruby_units/unit_definitions.rb",
