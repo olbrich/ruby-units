@@ -6,4 +6,5 @@ Gemfile.lock
 .rspec
 .rvmrc
 .rbx
+.idea
 doc
