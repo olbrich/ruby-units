@@ -553,6 +553,7 @@ describe "Unit handles attempts to create bad units" do
 
   specify "no undefined units" do
     expect {Unit("1 mFoo")}.to raise_error(ArgumentError,"'1 mFoo' Unit not recognized")
+    expect {Unit("1 second/mFoo")}.to raise_error(ArgumentError,"'1 second/mFoo' Unit not recognized")
   end
 
   specify "no units with powers greater than 19" do

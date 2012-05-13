@@ -1433,6 +1433,7 @@ class Unit < Numeric
       return
     end
 
+    # more than one per.  I.e., "1 m/s/s"
     raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
     raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s[02-9]/).size > 0
     @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0]  #parse the string into parts
@@ -1456,8 +1457,10 @@ class Unit < Numeric
     @numerator = top.scan(Unit.unit_match_regex).delete_if {|x| x.empty?}.compact if top
     @denominator = bottom.scan(Unit.unit_match_regex).delete_if {|x| x.empty?}.compact if bottom
 
-    us = "#{(top || '' + bottom || '')}".to_s.gsub(Unit.unit_match_regex,'').gsub(/[\d\*, "'_^\/\$]/,'')
-    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless us.empty?
+    # eliminate all known terms from this string.  This is a quick check to see if the passed unit
+    # contains terms that are not defined.
+    used = "#{top} #{bottom}".to_s.gsub(Unit.unit_match_regex,'').gsub(/[\d\*, "'_^\/\$]/,'')
+    raise( ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
     @numerator = @numerator.map do |item|
        @@PREFIX_MAP[item[0]] ? [@@PREFIX_MAP[item[0]], @@UNIT_MAP[item[1]]] : [@@UNIT_MAP[item[1]]]
