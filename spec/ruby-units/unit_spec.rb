@@ -427,7 +427,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}
   end
 
-  describe Unit.new("1 m^2 s^-2") do
+  describe Unit("1 m^2 s^-2") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
     its(:units) {should == "m^2/s^2"}
@@ -441,7 +441,7 @@ describe "Create some simple units" do
     its(:temperature_scale) {should be_nil}    
   end
   
-  describe Unit.new(1,"m^2","s^2") do
+  describe Unit(1,"m^2","s^2") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
     its(:units) {should == "m^2/s^2"}
@@ -456,7 +456,7 @@ describe "Create some simple units" do
   end
   
   #scientific notation
-  describe Unit.new("1e6 cells") do
+  describe Unit("1e6 cells") do
     it {should be_an_instance_of Unit}
     its(:scalar) {should be_an Integer}
     its(:scalar) {should == 1e6 }
@@ -567,6 +567,11 @@ describe "Unit handles attempts to create bad units" do
     expect {Unit("-100 tempK")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
     expect {Unit("-100 tempR")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
     expect {Unit("-500/9 tempR")}.to raise_error(ArgumentError,"Temperatures must not be less than absolute zero")
+  end
+  
+  specify "no nil scalar" do
+    expect {Unit(nil, "feet")}.to raise_error(ArgumentError, "Invalid Unit Format")
+    expect {Unit(nil, "feet", "min")}.to raise_error(ArgumentError, "Invalid Unit Format")
   end
 
 end
