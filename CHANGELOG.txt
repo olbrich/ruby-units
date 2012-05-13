@@ -1,5 +1,7 @@
 Change Log for Ruby-units
 =========================
+2012-05-13  1.4.1   * Fix issue #40 -- Unit parsing truncates invalid portions of the unit
+                    * Fix issue #41 -- initializing with a nil gives unexpected result
 2012-02-01          * Fix issue #34 -- Time.at takes more than one parameter
                     * Fix issue #35 -- 'pt' is ambiguous
 2012-01-02  1.4.0   * Fix some definitions that were just wrong (amu, dalton)
