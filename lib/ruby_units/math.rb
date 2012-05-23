@@ -7,10 +7,16 @@ module Math
   alias :unit_sqrt :sqrt
   # @return [Numeric]
   def sqrt(n)
-    if Unit === n
+    result = if Unit === n
       (n**(Rational(1,2))).to_unit 
     else
       unit_sqrt(n)
+    end
+    
+    if result.is_a?(Fixnum)
+      result.to_f
+    else
+      result
     end
   end
   # @return [Numeric]
