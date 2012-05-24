@@ -59,8 +59,7 @@ class Unit < Numeric
   FAHRENHEIT         = ['<fahrenheit>']
   RANKINE            = ['<rankine>']
   CELSIUS            = ['<celsius>']
-  TEMP_REGEX         = /(?:temp|deg)[CFRK]/
-
+  @@TEMP_REGEX       = nil
   SIGNATURE_VECTOR = [
                       :length,
                       :time,
@@ -191,7 +190,7 @@ class Unit < Numeric
     Unit.use_definition(unit_definition)
     return unit_definition
   end
-    
+  
   # @param [String] name Name of unit to redefine
   # @param [Block] block
   # @raise [ArgumentError] if a block is not given
@@ -370,11 +369,11 @@ class Unit < Numeric
     unary_unit = self.units || ""
     if options.first.instance_of?(String)
       opt_scalar, opt_units = Unit.parse_into_numbers_and_units(options[0])
-      unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{TEMP_REGEX})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+      unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
         @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
       end
     end
-    unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{TEMP_REGEX}/) then
+    unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{Unit.temp_regex}/) then
       @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
     end
     [@scalar, @numerator, @denominator, @base_scalar, @signature, @is_base].each {|x| x.freeze}
@@ -441,7 +440,7 @@ class Unit < Numeric
   # @todo this is brittle as it depends on the display_name of a unit, which can be changed
   def to_base
     return self if self.is_base?
-    if self.units =~ /\A(?:temp|deg)[CRF]\Z/
+    if @@UNIT_MAP[self.units] =~ /\A<(?:temp|deg)[CRF]>\Z/
       if RUBY_VERSION < "1.9"
         # :nocov_19:
         @signature = @@KINDS.index(:temperature)
@@ -563,7 +562,7 @@ class Unit < Numeric
   # @return [Boolean]
   # @todo use unit definition to determine if it's a temperature instead of a regex
   def is_temperature?
-    return self.is_degree? && (!(self.units =~ /temp[CFRK]/).nil?)
+    return self.is_degree? && (!(@@UNIT_MAP[self.units] =~ /temp[CFRK]/).nil?)
   end
   alias :temperature? :is_temperature?
 
@@ -579,7 +578,7 @@ class Unit < Numeric
   # @return [String] possible values: degC, degF, degR, or degK
   def temperature_scale
     return nil unless self.is_temperature?
-    return "deg#{self.units[/temp([CFRK])/,1]}"
+    return "deg#{@@UNIT_MAP[self.units][/temp([CFRK])/,1]}"
   end
 
   # returns true if no associated units
@@ -946,25 +945,25 @@ class Unit < Numeric
       start_unit = self.units
       target_unit = other.units rescue other
       unless @base_scalar
-        @base_scalar = case start_unit
-        when 'tempC'
+        @base_scalar = case @@UNIT_MAP[start_unit]
+        when '<tempC>'
           @scalar + 273.15
-        when 'tempK'
+        when '<tempK>'
           @scalar
-        when 'tempF'
+        when '<tempF>'
           (@scalar+459.67)*Rational(5,9)
-        when 'tempR'
+        when '<tempR>'
           @scalar*Rational(5,9)
         end
       end
-      q=  case target_unit
-      when 'tempC'
+      q=  case @@UNIT_MAP[target_unit]
+      when '<tempC>'
         @base_scalar - 273.15
-      when 'tempK'
+      when '<tempK>'
         @base_scalar
-      when 'tempF'
+      when '<tempF>'
         @base_scalar * Rational(9,5) - 459.67
-      when 'tempR'
+      when '<tempR>'
         @base_scalar * Rational(9,5)
       end
       return Unit.new("#{q} #{target_unit}")
@@ -1537,10 +1536,20 @@ class Unit < Numeric
     return @@PREFIX_REGEX ||= @@PREFIX_MAP.keys.sort_by {|prefix| [prefix.length, prefix]}.reverse.join('|')
   end
   
+  def self.temp_regex
+    @@TEMP_REGEX ||= Regexp.new "(?:#{
+      temp_units=%w(tempK tempC tempF tempR degK degC degF degR)
+      aliases=temp_units.map{|unit| d=Unit.definition(unit); d && d.aliases}.flatten.compact
+      regex_str= aliases.empty? ? '(?!x)x' : aliases.join('|')
+      regex_str
+    })"
+  end
+  
   # inject a definition into the internal array and set it up for use
   # @private
   def self.use_definition(definition)
     @@UNIT_MATCH_REGEX = nil #invalidate the unit match regex
+    @@TEMP_REGEX = nil #invalidate the temp regex
     if definition.prefix?
       @@PREFIX_VALUES[definition.name] = definition.scalar
       definition.aliases.each {|_alias| @@PREFIX_MAP[_alias] = definition.name }
