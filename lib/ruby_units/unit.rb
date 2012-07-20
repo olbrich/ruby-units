@@ -851,7 +851,7 @@ class Unit < Numeric
       valid = (1..9).map {|x| 1/x}
       raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
       return self.root((1/other).to_int)
-    when Complex
+    when (!defined?(Complex).nil? && Complex)
       raise ArgumentError, "exponentiation of complex numbers is not yet supported."
     else
       raise ArgumentError, "Invalid Exponent"

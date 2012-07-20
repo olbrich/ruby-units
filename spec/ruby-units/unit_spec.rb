@@ -105,7 +105,7 @@ describe "Create some simple units" do
     it {should be_unitless}
     it {should_not be_zero}
     its(:base) {should == subject}  
-  end
+  end if defined?(Complex)
 
   describe Unit("1+1i m") do
     it {should be_a Numeric}
@@ -120,7 +120,7 @@ describe "Create some simple units" do
     it {should_not be_unitless}
     it {should_not be_zero}
     its(:base) {should == subject}  
-  end
+  end if defined?(Complex)
 
   # scalar and unit
   describe Unit("1 mm") do
@@ -1092,7 +1092,7 @@ describe "Unit Math" do
         it { (subject**(-2)).should == Unit("1 1/m^2")}
         specify { expect { subject**(1/2)}.to raise_error(ArgumentError, "Illegal root")}
           # because 1 m^(1/2) doesn't make any sense
-        specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")}
+        specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")} if defined?(Complex)
         specify { expect { subject**(Unit("1 m"))}.to raise_error(ArgumentError, "Invalid Exponent")}
       end
     
@@ -1136,7 +1136,7 @@ describe "Unit Math" do
     end
     it "raises an exception when passed a Complex argument" do
       expect {subject.power(Complex(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
-    end
+    end if defined?(Complex)
     it "raises an exception when called on a temperature unit" do
       expect { Unit("100 tempC").power(2)}.to raise_error(ArgumentError,"Cannot raise a temperature to a power")
     end
@@ -1158,7 +1158,7 @@ describe "Unit Math" do
     end
     it "raises an exception when passed a Complex argument" do
       expect {subject.root(Complex(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
-    end
+    end if defined?(Complex)
     it "raises an exception when called on a temperature unit" do
       expect { Unit("100 tempC").root(2)}.to raise_error(ArgumentError,"Cannot take the root of a temperature")
     end
@@ -1183,8 +1183,8 @@ describe "Unit Math" do
     specify {Unit("10.0").to_f.should be_kind_of(Float)}
     specify { expect { Unit("10.0 m").to_f }.to raise_error(RuntimeError,"Cannot convert '10 m' to Float unless unitless.  Use Unit#scalar") }
 
-    specify {Unit("1+1i").to_c.should be_kind_of(Complex)}
-    specify { expect { Unit("1+1i m").to_c }.to raise_error(RuntimeError,"Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") }
+    specify {Unit("1+1i").to_c.should be_kind_of(Complex)} if defined?(Complex)
+    specify { expect { Unit("1+1i m").to_c }.to raise_error(RuntimeError,"Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") } if defined?(Complex)
 
     specify {Unit("3/7").to_r.should be_kind_of(Rational)}
     specify { expect { Unit("3/7 m").to_r }.to raise_error(RuntimeError,"Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }

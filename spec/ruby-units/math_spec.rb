@@ -5,7 +5,7 @@ describe Math do
   describe "#sqrt" do
     specify { Math.sqrt(Unit('1 mm^6')).should == Unit('1 mm^3') }
     specify { Math.sqrt(4).should == 2 }
-    specify { Math.sqrt(Unit("-9 mm^2")).should be_kind_of(Complex) }
+    specify { Math.sqrt(Unit("-9 mm^2")).should be_kind_of(Complex) } if defined?(Complex)
   end
 
   if RUBY_VERSION > "1.9"
