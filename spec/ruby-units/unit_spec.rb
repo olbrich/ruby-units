@@ -384,7 +384,7 @@ describe "Create some simple units" do
   #       '1 hour to minutes'
   describe Unit.parse("1 hour in minutes") do
     it {should be_an_instance_of Unit}
-    its(:scalar) {should be_an Integer}
+    its(:scalar) {should be_an Integer} if defined?(Math.rsqrt)
     its(:units) {should == "min"}
     its(:kind) {should == :time}
     it {should_not be_temperature}
