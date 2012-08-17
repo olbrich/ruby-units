@@ -57,7 +57,7 @@ begin
   desc "Run specs"
   RSpec::Core::RakeTask.new do |spec|
 	puts
-	puts %x{rvm current}
+	# puts %x{rvm current}
 	puts
   end
   

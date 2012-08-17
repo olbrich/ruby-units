@@ -1361,6 +1361,9 @@ class Unit < Numeric
     if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string = "#{$1} USD"
     end
+
+    unit_string.gsub!("\xC2\xB0".force_encoding('utf-8'), 'deg') unless RUBY_VERSION < '1.9'
+
     unit_string.gsub!(/%/,'percent')
     unit_string.gsub!(/'/,'feet')
     unit_string.gsub!(/"/,'inch')
