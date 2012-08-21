@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require File.dirname(__FILE__) + '/../../spec_helper'
     
 if RUBY_VERSION.include?('1.9')
