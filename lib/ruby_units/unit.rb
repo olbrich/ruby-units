@@ -1103,9 +1103,9 @@ class Unit < Numeric
   end
 
   # @return [Numeric,Unit]
-  def round
-    return @scalar.round if self.unitless?
-    return Unit.new(@scalar.round, @numerator, @denominator)
+  def round(ndigits = 0)
+    return @scalar.round(ndigits) if self.unitless?
+    return Unit.new(@scalar.round(ndigits), @numerator, @denominator)
   end
 
   # @return [Numeric, Unit]
