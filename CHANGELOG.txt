@@ -1,5 +1,9 @@
 Change Log for Ruby-units
 =========================
+2012-09-16  1.4.2   * Fix issue #54 -- pluralization of fluid-ounces
+                    * Fix issue #53, 51 -- incorrect definition for gee
+                    * Fix issue #52 -- add support for degree symbol
+                    * Fix issue #50 -- fix conversion to json
 2012-05-13  1.4.1   * Fix issue #40 -- Unit parsing truncates invalid portions of the unit
                     * Fix issue #41 -- initializing with a nil gives unexpected result
 2012-02-01          * Fix issue #34 -- Time.at takes more than one parameter
