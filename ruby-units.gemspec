@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "ruby-units"
-  s.version = "1.4.1"
+  s.version = "1.4.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kevin Olbrich, Ph.D."]
-  s.date = "2012-05-13"
+  s.date = "2012-09-16"
   s.description = "Provides classes and methods to perform unit math and conversions"
   s.email = ["kevin.olbrich+ruby_units@gmail.com"]
   s.extra_rdoc_files = [
@@ -62,8 +62,6 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["~> 2.5"])
       s.add_development_dependency(%q<autotest>, [">= 0"])
-      s.add_development_dependency(%q<autotest-growl>, [">= 0"])
-      s.add_development_dependency(%q<autotest-fsevent>, [">= 0"])
     else
       s.add_dependency(%q<bundler>, ["~> 1.0"])
       s.add_dependency(%q<rcov>, [">= 0"])
@@ -72,8 +70,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<rspec>, ["~> 2.5"])
       s.add_dependency(%q<autotest>, [">= 0"])
-      s.add_dependency(%q<autotest-growl>, [">= 0"])
-      s.add_dependency(%q<autotest-fsevent>, [">= 0"])
     end
   else
     s.add_dependency(%q<bundler>, ["~> 1.0"])
@@ -83,8 +79,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<rspec>, ["~> 2.5"])
     s.add_dependency(%q<autotest>, [">= 0"])
-    s.add_dependency(%q<autotest-growl>, [">= 0"])
-    s.add_dependency(%q<autotest-fsevent>, [">= 0"])
   end
 end
 
