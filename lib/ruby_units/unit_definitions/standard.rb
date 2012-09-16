@@ -237,7 +237,7 @@ end
 
 Unit.define('fluid-ounce') do |floz|
   floz.definition = Unit('1/128 gal')
-  floz.aliases    = %w{floz fluid-ounce}
+  floz.aliases    = %w{floz fluid-ounce fluid-ounces}
 end
 
 Unit.define('tablespoon') do |tbsp|
