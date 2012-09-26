@@ -1102,10 +1102,18 @@ class Unit < Numeric
     return Unit.new(@scalar.floor, @numerator, @denominator)
   end
 
-  # @return [Numeric,Unit]
-  def round(ndigits = 0)
-    return @scalar.round(ndigits) if self.unitless?
-    return Unit.new(@scalar.round(ndigits), @numerator, @denominator)
+  if RUBY_VERSION < '1.9'
+    # @return [Numeric,Unit]
+    def round
+      return @scalar.round if self.unitless?
+      return Unit.new(@scalar.round, @numerator, @denominator)
+    end
+  else
+    # @return [Numeric,Unit]
+    def round(ndigits = 0)
+      return @scalar.round(ndigits) if self.unitless?
+      return Unit.new(@scalar.round(ndigits), @numerator, @denominator)
+    end
   end
 
   # @return [Numeric, Unit]
