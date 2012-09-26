@@ -7,17 +7,17 @@ if RUBY_VERSION.include?('1.9')
     context 'when the UTF-8 symbol is used' do
       context 'Angles' do
         it 'should be a degree' do
-          Unit("180\xC2\xB0").units.should == 'deg'
+          Unit("180\u00B0").units.should == 'deg'
         end
       end
 
       context 'Temperature' do
         it 'should be a degree Celcius' do
-          Unit("180\xC2\xB0C").units.should == 'degC'
+          Unit("180\u00B0C").units.should == 'degC'
         end
 
         it 'should be a degree Fahrenheit' do
-          Unit("180\xC2\xB0F").units.should == 'degF'
+          Unit("180\u00B0F").units.should == 'degF'
         end
       end
     end
