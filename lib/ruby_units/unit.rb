@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'date'
 if RUBY_VERSION < "1.9"
   # :nocov_19:
