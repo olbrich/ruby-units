@@ -1377,7 +1377,7 @@ class Unit < Numeric
       unit_string = "#{$1} USD"
     end
 
-    unit_string.gsub!("°".force_encoding('utf-8'), 'deg') unless RUBY_VERSION < '1.9'
+    unit_string.gsub!("\xC2\xB0".force_encoding('utf-8'), 'deg') unless RUBY_VERSION < '1.9'
 
     unit_string.gsub!(/%/,'percent')
     unit_string.gsub!(/'/,'feet')
