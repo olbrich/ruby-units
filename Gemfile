@@ -6,6 +6,7 @@ group :development do
 end
 
 group :test do
+  gem 'rake'
   gem 'rcov', :platforms => :mri_18
   gem 'simplecov', :require => false, :platforms => :mri_19
   gem 'simplecov-html', :platforms => :mri_19
