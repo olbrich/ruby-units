@@ -250,7 +250,7 @@ class Unit < Numeric
   end
 
   # Used to copy one unit to another
-  # @param [Unit] from Unit to copy defintion from
+  # @param [Unit] from Unit to copy definition from
   # @return [Unit]
   def copy(from)
     @scalar      = from.scalar
@@ -313,7 +313,7 @@ class Unit < Numeric
     @base_scalar = nil
     @unit_name   = nil
     @signature   = nil
-    @output      = {}
+    @output      = { }
     raise ArgumentError, "Invalid Unit Format" if options[0].nil?
     if options.size == 2
       # options[0] is the scalar
@@ -339,31 +339,34 @@ class Unit < Numeric
     end
 
     case options[0]
-    when Hash
-      @scalar      = options[0][:scalar] || 1
-      @numerator   = options[0][:numerator] || UNITY_ARRAY
-      @denominator = options[0][:denominator] || UNITY_ARRAY
-      @signature   = options[0][:signature]
-    when Array
-      initialize(*options[0])
-      return
-    when Numeric
-      @scalar = options[0]
-      @numerator = @denominator = UNITY_ARRAY
-    when Time
-      @scalar = options[0].to_f
-      @numerator = ['<second>']
-      @denominator = UNITY_ARRAY
-    when DateTime, Date
-      @scalar = options[0].ajd
-      @numerator = ['<day>']
-      @denominator = UNITY_ARRAY
-    when /^\s*$/
-      raise ArgumentError, "No Unit Specified"
-    when String
-      parse(options[0])
-    else
-      raise ArgumentError, "Invalid Unit Format"
+      when Unit
+        copy(options[0])
+        return
+      when Hash
+        @scalar      = options[0][:scalar] || 1
+        @numerator   = options[0][:numerator] || UNITY_ARRAY
+        @denominator = options[0][:denominator] || UNITY_ARRAY
+        @signature   = options[0][:signature]
+      when Array
+        initialize(*options[0])
+        return
+      when Numeric
+        @scalar    = options[0]
+        @numerator = @denominator = UNITY_ARRAY
+      when Time
+        @scalar      = options[0].to_f
+        @numerator   = ['<second>']
+        @denominator = UNITY_ARRAY
+      when DateTime, Date
+        @scalar      = options[0].ajd
+        @numerator   = ['<day>']
+        @denominator = UNITY_ARRAY
+      when /^\s*$/
+        raise ArgumentError, "No Unit Specified"
+      when String
+        parse(options[0])
+      else
+        raise ArgumentError, "Invalid Unit Format"
     end
     self.update_base_scalar
     raise ArgumentError, "Temperatures must not be less than absolute zero" if self.is_temperature? &&  self.base_scalar < 0
