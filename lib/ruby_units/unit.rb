@@ -737,7 +737,11 @@ class Unit < Numeric
       when Unit
         case
         when self.zero?
-          -other.dup
+          if other.zero?
+            other.dup * -1 # preserve Units class
+          else
+            -other.dup
+          end
         when self =~ other
           case
             when [self, other].all? {|x| x.is_temperature?}
