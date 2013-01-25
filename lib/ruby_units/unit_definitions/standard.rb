@@ -237,7 +237,7 @@ end
 
 Unit.define('fluid-ounce') do |floz|
   floz.definition = Unit('1/128 gal')
-  floz.aliases    = %w{floz fluid-ounce}
+  floz.aliases    = %w{floz fluid-ounce fluid-ounces}
 end
 
 Unit.define('tablespoon') do |tbsp|
@@ -278,7 +278,7 @@ end
 
 Unit.define('gee') do |gee|
   # approximated as a rational number to minimize round-off errors
-  gee.definition    = Unit(Rational(196131,20000), 'm/s^2') # equivalent to 9.80655 m/s^2
+  gee.definition    = Unit(Rational(196133,20000), 'm/s^2') # equivalent to 9.80665 m/s^2
   gee.aliases       = %w{gee standard-gravitation}
 end
 

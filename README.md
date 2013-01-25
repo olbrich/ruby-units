@@ -1,6 +1,7 @@
 # Ruby Units
 
 [![Dependency Status](https://gemnasium.com/olbrich/ruby-units.png)](https://gemnasium.com/olbrich/ruby-units)
+[![Build Status](https://secure.travis-ci.org/olbrich/ruby-units.png)](http://travis-ci.org/olbrich/ruby-units)
 
 Kevin C. Olbrich, Ph.D. 
 

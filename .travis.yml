@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+  - 1.9.3
+  - jruby-19mode # JRuby in 1.9 mode
+jdk:
+  - openjdk6
+  - openjdk7
+matrix:
+  exclude:
+    - rvm: 1.9.3
+      jdk: openjdk7
+script: bundle exec rake --trace
