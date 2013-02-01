@@ -17,6 +17,12 @@ describe Time do
     specify { Time.in("5 min").should > Time.now}
   end
 
+  context '#to_date' do
+    subject { Time.parse("2012-01-31 11:59:59") }
+    specify { subject.to_date.to_s.should == "2012-01-31" }
+    specify { (subject+1).to_date.to_s.should == "2012-01-31" }
+  end
+
   context '#to_unit' do
     subject { now }
     its(:to_unit)         { should be_an_instance_of(Unit) }
