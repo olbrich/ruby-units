@@ -1383,7 +1383,7 @@ class Unit < Numeric
     if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string = "#{$1} USD"
     end
-    unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8 && RUBY_VERSION > '1.8'
+    unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if RUBY_VERSION >= '1.9' && unit_string.encoding == Encoding::UTF_8
 
     unit_string.gsub!(/%/,'percent')
     unit_string.gsub!(/'/,'feet')
@@ -1587,5 +1587,5 @@ class Unit < Numeric
       @@UNIT_REGEX    = nil #invalidate the unit regex
     end
   end
-  
+
 end
