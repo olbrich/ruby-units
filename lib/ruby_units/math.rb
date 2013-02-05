@@ -99,7 +99,7 @@ module Math
   # @return [Numeric]
   def hypot(x,y)
     if Unit === x && Unit === y
-      (x**2 + y**2)**(1/2)
+      (x**2 + y**2)**(1.quo_without_units(2))
     else
       unit_hypot(x,y)
     end

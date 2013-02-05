@@ -8,3 +8,11 @@ describe "Github issue #49" do
     (b - Unit("1.5 cm^3")).should == Unit("1.5 cm^3")
   end
 end
+
+describe "Github issue #48" do
+  it "should not leak mathn" do
+    if ENV['WITHOUT_MATHN']
+      (30/20).should be_kind_of Fixnum
+    end
+  end
+end

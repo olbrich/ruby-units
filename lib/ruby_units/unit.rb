@@ -480,9 +480,19 @@ class Unit < Numeric
     end
     for unit in @denominator.compact do
       if @@PREFIX_VALUES[unit]
-        q /= @@PREFIX_VALUES[unit]
+        if q.kind_of?(Fixnum)
+          q = q.quo_without_units(@@PREFIX_VALUES[unit])
+        else
+          q /= @@PREFIX_VALUES[unit]
+        end
       else
-        q /= @@UNIT_VALUES[unit][:scalar] if @@UNIT_VALUES[unit]
+        if @@UNIT_VALUES[unit]
+          if q.kind_of?(Fixnum)
+            q = q.quo_without_units(@@UNIT_VALUES[unit][:scalar])
+          else
+            q /= @@UNIT_VALUES[unit][:scalar]
+          end
+        end
         den << @@UNIT_VALUES[unit][:numerator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:numerator]
         num << @@UNIT_VALUES[unit][:denominator] if @@UNIT_VALUES[unit] && @@UNIT_VALUES[unit][:denominator]
       end
@@ -712,7 +722,11 @@ class Unit < Numeric
             Unit.new(:scalar => (other.scalar + self.convert_to(other.temperature_scale).scalar), :numerator => other.numerator, :denominator=>other.denominator, :signature => other.signature)
           end
         else
-          @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.to_base.scalar))
+          if @@cached_units[self.units].scalar.kind_of?(Fixnum)
+            @q ||= ((@@cached_units[self.units].scalar.quo_without_units(@@cached_units[self.units].base_scalar)) rescue (self.units.unit.to_base.scalar))
+          else
+            @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.to_base.scalar))
+          end
           Unit.new(:scalar=>(self.base_scalar + other.base_scalar)*@q, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
         end
       else
@@ -751,7 +765,11 @@ class Unit < Numeric
             when other.is_temperature?
               raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
             else
-              @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
+              if @@cached_units[self.units].scalar.kind_of?(Fixnum)
+                @q ||= ((@@cached_units[self.units].scalar.quo_without_units(@@cached_units[self.units].base_scalar)) rescue (self.units.unit.scalar.quo_without_units(self.units.unit.to_base.scalar)))
+              else
+                @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
+              end
               Unit.new(:scalar=>(self.base_scalar - other.base_scalar)*@q, :numerator=>@numerator, :denominator=>@denominator, :signature=>@signature)
           end
         else
@@ -795,12 +813,20 @@ class Unit < Numeric
     when Unit
       raise ZeroDivisionError if other.zero?
       raise ArgumentError, "Cannot divide with temperatures" if [other,self].any? {|x| x.is_temperature?}
-      opts = Unit.eliminate_terms(@scalar/other.scalar, @numerator + other.denominator ,@denominator + other.numerator)
+      opts = if @scalar.kind_of?(Fixnum)
+        Unit.eliminate_terms(@scalar.quo_without_units(other.scalar), @numerator + other.denominator ,@denominator + other.numerator)
+      else
+        Unit.eliminate_terms(@scalar/other.scalar, @numerator + other.denominator ,@denominator + other.numerator)
+      end
       opts.merge!(:signature=> @signature - other.signature)
       return Unit.new(opts)
     when Numeric
       raise ZeroDivisionError if other.zero?
-      return Unit.new(:scalar=>@scalar/other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
+      if @scalar.kind_of?(Fixnum)
+        return Unit.new(:scalar=>@scalar.quo_without_units(other), :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
+      else
+        return Unit.new(:scalar=>@scalar/other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
+      end
     else
       x,y = coerce(other)
       return y / x
@@ -856,9 +882,9 @@ class Unit < Numeric
       return self.power(other)
     when Float
       return self**(other.to_i) if other == other.to_i
-      valid = (1..9).map {|x| 1/x}
+      valid = (1..9).map {|x| 1.quo_without_units(x)}
       raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
-      return self.root((1/other).to_int)
+      return self.root((1.quo_without_units(other)).to_int)
     when (!defined?(Complex).nil? && Complex)
       raise ArgumentError, "exponentiation of complex numbers is not yet supported."
     else
