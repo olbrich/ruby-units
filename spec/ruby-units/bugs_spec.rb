@@ -16,3 +16,11 @@ describe "Github issue #48" do
     end
   end
 end
+
+describe "Github issue #43" do
+  it "should return a Float for Math::sqrt" do
+    if ENV['WITHOUT_MATHN']
+      Math.sqrt(100).should be_kind_of Float
+    end
+  end
+end
