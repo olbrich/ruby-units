@@ -481,14 +481,14 @@ class Unit < Numeric
     for unit in @denominator.compact do
       if @@PREFIX_VALUES[unit]
         if q.kind_of?(Fixnum)
-          q = q.quo_without_units(@@PREFIX_VALUES[unit])
+          q = q.quo(@@PREFIX_VALUES[unit])
         else
           q /= @@PREFIX_VALUES[unit]
         end
       else
         if @@UNIT_VALUES[unit]
           if q.kind_of?(Fixnum)
-            q = q.quo_without_units(@@UNIT_VALUES[unit][:scalar])
+            q = q.quo(@@UNIT_VALUES[unit][:scalar])
           else
             q /= @@UNIT_VALUES[unit][:scalar]
           end
@@ -723,7 +723,7 @@ class Unit < Numeric
           end
         else
           if @@cached_units[self.units].scalar.kind_of?(Fixnum)
-            @q ||= ((@@cached_units[self.units].scalar.quo_without_units(@@cached_units[self.units].base_scalar)) rescue (self.units.unit.to_base.scalar))
+            @q ||= ((@@cached_units[self.units].scalar.quo(@@cached_units[self.units].base_scalar)) rescue (self.units.unit.to_base.scalar))
           else
             @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.to_base.scalar))
           end
@@ -766,7 +766,7 @@ class Unit < Numeric
               raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
             else
               if @@cached_units[self.units].scalar.kind_of?(Fixnum)
-                @q ||= ((@@cached_units[self.units].scalar.quo_without_units(@@cached_units[self.units].base_scalar)) rescue (self.units.unit.scalar.quo_without_units(self.units.unit.to_base.scalar)))
+                @q ||= ((@@cached_units[self.units].scalar.quo(@@cached_units[self.units].base_scalar)) rescue (self.units.unit.scalar.quo(self.units.unit.to_base.scalar)))
               else
                 @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
               end
@@ -814,7 +814,7 @@ class Unit < Numeric
       raise ZeroDivisionError if other.zero?
       raise ArgumentError, "Cannot divide with temperatures" if [other,self].any? {|x| x.is_temperature?}
       opts = if @scalar.kind_of?(Fixnum)
-        Unit.eliminate_terms(@scalar.quo_without_units(other.scalar), @numerator + other.denominator ,@denominator + other.numerator)
+        Unit.eliminate_terms(@scalar.quo(other.scalar), @numerator + other.denominator ,@denominator + other.numerator)
       else
         Unit.eliminate_terms(@scalar/other.scalar, @numerator + other.denominator ,@denominator + other.numerator)
       end
@@ -823,7 +823,7 @@ class Unit < Numeric
     when Numeric
       raise ZeroDivisionError if other.zero?
       if @scalar.kind_of?(Fixnum)
-        return Unit.new(:scalar=>@scalar.quo_without_units(other), :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
+        return Unit.new(:scalar=>@scalar.quo(other), :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
       else
         return Unit.new(:scalar=>@scalar/other, :numerator=>@numerator, :denominator=>@denominator, :signature => @signature)
       end
@@ -882,9 +882,9 @@ class Unit < Numeric
       return self.power(other)
     when Float
       return self**(other.to_i) if other == other.to_i
-      valid = (1..9).map {|x| 1.quo_without_units(x)}
+      valid = (1..9).map {|x| 1.quo(x)}
       raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
-      return self.root((1.quo_without_units(other)).to_int)
+      return self.root((1.quo(other)).to_int)
     when (!defined?(Complex).nil? && Complex)
       raise ArgumentError, "exponentiation of complex numbers is not yet supported."
     else

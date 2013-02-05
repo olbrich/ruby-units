@@ -629,7 +629,7 @@ describe Unit do
     describe "a new unit" do
       before(:each) do
         @jiffy = Unit.define("jiffy") do |jiffy|
-          jiffy.scalar = 1.quo_without_units(100)
+          jiffy.scalar = 1.quo(100)
           jiffy.aliases = %w{jif}
           jiffy.numerator = ["<second>"]
           jiffy.kind = :time
@@ -701,14 +701,14 @@ describe Unit do
   describe '#redefine!' do
     before(:each) do
       @jiffy = Unit.define("jiffy") do |jiffy|
-        jiffy.scalar = 1.quo_without_units(100)
+        jiffy.scalar = 1.quo(100)
         jiffy.aliases = %w{jif}
         jiffy.numerator = ["<second>"]
         jiffy.kind = :time
       end
 
       Unit.redefine!('jiffy') do |jiffy|
-        jiffy.scalar = 1.quo_without_units(1000)
+        jiffy.scalar = 1.quo(1000)
       end
     end
     
@@ -716,13 +716,13 @@ describe Unit do
       Unit.undefine!("jiffy")
     end
     
-    specify { Unit('1 jiffy').to_base.scalar.should == 1.quo_without_units(1000) }
+    specify { Unit('1 jiffy').to_base.scalar.should == 1.quo(1000) }
   end
   
   describe '#undefine!' do
     before(:each) do
       @jiffy = Unit.define("jiffy") do |jiffy|
-        jiffy.scalar = 1.quo_without_units(100)
+        jiffy.scalar = 1.quo(100)
         jiffy.aliases = %w{jif}
         jiffy.numerator = ["<second>"]
         jiffy.kind = :time
@@ -1090,7 +1090,7 @@ describe "Unit Math" do
         it { (subject**(-1)).should == 1/subject }
         it { (subject**(2)).should == Unit("1 m^2")}
         it { (subject**(-2)).should == Unit("1 1/m^2")}
-        specify { expect { subject**(1.quo_without_units(2))}.to raise_error(ArgumentError, "Illegal root")}
+        specify { expect { subject**(1.quo(2))}.to raise_error(ArgumentError, "Illegal root")}
           # because 1 m^(1/2) doesn't make any sense
         specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")} if defined?(Complex)
         specify { expect { subject**(Unit("1 m"))}.to raise_error(ArgumentError, "Invalid Exponent")}

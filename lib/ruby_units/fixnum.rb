@@ -29,8 +29,4 @@ if RUBY_VERSION < "1.9"
 
   end
   # :nocov_19:
-else
-  class Fixnum
-    alias quo_without_units quo
-  end
 end
