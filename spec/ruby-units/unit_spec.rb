@@ -590,6 +590,11 @@ describe Unit do
     it "should return true when asked about a defined unit" do
       Unit.defined?("meter").should be_true
     end
+
+    it "should return true when asked about an alias for a unit" do
+      Unit.defined?("m").should be_true
+    end
+
     it "should return false when asked about a unit that is not defined" do
       Unit.defined?("doohickey").should be_false
     end

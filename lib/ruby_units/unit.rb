@@ -151,7 +151,7 @@ class Unit < Numeric
   # @param [String] unit
   # @return [Boolean]
   def self.defined?(unit)
-    return @@UNIT_VALUES.keys.include?("<#{unit}>")
+    self.definitions.values.any? {|d| d.aliases.include?(unit)}
   end
 
   # return the unit definition for a unit
