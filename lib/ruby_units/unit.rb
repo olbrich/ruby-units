@@ -981,7 +981,7 @@ class Unit < Numeric
       else
         raise ArgumentError, "Unknown target units"
       end
-      raise ArgumentError,  "Incompatible Units" unless self =~ target
+      raise ArgumentError,  "Incompatible Units (#{self.units} !~ #{target.units})" unless self =~ target
       _numerator1 = @numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
       _denominator1 = @denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
       _numerator2 = target.numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
