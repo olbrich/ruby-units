@@ -850,7 +850,7 @@ describe "Unit Conversions" do
   end
   
   context "between incompatible units" do
-    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
+    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units (s !~ m)")}
   end
   
   context "given bad input" do
