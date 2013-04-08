@@ -1434,7 +1434,8 @@ class Unit < Numeric
       return
     end
 
-    if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
+    power_match = /\^\d+\/\d+/ # This prevents thinking e.g. kg^2/100kg*ha is rational because of 2 / 100
+    if defined?(Rational) && unit_string =~ RATIONAL_NUMBER && ! unit_string.match(power_match)
       numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
       result = Unit(unit_s || '1') * Rational(numerator.to_i,denominator.to_i)
       copy(result)
