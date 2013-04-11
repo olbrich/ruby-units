@@ -2,6 +2,8 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup(:development)
 require 'rspec/core'
+require 'mathn' unless ENV['WITHOUT_MATHN']
+require 'complex' if ENV['WITH_COMPLEX']
 
 # Initiate code coverage generation when needed
 begin

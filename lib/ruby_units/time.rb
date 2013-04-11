@@ -16,6 +16,8 @@ class Time
   # @return [Unit, Time]
   def self.at(arg,ms=0)
     case arg
+    when Time
+      unit_time_at(arg)
     when Unit
       unit_time_at(arg.convert_to("s").scalar, ms)
     else

@@ -20,7 +20,7 @@ class String
       args.first.to_s(self)
     when (!defined?(Uncertain).nil? && args.first.is_a?(Uncertain))
       args.first.to_s(self)
-    when args.first.is_a?(Complex)
+    when (!defined?(Complex).nil? && args.first.is_a?(Complex))
       args.first.to_s
     else
       unit_format(*args)

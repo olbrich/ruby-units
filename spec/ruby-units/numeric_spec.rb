@@ -6,7 +6,7 @@ describe Numeric do
   specify { Float.instance_methods.map {|m| m.to_s}.should include("to_unit") }
   specify { Integer.instance_methods.map {|m| m.to_s}.should include("to_unit") }
   specify { Fixnum.instance_methods.map {|m| m.to_s}.should include("to_unit") }
-  specify { Complex.instance_methods.map {|m| m.to_s}.should include("to_unit") }
+  specify { Complex.instance_methods.map {|m| m.to_s}.should include("to_unit") } if defined?(Complex)
   specify { Bignum.instance_methods.map {|m| m.to_s}.should include("to_unit") }
   specify { Rational.instance_methods.map {|m| m.to_s}.should include("to_unit") }
 end

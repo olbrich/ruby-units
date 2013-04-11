@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-describe Unit.base_units do
+describe Unit.base_units do  
   it {should be_a Array}
   it {should have(14).elements}
   %w{kilogram meter second ampere degK tempK mole candela each dollar steradian radian decibel byte}.each do |u|
@@ -105,7 +105,7 @@ describe "Create some simple units" do
     it {should be_unitless}
     it {should_not be_zero}
     its(:base) {should == subject}  
-  end
+  end if defined?(Complex)
 
   describe Unit("1+1i m") do
     it {should be_a Numeric}
@@ -120,7 +120,7 @@ describe "Create some simple units" do
     it {should_not be_unitless}
     it {should_not be_zero}
     its(:base) {should == subject}  
-  end
+  end if defined?(Complex)
 
   # scalar and unit
   describe Unit("1 mm") do
@@ -384,7 +384,7 @@ describe "Create some simple units" do
   #       '1 hour to minutes'
   describe Unit.parse("1 hour in minutes") do
     it {should be_an_instance_of Unit}
-    its(:scalar) {should be_an Integer}
+    its(:scalar) {should be_an Integer} if defined?(Math.rsqrt)
     its(:units) {should == "min"}
     its(:kind) {should == :time}
     it {should_not be_temperature}
@@ -634,7 +634,7 @@ describe Unit do
     describe "a new unit" do
       before(:each) do
         @jiffy = Unit.define("jiffy") do |jiffy|
-          jiffy.scalar = (1/100)
+          jiffy.scalar = 1.quo(100)
           jiffy.aliases = %w{jif}
           jiffy.numerator = ["<second>"]
           jiffy.kind = :time
@@ -706,14 +706,14 @@ describe Unit do
   describe '#redefine!' do
     before(:each) do
       @jiffy = Unit.define("jiffy") do |jiffy|
-        jiffy.scalar = (1/100)
+        jiffy.scalar = 1.quo(100)
         jiffy.aliases = %w{jif}
         jiffy.numerator = ["<second>"]
         jiffy.kind = :time
       end
 
       Unit.redefine!('jiffy') do |jiffy|
-        jiffy.scalar = (1/1000)
+        jiffy.scalar = 1.quo(1000)
       end
     end
     
@@ -721,13 +721,13 @@ describe Unit do
       Unit.undefine!("jiffy")
     end
     
-    specify { Unit('1 jiffy').to_base.scalar.should == (1/1000) }
+    specify { Unit('1 jiffy').to_base.scalar.should == 1.quo(1000) }
   end
   
   describe '#undefine!' do
     before(:each) do
       @jiffy = Unit.define("jiffy") do |jiffy|
-        jiffy.scalar = (1/100)
+        jiffy.scalar = 1.quo(100)
         jiffy.aliases = %w{jif}
         jiffy.numerator = ["<second>"]
         jiffy.kind = :time
@@ -855,7 +855,7 @@ describe "Unit Conversions" do
   end
   
   context "between incompatible units" do
-    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
+    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units (s !~ m)")}
   end
   
   context "given bad input" do
@@ -926,6 +926,20 @@ describe "Unit Conversions" do
       ].each do |ounces, pounds|
       specify { Unit(ounces).convert_to("lbs").should == Unit(pounds)}
       specify { Unit(ounces).to_s(:lbs).should == pounds}
+    end  
+  end
+
+  # this spec previously failed when run with WITHOUT_MATHN=true
+  describe "kilogram-tonne conversions" do
+    [
+      ["1 kg", "0.001 tonne"],
+      ["999 kg", "0.999 tonne"],
+      ["1000 kg", "1 tonne"],
+      ["1001 kg", "1.001 tonne"],
+      ["1501 kg", "1.501 tonne"],
+      ["1999 kg", "1.999 tonne"],
+      ].each do |kg, t|
+      specify { Unit(kg).convert_to("tonne").should be_within( Unit( 0.000001, "tonne" ) ).of( Unit(t) ) }
     end  
   end
 end
@@ -1095,9 +1109,9 @@ describe "Unit Math" do
         it { (subject**(-1)).should == 1/subject }
         it { (subject**(2)).should == Unit("1 m^2")}
         it { (subject**(-2)).should == Unit("1 1/m^2")}
-        specify { expect { subject**(1/2)}.to raise_error(ArgumentError, "Illegal root")}
+        specify { expect { subject**(1.quo(2))}.to raise_error(ArgumentError, "Illegal root")}
           # because 1 m^(1/2) doesn't make any sense
-        specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")}
+        specify { expect { subject**(Complex(1,1))}.to raise_error(ArgumentError, "exponentiation of complex numbers is not yet supported.")} if defined?(Complex)
         specify { expect { subject**(Unit("1 m"))}.to raise_error(ArgumentError, "Invalid Exponent")}
       end
     
@@ -1141,7 +1155,7 @@ describe "Unit Math" do
     end
     it "raises an exception when passed a Complex argument" do
       expect {subject.power(Complex(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
-    end
+    end if defined?(Complex)
     it "raises an exception when called on a temperature unit" do
       expect { Unit("100 tempC").power(2)}.to raise_error(ArgumentError,"Cannot raise a temperature to a power")
     end
@@ -1163,7 +1177,7 @@ describe "Unit Math" do
     end
     it "raises an exception when passed a Complex argument" do
       expect {subject.root(Complex(1,2))}.to raise_error(ArgumentError,"Exponent must an Integer")
-    end
+    end if defined?(Complex)
     it "raises an exception when called on a temperature unit" do
       expect { Unit("100 tempC").root(2)}.to raise_error(ArgumentError,"Cannot take the root of a temperature")
     end
@@ -1188,8 +1202,8 @@ describe "Unit Math" do
     specify {Unit("10.0").to_f.should be_kind_of(Float)}
     specify { expect { Unit("10.0 m").to_f }.to raise_error(RuntimeError,"Cannot convert '10 m' to Float unless unitless.  Use Unit#scalar") }
 
-    specify {Unit("1+1i").to_c.should be_kind_of(Complex)}
-    specify { expect { Unit("1+1i m").to_c }.to raise_error(RuntimeError,"Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") }
+    specify {Unit("1+1i").to_c.should be_kind_of(Complex)} if defined?(Complex)
+    specify { expect { Unit("1+1i m").to_c }.to raise_error(RuntimeError,"Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") } if defined?(Complex)
 
     specify {Unit("3/7").to_r.should be_kind_of(Rational)}
     specify { expect { Unit("3/7 m").to_r }.to raise_error(RuntimeError,"Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }

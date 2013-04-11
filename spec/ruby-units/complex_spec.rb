@@ -7,7 +7,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe Complex do
   subject { Complex(1,1) }
   it { should respond_to :to_unit }
-end
+end if defined?(Complex)
 
 describe "Complex Unit" do
   subject { Complex(1.0, -1.0).to_unit }
@@ -34,4 +34,4 @@ describe "Complex Unit" do
     end
   end
   
-end
+end if defined?(Complex)
