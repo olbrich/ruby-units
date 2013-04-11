@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
-describe Unit.base_units do
+describe Unit.base_units do  
   it {should be_a Array}
   it {should have(14).elements}
   %w{kilogram meter second ampere degK tempK mole candela each dollar steradian radian decibel byte}.each do |u|
@@ -926,6 +926,20 @@ describe "Unit Conversions" do
       ].each do |ounces, pounds|
       specify { Unit(ounces).convert_to("lbs").should == Unit(pounds)}
       specify { Unit(ounces).to_s(:lbs).should == pounds}
+    end  
+  end
+
+  # this spec previously failed when run with WITHOUT_MATHN=true
+  describe "kilogram-tonne conversions" do
+    [
+      ["1 kg", "0.001 tonne"],
+      ["999 kg", "0.999 tonne"],
+      ["1000 kg", "1 tonne"],
+      ["1001 kg", "1.001 tonne"],
+      ["1501 kg", "1.501 tonne"],
+      ["1999 kg", "1.999 tonne"],
+      ].each do |kg, t|
+      specify { Unit(kg).convert_to("tonne").should be_within( Unit( 0.000001, "tonne" ) ).of( Unit(t) ) }
     end  
   end
 end

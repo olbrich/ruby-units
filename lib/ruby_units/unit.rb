@@ -1017,8 +1017,14 @@ class Unit < Numeric
       _numerator2 = target.numerator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
       _denominator2 = target.denominator.map {|x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x}.map {|x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact
 
-      q = @scalar * ( (_numerator1 + _denominator2).inject(1) {|product,n| product*n} ) /
-          ( (_numerator2 + _denominator1).inject(1) {|product,n| product*n} )
+      _product1 = ( (_numerator1 + _denominator2).inject(1) {|product,n| product*n} )
+      _product2 = ( (_numerator2 + _denominator1).inject(1) {|product,n| product*n} )
+      if _product1.kind_of?(Fixnum)
+        q = @scalar * _product1.quo(_product2)
+      else
+        q = @scalar * _product1 / _product2
+      end
+          
       return Unit.new(:scalar=>q, :numerator=>target.numerator, :denominator=>target.denominator, :signature => target.signature)
     end
   end
