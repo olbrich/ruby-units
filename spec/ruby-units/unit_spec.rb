@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + '/../spec_helper'
+require 'yaml'
 
 describe Unit.base_units do
   it {should be_a Array}
