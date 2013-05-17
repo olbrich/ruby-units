@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     "CHANGELOG.txt",
     "LICENSE.txt",
     "README.md",
-    "RakeFile",
+    "Rakefile.rb",
     "TODO",
     "VERSION",
     "lib/ruby-units.rb",
