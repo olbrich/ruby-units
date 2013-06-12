@@ -8,6 +8,7 @@ describe Time do
 
   context ".at" do
     subject { Date.new(2011,4,1).to_unit }
+    specify { Time.at(Time.at(0)).utc.strftime("%D %T").should == "01/01/70 00:00:00" }
     specify { Time.at(subject - Date.new(1970,1,1)).getutc.strftime("%D %T").should == "04/01/11 00:00:00"}
     specify { Time.at(subject - Date.new(1970,1,1), 500).usec.should == 500}
   end
