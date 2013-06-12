@@ -1,5 +1,12 @@
 Change Log for Ruby-units
 =========================
+2013-06-11  1.4.3   * Fix issue #70 -- Support passing Time objects to Time.at
+                    * Fix issue #72 -- Remove non-existent RakeFile from gemspec
+                    * Fix issue #71 -- Fix YAML test failure
+                    * Fix issue #49 -- Unit instances constructed using other Unit instances are incompatible within the framework
+                    * Fix issue #61 -- Fix failing case of subtraction losing Units class
+                    * Fix issue #63 -- fixes an issue with to_date on 1.8.7
+                    * Fix issue #64 -- Aliases aren't considered in Unit.defined? method
 2012-09-16  1.4.2   * Fix issue #54 -- pluralization of fluid-ounces
                     * Fix issue #53, 51 -- incorrect definition for gee
                     * Fix issue #52 -- add support for degree symbol
