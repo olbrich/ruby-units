@@ -974,7 +974,7 @@ class Unit < Numeric
     return self if other.nil?
     return self if TrueClass === other
     return self if FalseClass === other
-    if (Unit === other && other.is_temperature?) || (String === other && other =~ /temp[CFRK]/)
+    if (Unit === other && other.is_temperature?) || (String === other && other =~ /#{Unit.temp_regex}/)
       raise ArgumentError, "Receiver is not a temperature unit" unless self.degree?
       start_unit = self.units
       target_unit = other.units rescue other

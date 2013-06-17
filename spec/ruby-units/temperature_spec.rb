@@ -84,6 +84,10 @@ describe 'temperatures' do
       specify { Unit("100 tK").convert_to("tempC").should be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
       specify { Unit("100 tK").convert_to("tempF").should be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
       specify { Unit("100 tK").convert_to("tempR").should be_within(U"0.01 degR").of(Unit("180 tempR"))}
+
+      specify { Unit("100 tK").convert_to("tC").should be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
+      specify { Unit("100 tK").convert_to("tF").should be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
+      specify { Unit("100 tK").convert_to("tR").should be_within(U"0.01 degR").of(Unit("180 tempR"))}
     end
 
     
