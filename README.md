@@ -168,4 +168,17 @@ This is useful for changing display names, adding aliases, etc.
     Unit.redefine!("cup") do |cup|
       cup.display_name  = "cup"
     end
-  
+
+
+### Namespaced Class
+
+Sometimes the default class 'Unit' may conflict with other gems or applications.  Internally ruby-units defines itself using the RubyUnits namespace.
+The actual class of a unit is the RubyUnits::Unit.  For simplicity and backwards compatiblity, the '::Unit' class is defined as an alias to '::RubyUnits::Unit'.
+
+To load ruby-units without this alias...
+
+    require 'ruby-units/namespaced'
+
+When using bundler...
+
+    gem 'ruby-units', require: 'namespaced'
