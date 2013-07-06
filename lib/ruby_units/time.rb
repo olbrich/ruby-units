@@ -1,3 +1,4 @@
+require 'time'
 #
 # Time math is handled slightly differently.  The difference is considered to be an exact duration if
 # the subtracted value is in hours, minutes, or seconds.  It is rounded to the nearest day if the offset

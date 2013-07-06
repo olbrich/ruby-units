@@ -1,5 +1,5 @@
 # seed the cache
-RubyUnits::Unit('1')
+RubyUnits::Unit.new('1')
 
 RubyUnits::Unit.define("meter") do |unit|
   unit.scalar    = 1

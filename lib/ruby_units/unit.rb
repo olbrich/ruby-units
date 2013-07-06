@@ -25,7 +25,7 @@ end
 # @example Define a new unit
 #  RubyUnits::Unit.define("foobar") do |unit|
 #    unit.aliases    = %w{foo fb foo-bar}
-#    unit.definition = Unit("1 baz")
+#    unit.definition = RubyUnits::Unit.new("1 baz")
 #  end
 #
 # @todo fix class variables so they conform to standard naming conventions and refactor away as many of them as possible
@@ -177,11 +177,11 @@ module RubyUnits
     #
     # @example Block form
     #   RubyUnits::Unit.define('foobar') do |foobar|
-    #     foobar.definition = Unit("1 baz")
+    #     foobar.definition = RubyUnits::Unit.new("1 baz")
     #   end
     #
     # @example RubyUnits::Unit::Definition form
-    #   unit_definition = RubyUnits::Unit::Definition.new("foobar") {|foobar| foobar.definition = Unit("1 baz")}
+    #   unit_definition = RubyUnits::Unit::Definition.new("foobar") {|foobar| foobar.definition = RubyUnits::Unit.new("1 baz")}
     #   RubyUnits::Unit.define(unit_definition)
     def self.define(unit_definition, &block)
       if block_given?
@@ -674,8 +674,8 @@ module RubyUnits
 
     # Compare two units.  Returns true if quantities and units match
     # @example
-    #   Unit("100 cm") === Unit("100 cm")   # => true
-    #   Unit("100 cm") === Unit("1 m")      # => false
+    #   RubyUnits::Unit.new("100 cm") === RubyUnits::Unit.new("100 cm")   # => true
+    #   RubyUnits::Unit.new("100 cm") === RubyUnits::Unit.new("1 m")      # => false
     # @param [Object] other
     # @return [Boolean]
     def ===(other)
@@ -928,7 +928,7 @@ module RubyUnits
     # returns inverse of Unit (1/unit)
     # @return [Unit]
     def inverse
-      return Unit("1") / self
+      return RubyUnits::Unit.new("1") / self
     end
 
     # convert to a specified unit string or to the same units as another Unit
@@ -1415,14 +1415,14 @@ module RubyUnits
 
       if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
         real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]
-        result                  = Unit(unit_s || '1') * Complex(real.to_f, imaginary.to_f)
+        result                  = RubyUnits::Unit.new(unit_s || '1') * Complex(real.to_f, imaginary.to_f)
         copy(result)
         return
       end
 
       if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
         numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
-        result                         = Unit(unit_s || '1') * Rational(numerator.to_i, denominator.to_i)
+        result                         = RubyUnits::Unit.new(unit_s || '1') * Rational(numerator.to_i, denominator.to_i)
         copy(result)
         return
       end

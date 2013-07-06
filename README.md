@@ -2,9 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/olbrich/ruby-units.png)](http://travis-ci.org/olbrich/ruby-units)
 
-Kevin C. Olbrich, Ph.D. 
-
-[Sciwerks.com](http://www.sciwerks.com)
+Kevin C. Olbrich, Ph.D.
 
 Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/ruby-units)
 
@@ -36,7 +34,7 @@ This package may be installed using:  `gem install ruby-units`
 2. use SI notation when possible
 3. avoid using spaces in unit names
 
-## Unit compatability:
+## Unit compatibility:
 Many methods require that the units of two operands are compatible.  Compatible units are those that can be easily converted into each other, such as 'meters' and 'feet'.
 
     unit1 =~ unit2                  #=> true if units are compatible
