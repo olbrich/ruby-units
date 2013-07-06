@@ -7,7 +7,7 @@ module Math
   alias :unit_sqrt :sqrt
   # @return [Numeric]
   def sqrt(n)
-    if Unit === n
+    if RubyUnits::Unit === n
       (n**(Rational(1,2))).to_unit 
     else
       unit_sqrt(n)
@@ -23,7 +23,7 @@ module Math
     alias :unit_cbrt :cbrt
     # @return [Numeric]
     def cbrt(n)
-      if Unit === n
+      if RubyUnits::Unit === n
         (n**(Rational(1,3))).to_unit 
       else
         unit_cbrt(n)
@@ -39,7 +39,7 @@ module Math
   alias :unit_sin :sin
   # @return [Numeric]
   def sin(n)
-   Unit === n ? unit_sin(n.convert_to('radian').scalar) : unit_sin(n)
+   RubyUnits::Unit === n ? unit_sin(n.convert_to('radian').scalar) : unit_sin(n)
   end
   # @return [Numeric]
   module_function :unit_sin
@@ -49,7 +49,7 @@ module Math
   alias :unit_cos :cos
   # @return [Numeric]
   def cos(n)
-    Unit === n ? unit_cos(n.convert_to('radian').scalar) : unit_cos(n)
+    RubyUnits::Unit === n ? unit_cos(n.convert_to('radian').scalar) : unit_cos(n)
   end
   # @return [Numeric]
   module_function :unit_cos
@@ -59,7 +59,7 @@ module Math
   alias :unit_sinh :sinh
   # @return [Numeric]
   def sinh(n)
-    Unit === n ? unit_sinh(n.convert_to('radian').scalar) : unit_sinh(n)
+    RubyUnits::Unit === n ? unit_sinh(n.convert_to('radian').scalar) : unit_sinh(n)
   end
   # @return [Numeric]
   module_function :unit_sinh
@@ -69,7 +69,7 @@ module Math
   alias :unit_cosh :cosh
   # @return [Numeric]
   def cosh(n)
-    Unit === n ? unit_cosh(n.convert_to('radian').scalar) : unit_cosh(n)
+    RubyUnits::Unit === n ? unit_cosh(n.convert_to('radian').scalar) : unit_cosh(n)
   end
   # @return [Numeric]
   module_function :unit_cosh
@@ -79,7 +79,7 @@ module Math
   alias :unit_tan :tan
   # @return [Numeric]
   def tan(n)
-   Unit === n ? unit_tan(n.convert_to('radian').scalar) : unit_tan(n)
+   RubyUnits::Unit === n ? unit_tan(n.convert_to('radian').scalar) : unit_tan(n)
   end
   # @return [Numeric]
   module_function :tan
@@ -89,7 +89,7 @@ module Math
   alias :unit_tanh :tanh
   # @return [Numeric]
   def tanh(n)
-    Unit === n ? unit_tanh(n.convert_to('radian').scalar) : unit_tanh(n)
+    RubyUnits::Unit === n ? unit_tanh(n.convert_to('radian').scalar) : unit_tanh(n)
   end
   # @return [Numeric]
   module_function :unit_tanh
@@ -100,7 +100,7 @@ module Math
   # Convert parameters to consistent units and perform the function
   # @return [Numeric]
   def hypot(x,y)
-    if Unit === x && Unit === y
+    if RubyUnits::Unit === x && RubyUnits::Unit === y
       (x**2 + y**2)**(1/2)
     else
       unit_hypot(x,y)
@@ -115,9 +115,9 @@ module Math
   # @return [Numeric]
   def atan2(x,y)
     case
-    when (x.is_a?(Unit) && y.is_a?(Unit)) && (x !~ y)
-      raise ArgumentError, "Incompatible Units"
-    when (x.is_a?(Unit) && y.is_a?(Unit)) && (x =~ y)
+    when (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && (x !~ y)
+      raise ArgumentError, "Incompatible RubyUnits::Units"
+    when (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && (x =~ y)
       Math::unit_atan2(x.base_scalar, y.base_scalar)
     else
       Math::unit_atan2(x,y)

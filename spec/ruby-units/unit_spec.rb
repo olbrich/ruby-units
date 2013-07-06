@@ -603,7 +603,7 @@ describe Unit do
   
   describe '#to_yaml' do
     subject { Unit('1 mm') }
-    its(:to_yaml) {should =~ /--- !ruby\/object:Unit/ }
+    its(:to_yaml) {should =~ /--- !ruby\/object:RubyUnits::Unit/ }
   end
 
   describe "#definition" do    
@@ -834,7 +834,7 @@ describe "Unit Comparisons" do
       specify { Unit("2 m").should > Unit("1 ft")}
       specify { Unit("70 tempF").should > Unit("10 degC")}
       specify { Unit("1 m").should > 0 }
-      specify { expect { Unit("1 m").should_not > nil}.to raise_error(ArgumentError, /comparison of Unit with (nil failed|NilClass)/) }
+      specify { expect { Unit("1 m").should_not > nil}.to raise_error(ArgumentError, /comparison of RubyUnits::Unit with (nil failed|NilClass)/) }
     end
     
     context "incompatible units cannot be compared" do
