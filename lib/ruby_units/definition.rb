@@ -1,4 +1,4 @@
-class Unit < Numeric
+class RubyUnits::Unit < Numeric
 
   # Handle the definition of units
   class Definition
@@ -36,8 +36,8 @@ class Unit < Numeric
       @aliases      ||= (_definition[0] || [_name])
       @scalar       ||= _definition[1]
       @kind         ||= _definition[2]
-      @numerator    ||= _definition[3] || Unit::UNITY_ARRAY
-      @denominator  ||= _definition[4] || Unit::UNITY_ARRAY
+      @numerator    ||= _definition[3] || RubyUnits::Unit::UNITY_ARRAY
+      @denominator  ||= _definition[4] || RubyUnits::Unit::UNITY_ARRAY
       @display_name ||= @aliases.first
     end
     
@@ -90,8 +90,8 @@ class Unit < Numeric
     # units are base units if the scalar is one, and the unit is defined in terms of itself.
     # @return [Boolean]
     def base?
-      (self.denominator     == Unit::UNITY_ARRAY) &&
-      (self.numerator       != Unit::UNITY_ARRAY) &&
+      (self.denominator     == RubyUnits::Unit::UNITY_ARRAY) &&
+      (self.numerator       != RubyUnits::Unit::UNITY_ARRAY) &&
       (self.numerator.size  == 1) &&
       (self.scalar          == 1) &&
       (self.numerator.first == self.name)

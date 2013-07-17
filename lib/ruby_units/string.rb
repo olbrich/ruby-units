@@ -1,9 +1,9 @@
 require 'time'
 class String
   # make a string into a unit
-  # @return (see Unit#initialize)
+  # @return (see RubyUnits::Unit#initialize)
   def to_unit(other = nil)
-    other ? Unit.new(self).convert_to(other) : Unit.new(self)
+    other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
   end
   alias :unit :to_unit
   alias :u :to_unit
@@ -16,7 +16,7 @@ class String
   def %(*args)
 		return "" if self.empty?
     case 
-    when args.first.is_a?(Unit)
+    when args.first.is_a?(RubyUnits::Unit)
       args.first.to_s(self)
     when (!defined?(Uncertain).nil? && args.first.is_a?(Uncertain))
       args.first.to_s(self)
@@ -27,8 +27,8 @@ class String
     end
   end
   
-  # @param (see Unit#convert_to)
-  # @return (see Unit#convert_to)
+  # @param (see RubyUnits::Unit#convert_to)
+  # @return (see RubyUnits::Unit#convert_to)
   def convert_to(other)
     self.unit.convert_to(other)
   end

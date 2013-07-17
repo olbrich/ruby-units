@@ -8,7 +8,7 @@ if RUBY_VERSION < "1.9"
     # @return [Unit, Integer]
     def quo_with_units(other)
       case other
-      when Unit
+      when RubyUnits::Unit
         self * other.inverse
       else
         quo_without_units(other)

@@ -1,3 +1,4 @@
+require 'time'
 #
 # Time math is handled slightly differently.  The difference is considered to be an exact duration if
 # the subtracted value is in hours, minutes, or seconds.  It is rounded to the nearest day if the offset
@@ -13,21 +14,21 @@ class Time
   # epoch
   # @param [Time] arg
   # @param [Integer] ms
-  # @return [Unit, Time]
+  # @return [RubyUnits::Unit, Time]
   def self.at(arg,ms=0)
     case arg
     when Time
       unit_time_at(arg)
-    when Unit
+    when RubyUnits::Unit
       unit_time_at(arg.convert_to("s").scalar, ms)
     else
       unit_time_at(arg, ms)
     end
   end
   
-  # @return (see Unit#initialize)
+  # @return (see RubyUnits::Unit#initialize)
   def to_unit(other = nil)
-    other ? Unit.new(self).convert_to(other) : Unit.new(self)
+    other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
   end
   alias :unit :to_unit
   alias :u :to_unit
@@ -39,10 +40,10 @@ class Time
   end
   
   alias :unit_add :+
-  # @return [Unit, Time]
+  # @return [RubyUnits::Unit, Time]
   def +(other)
     case other
-    when Unit
+    when RubyUnits::Unit
       other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units  
       begin
         unit_add(other.convert_to('s').scalar)
@@ -63,10 +64,10 @@ class Time
   
   alias :unit_sub :-
   
-  # @return [Unit, Time]
+  # @return [RubyUnits::Unit, Time]
   def -(other)
     case other
-    when Unit
+    when RubyUnits::Unit
       other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units  
       begin
         unit_sub(other.convert_to('s').scalar)

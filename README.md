@@ -2,9 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/olbrich/ruby-units.png)](http://travis-ci.org/olbrich/ruby-units)
 
-Kevin C. Olbrich, Ph.D. 
-
-[Sciwerks.com](http://www.sciwerks.com)
+Kevin C. Olbrich, Ph.D.
 
 Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/ruby-units)
 
@@ -36,7 +34,7 @@ This package may be installed using:  `gem install ruby-units`
 2. use SI notation when possible
 3. avoid using spaces in unit names
 
-## Unit compatability:
+## Unit compatibility:
 Many methods require that the units of two operands are compatible.  Compatible units are those that can be easily converted into each other, such as 'meters' and 'feet'.
 
     unit1 =~ unit2                  #=> true if units are compatible
@@ -170,4 +168,19 @@ This is useful for changing display names, adding aliases, etc.
     Unit.redefine!("cup") do |cup|
       cup.display_name  = "cup"
     end
-  
+
+
+### Namespaced Class
+
+Sometimes the default class 'Unit' may conflict with other gems or applications.  Internally ruby-units defines itself using the RubyUnits namespace.
+The actual class of a unit is the RubyUnits::Unit.  For simplicity and backwards compatiblity, the '::Unit' class is defined as an alias to '::RubyUnits::Unit'.
+
+To load ruby-units without this alias...
+
+    require 'ruby-units/namespaced'
+
+When using bundler...
+
+    gem 'ruby-units', require: 'namespaced'
+
+Note: when using the namespaced version, the Unit('unit string') helper will not be defined.

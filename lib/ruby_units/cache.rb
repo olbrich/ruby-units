@@ -1,4 +1,4 @@
-class Unit < Numeric
+class RubyUnits::Unit < Numeric
   @@cached_units = {}
   
   class Cache
