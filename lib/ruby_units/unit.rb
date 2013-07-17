@@ -71,7 +71,7 @@ module RubyUnits
         :substance,
         :luminosity,
         :currency,
-        :memory,
+        :information,
         :angle
     ]
     @@KINDS            = {
@@ -120,7 +120,7 @@ module RubyUnits
         63999998     => :illuminance,
         64000000     => :luminous_power,
         1280000000   => :currency,
-        25600000000  => :memory,
+        25600000000  => :information,
         511999999980 => :angular_velocity,
         512000000000 => :angle
     }
@@ -1264,6 +1264,16 @@ module RubyUnits
       end
     end
 
+    def best_prefix
+      best_prefix =  if (self.kind == :information)
+        @@PREFIX_VALUES.key(2**((Math.log(self.base_scalar,2) / 10.0).floor * 10))
+      else
+        @@PREFIX_VALUES.key(10**((Math.log(self.base_scalar,10) / 3.0).floor * 3))
+      end
+      puts @@PREFIX_MAP.key(best_prefix)+self.base.units
+      self.to(RubyUnits::Unit.new(@@PREFIX_MAP.key(best_prefix)+self.base.units))
+    end
+
     # Protected and Private Functions that should only be called from this class
     protected
 
@@ -1299,6 +1309,7 @@ module RubyUnits
       raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { |x| x.abs >=20 }
       return vector
     end
+
 
     private
 
@@ -1515,8 +1526,6 @@ module RubyUnits
     def self.base_units
       return @@base_units ||= @@definitions.dup.delete_if { |_, defn| !defn.base? }.keys.map { |u| RubyUnits::Unit.new(u) }
     end
-
-    private
 
     # parse a string consisting of a number and a unit string
     # @param [String] string
