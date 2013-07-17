@@ -31,7 +31,7 @@
   'zepto'  => [%w{z Zepto zepto},     Rational(1,1e21)],
   'yocto'  => [%w{y Yocto yocto},     Rational(1,1e24)]
 }.each do |name, definition|
-  Unit.define(name) do |unit|
+  RubyUnits::Unit.define(name) do |unit|
     aliases, scalar = definition
     unit.aliases    = aliases
     unit.scalar     = scalar
