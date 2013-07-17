@@ -112,7 +112,7 @@ module RubyUnits
         159999       => :magnetism,
         160000       => :current,
         160020       => :charge,
-        312058       => :resistance,
+        312058       => :conductance,
         312078       => :capacitance,
         3199980      => :activity,
         3199997      => :molar_concentration,
