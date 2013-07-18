@@ -1267,13 +1267,13 @@ module RubyUnits
     end
 
     # returns a new unit that has been
-    def natural
-      best_prefix =  if (self.kind == :information)
+    def best_prefix
+      _best_prefix =  if (self.kind == :information)
         @@PREFIX_VALUES.key(2**((Math.log(self.base_scalar,2) / 10.0).floor * 10))
       else
-        @@PREFIX_VALUES.key(10**((Math.log(self.base_scalar,10) / 3.0).floor * 3))
+        @@PREFIX_VALUES.key(10**((Math.log10(self.base_scalar) / 3.0).floor * 3))
       end
-      self.to(RubyUnits::Unit.new(@@PREFIX_MAP.key(best_prefix)+self.units(false)))
+      self.to(RubyUnits::Unit.new(@@PREFIX_MAP.key(_best_prefix)+self.units(false)))
     end
 
     # Protected and Private Functions that should only be called from this class

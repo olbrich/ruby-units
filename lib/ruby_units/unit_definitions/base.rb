@@ -61,7 +61,7 @@ RubyUnits::Unit.define("byte") do |unit|
   unit.scalar    = 1
   unit.numerator = %w{<byte>}
   unit.aliases   = %w{B byte bytes}
-  unit.kind      = :memory
+  unit.kind      = :information
 end
 
 RubyUnits::Unit.define("dollar") do |unit|
