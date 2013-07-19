@@ -508,7 +508,16 @@ describe "Create some simple units" do
     its(:kind)    {should == :speed}
     its(:units)   {should == "m/s"}
   end
-  
+
+  # without spaces
+  describe Unit('1g') do
+    specify { subject == Unit('1 g')}
+  end
+
+  describe Unit('11/s') do
+    specify { subject == Unit('1 1/s')}
+  end
+
 end
 
 describe "Unit handles attempts to create bad units" do
