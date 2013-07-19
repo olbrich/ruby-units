@@ -518,6 +518,9 @@ describe "Create some simple units" do
     specify { subject == Unit('1 1/s')}
   end
 
+  describe Unit.new("63.5029318kg") do
+    specify { subject == Unit.new("63.5029318 kg")}
+  end
 end
 
 describe "Unit handles attempts to create bad units" do
