@@ -1306,6 +1306,11 @@ describe "Unit Math" do
     specify { Unit('23 m').div(Unit('2 m')).should == 11 }
   end
 
+  context '#best_prefix' do
+    specify { Unit('1024 KiB').best_prefix.should == Unit('1 MiB')}
+    specify { Unit('1000 m').best_prefix.should == Unit('1 km')}
+  end
+
   context "Time helper functions" do
     before do
       Time.stub!(:now).and_return(Time.utc(2011,10,16))

@@ -71,7 +71,7 @@ module RubyUnits
         :substance,
         :luminosity,
         :currency,
-        :memory,
+        :information,
         :angle
     ]
     @@KINDS            = {
@@ -120,7 +120,7 @@ module RubyUnits
         63999998     => :illuminance,
         64000000     => :luminous_power,
         1280000000   => :currency,
-        25600000000  => :memory,
+        25600000000  => :information,
         511999999980 => :angular_velocity,
         512000000000 => :angle
     }
@@ -1048,9 +1048,8 @@ module RubyUnits
 
     # returns the 'unit' part of the Unit object without the scalar
     # @return [String]
-    def units
+    def units(with_prefix = true)
       return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
-      return @unit_name unless @unit_name.nil?
       output_numerator   = []
       output_denominator = []
       num                = @numerator.clone.compact
@@ -1061,7 +1060,9 @@ module RubyUnits
       else
         while defn = RubyUnits::Unit.definition(num.shift) do
           if defn && defn.prefix?
-            output_numerator << defn.display_name + RubyUnits::Unit.definition(num.shift).display_name
+            if with_prefix
+              output_numerator << (defn.display_name + RubyUnits::Unit.definition(num.shift).display_name)
+            end
           else
             output_numerator << defn.display_name
           end
@@ -1073,7 +1074,9 @@ module RubyUnits
       else
         while defn = RubyUnits::Unit.definition(den.shift) do
           if defn && defn.prefix?
-            output_denominator << defn.display_name + RubyUnits::Unit.definition(den.shift).display_name
+            if with_prefix
+              output_denominator << (defn.display_name + RubyUnits::Unit.definition(den.shift).display_name)
+            end
           else
             output_denominator << defn.display_name
           end
@@ -1087,7 +1090,6 @@ module RubyUnits
           map { |x| [x, output_denominator.count(x)] }.
           map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
       out = "#{on.join('*')}#{od.empty? ? '' : '/' + od.join('*')}".strip
-      @unit_name = out unless self.kind == :temperature
       return out
     end
 
@@ -1264,6 +1266,16 @@ module RubyUnits
       end
     end
 
+    # returns a new unit that has been
+    def best_prefix
+      _best_prefix =  if (self.kind == :information)
+        @@PREFIX_VALUES.key(2**((Math.log(self.base_scalar,2) / 10.0).floor * 10))
+      else
+        @@PREFIX_VALUES.key(10**((Math.log10(self.base_scalar) / 3.0).floor * 3))
+      end
+      self.to(RubyUnits::Unit.new(@@PREFIX_MAP.key(_best_prefix)+self.units(false)))
+    end
+
     # Protected and Private Functions that should only be called from this class
     protected
 
@@ -1299,6 +1311,7 @@ module RubyUnits
       raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { |x| x.abs >=20 }
       return vector
     end
+
 
     private
 
@@ -1515,8 +1528,6 @@ module RubyUnits
     def self.base_units
       return @@base_units ||= @@definitions.dup.delete_if { |_, defn| !defn.base? }.keys.map { |u| RubyUnits::Unit.new(u) }
     end
-
-    private
 
     # parse a string consisting of a number and a unit string
     # @param [String] string
