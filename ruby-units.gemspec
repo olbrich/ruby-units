@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "ruby-units"
-  s.version = "1.4.3"
+  s.version = "1.4.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kevin Olbrich, Ph.D."]
-  s.date = "2013-06-12"
+  s.date = "2013-07-19"
   s.description = "Provides classes and methods to perform unit math and conversions"
   s.email = ["kevin.olbrich+ruby_units@gmail.com"]
   s.extra_rdoc_files = [
@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
     "lib/ruby_units/definition.rb",
     "lib/ruby_units/fixnum.rb",
     "lib/ruby_units/math.rb",
+    "lib/ruby_units/namespaced.rb",
     "lib/ruby_units/numeric.rb",
     "lib/ruby_units/object.rb",
     "lib/ruby_units/string.rb",
