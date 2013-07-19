@@ -1,5 +1,8 @@
 Change Log for Ruby-units
 =========================
+2013-07-19  1.4.4   * Fix issue #4 -- .best_prefix method
+                    * Fix issue #60 -- Consider placing Unit in a module
+                    * Fix issue #75 -- Siemens is kind of conductance not resistance
 2013-06-11  1.4.3   * Fix issue #70 -- Support passing Time objects to Time.at
                     * Fix issue #72 -- Remove non-existent RakeFile from gemspec
                     * Fix issue #71 -- Fix YAML test failure

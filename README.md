@@ -32,7 +32,7 @@ This package may be installed using:  `gem install ruby-units`
 ## Rules:
 1. only 1 quantity per unit (with 2 exceptions... 6'5" and '8 lbs 8 oz')
 2. use SI notation when possible
-3. avoid using spaces in unit names
+3. spaces in units are allowed, but ones like '11/m' will be recognized as '11 1/m'.
 
 ## Unit compatibility:
 Many methods require that the units of two operands are compatible.  Compatible units are those that can be easily converted into each other, such as 'meters' and 'feet'.
