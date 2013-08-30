@@ -715,13 +715,26 @@ describe Unit do
       Unit.redefine!('jiffy') do |jiffy|
         jiffy.scalar = 1.quo(1000)
       end
+
+      Unit.redefine!('liter') do |unit|
+        unit.display_name = 'L'
+      end
     end
     
     after(:each) do
       Unit.undefine!("jiffy")
+      Unit.redefine!('liter') do |unit|
+        unit.display_name = 'l'
+      end
     end
     
     specify { Unit('1 jiffy').to_base.scalar.should == 1.quo(1000) }
+    specify { Unit('1 l').to_s.should eq('1 L') }
+    specify { Unit('1 litre').to_s.should eq('1 L') }
+    specify { Unit('1 ml').to_s.should eq('1 mL') }
+    specify { Unit('1 milliliter').to_s.should eq('1 mL') }
+    specify { Unit('1 Ml').to_s.should eq('1 ML') }
+    specify { Unit('1 megalitre').to_s.should eq('1 L') }
   end
   
   describe '#undefine!' do
