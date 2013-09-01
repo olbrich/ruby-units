@@ -1321,6 +1321,7 @@ describe "Unit Math" do
   context '#best_prefix' do
     specify { Unit('1024 KiB').best_prefix.should == Unit('1 MiB')}
     specify { Unit('1000 m').best_prefix.should == Unit('1 km')}
+    specify { expect { Unit('0 m').best_prefix }.to_not raise_error }
   end
 
   context "Time helper functions" do
