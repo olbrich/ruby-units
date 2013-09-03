@@ -1266,8 +1266,9 @@ module RubyUnits
       end
     end
 
-    # returns a new unit that has been
+    # returns a new unit that has been scaled to be more in line with typical usage.
     def best_prefix
+      return self.to_base if self.scalar == 0
       _best_prefix =  if (self.kind == :information)
         @@PREFIX_VALUES.key(2**((Math.log(self.base_scalar,2) / 10.0).floor * 10))
       else
