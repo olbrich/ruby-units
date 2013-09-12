@@ -514,6 +514,10 @@ describe "Create some simple units" do
     specify { subject == Unit('1 g')}
   end
 
+  describe Unit('-1g') do
+    specify { subject == Unit('-1 g')}
+  end
+
   describe Unit('11/s') do
     specify { subject == Unit('1 1/s')}
   end

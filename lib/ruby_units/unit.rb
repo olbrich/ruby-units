@@ -1541,7 +1541,7 @@ module RubyUnits
       rational  = %r{[+-]?\d+\/\d+}
       # complex numbers... -1.2+3i, +1.2-3.3i
       complex   = %r{#{sci}{2,2}i}
-      anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^\d\.].*)?}
+      anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^-\d\.].*)?}
       num, unit = string.scan(anynumber).first
 
       return [case num
