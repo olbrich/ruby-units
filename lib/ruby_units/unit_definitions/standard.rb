@@ -69,14 +69,14 @@ end
 
 # typesetting
 
-RubyUnits::Unit.define('point') do |point|
-  point.definition = RubyUnits::Unit.new('1/12 pica')
-  point.aliases    = %w{point points}
-end
-
 RubyUnits::Unit.define('pica') do |pica|
   pica.definition = RubyUnits::Unit.new('1/72 ft')
   pica.aliases    = %w{P pica picas}
+end
+
+RubyUnits::Unit.define('point') do |point|
+  point.definition = RubyUnits::Unit.new('1/12 pica')
+  point.aliases    = %w{point points}
 end
 
 RubyUnits::Unit.define('dot') do |dot|
