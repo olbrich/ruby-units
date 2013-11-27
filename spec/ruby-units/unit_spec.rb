@@ -859,8 +859,8 @@ describe "Unit Comparisons" do
     end
 
     context "with coercions should be valid" do
-      specify { Unit("1GB") > "500MB" }
-      specify { Unit("0.5GB") < "900MB" }
+      specify { expect(Unit("1GB") > "500MB").to eq(true) }
+      specify { expect(Unit("0.5GB") < "900MB").to eq(true) }
     end
   end
   

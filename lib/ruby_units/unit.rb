@@ -617,7 +617,7 @@ module RubyUnits
           return self.base_scalar <=> other.base_scalar
         else
           x, y = coerce(other)
-          return x <=> y
+          return y <=> x
       end
     end
 
