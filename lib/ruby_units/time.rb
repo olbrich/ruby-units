@@ -15,17 +15,21 @@ class Time
   # @param [Time] arg
   # @param [Integer] ms
   # @return [RubyUnits::Unit, Time]
-  def self.at(arg,ms=nil)
+  def self.at(arg, ms=nil)
     case arg
     when Time
       unit_time_at(arg)
     when RubyUnits::Unit
-      unit_time_at(arg.convert_to("s").scalar, ms)
+      if ms
+        unit_time_at(arg.convert_to("s").scalar, ms)
+      else
+        unit_time_at(arg.convert_to("s").scalar)
+      end
     else
       ms.nil? ? unit_time_at(arg) : unit_time_at(arg, ms)
     end
   end
-  
+
   # @return (see RubyUnits::Unit#initialize)
   def to_unit(other = nil)
     other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
