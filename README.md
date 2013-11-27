@@ -177,10 +177,10 @@ The actual class of a unit is the RubyUnits::Unit.  For simplicity and backwards
 
 To load ruby-units without this alias...
 
-    require 'ruby-units/namespaced'
+    require 'ruby_units/namespaced'
 
 When using bundler...
 
-    gem 'ruby-units', require: 'namespaced'
+    gem 'ruby-units', require: 'ruby_units/namespaced'
 
 Note: when using the namespaced version, the Unit('unit string') helper will not be defined.
