@@ -1330,9 +1330,9 @@ describe "Unit Math" do
 
   context "Time helper functions" do
     before do
-      Time.stub!(:now).and_return(Time.utc(2011,10,16))
-      DateTime.stub!(:now).and_return(DateTime.civil(2011,10,16))
-      Date.stub!(:today).and_return(Date.civil(2011,10,16))
+      Time.stub(:now).and_return(Time.utc(2011,10,16))
+      DateTime.stub(:now).and_return(DateTime.civil(2011,10,16))
+      Date.stub(:today).and_return(Date.civil(2011,10,16))
     end
   
     context '#since' do
