@@ -610,7 +610,7 @@ module RubyUnits
           raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspect}"
         when other.nil?
           return self.base_scalar <=> nil
-        when !self.is_temperature? && other.zero?
+        when !self.is_temperature? && other.respond_to?(:zero?) && other.zero?
           return self.base_scalar <=> 0
         when other.instance_of?(Unit)
           raise ArgumentError, "Incompatible Units (#{self.units} !~ #{other.units})" unless self =~ other
