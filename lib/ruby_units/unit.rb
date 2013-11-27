@@ -610,14 +610,14 @@ module RubyUnits
           raise NoMethodError, "undefined method `<=>' for #{self.base_scalar.inspect}"
         when other.nil?
           return self.base_scalar <=> nil
-        when !self.is_temperature? && other.zero?
+        when !self.is_temperature? && other.respond_to?(:zero?) && other.zero?
           return self.base_scalar <=> 0
         when other.instance_of?(Unit)
           raise ArgumentError, "Incompatible Units (#{self.units} !~ #{other.units})" unless self =~ other
           return self.base_scalar <=> other.base_scalar
         else
           x, y = coerce(other)
-          return x <=> y
+          return y <=> x
       end
     end
 
@@ -1266,8 +1266,9 @@ module RubyUnits
       end
     end
 
-    # returns a new unit that has been
+    # returns a new unit that has been scaled to be more in line with typical usage.
     def best_prefix
+      return self.to_base if self.scalar == 0
       _best_prefix =  if (self.kind == :information)
         @@PREFIX_VALUES.key(2**((Math.log(self.base_scalar,2) / 10.0).floor * 10))
       else
@@ -1540,7 +1541,7 @@ module RubyUnits
       rational  = %r{[+-]?\d+\/\d+}
       # complex numbers... -1.2+3i, +1.2-3.3i
       complex   = %r{#{sci}{2,2}i}
-      anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^\d\.].*)?}
+      anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^-\d\.].*)?}
       num, unit = string.scan(anynumber).first
 
       return [case num

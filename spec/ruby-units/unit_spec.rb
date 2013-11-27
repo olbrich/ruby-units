@@ -514,6 +514,10 @@ describe "Create some simple units" do
     specify { subject == Unit('1 g')}
   end
 
+  describe Unit('-1g') do
+    specify { subject == Unit('-1 g')}
+  end
+
   describe Unit('11/s') do
     specify { subject == Unit('1 1/s')}
   end
@@ -852,6 +856,11 @@ describe "Unit Comparisons" do
     context "incompatible units cannot be compared" do
       specify { expect { Unit("1 m") < Unit("1 liter")}.to raise_error(ArgumentError,"Incompatible Units (m !~ l)")}
       specify { expect { Unit("1 kg") > Unit("60 mph")}.to raise_error(ArgumentError,"Incompatible Units (kg !~ mph)")}
+    end
+
+    context "with coercions should be valid" do
+      specify { expect(Unit("1GB") > "500MB").to eq(true) }
+      specify { expect(Unit("0.5GB") < "900MB").to eq(true) }
     end
   end
   
@@ -1321,13 +1330,14 @@ describe "Unit Math" do
   context '#best_prefix' do
     specify { Unit('1024 KiB').best_prefix.should == Unit('1 MiB')}
     specify { Unit('1000 m').best_prefix.should == Unit('1 km')}
+    specify { expect { Unit('0 m').best_prefix }.to_not raise_error }
   end
 
   context "Time helper functions" do
     before do
-      Time.stub!(:now).and_return(Time.utc(2011,10,16))
-      DateTime.stub!(:now).and_return(DateTime.civil(2011,10,16))
-      Date.stub!(:today).and_return(Date.civil(2011,10,16))
+      Time.stub(:now).and_return(Time.utc(2011,10,16))
+      DateTime.stub(:now).and_return(DateTime.civil(2011,10,16))
+      Date.stub(:today).and_return(Date.civil(2011,10,16))
     end
   
     context '#since' do
