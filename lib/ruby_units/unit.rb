@@ -613,7 +613,7 @@ module RubyUnits
         when !self.is_temperature? && other.respond_to?(:zero?) && other.zero?
           return self.base_scalar <=> 0
         when other.instance_of?(Unit)
-          raise ArgumentError, "Incompatible Units (#{self.units} !~ #{other.units})" unless self =~ other
+          raise ArgumentError, "Incompatible Units ('#{self.units}' not compatible with '#{other.units}')" unless self =~ other
           return self.base_scalar <=> other.base_scalar
         else
           x, y = coerce(other)
@@ -819,7 +819,7 @@ module RubyUnits
     # @param [Object] other
     # @return [Array]
     def divmod(other)
-      raise ArgumentError, "Incompatible Units" unless self =~ other
+      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ other
       if self.units == other.units
         return self.scalar.divmod(other.scalar)
       else
@@ -991,7 +991,7 @@ module RubyUnits
           else
             raise ArgumentError, "Unknown target units"
         end
-        raise ArgumentError, "Incompatible Units" unless self =~ target
+        raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ target
         _numerator1   = @numerator.map { |x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x }.map { |i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
         _denominator1 = @denominator.map { |x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x }.map { |i| i.kind_of?(Numeric) ? i : @@UNIT_VALUES[i][:scalar] }.compact
         _numerator2   = target.numerator.map { |x| @@PREFIX_VALUES[x] ? @@PREFIX_VALUES[x] : x }.map { |x| x.kind_of?(Numeric) ? x : @@UNIT_VALUES[x][:scalar] }.compact

@@ -854,8 +854,8 @@ describe "Unit Comparisons" do
     end
     
     context "incompatible units cannot be compared" do
-      specify { expect { Unit("1 m") < Unit("1 liter")}.to raise_error(ArgumentError,"Incompatible Units (m !~ l)")}
-      specify { expect { Unit("1 kg") > Unit("60 mph")}.to raise_error(ArgumentError,"Incompatible Units (kg !~ mph)")}
+      specify { expect { Unit("1 m") < Unit("1 liter")}.to raise_error(ArgumentError,"Incompatible Units ('m' not compatible with 'l')")}
+      specify { expect { Unit("1 kg") > Unit("60 mph")}.to raise_error(ArgumentError,"Incompatible Units ('kg' not compatible with 'mph')")}
     end
 
     context "with coercions should be valid" do
@@ -877,7 +877,7 @@ describe "Unit Conversions" do
   end
   
   context "between incompatible units" do
-    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units")}
+    specify { expect { Unit("1 s").convert_to("m")}.to raise_error(ArgumentError,"Incompatible Units ('1 s' not compatible with 'm')")}
   end
   
   context "given bad input" do
@@ -1140,7 +1140,7 @@ describe "Unit Math" do
       end
     
       specify "incompatible units raises an exception" do 
-        expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units")
+        expect { Unit("1 m") % Unit("1 kg")}.to raise_error(ArgumentError,"Incompatible Units ('1 m' not compatible with '1 kg')")
       end
     end
     
@@ -1320,7 +1320,7 @@ describe "Unit Math" do
   context '#divmod' do
     specify { Unit("5 mm").divmod(Unit("2 mm")).should == [2,1] }
     specify { Unit("1 km").divmod(Unit("2 m")).should == [500,0] }
-    specify { expect {Unit('1 m').divmod(Unit('2 kg'))}.to raise_error(ArgumentError,"Incompatible Units")}
+    specify { expect {Unit('1 m').divmod(Unit('2 kg'))}.to raise_error(ArgumentError,"Incompatible Units ('1 m' not compatible with '2 kg')")}
   end
   
   context '#div' do
