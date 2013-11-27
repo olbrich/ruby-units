@@ -857,6 +857,11 @@ describe "Unit Comparisons" do
       specify { expect { Unit("1 m") < Unit("1 liter")}.to raise_error(ArgumentError,"Incompatible Units (m !~ l)")}
       specify { expect { Unit("1 kg") > Unit("60 mph")}.to raise_error(ArgumentError,"Incompatible Units (kg !~ mph)")}
     end
+
+    context "with coercions should be valid" do
+      specify { expect(Unit("1GB") > "500MB").to eq(true) }
+      specify { expect(Unit("0.5GB") < "900MB").to eq(true) }
+    end
   end
   
 end
