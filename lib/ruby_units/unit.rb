@@ -1451,7 +1451,11 @@ module RubyUnits
         @base_scalar *= mult
         return self
       end
-      unit_string.gsub!(/<(#{@@UNIT_REGEX})><(#{@@UNIT_REGEX})>/, '\1*\2')
+
+      while unit_string.gsub! /(<#{@@UNIT_REGEX})><(#{@@UNIT_REGEX}>)/, '\1*\2'
+        # collapse <x><y><z> into <x*y*z>...
+      end
+      # ... and then strip the remaining brackets for x*y*z
       unit_string.gsub!(/[<>]/, "")
 
       if unit_string =~ /:/
