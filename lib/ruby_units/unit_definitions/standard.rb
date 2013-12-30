@@ -139,7 +139,7 @@ end
 
 RubyUnits::Unit.define('short-ton') do |ton|
   ton.definition = RubyUnits::Unit.new('2000 lbs')
-  ton.aliases    = %w{ton tn}
+  ton.aliases    = %w{tn ton tons short-tons}
 end
 
 RubyUnits::Unit.define('carat') do |carat|
