@@ -24,6 +24,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should be_zero }
     its(:base) { should == subject }
   end
@@ -40,6 +41,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == subject }
   end
@@ -56,6 +58,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == subject }
   end
@@ -72,6 +75,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == subject }
   end
@@ -88,6 +92,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == subject }
   end
@@ -104,6 +109,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == subject }
   end
@@ -119,6 +125,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == subject }
   end
@@ -135,6 +142,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == Unit("0.001 m") }
   end
@@ -151,6 +159,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == Unit("1") }
   end
@@ -167,6 +176,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == Unit("0.001 m") }
   end
@@ -183,6 +193,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == Unit("1 kg*m^2/s^2") }
   end
@@ -198,6 +209,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should == Unit("10 m/s^2") }
   end
@@ -212,6 +224,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_within(Unit("0.01 m")).of Unit("1.6764 m") }
     specify { subject.to_s(:ft).should == %{5'6"} }
@@ -227,6 +240,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_within(Unit("0.01 kg")).of Unit("2.8633 kg") }
     specify { subject.to_s(:lbs).should == "6 lbs, 5 oz" }
@@ -242,6 +256,7 @@ describe "Create some simple units" do
     it { should be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_within(Unit("0.01 degK")).of Unit("373.15 tempK") }
     its(:temperature_scale) { should == "degC" }
@@ -257,6 +272,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a(Numeric) }
     its(:temperature_scale) { should be_nil }
@@ -272,6 +288,7 @@ describe "Create some simple units" do
     it { should be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     its(:base) { should be_within(Unit("0.01 degK")).of Unit("100 degK") }
   end
 
@@ -285,6 +302,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should be_counting }
     it { should_not be_zero }
     its(:base) { should be_a(Numeric) }
     its(:temperature_scale) { should be_nil }
@@ -300,6 +318,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a(Numeric) }
     its(:temperature_scale) { should be_nil }
@@ -315,6 +334,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -330,6 +350,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -345,6 +366,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -360,6 +382,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -376,6 +399,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -392,6 +416,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -407,6 +432,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -423,6 +449,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -437,6 +464,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -451,6 +479,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should be_base }
     it { should_not be_unitless }
+    it { should_not be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
@@ -467,6 +496,7 @@ describe "Create some simple units" do
     it { should_not be_degree }
     it { should_not be_base }
     it { should_not be_unitless }
+    it { should be_counting }
     it { should_not be_zero }
     its(:base) { should be_a Numeric }
     its(:temperature_scale) { should be_nil }
