@@ -633,7 +633,7 @@ module RubyUnits
       case
         when other.respond_to?(:zero?) && other.zero?
           return self.zero?
-        when self.unitless? && other.instance_of?(Unit) && other.unitless?
+        when self.kind == :unitless && other.instance_of?(Unit) && other.kind == :unitless
           return self.units == other.units
         when other.instance_of?(Unit)
           return false unless self =~ other

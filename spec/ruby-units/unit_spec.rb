@@ -1438,3 +1438,12 @@ describe "Equations with Units" do
     specify { ((p*v)/(n*r)).convert_to('tempK').should be_within(Unit("0.1 degK")).of(Unit("12027.2 tempK")) }
   end
 end
+
+describe 'comparing counting units' do
+  specify { Unit.new('3 dB').should_not eq(Unit.new('3 sr')) }
+  specify { Unit.new('3 sr').should_not eq(Unit.new('3 nt')) }
+  specify { Unit.new('3 nt').should_not eq(Unit.new('3 bp')) }
+  specify { Unit.new('3 bp').should_not eq(Unit.new('3 molecule')) }
+  specify { Unit.new('3 molecule').should_not eq(Unit.new('3 each')) }
+  specify { Unit.new('3 each').should_not eq(Unit.new('3')) }
+end
