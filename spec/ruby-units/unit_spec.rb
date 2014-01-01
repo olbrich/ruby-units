@@ -509,6 +509,11 @@ describe "Create some simple units" do
     its(:units)   {should == "m/s"}
   end
 
+  describe Unit("1 <kilogram><meter>/<second><second><second>") do
+    its(:kind)    {should == :yank}
+    its(:units)   {should == "kg*m/s^3"}
+  end
+
   # without spaces
   describe Unit('1g') do
     specify { subject == Unit('1 g')}
@@ -1284,6 +1289,12 @@ describe "Unit Math" do
     context "of a unit" do
       specify "returns a unit with the truncate of the scalar" do
         Unit("10.5 m").truncate.should == Unit("10 m")
+      end
+    end
+
+    context "of a complex unit" do
+      specify "returns a unit with the truncate of the scalar" do
+        Unit("10.5 kg*m/s^3").truncate.should == Unit("10 kg*m/s^3")
       end
     end
   end
