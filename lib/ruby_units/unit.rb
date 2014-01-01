@@ -48,7 +48,7 @@ module RubyUnits
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
     LBS_OZ_REGEX       = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
     SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
-    RATIONAL_NUMBER    = /\(?([+-]?\d+)\/(\d+)\)?/
+    RATIONAL_NUMBER    = /\(?([+-])?(\d+ )?(\d+)\/(\d+)\)?/
     COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
     NUMBER_REGEX       = /#{SCI_NUMBER}*\s*(.+)?/
     UNIT_STRING_REGEX  = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
@@ -1435,8 +1435,10 @@ module RubyUnits
       end
 
       if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
-        numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
-        result                         = RubyUnits::Unit.new(unit_s || '1') * Rational(numerator.to_i, denominator.to_i)
+        sign, proper, numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
+        sign = (sign == '-') ? -1 : 1
+        rational = sign * (proper.to_i + Rational(numerator.to_i, denominator.to_i))
+        result  = RubyUnits::Unit.new(unit_s || '1') * rational
         copy(result)
         return
       end
@@ -1542,7 +1544,7 @@ module RubyUnits
       # scientific notation.... 123.234E22, -123.456e-10
       sci       = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
       # rational numbers.... -1/3, 1/5, 20/100
-      rational  = %r{[+-]?\d+\/\d+}
+      rational  = %r{[+-]?(?:\d+ )?\d+\/\d+}
       # complex numbers... -1.2+3i, +1.2-3.3i
       complex   = %r{#{sci}{2,2}i}
       anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^-\d\.].*)?}
@@ -1560,7 +1562,15 @@ module RubyUnits
                     #:nocov_19:
                   end
                 when rational
-                  Rational(*num.split("/").map { |x| x.to_i })
+                  # if it has whitespace, it will be of the form '6 1/2'
+                  if num =~ /([+-]?)(\d+ )?(\d+)\/(\d+)/
+                    sign = ($1 == '-') ? -1 : 1
+                    n = $2.to_i
+                    f = Rational($3.to_i,$4.to_i)
+                    sign * (n + f)
+                  else
+                    Rational(*num.split("/").map { |x| x.to_i })
+                  end
                 else
                   num.to_f
               end, unit.to_s.strip]
