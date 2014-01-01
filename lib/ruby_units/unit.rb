@@ -639,7 +639,7 @@ module RubyUnits
       case
         when other.respond_to?(:zero?) && other.zero?
           return self.zero?
-        when self.kind == :unitless && other.instance_of?(Unit) && other.kind == :unitless
+        when self.counting? && other.instance_of?(Unit) && other.counting?
           return self.units == other.units
         when other.instance_of?(Unit)
           return false unless self =~ other
@@ -666,7 +666,7 @@ module RubyUnits
     def =~(other)
       case other
         when Unit
-          self.signature == other.signature
+          self.signature == other.signature && self.counting? == other.counting?
         else
           begin
             x, y = coerce(other)
