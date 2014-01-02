@@ -48,7 +48,7 @@ module RubyUnits
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
     LBS_OZ_REGEX       = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
     SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
-    RATIONAL_NUMBER    = /\(?([+-])?(\d+ )?(\d+)\/(\d+)\)?/
+    RATIONAL_NUMBER    = /\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?/
     COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
     NUMBER_REGEX       = /#{SCI_NUMBER}*\s*(.+)?/
     UNIT_STRING_REGEX  = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
@@ -1488,7 +1488,7 @@ module RubyUnits
         return
       end
 
-                                                                    # more than one per.  I.e., "1 m/s/s"
+      # more than one per.  I.e., "1 m/s/s"
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s[02-9]/).size > 0
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] #parse the string into parts
@@ -1543,8 +1543,8 @@ module RubyUnits
     def self.parse_into_numbers_and_units(string)
       # scientific notation.... 123.234E22, -123.456e-10
       sci       = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
-      # rational numbers.... -1/3, 1/5, 20/100
-      rational  = %r{[+-]?(?:\d+ )?\d+\/\d+}
+      # rational numbers.... -1/3, 1/5, 20/100, -6 1/2, -6-1/2
+      rational  = %r{\(?[+-]?(?:\d+[ -])?\d+\/\d+\)?}
       # complex numbers... -1.2+3i, +1.2-3.3i
       complex   = %r{#{sci}{2,2}i}
       anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^-\d\.].*)?}
@@ -1563,7 +1563,7 @@ module RubyUnits
                   end
                 when rational
                   # if it has whitespace, it will be of the form '6 1/2'
-                  if num =~ /([+-]?)(\d+ )?(\d+)\/(\d+)/
+                  if num =~ RATIONAL_NUMBER
                     sign = ($1 == '-') ? -1 : 1
                     n = $2.to_i
                     f = Rational($3.to_i,$4.to_i)

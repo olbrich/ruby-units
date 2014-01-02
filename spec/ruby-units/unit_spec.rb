@@ -535,6 +535,12 @@ describe "Create some simple units" do
   describe Unit.new('6 1/2 cups') do
     specify { subject.should eq(Unit.new('13/2 cu')) }
   end
+
+  # mixed fraction
+  describe Unit.new('-6-1/2 cups') do
+    specify { subject.should eq(Unit.new('-13/2 cu')) }
+  end
+
 end
 
 describe "Unit handles attempts to create bad units" do
