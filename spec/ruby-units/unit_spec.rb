@@ -541,6 +541,14 @@ describe "Create some simple units" do
     specify { subject.should eq(Unit.new('-13/2 cu')) }
   end
 
+  describe Unit.new('100 mcg') do
+    specify { expect(subject).to eq(Unit.new('100 ug'))}
+  end
+
+  describe Unit.new('100 mcL') do
+    specify { expect(subject).to eq(Unit.new('100 uL'))}
+  end
+
 end
 
 describe "Unit handles attempts to create bad units" do
