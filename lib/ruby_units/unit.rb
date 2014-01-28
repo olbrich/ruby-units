@@ -1588,7 +1588,7 @@ module RubyUnits
     # @return [RegExp]
     # @private
     def self.unit_match_regex
-      @@UNIT_MATCH_REGEX ||= /(#{RubyUnits::Unit.prefix_regex})*?(#{RubyUnits::Unit.unit_regex})\b/
+      @@UNIT_MATCH_REGEX ||= /(#{RubyUnits::Unit.prefix_regex})??(#{RubyUnits::Unit.unit_regex})\b/
     end
 
     # return a regexp fragment used to match prefixes

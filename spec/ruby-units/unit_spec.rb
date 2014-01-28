@@ -608,6 +608,10 @@ describe "Unit handles attempts to create bad units" do
     expect { Unit(nil, "feet", "min") }.to raise_error(ArgumentError, "Invalid Unit Format")
   end
 
+  specify 'no double prefixes' do
+    expect { Unit.new('1 mmm') }.to raise_error(ArgumentError, /Unit not recognized/)
+  end
+
 end
 
 describe Unit do
