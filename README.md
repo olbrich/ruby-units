@@ -10,7 +10,7 @@ Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/r
 Many technical applications make use of specialized calculations at some point.  Frequently, these calculations require unit conversions to ensure accurate results.  Needless to say, this is a pain to properly keep track of, and is prone to numerous errors.
   
 ## Solution
-The 'Ruby units' gem is designed so simplify the handling of units for scientific calculations. The units of each quantity are specified when a Unit object is created and the Unit class will handle all subsequent conversions and manipulations to ensure an accurate result.
+The 'Ruby units' gem is designed to simplify the handling of units for scientific calculations. The units of each quantity are specified when a Unit object is created and the Unit class will handle all subsequent conversions and manipulations to ensure an accurate result.
   
 ## Installation:
 This package may be installed using:  `gem install ruby-units`
