@@ -1,5 +1,6 @@
 Change Log for Ruby-units
 =========================
+2014-02-21  1.4.5	* Fix issue #98 -- add mcg as a valid unit
 2013-07-19  1.4.4   * Fix issue #4 -- .best_prefix method
                     * Fix issue #60 -- Consider placing Unit in a module
                     * Fix issue #75 -- Siemens is kind of conductance not resistance
