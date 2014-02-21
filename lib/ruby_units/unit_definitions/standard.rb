@@ -559,7 +559,7 @@ end
 
 RubyUnits::Unit.define('unit') do |unit|
   unit.definition   = RubyUnits::Unit.new('1/60 microkatal')
-  unit.aliases      = %w{U enzRubyUnits::Unit}
+  unit.aliases      = %w{U enzUnit units}
 end
 
 #frequency
