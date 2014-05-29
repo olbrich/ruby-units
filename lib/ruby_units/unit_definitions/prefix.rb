@@ -1,9 +1,9 @@
 
 {
   'googol' => [%w{googol},            1e100],
-  'yebi'   => [%w{Yi Yebi yebi},      2**80],
+  'yobi'   => [%w{Yi Yobi yobi},      2**80],
   'zebi'   => [%w{Zi Zebi zebi},      2**70],
-  'exi'    => [%w{Ei Exi exi},        2**60],
+  'exbi'   => [%w{Ei Exbi exbi},      2**60],
   'pebi'   => [%w{Pi Pebi pebi},      2**50],
   'tebi'   => [%w{Ti Tebi tebi},      2**40],
   'gibi'   => [%w{Gi Gibi gibi},      2**30],
