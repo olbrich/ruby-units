@@ -250,6 +250,11 @@ RubyUnits::Unit.define('teaspoon') do |tsp|
   tsp.aliases    = %w{tsp teaspoon teaspoons}
 end
 
+RubyUnits::Unit.define('bdft') do |bdft|
+  bdft.definition = RubyUnits::Unit.new('1/12 ft^3')
+  bdft.aliases    = %w{boardfoot boardfeet}
+end
+
 # volumetric flow
 
 RubyUnits::Unit.define('cfm') do |cfm|
