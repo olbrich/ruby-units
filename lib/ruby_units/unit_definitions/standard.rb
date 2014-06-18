@@ -250,9 +250,14 @@ RubyUnits::Unit.define('teaspoon') do |tsp|
   tsp.aliases    = %w{tsp teaspoon teaspoons}
 end
 
+##
+# The board-foot is a specialized unit of measure for the volume of lumber in
+# the United States and Canada. It is the volume of a one-foot length of a board
+# one foot wide and one inch thick.
+# http://en.wikipedia.org/wiki/Board_foot
 RubyUnits::Unit.define('bdft') do |bdft|
   bdft.definition = RubyUnits::Unit.new('1/12 ft^3')
-  bdft.aliases    = %w{boardfoot boardfeet}
+  bdft.aliases    = %w{fbm boardfoot boardfeet bf}
 end
 
 # volumetric flow
