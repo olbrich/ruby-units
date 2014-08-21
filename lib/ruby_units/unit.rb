@@ -1541,6 +1541,9 @@ module RubyUnits
     # @return [Array] consisting of [Numeric, "unit"]
     # @private
     def self.parse_into_numbers_and_units(string)
+      if string =~ /\$\s*(#{NUMBER_REGEX})/
+        string = "#{$1} USD"
+      end
       # scientific notation.... 123.234E22, -123.456e-10
       sci       = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
       # rational numbers.... -1/3, 1/5, 20/100, -6 1/2, -6-1/2
