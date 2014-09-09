@@ -1353,7 +1353,7 @@ describe "Unit Math" do
 
   context '#divmod' do
     specify { Unit("5 mm").divmod(Unit("2 mm")).should == [2, 1] }
-    specify { Unit("1 km").divmod(Unit("2 m")).should == [500, 0] }
+    specify { Unit("1 km").divmod(Unit("2 m")).should == [Unit('500 km/m'), Unit('0 km/m')] }
     specify { expect { Unit('1 m').divmod(Unit('2 kg')) }.to raise_error(ArgumentError, "Incompatible Units ('1 m' not compatible with '2 kg')") }
   end
 
