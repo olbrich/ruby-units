@@ -779,9 +779,16 @@ module RubyUnits
       case other
         when Unit
           raise ArgumentError, "Cannot multiply by temperatures" if [other, self].any? { |x| x.is_temperature? }
-          opts = RubyUnits::Unit.eliminate_terms(@scalar*other.scalar, @numerator + other.numerator, @denominator + other.denominator)
-          opts.merge!(:signature => @signature + other.signature)
-          return RubyUnits::Unit.new(opts)
+          if other.numerator == ['<percent>']
+            return RubyUnits::Unit.new(:scalar => @scalar*other.to_base.scalar, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
+          elsif @numerator == ['<percent>']
+            #return other * self
+            return RubyUnits::Unit.new(:scalar => self.to_base.scalar*other.scalar, :numerator => other.numerator, :denominator => other.denominator, :signature => other.signature)
+          else
+            opts = RubyUnits::Unit.eliminate_terms(@scalar*other.scalar, @numerator + other.numerator, @denominator + other.denominator)
+            opts.merge!(:signature => @signature + other.signature)
+            return RubyUnits::Unit.new(opts)
+          end
         when Numeric
           return RubyUnits::Unit.new(:scalar => @scalar*other, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
         else
@@ -801,9 +808,17 @@ module RubyUnits
         when Unit
           raise ZeroDivisionError if other.zero?
           raise ArgumentError, "Cannot divide with temperatures" if [other, self].any? { |x| x.is_temperature? }
-          opts = RubyUnits::Unit.eliminate_terms(@scalar/other.scalar, @numerator + other.denominator, @denominator + other.numerator)
-          opts.merge!(:signature => @signature - other.signature)
-          return RubyUnits::Unit.new(opts)
+          self_pct = @numerator == ['<percent>']
+          other_pct = other.numerator == ['<percent>']
+          if other_pct && ! self_pct
+            return RubyUnits::Unit.new(:scalar => @scalar/other.to_base.scalar, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
+          elsif self_pct && ! other_pct
+            return RubyUnits::Unit.new(:scalar => self.to_base.scalar/other.scalar, :numerator => other.numerator, :denominator => other.denominator, :signature => other.signature)
+          else
+            opts = RubyUnits::Unit.eliminate_terms(@scalar/other.scalar, @numerator + other.denominator, @denominator + other.numerator)
+            opts.merge!(:signature => @signature - other.signature)
+            return RubyUnits::Unit.new(opts)
+          end
         when Numeric
           raise ZeroDivisionError if other.zero?
           return RubyUnits::Unit.new(:scalar => @scalar/other, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
@@ -819,11 +834,38 @@ module RubyUnits
     # @param [Object] other
     # @return [Array]
     def divmod(other)
-      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ other
-      if self.units == other.units
-        return self.scalar.divmod(other.scalar)
-      else
-        return self.to_base.scalar.divmod(other.to_base.scalar)
+      case other
+        when Unit
+          raise ZeroDivisionError if other.zero?
+          self_pct = @numerator == ['<percent>']
+          other_pct = other.numerator == ['<percent>']
+          if other_pct && ! self_pct
+            return @scalar.divmod(other.to_base.scalar).map {|part|
+              RubyUnits::Unit.new(:scalar => part, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
+            }
+          elsif self_pct && ! other_pct
+            return self.base.scalar.divmod(other).map {|part|
+              RubyUnits::Unit.new(:scalar => part, :numerator => other.denominator, :denominator => other.numerator, :signature => other.signature)
+            }
+          else
+            raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ other
+            if self.units == other.units
+              return @scalar.divmod(other.scalar)
+            else
+              opts = RubyUnits::Unit.eliminate_terms(0, @numerator + other.denominator, @denominator + other.numerator)
+              opts.merge!(:signature => @signature - other.signature)
+              return self.to_base.scalar.divmod(other.to_base.scalar).map {|part|
+                RubyUnits::Unit.new(opts.merge(:scalar => part))
+              }
+            end
+          end
+        when Numeric
+          return self.scalar.divmod(other).map {|part|
+            RubyUnits::Unit.new(:scalar => part, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
+          }
+        else
+          x, y = coerce(other)
+          return y.divmod x
       end
     end
 
