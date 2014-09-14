@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative "spec_helper"
 
 # Complex numbers are a bit strange
 # Technically you can't really compare them using <=>, and ruby 1.9 does not implement this method for them

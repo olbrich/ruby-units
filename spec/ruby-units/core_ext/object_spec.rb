@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative "spec_helper"
 
 describe Object do
   specify { expect(Unit('1 mm')).to be_instance_of Unit}

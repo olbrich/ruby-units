@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative "spec_helper"
 
 describe String do
   context "Unit creation from strings" do

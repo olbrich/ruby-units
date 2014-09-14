@@ -14,5 +14,3 @@ begin
   end if ENV['COVERAGE']
 rescue LoadError
 end
-
-require File.dirname(__FILE__) + "/../lib/ruby-units"

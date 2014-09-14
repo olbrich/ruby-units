@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative "spec_helper"
 
 describe Date do
   subject { Date.new(2011,4,1) }

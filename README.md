@@ -169,18 +169,26 @@ This is useful for changing display names, adding aliases, etc.
       cup.display_name  = "cup"
     end
 
+## How to Require
 
-### Namespaced Class
+To get everything, both the core functionality and the extensions to
+core Ruby classes:
 
-Sometimes the default class 'Unit' may conflict with other gems or applications.  Internally ruby-units defines itself using the RubyUnits namespace.
-The actual class of a unit is the RubyUnits::Unit.  For simplicity and backwards compatiblity, the '::Unit' class is defined as an alias to '::RubyUnits::Unit'.
+    require 'ruby_units'
 
-To load ruby-units without this alias...
+To get just the Unit class, with no extension to core Ruby classes and
+no global functions:
 
-    require 'ruby_units/namespaced'
+    require 'ruby_units/core'
 
-When using bundler...
+or if using bundler to require libaries, then:
 
-    gem 'ruby-units', require: 'ruby_units/namespaced'
+    gem 'ruby-units', require: ruby_units/core'
 
-Note: when using the namespaced version, the Unit('unit string') helper will not be defined.
+To get everything _except_ the global functions ::U and ::Unit
+
+   require 'ruby_units/namespaced'
+
+or if using bundler to require libaries, then:
+
+    gem 'ruby-units', require: ruby_units/namespaced'

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative "spec_helper"
 
 describe Time do
   let(:now) { Time.at(1303656390) }

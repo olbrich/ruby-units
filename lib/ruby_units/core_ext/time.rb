@@ -1,5 +1,5 @@
 require 'time'
-#
+
 # Time math is handled slightly differently.  The difference is considered to be an exact duration if
 # the subtracted value is in hours, minutes, or seconds.  It is rounded to the nearest day if the offset
 # is in years, decades, or centuries.  This leads to less precise values, but ones that match the 
@@ -44,19 +44,10 @@ class Time
   end
   
   alias :unit_add :+
+
   # @return [RubyUnits::Unit, Time]
   def +(other)
-    case other
-    when RubyUnits::Unit
-      other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units  
-      begin
-        unit_add(other.convert_to('s').scalar)
-      rescue RangeError
-        self.to_datetime + other
-      end
-    else
-      unit_add(other)
-    end
+    RubyUnits::TimeHelper.time_add(self, other)
   end
   
   # @example
@@ -70,16 +61,6 @@ class Time
   
   # @return [RubyUnits::Unit, Time]
   def -(other)
-    case other
-    when RubyUnits::Unit
-      other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units  
-      begin
-        unit_sub(other.convert_to('s').scalar)
-      rescue RangeError
-        self.send(:to_datetime) - other
-      end
-    else
-      unit_sub(other)
-    end
+    RubyUnits::TimeHelper.time_sub(self, other)
   end
 end
