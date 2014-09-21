@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative "spec_helper"
 
 # Complex numbers are a bit strange
 # Technically you can't really compare them using <=>, and ruby 1.9 does not implement this method for them
@@ -6,23 +6,23 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 describe Complex do
   subject { Complex(1,1) }
-  it { should respond_to :to_unit }
+  it { is_expected.to respond_to :to_unit }
 end
 
 describe "Complex Unit" do
   subject { Complex(1.0, -1.0).to_unit }
   
-  it { should be_instance_of Unit}
-  it(:scalar) { should be_kind_of Complex }
+  it { is_expected.to be_instance_of Unit}
+  it(:scalar) { is_expected.to be_kind_of Complex }
 
-  it { should == "1-1i".to_unit }
-  it { should === "1-1i".to_unit }
+  it { is_expected.to eq("1-1i".to_unit) }
+  it { is_expected.to be === "1-1i".to_unit }
 
   if RUBY_VERSION < "1.9"
     context "in Ruby < 1.9" do
       it "is comparable" do
-        subject.should > "1+0.5i".to_unit
-        subject.should < "2+1i".to_unit
+        expect(subject).to be > "1+0.5i".to_unit
+        expect(subject).to be < "2+1i".to_unit
       end
     end
   else

@@ -7,26 +7,14 @@ class Date
   # @param [Object] unit
   # @return [Unit]
   def +(unit)
-    case unit
-    when Unit
-      unit = unit.convert_to('d').round if ['y', 'decade', 'century'].include? unit.units 
-      unit_date_add(unit.convert_to('day').scalar)
-    else
-      unit_date_add(unit)
-    end
+    RubyUnits::DateHelper.date_add(self, unit)
   end
  
   alias :unit_date_sub :-    
   # @param [Object] unit
   # @return [Unit]
   def -(unit)
-    case unit
-    when Unit 
-      unit = unit.convert_to('d').round if ['y', 'decade', 'century'].include? unit.units 
-      unit_date_sub(unit.convert_to('day').scalar)
-    else
-      unit_date_sub(unit)
-    end
+    RubyUnits::DateHelper.date_sub(self, unit)
   end
   
   # Construct a unit from a Date

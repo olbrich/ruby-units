@@ -1,11 +1,19 @@
 # encoding: utf-8
 require 'date'
+require 'mathn'
 if RUBY_VERSION < "1.9"
   # :nocov_19:
   require 'parsedate'
   require 'rational'
   # :nocov_19:
 end
+
+# require_relative "definition"
+require_relative "date_helper"
+require_relative "string_helper"
+require_relative "time_helper"
+require_relative "version"
+
 # Copyright 2006-2012
 #
 # @author Kevin C. Olbrich, Ph.D.
@@ -215,6 +223,9 @@ module RubyUnits
     end
 
     include Comparable
+    include DateHelper
+    include StringHelper
+    include TimeHelper
 
     # @return [Numeric]
     attr_accessor :scalar
@@ -375,11 +386,13 @@ module RubyUnits
       if options.first.instance_of?(String)
         opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
         unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
-          @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
+          if opt_units && !opt_units.empty?
+            @@cached_units[opt_units] = (self.scalar == 1 ? self : string_to_unit(opt_units))
+          end
         end
       end
       unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{RubyUnits::Unit.temp_regex}/) then
-        @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
+        @@cached_units[unary_unit] = self.scalar == 1 ? self : string_to_unit(unary_unit)
       end
       [@scalar, @numerator, @denominator, @base_scalar, @signature, @is_base].each { |x| x.freeze }
       return self
@@ -419,7 +432,11 @@ module RubyUnits
     # @return [Unit]
     def self.parse(input)
       first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
-      return second.nil? ? first.unit : first.unit.convert_to(second)
+      if second.nil?
+        first.unit
+      else
+        StringHelper.string_to_unit(first).convert_to(second)
+      end
     end
 
     # @return [Unit]
@@ -535,7 +552,7 @@ module RubyUnits
                         if $2 #unit specified, need to convert
                           self.convert_to($2).to_s($1)
                         else
-                          "#{$1 % @scalar} #{$2 || self.units}".strip
+                          "#{string_format($1, @scalar)} #{$2 || self.units}".strip
                         end
                       rescue # parse it like a strftime format string
                         (DateTime.new(0) + self).strftime(target_units)
@@ -550,7 +567,7 @@ module RubyUnits
                     when Rational
                       "#{@scalar} #{self.units}"
                     else
-                      "#{'%g' % @scalar} #{self.units}"
+                      "#{string_format('%g', @scalar)} #{self.units}"
                   end.strip
         end
         @output[target_units] = out
@@ -1196,10 +1213,12 @@ module RubyUnits
     # @return [Unit]
     def before(time_point = ::Time.now)
       case time_point
-        when Time, Date, DateTime
-          return (time_point - self rescue time_point.to_datetime - self)
-        else
-          raise ArgumentError, "Must specify a Time, Date, or DateTime"
+      when Time
+        time_sub(time_point, self)
+      when Date, DateTime
+        date_sub(time_point, self)
+      else
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1211,12 +1230,12 @@ module RubyUnits
     # @raise [ArgumentError] when time point is not a Time, Date, or DateTime
     def since(time_point)
       case time_point
-        when Time
-          return (Time.now - time_point).unit('s').convert_to(self)
-        when DateTime, Date
-          return (DateTime.now - time_point).unit('d').convert_to(self)
-        else
-          raise ArgumentError, "Must specify a Time, Date, or DateTime"
+      when Time
+        self.class.new(time_sub(Time.now, time_point), 's').convert_to(self)
+      when DateTime, Date
+        self.class.new(date_sub(DateTime.now, time_point), 'd').convert_to(self)
+      else
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1225,12 +1244,12 @@ module RubyUnits
     # @return [Unit]
     def until(time_point)
       case time_point
-        when Time
-          return (time_point - Time.now).unit('s').convert_to(self)
-        when DateTime, Date
-          return (time_point - DateTime.now).unit('d').convert_to(self)
-        else
-          raise ArgumentError, "Must specify a Time, Date, or DateTime"
+      when Time
+        self.class.new(time_sub(time_point, Time.now), 's').convert_to(self)
+      when DateTime, Date
+        self.class.new(date_sub(time_point, DateTime.now), 'd').convert_to(self)
+      else
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1240,10 +1259,12 @@ module RubyUnits
     # @raise [ArgumentError] when passed argument is not a Time, Date, or DateTime
     def from(time_point)
       case time_point
-        when Time, DateTime, Date
-          return (time_point + self rescue time_point.to_datetime + self)
-        else
-          raise ArgumentError, "Must specify a Time, Date, or DateTime"
+      when Time
+        time_add(time_point, self)
+      when DateTime, Date
+        date_add(time_point, self)
+      else
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1256,7 +1277,7 @@ module RubyUnits
     # @return [Array]
     def coerce(other)
       if other.respond_to? :to_unit
-        return [other.to_unit, self]
+        return [string_to_unit(other), self]
       end
       case other
         when Unit
@@ -1463,10 +1484,10 @@ module RubyUnits
       if unit_string =~ /:/
         hours, minutes, seconds, microseconds = unit_string.scan(TIME_REGEX)[0]
         raise ArgumentError, "Invalid Duration" if [hours, minutes, seconds, microseconds].all? { |x| x.nil? }
-        result = "#{hours || 0} h".unit +
-            "#{minutes || 0} minutes".unit +
-            "#{seconds || 0} seconds".unit +
-            "#{microseconds || 0} usec".unit
+        result = string_to_unit("#{hours || 0} h") +
+            string_to_unit("#{minutes || 0} minutes") +
+            string_to_unit("#{seconds || 0} seconds") +
+            string_to_unit("#{microseconds || 0} usec")
         copy(result)
         return
       end
