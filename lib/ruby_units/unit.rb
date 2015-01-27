@@ -598,6 +598,12 @@ module RubyUnits
       return(@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
     end
 
+    # returns true if this is a counting unit
+    # @return [Boolean]
+    def counting?
+      self.kind == :unitless && !self.unitless?
+    end
+
     # Compare two Unit objects. Throws an exception if they are not of compatible types.
     # Comparisons are done based on the value of the unit in base SI units.
     # @param [Object] other
@@ -633,6 +639,8 @@ module RubyUnits
       case
         when other.respond_to?(:zero?) && other.zero?
           return self.zero?
+        when self.counting? && other.instance_of?(Unit) && other.counting?
+          return self.units == other.units
         when other.instance_of?(Unit)
           return false unless self =~ other
           return self.base_scalar == other.base_scalar
@@ -658,7 +666,7 @@ module RubyUnits
     def =~(other)
       case other
         when Unit
-          self.signature == other.signature
+          self.signature == other.signature && self.counting? == other.counting?
         else
           begin
             x, y = coerce(other)
