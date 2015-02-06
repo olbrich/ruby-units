@@ -53,11 +53,11 @@ describe 'temperatures' do
       its(:scalar) {should be_within(0.001).of 100}
       its(:units) {should == "tC"}
       its(:kind) {should == :temperature}
-      it {should be_temperature}
-      it {should be_degree}
-      it {should_not be_base}
-      it {should_not be_unitless}
-      it {should_not be_zero}
+      it {is_expected.to be_temperature}
+      it {is_expected.to be_degree}
+      it {is_expected.not_to be_base}
+      it {is_expected.not_to be_unitless}
+      it {is_expected.not_to be_zero}
       its(:base) {should be_within(Unit("0.01 degK")).of Unit("373.15 tempK")}
       its(:temperature_scale) {should == "degC"}
     end
@@ -66,24 +66,24 @@ describe 'temperatures' do
       # note that 'temp' units are for temperature readings on a scale, while 'deg' units are used to represent
       # differences between temperatures, offsets, or other differential temperatures.
     
-      specify { Unit("100 tC").should be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
-      specify { Unit("0 tC").should be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
-      specify { Unit("37 tC").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
-      specify { Unit("-273.15 tC").should == Unit("0 tempK") }
+      specify { expect(Unit("100 tC")).to be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
+      specify { expect(Unit("0 tC")).to be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
+      specify { expect(Unit("37 tC")).to be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
+      specify { expect(Unit("-273.15 tC")).to eq(Unit("0 tempK")) }
     
-      specify { Unit("212 tF").should be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
-      specify { Unit("32 tF").should be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
-      specify { Unit("98.6 tF").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
-      specify { Unit("-459.67 tF").should == Unit("0 tempK") }
+      specify { expect(Unit("212 tF")).to be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
+      specify { expect(Unit("32 tF")).to be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
+      specify { expect(Unit("98.6 tF")).to be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
+      specify { expect(Unit("-459.67 tF")).to eq(Unit("0 tempK")) }
 
-      specify { Unit("671.67 tR").should be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
-      specify { Unit("491.67 tR").should be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
-      specify { Unit("558.27 tR").should be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
-      specify { Unit("0 tR").should == Unit("0 tempK") }
+      specify { expect(Unit("671.67 tR")).to be_within(Unit("0.001 degK")).of(Unit("373.15 tempK")) }
+      specify { expect(Unit("491.67 tR")).to be_within(Unit("0.001 degK")).of(Unit("273.15 tempK")) }
+      specify { expect(Unit("558.27 tR")).to be_within(Unit("0.01 degK")).of(Unit("310.15 tempK"))}
+      specify { expect(Unit("0 tR")).to eq(Unit("0 tempK")) }
     
-      specify { Unit("100 tK").convert_to("tempC").should be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
-      specify { Unit("100 tK").convert_to("tempF").should be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
-      specify { Unit("100 tK").convert_to("tempR").should be_within(U"0.01 degR").of(Unit("180 tempR"))}
+      specify { expect(Unit("100 tK").convert_to("tempC")).to be_within(U"0.01 degC").of(Unit("-173.15 tempC"))}
+      specify { expect(Unit("100 tK").convert_to("tempF")).to be_within(U"0.01 degF").of(Unit("-279.67 tempF"))}
+      specify { expect(Unit("100 tK").convert_to("tempR")).to be_within(U"0.01 degR").of(Unit("180 tempR"))}
     end
 
     

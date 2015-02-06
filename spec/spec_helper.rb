@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup(:development)
 require 'rspec/core'
+require 'rspec/its'
 
 # Initiate code coverage generation when needed
 begin

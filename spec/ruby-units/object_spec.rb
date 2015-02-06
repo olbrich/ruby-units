@@ -1,9 +1,9 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe Object do
-  specify { Unit('1 mm').should be_instance_of Unit}
-  specify { U('1 mm').should be_instance_of Unit}
-  specify { u('1 mm').should be_instance_of Unit}
-  specify { (Unit(0) + Unit(0)).should be_instance_of Unit}
-  specify { (Unit(0) - Unit(0)).should be_instance_of Unit}
+  specify { expect(Unit('1 mm')).to be_instance_of Unit}
+  specify { expect(U('1 mm')).to be_instance_of Unit}
+  specify { expect(u('1 mm')).to be_instance_of Unit}
+  specify { expect(Unit(0) + Unit(0)).to be_instance_of Unit}
+  specify { expect(Unit(0) - Unit(0)).to be_instance_of Unit}
 end
