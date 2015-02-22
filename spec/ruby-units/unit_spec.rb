@@ -203,7 +203,7 @@ describe "Create some simple units" do
   end
 
   # feet/in form
-  ["5 feet 6 inches", "5 feet 6 inch", "5ft 6in", "5 ft 6 in"].each do |unit|
+  ["5 feet 6 inches", "5 feet 6 inch", "5ft 6in", "5 ft 6 in", %(5'6"), %(5' 6")].each do |unit|
     describe Unit(unit) do
       it { should be_an_instance_of Unit }
       its(:scalar) { should == 5.5 }

@@ -44,9 +44,11 @@ module RubyUnits
     @@UNIT_MATCH_REGEX = nil
     UNITY              = '<1>'
     UNITY_ARRAY        = [UNITY]
-    FEET_INCH_REGEX    = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inch(?:es)?)/
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inch(?:es)?)/
+    FEET_INCH_REGEX    = /(\d+)\s*#{FEET_INCH_UNITS_REGEX}/
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
-    LBS_OZ_REGEX       = /(\d+)\s*(?:#|lbs?|pounds?|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces?)/
+    LBS_OZ_UNITS_REGEX = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces?)/
+    LBS_OZ_REGEX       = /(\d+)\s*#{LBS_OZ_UNITS_REGEX}/
     SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
     RATIONAL_NUMBER    = /\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?/
     COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
@@ -374,7 +376,7 @@ module RubyUnits
       unary_unit = self.units || ""
       if options.first.instance_of?(String)
         opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
-        unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds?|lbs?[ ,]\d+ ounces?|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inch(?:es))|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+        unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(#{LBS_OZ_UNITS_REGEX})|#{FEET_INCH_UNITS_REGEX}|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
           @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
         end
       end
