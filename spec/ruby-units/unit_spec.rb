@@ -203,33 +203,37 @@ describe "Create some simple units" do
   end
 
   # feet/in form
-  describe Unit("5ft 6in") do
-    it { should be_an_instance_of Unit }
-    its(:scalar) { should == 5.5 }
-    its(:units) { should == "ft" }
-    its(:kind) { should == :length }
-    it { should_not be_temperature }
-    it { should_not be_degree }
-    it { should_not be_base }
-    it { should_not be_unitless }
-    it { should_not be_zero }
-    its(:base) { should be_within(Unit("0.01 m")).of Unit("1.6764 m") }
-    specify { subject.to_s(:ft).should == %{5'6"} }
+  ["5 feet 6 inches", "5 feet 6 inch", "5ft 6in", "5 ft 6 in", %(5'6"), %(5' 6")].each do |unit|
+    describe Unit(unit) do
+      it { should be_an_instance_of Unit }
+      its(:scalar) { should == 5.5 }
+      its(:units) { should == "ft" }
+      its(:kind) { should == :length }
+      it { should_not be_temperature }
+      it { should_not be_degree }
+      it { should_not be_base }
+      it { should_not be_unitless }
+      it { should_not be_zero }
+      its(:base) { should be_within(Unit("0.01 m")).of Unit("1.6764 m") }
+      specify { subject.to_s(:ft).should == %{5'6"} }
+    end
   end
 
   # pound/ounces form
-  describe Unit("6lbs 5oz") do
-    it { should be_an_instance_of Unit }
-    its(:scalar) { should be_within(0.001).of 6.312 }
-    its(:units) { should == "lbs" }
-    its(:kind) { should == :mass }
-    it { should_not be_temperature }
-    it { should_not be_degree }
-    it { should_not be_base }
-    it { should_not be_unitless }
-    it { should_not be_zero }
-    its(:base) { should be_within(Unit("0.01 kg")).of Unit("2.8633 kg") }
-    specify { subject.to_s(:lbs).should == "6 lbs, 5 oz" }
+  ["6 pounds 5 ounces", "6 pound 5 ounce", "6lbs 5oz", "6 lbs 5 oz", "6lb 5oz", "6 lb 5 oz"].each do |unit|
+    describe Unit(unit) do
+      it { should be_an_instance_of Unit }
+      its(:scalar) { should be_within(0.001).of 6.312 }
+      its(:units) { should == "lbs" }
+      its(:kind) { should == :mass }
+      it { should_not be_temperature }
+      it { should_not be_degree }
+      it { should_not be_base }
+      it { should_not be_unitless }
+      it { should_not be_zero }
+      its(:base) { should be_within(Unit("0.01 kg")).of Unit("2.8633 kg") }
+      specify { subject.to_s(:lbs).should == "6 lbs, 5 oz" }
+    end
   end
 
   # temperature
