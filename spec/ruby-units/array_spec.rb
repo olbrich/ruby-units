@@ -4,11 +4,11 @@ describe Array do
   
   subject { [1, 'cm'] }
   
-  it {should be_kind_of Array}
-  it {should respond_to :to_unit}
+  it {is_expected.to be_kind_of Array}
+  it {is_expected.to respond_to :to_unit}
   
-  specify { subject.to_unit.should be_instance_of Unit}
-  specify { subject.to_unit.should == "1 cm".to_unit }
-  specify { subject.to_unit('mm').should == "10 mm".to_unit}
+  specify { expect(subject.to_unit).to be_instance_of Unit}
+  specify { expect(subject.to_unit).to eq("1 cm".to_unit) }
+  specify { expect(subject.to_unit('mm')).to eq("10 mm".to_unit)}
   
 end
