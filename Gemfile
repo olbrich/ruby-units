@@ -12,5 +12,6 @@ group :test do
   gem 'simplecov', :require => false, :platforms => :mri_19
   gem 'simplecov-html', :platforms => :mri_19
   gem 'rspec', '~>2.5'
+  gem 'guard-rspec'
 end
 

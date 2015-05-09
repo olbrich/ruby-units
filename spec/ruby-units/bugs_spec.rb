@@ -5,6 +5,6 @@ describe "Github issue #49" do
   let(:b) { Unit.new(a)}
 
   it "should subtract a unit properly from one initialized with a unit" do
-    (b - Unit("1.5 cm^3")).should == Unit("1.5 cm^3")
+    expect(b - Unit("1.5 cm^3")).to eq(Unit("1.5 cm^3"))
   end
 end
