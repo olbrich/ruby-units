@@ -4,6 +4,9 @@ rvm:
   - jruby-19mode # JRuby in 1.9 mode
   - 2.0.0
   - 2.1.0
+  - 2.2.0
+  - ruby-head
+  - jruby-head
 jdk:
   - openjdk6
   - openjdk7
@@ -14,5 +17,11 @@ matrix:
     - rvm: 2.0.0
       jdk: openjdk6
     - rvm: 2.1.0
+      jdk: openjdk6
+    - rvm: 2.2.0
+      jdk: openjdk6
+    - rvm: jruby-head
+      jdk: openjdk6
+    - rvm: ruby-head
       jdk: openjdk6
 script: bundle exec rake --trace
