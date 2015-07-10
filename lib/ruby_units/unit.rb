@@ -54,6 +54,7 @@ module RubyUnits
     UNIT_STRING_REGEX  = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
     TOP_REGEX          = /([^ \*]+)(?:\^|\*\*)([\d-]+)/
     BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
+    NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
     UNCERTAIN_REGEX    = /#{SCI_NUMBER}\s*\+\/-\s*#{SCI_NUMBER}\s(.+)/
     COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(.+)?/
     RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(.+)?/
@@ -1502,7 +1503,12 @@ module RubyUnits
             bottom = "#{bottom} #{x * -n}"; top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, "")
         end
       end
-      bottom.gsub!(BOTTOM_REGEX) { |s| "#{$1} " * $2.to_i } if bottom
+      if bottom
+        bottom.gsub!(BOTTOM_REGEX) { |s| "#{$1} " * $2.to_i }
+        # Separate leading decimal from denominator, if any
+        bottom_scalar,bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
+      end
+
       @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
       @scalar = 1 unless @scalar.kind_of? Numeric
       @scalar = @scalar.to_int if (@scalar.to_int == @scalar)

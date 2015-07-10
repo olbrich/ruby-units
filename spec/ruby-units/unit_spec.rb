@@ -365,6 +365,21 @@ describe "Create some simple units" do
     its(:temperature_scale) { should be_nil }
   end
 
+  # rational scalar with numeric modified unit
+  describe Unit("12.1 mg/0.6mL") do
+    it { should be_an_instance_of Unit }
+    its(:scalar) { should be_an Numeric}
+    its(:units) { should == "mg/ml" }
+    its(:kind) { should == :density }
+    it { should_not be_temperature }
+    it { should_not be_degree }
+    it { should_not be_base }
+    it { should_not be_unitless }
+    it { should_not be_zero }
+    its(:base) { should be_a Numeric }
+    its(:temperature_scale) { should be_nil }
+  end
+
   # time string
   describe Unit("1:23:45,200") do
     it { should be_an_instance_of Unit }
