@@ -375,7 +375,9 @@ module RubyUnits
       unary_unit = self.units || ""
       if options.first.instance_of?(String)
         opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
-        unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+        unless @@cached_units.keys.include?(opt_units) ||
+            (opt_units =~ %r{\D/[\d+\.]+}) ||
+            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
           @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
         end
       end
