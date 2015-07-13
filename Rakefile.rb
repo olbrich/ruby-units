@@ -60,7 +60,7 @@ begin
 	# puts %x{rvm current}
 	puts
   end
-  
+
   desc  "Run all specs with rcov"
   RSpec::Core::RakeTask.new("spec:rcov") do |t|
     t.rcov = true

@@ -12,20 +12,20 @@ describe Unit::Cache do
   context ".clear" do    
     it "should clear the cache" do
       subject.clear
-      subject.get('m').should be_nil
+      expect(subject.get('m')).to be_nil
     end
   end
 
   context ".get" do
     it "should retrieve values already in the cache" do
-      subject.get['m'].should == unit
+      expect(subject.get['m']).to eq(unit)
     end
   end
 
   context ".set" do
     it "should put a unit into the cache" do
       subject.set('kg', Unit('1 kg'))
-      subject.get['kg'].should == Unit('1 kg')
+      expect(subject.get['kg']).to eq(Unit('1 kg'))
     end
   end
 end
