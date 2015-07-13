@@ -1508,12 +1508,21 @@ module RubyUnits
       if bottom
         bottom.gsub!(BOTTOM_REGEX) { |s| "#{$1} " * $2.to_i }
         # Separate leading decimal from denominator, if any
-        bottom_scalar,bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
+        bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
       end
 
       @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
       @scalar = 1 unless @scalar.kind_of? Numeric
       @scalar = @scalar.to_int if (@scalar.to_int == @scalar)
+
+      case
+      when bottom_scalar.nil? || bottom_scalar.empty?
+      when bottom_scalar.to_i == bottom_scalar
+        @scalar /= bottom_scalar.to_i
+      else
+        @scalar /= bottom_scalar.to_f
+      end
+
 
       @numerator   ||= UNITY_ARRAY
       @denominator ||= UNITY_ARRAY
@@ -1545,6 +1554,7 @@ module RubyUnits
     end
 
     # parse a string consisting of a number and a unit string
+    # NOTE: This does not properly handle units formatted like '12mg/6ml'
     # @param [String] string
     # @return [Array] consisting of [Numeric, "unit"]
     # @private
@@ -1555,7 +1565,8 @@ module RubyUnits
       rational  = %r{\(?[+-]?(?:\d+[ -])?\d+\/\d+\)?}
       # complex numbers... -1.2+3i, +1.2-3.3i
       complex   = %r{#{sci}{2,2}i}
-      anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^-\d\.].*)?}
+      anynumber = %r{(?:(#{complex}|#{rational}|#{sci}))?\s?([^-\d\.].*)?}
+
       num, unit = string.scan(anynumber).first
 
       return [case num
