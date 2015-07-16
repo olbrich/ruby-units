@@ -815,6 +815,43 @@ describe "Create some simple units" do
     end
   end
 
+  # rational scalar with numeric modified unit
+  describe Unit.new('12.0mg/6.0mL') do
+    it { should be_an_instance_of Unit }
+
+    describe '#scalar' do
+      subject { super().scalar }
+      it { is_expected.to be_an Numeric }
+      it { is_expected.to eq (12.0/6.0) }
+    end
+
+    describe '#units' do
+      subject { super().units }
+      it { is_expected.to eq 'mg/ml' }
+    end
+
+    describe '#kind' do
+      subject { super().kind }
+      it { is_expected.to eq :density }
+    end
+
+    it { is_expected.not_to be_temperature }
+    it { is_expected.not_to be_degree }
+    it { is_expected.not_to be_base }
+    it { is_expected.not_to be_unitless }
+    it { is_expected.not_to be_zero }
+
+    describe '#base' do
+      subject { super().base }
+      it { is_expected.to be_a Numeric }
+    end
+
+    describe '#temperature_scale' do
+      subject { super().temperature_scale }
+      it { is_expected.to be_nil }
+    end
+  end
+
   # time string
   describe Unit("1:23:45,200") do
     it { is_expected.to be_an_instance_of Unit }

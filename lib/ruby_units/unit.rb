@@ -54,6 +54,7 @@ module RubyUnits
     UNIT_STRING_REGEX  = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
     TOP_REGEX          = /([^ \*]+)(?:\^|\*\*)([\d-]+)/
     BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
+    NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
     UNCERTAIN_REGEX    = /#{SCI_NUMBER}\s*\+\/-\s*#{SCI_NUMBER}\s(.+)/
     COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(.+)?/
     RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(.+)?/
@@ -374,7 +375,9 @@ module RubyUnits
       unary_unit = self.units || ""
       if options.first.instance_of?(String)
         opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
-        unless @@cached_units.keys.include?(opt_units) || (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+        unless @@cached_units.keys.include?(opt_units) ||
+            (opt_units =~ %r{\D/[\d+\.]+}) ||
+            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
           @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
         end
       end
@@ -1502,10 +1505,24 @@ module RubyUnits
             bottom = "#{bottom} #{x * -n}"; top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, "")
         end
       end
-      bottom.gsub!(BOTTOM_REGEX) { |s| "#{$1} " * $2.to_i } if bottom
+      if bottom
+        bottom.gsub!(BOTTOM_REGEX) { |s| "#{$1} " * $2.to_i }
+        # Separate leading decimal from denominator, if any
+        bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
+      end
+
       @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
       @scalar = 1 unless @scalar.kind_of? Numeric
       @scalar = @scalar.to_int if (@scalar.to_int == @scalar)
+
+      case
+      when bottom_scalar.nil? || bottom_scalar.empty?
+      when bottom_scalar.to_i == bottom_scalar
+        @scalar /= bottom_scalar.to_i
+      else
+        @scalar /= bottom_scalar.to_f
+      end
+
 
       @numerator   ||= UNITY_ARRAY
       @denominator ||= UNITY_ARRAY
@@ -1537,6 +1554,7 @@ module RubyUnits
     end
 
     # parse a string consisting of a number and a unit string
+    # NOTE: This does not properly handle units formatted like '12mg/6ml'
     # @param [String] string
     # @return [Array] consisting of [Numeric, "unit"]
     # @private
@@ -1547,7 +1565,8 @@ module RubyUnits
       rational  = %r{\(?[+-]?(?:\d+[ -])?\d+\/\d+\)?}
       # complex numbers... -1.2+3i, +1.2-3.3i
       complex   = %r{#{sci}{2,2}i}
-      anynumber = %r{(?:(#{complex}|#{rational}|#{sci})\b)?\s?([^-\d\.].*)?}
+      anynumber = %r{(?:(#{complex}|#{rational}|#{sci}))?\s?([^-\d\.].*)?}
+
       num, unit = string.scan(anynumber).first
 
       return [case num
