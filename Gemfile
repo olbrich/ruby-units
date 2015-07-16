@@ -3,7 +3,7 @@ source "https://rubygems.org"
 group :development do
   gem 'bundler', '~> 1.0'
   gem 'jeweler'
-  gem 'pry-byebug'
+  gem 'pry-byebug', :platforms => :ruby_20
 end
 
 group :test do
