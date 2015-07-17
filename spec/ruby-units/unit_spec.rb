@@ -1589,7 +1589,7 @@ describe "Unit Comparisons" do
       specify { expect(Unit("2 m")).to be > Unit("1 ft") }
       specify { expect(Unit("70 tempF")).to be > Unit("10 degC") }
       specify { expect(Unit("1 m")).to be > 0 }
-      specify { expect { expect(Unit("1 m")).not_to be > nil }.to raise_error(ArgumentError, /comparison of RubyUnits::Unit with (nil failed|NilClass)/) }
+      specify { expect { Unit("1 m") > nil }.to raise_error(ArgumentError, /comparison of RubyUnits::Unit with (nil failed|NilClass)/) }
     end
 
     context "incompatible units cannot be compared" do
