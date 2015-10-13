@@ -23,7 +23,7 @@
   'deci'   => [%w{d Deci deci},       Rational(1,1e1)],
   'centi'  => [%w{c Centi centi},     Rational(1,1e2)],
   'milli'  => [%w{m Milli milli},     Rational(1,1e3)],
-  'micro'  => [%w{u Micro micro mc},  Rational(1,1e6)],
+  'micro'  => [%w{u µ Micro micro mc}, Rational(1,1e6)],
   'nano'   => [%w{n Nano nano},       Rational(1,1e9)],
   'pico'   => [%w{p Pico pico},       Rational(1,1e12)],
   'femto'  => [%w{f Femto femto},     Rational(1,1e15)],
