@@ -817,7 +817,7 @@ describe "Create some simple units" do
 
   # rational scalar with numeric modified unit
   describe Unit.new('12.0mg/6.0mL') do
-    it { should be_an_instance_of Unit }
+    it { is_expected.to be_an_instance_of Unit }
 
     describe '#scalar' do
       subject { super().scalar }
