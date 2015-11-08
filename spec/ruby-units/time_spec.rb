@@ -45,13 +45,13 @@ describe Time do
 
   context 'addition (+)' do
     specify { expect(Time.now + 1).to eq(Time.at(1303656390 + 1))}
-    specify { expect(Time.now + Unit("10 min")).to eq(Time.at(1303656390 + 600))}
+    specify { expect(Time.now + RubyUnits::Unit.new("10 min")).to eq(Time.at(1303656390 + 600))}
   end
 
   context 'subtraction (-)' do
     specify { expect(Time.now - 1).to eq(Time.at(1303656390 - 1))}
-    specify { expect(Time.now - Unit("10 min")).to eq(Time.at(1303656390 - 600))}
-    specify { expect(Time.now - Unit("150 years")).to eq(Time.parse("1861-04-24 09:46:30 -0500"))}
+    specify { expect(Time.now - RubyUnits::Unit.new("10 min")).to eq(Time.at(1303656390 - 600))}
+    specify { expect(Time.now - RubyUnits::Unit.new("150 years")).to eq(Time.parse("1861-04-24 09:46:30 -0500"))}
   end
 
 end

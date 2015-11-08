@@ -1,34 +1,34 @@
 require 'date'
 
 # Allow date objects to do offsets by a time unit
-# Date.today + U"1 week" => gives today+1 week
+# Date.today + Unit.new("1 week") => gives today+1 week
 class Date
-  alias :unit_date_add :+
-  # @param [Object] unit
+  alias_method :unit_date_add, :+
+  # @param [Object] other
   # @return [Unit]
-  def +(unit)
-    case unit
+  def +(other)
+    case other
     when RubyUnits::Unit
-      unit = unit.convert_to('d').round if ['y', 'decade', 'century'].include? unit.units 
-      unit_date_add(unit.convert_to('day').scalar)
+      other = other.convert_to('d').round if %w(y decade century).include? other.units
+      unit_date_add(other.convert_to('day').scalar)
     else
-      unit_date_add(unit)
+      unit_date_add(other)
     end
   end
- 
-  alias :unit_date_sub :-    
-  # @param [Object] unit
+
+  alias_method :unit_date_sub, :-
+  # @param [Object] other
   # @return [Unit]
-  def -(unit)
-    case unit
-    when RubyUnits::Unit 
-      unit = unit.convert_to('d').round if ['y', 'decade', 'century'].include? unit.units 
-      unit_date_sub(unit.convert_to('day').scalar)
+  def -(other)
+    case other
+    when RubyUnits::Unit
+      other = other.convert_to('d').round if %w(y decade century).include? other.units
+      unit_date_sub(other.convert_to('day').scalar)
     else
-      unit_date_sub(unit)
+      unit_date_sub(other)
     end
   end
-  
+
   # Construct a unit from a Date
   # @example Date.today.to_unit => Unit
   # @return (see Unit#initialize)
@@ -36,31 +36,29 @@ class Date
   def to_unit(other = nil)
     other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
   end
-  alias :unit :to_unit
-  
+
   # :nocov_19:
   unless Date.instance_methods.include?(:to_time)
     # @return [Time]
     def to_time
-      Time.local(*ParseDate.parsedate(self.to_s))
+      Time.local(*ParseDate.parsedate(to_s))
     end
   end
   # :nocov_19:
-  
-  alias :units_datetime_inspect :inspect
+
+  alias_method :units_datetime_inspect, :inspect
   # @deprecated
-  def inspect(raw = false)
-    return self.units_datetime_inspect if raw
-    self.to_s
+  def inspect(dump = false)
+    return units_datetime_inspect if dump
+    to_s
   end
-  
+
   unless Date.instance_methods.include?(:to_date)
     # :nocov_19:
     # @return [Date]
     def to_date
-      Date.civil(self.year, self.month, self.day)
+      Date.civil(year, month, day)
     end
     # :nocov_19:
   end
-  
 end

@@ -1,5 +1,10 @@
 Change Log for Ruby-units
 =========================
+2015-11-07  2.0.0   * remove support for ruby versions less than 2.0
+                    * remove `.unit` and `.u` from String
+                    * remove `.unit` from Date
+                    * Fix an issue with redefining units that have already been cached
+                    * remove 'U()' and 'u()' constructors
 2015-07-16          * Fix issue #129 -- doesn't handle number in the denominator
 2015-05-09          * update test harness to use rspec 3
 2014-02-21  1.4.5	  * Fix issue #98 -- add mcg as a valid unit
@@ -253,10 +258,3 @@ Change Log for Ruby-units
                     * Added instructions on how to add custom units
 
 2006-08-22  0.1.0   * Initial Release
-
-
-
-
-
-
-

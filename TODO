@@ -1,3 +1,0 @@
-2006-10-02  Currency handling remains to be implemented well
-2011-04-23  Refactor caching
-2011-11-23  Perform all internal calculations in rational numbers to avoid round off problems
