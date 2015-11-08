@@ -72,8 +72,6 @@ end
 task :specs => :spec
 
 rubies = {
-      "ruby-1.8.7" => %w{ruby-1.8.7-p357@ruby-units ruby-1.8.7-p357@ruby-units-with-chronic},
-      "ruby-1.9.2" => %w{ruby-1.9.2-p290@ruby-units ruby-1.9.2-p290@ruby-units-with-chronic},
       "rbx"        => %w{rbx-head@ruby-units},
       "jruby"      => %w{jruby-1.6.7@ruby-units}
     }

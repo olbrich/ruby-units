@@ -1,13 +1,6 @@
 # encoding: utf-8
 require 'date'
-if RUBY_VERSION < "1.9"
-  # :nocov_19:
-  require 'parsedate'
-  require 'rational'
-  # :nocov_19:
-end
-# Copyright 2006-2012
-#
+# Copyright 2006-2015
 # @author Kevin C. Olbrich, Ph.D.
 # @see https://github.com/olbrich/ruby-units
 #
@@ -28,10 +21,6 @@ end
 #    unit.definition = RubyUnits::Unit.new("1 baz")
 #  end
 #
-# @todo fix class variables so they conform to standard naming conventions and refactor away as many of them as possible
-# @todo pull caching out into its own class
-# @todo refactor internal representation of units
-# @todo method to determine best natural prefix
 module RubyUnits
   class Unit < Numeric
     VERSION            = Unit::Version::STRING
@@ -265,31 +254,6 @@ module RubyUnits
       return self
     end
 
-    if RUBY_VERSION < "1.9"
-      # :nocov_19:
-
-      # a list of properties to emit to yaml
-      # @return [Array]
-      def to_yaml_properties
-        %w{@scalar @numerator @denominator @signature @base_scalar}
-      end
-
-      # basically a copy of the basic to_yaml.  Needed because otherwise it ends up coercing the object to a string
-      # before YAML'izing it.
-      # @param [Hash] opts
-      # @return [String]
-      def to_yaml(opts = {})
-        YAML::quick_emit(object_id, opts) do |out|
-          out.map(taguri, to_yaml_style) do |map|
-            for m in to_yaml_properties do
-              map.add(m[1..-1], instance_variable_get(m))
-            end
-          end
-        end
-      end
-      # :nocov_19:
-    end
-
     # Create a new Unit object.  Can be initialized using a String, a Hash, an Array, Time, DateTime
     #
     # @example Valid options include:
@@ -451,15 +415,7 @@ module RubyUnits
     def to_base
       return self if self.is_base?
       if @@UNIT_MAP[self.units] =~ /\A<(?:temp|deg)[CRF]>\Z/
-        if RUBY_VERSION < "1.9"
-          # :nocov_19:
-          @signature = @@KINDS.index(:temperature)
-          # :nocov_19:
-        else
-          #:nocov:
-          @signature = @@KINDS.key(:temperature)
-          #:nocov:
-        end
+        @signature = @@KINDS.key(:temperature)
         base = case
                  when self.is_temperature?
                    self.convert_to('tempK')
@@ -1123,18 +1079,10 @@ module RubyUnits
       return RubyUnits::Unit.new(@scalar.floor, @numerator, @denominator)
     end
 
-    if RUBY_VERSION < '1.9'
-      # @return [Numeric,Unit]
-      def round
-        return @scalar.round if self.unitless?
-        return RubyUnits::Unit.new(@scalar.round, @numerator, @denominator)
-      end
-    else
-      # @return [Numeric,Unit]
-      def round(ndigits = 0)
-        return @scalar.round(ndigits) if self.unitless?
-        return RubyUnits::Unit.new(@scalar.round(ndigits), @numerator, @denominator)
-      end
+    # @return [Numeric,Unit]
+    def round(ndigits = 0)
+      return @scalar.round(ndigits) if self.unitless?
+      return RubyUnits::Unit.new(@scalar.round(ndigits), @numerator, @denominator)
     end
 
     # @return [Numeric, Unit]
@@ -1412,7 +1360,7 @@ module RubyUnits
       if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
         unit_string = "#{$1} USD"
       end
-      unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if RUBY_VERSION >= '1.9' && unit_string.encoding == Encoding::UTF_8
+      unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
 
       unit_string.gsub!(/%/, 'percent')
       unit_string.gsub!(/'/, 'feet')

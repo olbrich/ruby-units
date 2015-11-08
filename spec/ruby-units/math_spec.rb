@@ -8,12 +8,9 @@ describe Math do
     specify { expect(Math.sqrt(Unit("-9 mm^2"))).to be_kind_of(Complex) }
   end
 
-  if RUBY_VERSION > "1.9"
-  # cbrt is only defined in Ruby > 1.9
-    describe '#cbrt' do
-      specify { expect(Math.cbrt(Unit('1 mm^6'))).to eq(Unit('1 mm^2')) }
-      specify { expect(Math.cbrt(8)).to eq(2) }
-    end
+  describe '#cbrt' do
+    specify { expect(Math.cbrt(Unit('1 mm^6'))).to eq(Unit('1 mm^2')) }
+    specify { expect(Math.cbrt(8)).to eq(2) }
   end
 
   context "Trigonometry functions" do
