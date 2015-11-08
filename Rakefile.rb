@@ -12,7 +12,7 @@ begin
     gem.authors = ['Kevin Olbrich, Ph.D.']
     gem.email = ['kevin.olbrich+ruby_units@gmail.com']
     gem.homepage = 'https://github.com/olbrich/ruby-units'
-    gem.files.exclude('.*', 'test/**/*', 'spec/**/*', 'Gemfile')
+    gem.files.exclude('.*', 'test/**/*', 'spec/**/*', 'Gemfile', 'Guardfile')
     gem.license = 'MIT'
   end
   Jeweler::GemcutterTasks.new
