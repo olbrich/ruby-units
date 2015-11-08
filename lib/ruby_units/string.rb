@@ -8,7 +8,7 @@ class String
 
   alias_method :original_format, :%
   # format unit output using formating codes
-  # @example '%0.2f' % '1 mm'.unit => '1.00 mm'
+  # @example '%0.2f' % '1 mm'.to_unit => '1.00 mm'
   # @return [String]
   def format_with_unit(*other)
     case

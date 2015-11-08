@@ -44,7 +44,6 @@ module RubyUnits
     TOP_REGEX          = /([^ \*]+)(?:\^|\*\*)([\d-]+)/
     BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
     NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
-    UNCERTAIN_REGEX    = /#{SCI_NUMBER}\s*\+\/-\s*#{SCI_NUMBER}\s(.+)/
     COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(.+)?/
     RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(.+)?/
     KELVIN             = ['<kelvin>']
@@ -547,7 +546,7 @@ module RubyUnits
     alias :degree? :is_degree?
 
     # returns the 'degree' unit associated with a temperature unit
-    # @example '100 tempC'.unit.temperature_scale #=> 'degC'
+    # @example '100 tempC'.to_unit.temperature_scale #=> 'degC'
     # @return [String] possible values: degC, degF, degR, or degK
     def temperature_scale
       return nil unless self.is_temperature?
@@ -681,7 +680,7 @@ module RubyUnits
                   RubyUnits::Unit.new(:scalar => (other.scalar + self.convert_to(other.temperature_scale).scalar), :numerator => other.numerator, :denominator => other.denominator, :signature => other.signature)
                 end
               else
-                @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.to_base.scalar))
+                @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.to_unit.to_base.scalar))
                 RubyUnits::Unit.new(:scalar => (self.base_scalar + other.base_scalar)*@q, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
               end
             else
@@ -720,7 +719,7 @@ module RubyUnits
                 when other.is_temperature?
                   raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
                 else
-                  @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.unit.scalar/self.units.unit.to_base.scalar))
+                  @q ||= ((@@cached_units[self.units].scalar / @@cached_units[self.units].base_scalar) rescue (self.units.to_unit.scalar/self.units.to_unit.to_base.scalar))
                   RubyUnits::Unit.new(:scalar => (self.base_scalar - other.base_scalar)*@q, :numerator => @numerator, :denominator => @denominator, :signature => @signature)
               end
             else
@@ -1095,7 +1094,7 @@ module RubyUnits
       return RubyUnits::Unit.new(@scalar.truncate, @numerator, @denominator)
     end
 
-    # returns next unit in a range.  '1 mm'.unit.succ #=> '2 mm'.unit
+    # returns next unit in a range.  '1 mm'.to_unit.succ #=> '2 mm'.to_unit
     # only works when the scalar is an integer
     # @return [Unit]
     # @raise [ArgumentError] when scalar is not equal to an integer
@@ -1106,7 +1105,7 @@ module RubyUnits
 
     alias :next :succ
 
-    # returns previous unit in a range.  '2 mm'.unit.pred #=> '1 mm'.unit
+    # returns previous unit in a range.  '2 mm'.to_unit.pred #=> '1 mm'.to_unit
     # only works when the scalar is an integer
     # @return [Unit]
     # @raise [ArgumentError] when scalar is not equal to an integer
@@ -1141,7 +1140,7 @@ module RubyUnits
       return self.base_scalar.zero?
     end
 
-    # @example '5 min'.unit.ago
+    # @example '5 min'.to_unit.ago
     # @return [Unit]
     def ago
       return self.before
@@ -1370,17 +1369,6 @@ module RubyUnits
       unit_string.gsub!(/'/, 'feet')
       unit_string.gsub!(/"/, 'inch')
       unit_string.gsub!(/#/, 'pound')
-
-      #:nocov:
-      #:nocov_19:
-      if defined?(Uncertain) && unit_string =~ /(\+\/-|&plusmn;)/
-        value, uncertainty, unit_s = unit_string.scan(UNCERTAIN_REGEX)[0]
-        result                     = unit_s.unit * Uncertain.new(value.to_f, uncertainty.to_f)
-        copy(result)
-        return
-      end
-      #:nocov:
-      #:nocov_19:
 
       if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
         real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]
