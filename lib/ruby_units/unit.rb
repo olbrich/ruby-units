@@ -1166,12 +1166,12 @@ module RubyUnits
     # @raise [ArgumentError] when time point is not a Time, Date, or DateTime
     def since(time_point)
       case time_point
-        when Time
-          return (Time.now - time_point).unit('s').convert_to(self)
-        when DateTime, Date
-          return (DateTime.now - time_point).unit('d').convert_to(self)
-        else
-          raise ArgumentError, "Must specify a Time, Date, or DateTime"
+      when Time
+        return (Time.now - time_point).to_unit('s').convert_to(self)
+      when DateTime, Date
+        return (DateTime.now - time_point).to_unit('d').convert_to(self)
+      else
+        fail ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
     end
 
@@ -1180,12 +1180,12 @@ module RubyUnits
     # @return [Unit]
     def until(time_point)
       case time_point
-        when Time
-          return (time_point - Time.now).unit('s').convert_to(self)
-        when DateTime, Date
-          return (time_point - DateTime.now).unit('d').convert_to(self)
-        else
-          raise ArgumentError, "Must specify a Time, Date, or DateTime"
+      when Time
+        return (time_point - Time.now).to_unit('s').convert_to(self)
+      when DateTime, Date
+        return (time_point - DateTime.now).to_unit('d').convert_to(self)
+      else
+        fail ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
     end
 
