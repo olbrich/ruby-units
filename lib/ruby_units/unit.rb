@@ -189,11 +189,13 @@ module RubyUnits
     # @yield [RubyUnits::Unit::Definition]
     # @return (see RubyUnits::Unit.define)
     # Get the definition for a unit and allow it to be redefined
-    def self.redefine!(name, &block)
-      raise ArgumentError, "A block is required to redefine a unit" unless block_given?
-      unit_definition = self.definition(name)
+    def self.redefine!(name)
+      fail ArgumentError, 'A block is required to redefine a unit' unless block_given?
+      unit_definition = definition(name)
       yield unit_definition
-      self.define(unit_definition)
+      @@definitions.delete("<#{name}>")
+      define(unit_definition)
+      RubyUnits::Unit.setup
     end
 
     # @param [String] name of unit to undefine
@@ -342,11 +344,11 @@ module RubyUnits
         unless @@cached_units.keys.include?(opt_units) ||
             (opt_units =~ %r{\D/[\d+\.]+}) ||
             (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
-          @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.unit) if opt_units && !opt_units.empty?
+          @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.to_unit) if opt_units && !opt_units.empty?
         end
       end
       unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{RubyUnits::Unit.temp_regex}/) then
-        @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.unit)
+        @@cached_units[unary_unit] = (self.scalar == 1 ? self : unary_unit.to_unit)
       end
       [@scalar, @numerator, @denominator, @base_scalar, @signature, @is_base].each { |x| x.freeze }
       return self
@@ -386,7 +388,7 @@ module RubyUnits
     # @return [Unit]
     def self.parse(input)
       first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
-      return second.nil? ? first.unit : first.unit.convert_to(second)
+      second.nil? ? RubyUnits::Unit.new(first) : RubyUnits::Unit.new(first).convert_to(second)
     end
 
     # @return [Unit]
@@ -453,7 +455,7 @@ module RubyUnits
       num = num.flatten.compact
       den = den.flatten.compact
       num = UNITY_ARRAY if num.empty?
-      base                         = RubyUnits::Unit.new(RubyUnits::Unit.eliminate_terms(q, num, den))
+      base = RubyUnits::Unit.new(RubyUnits::Unit.eliminate_terms(q, num, den))
       @@base_unit_cache[self.units]=base
       return base * @scalar
     end
@@ -481,36 +483,38 @@ module RubyUnits
         return out
       else
         case target_units
-          when :ft
-            inches = self.convert_to("in").scalar.to_int
-            out    = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
-          when :lbs
-            ounces = self.convert_to("oz").scalar.to_int
-            out    = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
-          when String
-            out = case target_units
-                    when /(%[\-+\.\w#]+)\s*(.+)*/ #format string like '%0.2f in'
-                      begin
-                        if $2 #unit specified, need to convert
-                          self.convert_to($2).to_s($1)
-                        else
-                          "#{$1 % @scalar} #{$2 || self.units}".strip
-                        end
-                      rescue # parse it like a strftime format string
-                        (DateTime.new(0) + self).strftime(target_units)
-                      end
-                    when /(\S+)/ #unit only 'mm' or '1/mm'
-                      self.convert_to($1).to_s
+        when :ft
+          inches = self.convert_to("in").scalar.to_int
+          out    = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
+        when :lbs
+          ounces = self.convert_to("oz").scalar.to_int
+          out    = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
+        when String
+          out = case target_units.strip
+                when /\A\s*\Z/ # whitespace only
+                  ''
+                when /(%[\-+\.\w#]+)\s*(.+)*/ #format string like '%0.2f in'
+                  begin
+                    if $2 #unit specified, need to convert
+                      self.convert_to($2).to_s($1)
                     else
-                      raise "unhandled case"
+                      "#{$1 % @scalar} #{$2 || self.units}".strip
+                    end
+                  rescue # parse it like a strftime format string
+                    (DateTime.new(0) + self).strftime(target_units)
                   end
-          else
-            out = case @scalar
-                    when Rational
-                      "#{@scalar} #{self.units}"
-                    else
-                      "#{'%g' % @scalar} #{self.units}"
-                  end.strip
+                when /(\S+)/ #unit only 'mm' or '1/mm'
+                  self.convert_to($1).to_s
+                else
+                  raise "unhandled case"
+                end
+        else
+          out = case @scalar
+                when Rational, Complex
+                  "#{@scalar} #{self.units}"
+                else
+                  "#{'%g' % @scalar} #{self.units}"
+                end.strip
         end
         @output[target_units] = out
         return out
@@ -520,9 +524,9 @@ module RubyUnits
     # Normally pretty prints the unit, but if you really want to see the guts of it, pass ':dump'
     # @deprecated
     # @return [String]
-    def inspect(option=nil)
-      return super() if option == :dump
-      return self.to_s
+    def inspect(dump = nil)
+      return super() if dump
+      to_s
     end
 
     # true if unit is a 'temperature', false if a 'degree' or anything else
@@ -1414,10 +1418,10 @@ module RubyUnits
       if unit_string =~ /:/
         hours, minutes, seconds, microseconds = unit_string.scan(TIME_REGEX)[0]
         raise ArgumentError, "Invalid Duration" if [hours, minutes, seconds, microseconds].all? { |x| x.nil? }
-        result = "#{hours || 0} h".unit +
-            "#{minutes || 0} minutes".unit +
-            "#{seconds || 0} seconds".unit +
-            "#{microseconds || 0} usec".unit
+        result = RubyUnits::Unit.new("#{hours || 0} h") +
+                 RubyUnits::Unit.new("#{minutes || 0} minutes") +
+                 RubyUnits::Unit.new("#{seconds || 0} seconds") +
+                 RubyUnits::Unit.new("#{microseconds || 0} usec")
         copy(result)
         return
       end

@@ -2137,22 +2137,22 @@ describe "Unit Output formatting" do
     specify { expect { subject.to_s("random string") }.to raise_error(ArgumentError, "'random' Unit not recognized") }
   end
 
-  context "for a unit with a custom display_name" do
+  context 'for a unit with a custom display_name' do
     before(:each) do
-      Unit.redefine!("cup") do |cup|
-        cup.display_name = "cupz"
+      Unit.redefine!('cup') do |cup|
+        cup.display_name = 'cupz'
       end
     end
 
     after(:each) do
-      Unit.redefine!("cup") do |cup|
+      Unit.redefine!('cup') do |cup|
         cup.display_name = cup.aliases.first
       end
     end
 
-    subject { Unit("8 cups") }
+    subject { Unit.new('8 cups') }
 
-    specify { expect(subject.to_s).to eq("8 cupz") }
+    specify { expect(subject.to_s).to eq('8 cupz') }
 
   end
 
