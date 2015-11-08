@@ -104,7 +104,7 @@ end
 avagadro_constant = RubyUnits::Unit.new('6.02214129e23 1/mol')
 
 RubyUnits::Unit.define('AMU') do |amu|
-  amu.definition = RubyUnits::Unit.new('12 kg/mol') / (12 * avagadro_constant)
+  amu.definition = RubyUnits::Unit.new('0.012 kg/mol') / (12 * avagadro_constant)
   amu.aliases    = %w{u AMU amu}
 end
 
