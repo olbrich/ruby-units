@@ -33,9 +33,15 @@ module RubyUnits
     @@UNIT_MATCH_REGEX = nil
     UNITY              = '<1>'
     UNITY_ARRAY        = [UNITY]
-    FEET_INCH_REGEX    = /(\d+)\s*(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inches)/
+    # ideally we would like to generate this regex from the alias for a 'feet' and 'inches', but they aren't
+    # defined at the point in the code where we need this regex.
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inch(?:es)?)/
+    FEET_INCH_REGEX    = /(\d+)\s*#{FEET_INCH_UNITS_REGEX}/
+    # ideally we would like to generate this regex from the alias for a 'pound' and 'ounce', but they aren't
+    # defined at the point in the code where we need this regex.
+    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(\d+)\s*(?:ozs?|ounces?)/
+    LBS_OZ_REGEX       = /(\d+)\s*#{LBS_OZ_UNIT_REGEX}/
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
-    LBS_OZ_REGEX       = /(\d+)\s*(?:#|lbs|pounds|pound-mass)+[\s,]*(\d+)\s*(?:oz|ounces)/
     SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
     RATIONAL_NUMBER    = /\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?/
     COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
@@ -342,7 +348,7 @@ module RubyUnits
         opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
         unless @@cached_units.keys.include?(opt_units) ||
             (opt_units =~ %r{\D/[\d+\.]+}) ||
-            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(pounds|lbs[ ,]\d+ ounces|oz)|('\d+")|(ft|feet[ ,]\d+ in|inch|inches)|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
           @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.to_unit) if opt_units && !opt_units.empty?
         end
       end
