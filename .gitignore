@@ -8,3 +8,5 @@ Gemfile.lock
 .rbx
 .idea
 doc
+.rubocop.yml
+bin/rake
