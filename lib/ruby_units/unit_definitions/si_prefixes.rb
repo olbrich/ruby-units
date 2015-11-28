@@ -19,18 +19,18 @@ RubyUnits::UnitSystem.registered[:si].extend do
     kilo: [%w(k kilo), 1e3],
     hecto: [%w(h Hecto hecto), 1e2],
     deca: [%w(da Deca deca deka), 1e1],
-    deci: [%w(d Deci deci), Rational(1,1e1)],
-    centi: [%w(c Centi centi), Rational(1,1e2)],
-    milli: [%w(m Milli milli), Rational(1,1e3)],
-    micro: [%w{u µ Micro micro mc}, Rational(1,1e6)],
-    nano: [%w(n Nano nano), Rational(1,1e9)],
-    pico: [%w(p Pico pico), Rational(1,1e12)],
-    femto: [%w(f Femto femto), Rational(1,1e15)],
-    atto: [%w(a Atto atto), Rational(1,1e18)],
-    zepto: [%w(z Zepto zepto), Rational(1,1e21)],
-    yocto: [%w(y Yocto yocto), Rational(1,1e24)]
+    deci: [%w(d Deci deci), Rational(1, 1e1)],
+    centi: [%w(c Centi centi), Rational(1, 1e2)],
+    milli: [%w(m Milli milli), Rational(1, 1e3)],
+    micro: [%w(u µ Micro micro mc), Rational(1, 1e6)],
+    nano: [%w(n Nano nano), Rational(1, 1e9)],
+    pico: [%w(p Pico pico), Rational(1, 1e12)],
+    femto: [%w(f Femto femto), Rational(1, 1e15)],
+    atto: [%w(a Atto atto), Rational(1, 1e18)],
+    zepto: [%w(z Zepto zepto), Rational(1, 1e21)],
+    yocto: [%w(y Yocto yocto), Rational(1, 1e24)]
   }.each do |name, definition|
-    define_prefix(name) do
+    prefix(name) do
       aliases definition.first
       scalar definition.last
     end

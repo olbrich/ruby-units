@@ -5,6 +5,29 @@ module RubyUnits
   #    (like meters, kilograms, and seconds)
   # derived Units: Units composed of more than one base unit
   class UnitSystem
+
+    # used only for defining units
+    class Proxy
+      attr_accessor :attributes
+
+      def initialize(name)
+        @attributes = {
+          name: name
+        }
+      end
+
+      def definition(&block)
+        fail 'Block required' unless block_given?
+        @attributes[:definition] = block
+      end
+
+      %i(scalar numerator denominator kind display_name aliases).each do |meth|
+        define_method meth do |value|
+          @attributes[meth] = value
+        end
+      end
+    end
+
     @unit_systems = {}
 
     def self.register(unit_system)
@@ -20,10 +43,10 @@ module RubyUnits
     end
 
     attr_accessor :abbreviation,
-    :base_units,
-    :derived_units,
-    :name,
-    :prefixes
+                  :base_units,
+                  :derived_units,
+                  :name,
+                  :prefixes
 
     def initialize(name, abbreviation, &block)
       @name = name
@@ -45,32 +68,32 @@ module RubyUnits
 
     def check_for_ambiguous_definition(collection, new_definition)
       already_used_aliases = Set.new(collection.values.map(&:aliases)).flatten &
-      new_definition.aliases
+                             new_definition.aliases
       return if already_used_aliases.empty?
       fail "Ambiguous #{new_definition.class}: #{new_definition.name} -- Aliases #{already_used_aliases.to_a.inspect} are already in use."
     end
 
-    def define_base(name, &block)
+    def base(name, &block)
       fail 'Block required' unless block_given?
-      proxy = RubyUnits::DefinitionProxy.new(name)
+      proxy = RubyUnits::UnitSystem::Proxy.new(name)
       proxy.instance_eval(&block)
       new_definition = RubyUnits::Definition::Base.new(proxy, abbreviation)
       check_for_ambiguous_definition(units, new_definition)
       @base_units[new_definition.name] = new_definition
     end
 
-    def define_prefix(name, &block)
+    def prefix(name, &block)
       fail 'Block required' unless block_given?
-      proxy = RubyUnits::DefinitionProxy.new(name)
+      proxy = RubyUnits::UnitSystem::Proxy.new(name)
       proxy.instance_eval(&block)
       new_definition = RubyUnits::Definition::Prefix.new(proxy, abbreviation)
       check_for_ambiguous_definition(prefixes, new_definition)
       @prefixes[new_definition.name] = new_definition
     end
 
-    def define(name, &block)
+    def derived(name, &block)
       fail 'Block required' unless block_given?
-      proxy = RubyUnits::DefinitionProxy.new(name)
+      proxy = RubyUnits::UnitSystem::Proxy.new(name)
       proxy.instance_eval(&block)
       new_definition = RubyUnits::Definition::Derived.new(proxy, abbreviation)
       check_for_ambiguous_definition(units, new_definition)

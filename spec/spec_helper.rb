@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:development, :test)
 require 'rspec/core'
+require 'rspec/its'
 
 require 'simplecov'
 SimpleCov.start do

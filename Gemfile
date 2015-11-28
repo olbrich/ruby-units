@@ -11,5 +11,6 @@ group :test do
   gem 'simplecov'
   gem 'simplecov-html'
   gem 'rspec'
+  gem 'rspec-its'
   gem 'guard-rspec'
 end
