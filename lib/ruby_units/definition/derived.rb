@@ -9,6 +9,7 @@ module RubyUnits
         @numerator = proxy.attributes[:numerator]
         @denominator = proxy.attributes[:denominator]
         @definition = proxy.attributes[:definition]
+        fail ArgumentError, "Cannot define a unit using both 'numerator/denominator' and a 'definition'" if @definition && (@numerator || @denominator)
       end
 
       def defined_as

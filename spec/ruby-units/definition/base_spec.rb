@@ -3,7 +3,7 @@ require_relative '../../../lib/ruby_units/unit_system'
 
 describe RubyUnits::Definition::Base do
   let(:proxy) do
-    proxy = RubyUnits::UnitSystem::Proxy.new('quton')
+    proxy = RubyUnits::UnitSystem::Proxy::Base.new('quton')
     proxy.instance_eval do
       aliases %w(qu quton qutons)
       kind :happiness

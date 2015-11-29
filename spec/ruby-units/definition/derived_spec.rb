@@ -4,7 +4,7 @@ require 'ostruct'
 
 describe RubyUnits::Definition::Derived do
   let(:proxy) do
-    proxy = RubyUnits::UnitSystem::Proxy.new('Altman')
+    proxy = RubyUnits::UnitSystem::Proxy::Derived.new('Altman')
     proxy.instance_eval do
       aliases %w(Am Altmans)
       definition do
@@ -12,7 +12,7 @@ describe RubyUnits::Definition::Derived do
           kind: :complexity,
           scalar: 1_000,
           numerator: %i(wtf),
-          denominator: %i(second),
+          denominator: %i(second)
         )
       end
     end

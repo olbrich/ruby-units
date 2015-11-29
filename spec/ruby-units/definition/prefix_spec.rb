@@ -3,7 +3,7 @@ require_relative '../../../lib/ruby_units/unit_system'
 
 describe RubyUnits::Definition::Prefix do
   let(:proxy) do
-    proxy = RubyUnits::UnitSystem::Proxy.new('fifth')
+    proxy = RubyUnits::UnitSystem::Proxy::Prefix.new('fifth')
     proxy.instance_eval do
       aliases %w(fifth)
       scalar Rational(1, 5)
