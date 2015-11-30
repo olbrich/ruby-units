@@ -1,4 +1,4 @@
-RubyUnits::UnitSystem.new('International System of Units', :si) do
+RubyUnits::UnitSystem.registered[:si].extend do
   base(:meter) do
     aliases %w(m meter meters metre metres)
     kind :length

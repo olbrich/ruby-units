@@ -1,3 +1,5 @@
+Dir['./lib/ruby_units/definition/*.rb'].each { |file| require file }
+
 module RubyUnits
   # This class manages the collection of unit definitions used.
   # Prefixes: units that only define a scalar multiplier (like milli, or dozen)
@@ -99,6 +101,8 @@ module RubyUnits
       base_units.merge(derived_units)
     end
 
+    # this method can be used to add additional definitions to a
+    # unit system after it has been created.
     def extend(&block)
       instance_eval(&block) if block_given?
     end
