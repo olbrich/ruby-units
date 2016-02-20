@@ -148,7 +148,7 @@ RubyUnits::Unit.define('carat') do |carat|
 end
 
 RubyUnits::Unit.define('stone') do |stone|
-  stone.definition = RubyUnits::Unit.new('14 lbs')
+  stone.definition = RubyUnits::Unit.new('635029/100000 kg')
   stone.aliases    = %w{st stone}
 end
 
