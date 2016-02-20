@@ -41,6 +41,10 @@ module RubyUnits
     # defined at the point in the code where we need this regex.
     LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(\d+)\s*(?:ozs?|ounces?)/
     LBS_OZ_REGEX       = /(\d+)\s*#{LBS_OZ_UNIT_REGEX}/
+    # ideally we would like to generate this regex from the alias for a 'stone' and 'pound', but they aren't
+    # defined at the point in the code where we need this regex.
+    STONE_UNIT_REGEX   = /(\d+)\s*(?:sts?|stones?)+/
+    STONE_LB_REGEX     = /#{STONE_UNIT_REGEX}\s*(\d*)/
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
     SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
     RATIONAL_NUMBER    = /\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?/
