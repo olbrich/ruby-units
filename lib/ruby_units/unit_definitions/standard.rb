@@ -147,9 +147,9 @@ RubyUnits::Unit.define('carat') do |carat|
   carat.aliases    = %w{ct carat carats}
 end
 
-RubyUnits::Unit.define('stone') do |carat|
-  carat.definition = RubyUnits::Unit.new('14 lbs')
-  carat.aliases    = %{st stone}
+RubyUnits::Unit.define('stone') do |stone|
+  stone.definition = RubyUnits::Unit.new('14 lbs')
+  stone.aliases    = %w{st stone}
 end
 
 # time
