@@ -482,7 +482,7 @@ module RubyUnits
     #
     # @param [Symbol] target_units
     # @return [String]
-    def to_s(target_units=nil)
+    def to_s(target_units=nil, separator: ' ')
       out = @output[target_units]
       if out
         return out
@@ -516,9 +516,9 @@ module RubyUnits
         else
           out = case @scalar
                 when Rational, Complex
-                  "#{@scalar} #{self.units}"
+                  "#{@scalar}#{separator}#{self.units}"
                 else
-                  "#{'%g' % @scalar} #{self.units}"
+                  "#{'%g' % @scalar}#{separator}#{self.units}"
                 end.strip
         end
         @output[target_units] = out

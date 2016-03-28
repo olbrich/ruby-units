@@ -2157,6 +2157,15 @@ describe "Unit Output formatting" do
 
   end
 
+  context 'when using a custom separator' do
+    subject { Unit.new('10 mg') }
+    specify { expect(subject.to_s).to eq('10 mg') }
+    specify { expect(subject.to_s(separator: '')).to eq('10mg') }
+    specify { expect(subject.to_s(separator: ':')).to eq('10:mg') }
+    specify { expect(Unit.new('1/3 g').to_s(separator: '')).to eq('1/3g') }
+    specify { expect(Unit.new('0.5 g').to_s(separator: '')).to eq('0.5g') }
+  end
+
 end
 
 describe "Equations with Units" do
