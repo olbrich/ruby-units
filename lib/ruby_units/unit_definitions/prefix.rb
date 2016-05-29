@@ -1,3 +1,4 @@
+# encoding: utf-8
 
 {
   'googol' => [%w{googol},             1e100],
