@@ -4,6 +4,7 @@ rvm:
   - 2.0.0
   - 2.1.0
   - 2.2.0
+  - 2.3.1
   - ruby-head
   - jruby-head
 jdk:
@@ -17,8 +18,11 @@ matrix:
       jdk: openjdk6
     - rvm: 2.2.0
       jdk: openjdk6
+    - rvm: 2.3.1
+      jdk: openjdk6
     - rvm: jruby-head
       jdk: openjdk6
     - rvm: ruby-head
       jdk: openjdk6
 script: bundle exec rake --trace
+bundler_args: --without development
