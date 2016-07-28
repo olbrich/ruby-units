@@ -1,0 +1,9 @@
+require: rubocop-rspec
+AllCops:
+  TargetRubyVersion: 2.3
+Style/CaseEquality:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Metrics/LineLength:
+  Enabled: false

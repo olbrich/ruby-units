@@ -8,3 +8,6 @@ Gemfile.lock
 .rbx
 .idea
 doc
+bin
+tmp
+
