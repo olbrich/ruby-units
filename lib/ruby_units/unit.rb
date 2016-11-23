@@ -1237,6 +1237,17 @@ module RubyUnits
       self.to(RubyUnits::Unit.new(@@PREFIX_MAP.key(_best_prefix)+self.units(false)))
     end
 
+    # override hash method so objects with same values are considered equal
+    def hash
+      [@scalar,
+      @numerator,
+      @denominator,
+      @is_base,
+      @signature,
+      @base_scalar,
+      @unit_name].hash
+    end
+
     # Protected and Private Functions that should only be called from this class
     protected
 
