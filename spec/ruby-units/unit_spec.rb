@@ -961,6 +961,22 @@ describe 'Create some simple units' do
     it { expect(subject.convert_to("in/s")).to be_within(RubyUnits::Unit.new("0.0001 in/s")).of(RubyUnits::Unit.new("1.0043269330917 in/s")) }
   end
 
+  # dollars
+  describe Unit("$1.45") do
+    it { should be_an_instance_of Unit }
+    it { should == Unit("1 dollar") + Unit("45 cents") }
+    its(:scalar) { should be_a Numeric }
+    its(:units) { should == "USD" }
+    its(:kind) { should == :currency }
+    it { should_not be_temperature }
+    it { should_not be_degree }
+    it { should be_base }
+    it { should_not be_unitless }
+    it { should_not be_zero }
+    its(:base) { should be_a Numeric }
+    its(:temperature_scale) { should be_nil }
+  end
+
   # Farads
   describe RubyUnits::Unit.new("1 F") do
     it { is_expected.to be_an_instance_of Unit }
