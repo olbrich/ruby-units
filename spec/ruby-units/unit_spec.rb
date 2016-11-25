@@ -2168,3 +2168,23 @@ describe "Equations with Units" do
     specify { expect(((p*v)/(n*r)).convert_to('tempK')).to be_within(RubyUnits::Unit.new('0.1 degK')).of(RubyUnits::Unit.new('12027.2 tempK')) }
   end
 end
+
+describe "Unit hash method" do
+  context "should return equal values for identical units" do
+    let(:kg_unit_1) { RubyUnits::Unit.new("2.2 kg") }
+    let(:kg_unit_2) { RubyUnits::Unit.new("2.2 kg") }
+
+    specify { expect(kg_unit_1).to eq(kg_unit_2) }
+    specify { expect(kg_unit_1.hash).to eq(kg_unit_2.hash) }
+    specify { expect([kg_unit_1, kg_unit_2].uniq.size).to eq(1) }
+  end
+
+  context "should return not equal values for differnet units" do
+    let(:kg_unit) { RubyUnits::Unit.new("2.2 kg") }
+    let(:lb_unit) { RubyUnits::Unit.new("2.2 lbs") }
+
+    specify { expect(kg_unit).to_not eq(lb_unit) }
+    specify { expect(kg_unit.hash).to_not eq(lb_unit.hash) }
+    specify { expect([kg_unit, lb_unit].uniq.size).to eq(2) }
+  end
+end
