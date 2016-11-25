@@ -147,6 +147,11 @@ RubyUnits::Unit.define('carat') do |carat|
   carat.aliases    = %w{ct carat carats}
 end
 
+RubyUnits::Unit.define('stone') do |stone|
+  stone.definition = RubyUnits::Unit.new('635029/100000 kg')
+  stone.aliases    = %w{st stone}
+end
+
 # time
 
 RubyUnits::Unit.define('minute') do |min|
