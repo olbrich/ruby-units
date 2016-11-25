@@ -147,6 +147,11 @@ RubyUnits::Unit.define('carat') do |carat|
   carat.aliases    = %w{ct carat carats}
 end
 
+RubyUnits::Unit.define('stone') do |stone|
+  stone.definition = RubyUnits::Unit.new('14 lbs')
+  stone.aliases    = %w{st stone}
+end
+
 # time
 
 RubyUnits::Unit.define('minute') do |min|
@@ -322,7 +327,7 @@ RubyUnits::Unit.define('celsius') do |celsius|
 end
 
 RubyUnits::Unit.define('fahrenheit') do |fahrenheit|
-  fahrenheit.definition = RubyUnits::Unit.new(temp_convert_factor, 'degK')  
+  fahrenheit.definition = RubyUnits::Unit.new(temp_convert_factor, 'degK')
   fahrenheit.aliases    = %w{degF fahrenheit}
 end
 
@@ -383,7 +388,7 @@ end
 
 RubyUnits::Unit.define('slug') do |slug|
   slug.definition = RubyUnits::Unit.new('1 lbf*s^2/ft')
-  slug.aliases    = %w{slug slugs} 
+  slug.aliases    = %w{slug slugs}
 end
 
 # pressure
@@ -431,7 +436,7 @@ end
 RubyUnits::Unit.define('inh2o') do |inh2o|
   density_of_water  = RubyUnits::Unit.new('1 g/cm^3') # at 4 tempC
   inh2o.definition  = RubyUnits::Unit.new('1 in') * RubyUnits::Unit.new('1 gee') * density_of_water
-  inh2o.aliases     = %w{inH2O inh2o inAq}  
+  inh2o.aliases     = %w{inH2O inh2o inAq}
 end
 
 #viscosity
@@ -534,7 +539,7 @@ RubyUnits::Unit.define('ohm') do |ohm|
   ohm.aliases     = %w{Ohm ohm ohms}
 end
 
-# magnetism 
+# magnetism
 
 RubyUnits::Unit.define('weber') do |weber|
   weber.definition  = RubyUnits::Unit.new('1 V*s')

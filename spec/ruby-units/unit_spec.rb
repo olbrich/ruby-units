@@ -1690,6 +1690,18 @@ describe "Unit Conversions" do
       specify { expect(RubyUnits::Unit.new(ounces).to_s(:lbs)).to eq(pounds) }
     end
   end
+
+  describe 'stone-pound conversions' do
+    [
+      ["14 stone 4", '200 lbs'],
+      ['14 st 4', '200 lbs'],
+      ['14 stone, 4 pounds', '200 lbs'],
+      ['14 st, 4 lbs', '200 lbs' ]
+    ].each do |stone, pounds|
+      specify { expect(RubyUnits::Unit.new(stone).convert_to('lbs')).to eq(RubyUnits::Unit.new(pounds)) }
+    end
+    specify { expect(RubyUnits::Unit.new('200 lbs').to_s(:stone)).to eq '14 stone, 4 lb' }
+  end
 end
 
 describe "Unit Math" do
