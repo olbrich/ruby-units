@@ -113,11 +113,13 @@ Units will display themselves nicely based on the display_name for the units and
 The to_s also accepts some options.
 
 ```
-Unit.new('1.5 mm').to_s("%0.2f")  # "1.50 mm".  Enter any valid format
-                                    string.  Also accepts strftime format
-Unit.new('1.5 mm').to_s("in")     # converts to inches before printing
-Unit.new("2 m").to_s(:ft)         # returns 6'7"
-Unit.new("100 kg").to_s(:lbs)     # returns 220 lbs, 7 oz
+Unit.new('1.5 mm').to_s("%0.2f")          # "1.50 mm".  Enter any valid format
+                                            string.  Also accepts strftime format
+Unit.new('1.5 mm').to_s("in")             # converts to inches before printing
+Unit.new("2 m").to_s(:ft)                 # returns 6'7"
+Unit.new("100 kg").to_s(:lbs)             # returns 220 lbs, 7 oz
+Unit.new("1 kg").to_s(separator: '')      # returns 1kg
+Unit.new("1 kg").to_s("g", separator: '') # returns 1000g
 ```
 
 Time Helpers
