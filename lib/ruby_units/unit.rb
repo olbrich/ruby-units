@@ -43,8 +43,9 @@ module RubyUnits
     LBS_OZ_REGEX       = /(\d+)\s*#{LBS_OZ_UNIT_REGEX}/
     # ideally we would like to generate this regex from the alias for a 'stone' and 'pound', but they aren't
     # defined at the point in the code where we need this regex.
-    STONE_UNIT_REGEX   = /(?:sts?|stones?)\s*(\d+)+/
-    STONE_LB_REGEX     = /(\d+)\s*#{STONE_UNIT_REGEX}/
+    # also note that the plural of 'stone' is still 'stone', but we accept 'stones' anyway.
+    STONE_LB_UNIT_REGEX   = /(?:sts?|stones?)+[\s,]*(\d+)\s*(?:#|lbs?|pounds?|pound-mass)*/
+    STONE_LB_REGEX     = /(\d+)\s*#{STONE_LB_UNIT_REGEX}/
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
     SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
     RATIONAL_NUMBER    = /\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?/
@@ -352,7 +353,7 @@ module RubyUnits
         opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
         unless @@cached_units.keys.include?(opt_units) ||
             (opt_units =~ %r{\D/[\d+\.]+}) ||
-            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(#{STONE_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
           @@cached_units[opt_units] = (self.scalar == 1 ? self : opt_units.to_unit) if opt_units && !opt_units.empty?
         end
       end
@@ -498,6 +499,9 @@ module RubyUnits
         when :lbs
           ounces = self.convert_to("oz").scalar.to_int
           out    = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
+        when :stone
+          pounds = self.convert_to("lbs").scalar.to_int
+          out = "#{(pounds / 14).truncate} stone, #{(pounds % 14).round} lb"
         when String
           out = case target_units.strip
                 when /\A\s*\Z/ # whitespace only
@@ -1451,7 +1455,7 @@ module RubyUnits
         copy(result)
         return
       end
-      
+
       # stone -- 3 stone 5, 2 stone, 14 stone 3 pounds, etc.
       stone, pounds = unit_string.scan(STONE_LB_REGEX)[0]
       if (stone && pounds)
