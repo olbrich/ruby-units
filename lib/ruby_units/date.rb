@@ -3,7 +3,7 @@ require 'date'
 # Allow date objects to do offsets by a time unit
 # Date.today + Unit.new("1 week") => gives today+1 week
 class Date
-  alias_method :unit_date_add, :+
+  alias unit_date_add +
   # @param [Object] other
   # @return [Unit]
   def +(other)
@@ -16,7 +16,7 @@ class Date
     end
   end
 
-  alias_method :unit_date_sub, :-
+  alias unit_date_sub -
   # @param [Object] other
   # @return [Unit]
   def -(other)
@@ -46,7 +46,7 @@ class Date
   end
   # :nocov_19:
 
-  alias_method :units_datetime_inspect, :inspect
+  alias units_datetime_inspect inspect
   # @deprecated
   def inspect(dump = false)
     return units_datetime_inspect if dump

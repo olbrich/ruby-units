@@ -1,5 +1,9 @@
+inherit_from: .rubocop_todo.yml
 AllCops:
   TargetRubyVersion: 2.3
+  Exclude:
+    - ruby-units.gemspec
+    - bin/*
 Style/CaseEquality:
   Enabled: false
 Style/FrozenStringLiteralComment:

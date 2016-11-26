@@ -27,4 +27,5 @@ ratings:
   - "**.py"
   - "**.rb"
 exclude_paths:
-- spec/
+- ruby-units.gemspec
+- bin/

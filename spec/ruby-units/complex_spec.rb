@@ -5,22 +5,21 @@ require File.dirname(__FILE__) + '/../spec_helper'
 # so it stands to reason that complex units should also not support :> or :<
 
 describe Complex do
-  subject { Complex(1,1) }
+  subject { Complex(1, 1) }
   it { is_expected.to respond_to :to_unit }
 end
 
-describe "Complex Unit" do
+describe 'Complex Unit' do
   subject { Complex(1.0, -1.0).to_unit }
 
-  it { is_expected.to be_instance_of Unit}
+  it { is_expected.to be_instance_of Unit }
   it(:scalar) { is_expected.to be_kind_of Complex }
 
-  it { is_expected.to eq("1-1i".to_unit) }
-  it { is_expected.to be === "1-1i".to_unit }
+  it { is_expected.to eq('1-1i'.to_unit) }
+  it { is_expected.to be === '1-1i'.to_unit }
 
-  it "is not comparable" do
-    expect { subject > "1+1i".to_unit }.to raise_error(NoMethodError)
-    expect { subject < "1+1i".to_unit }.to raise_error(NoMethodError)
+  it 'is not comparable' do
+    expect { subject > '1+1i'.to_unit }.to raise_error(NoMethodError)
+    expect { subject < '1+1i'.to_unit }.to raise_error(NoMethodError)
   end
-
 end

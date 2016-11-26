@@ -39,11 +39,11 @@ describe 'Date Unit' do
   specify { expect(subject - '5 days'.to_unit).to eq(Date.new(2011, 3, 27)) }
 
   specify { expect { subject + Date.new(2011, 4, 1) }.to raise_error(ArgumentError) }
-  specify { expect { subject + DateTime.new(2011, 4, 1, 12, 00, 00) }.to raise_error(ArgumentError) }
+  specify { expect { subject + DateTime.new(2011, 4, 1, 12, 0, 0) }.to raise_error(ArgumentError) }
   specify { expect { subject + Time.parse('2011-04-01 12:00:00') }.to raise_error(ArgumentError) }
 
   specify { expect(subject - Date.new(2011, 4, 1)).to be_zero }
-  specify { expect(subject - DateTime.new(2011, 4, 1, 00, 00, 00)).to be_zero }
+  specify { expect(subject - DateTime.new(2011, 4, 1, 0, 0, 0)).to be_zero }
   specify { expect { (subject - Time.parse('2011-04-01 00:00')) }.to raise_error(ArgumentError) }
   specify { expect(Date.new(2011, 4, 1) + 1).to eq(Date.new(2011, 4, 2)) }
 end

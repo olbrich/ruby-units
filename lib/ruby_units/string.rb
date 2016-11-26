@@ -6,19 +6,18 @@ class String
     other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
   end
 
-  alias_method :original_format, :%
+  alias original_format %
   # format unit output using formating codes
   # @example '%0.2f' % '1 mm'.to_unit => '1.00 mm'
   # @return [String]
   def format_with_unit(*other)
-    case
-    when other.first.is_a?(RubyUnits::Unit)
+    if other.first.is_a?(RubyUnits::Unit)
       other.first.to_s(self)
     else
       original_format(*other)
     end
   end
-  alias_method :%, :format_with_unit
+  alias % format_with_unit
 
   # @param (see RubyUnits::Unit#convert_to)
   # @return (see RubyUnits::Unit#convert_to)

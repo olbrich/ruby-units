@@ -16,4 +16,4 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 end
 
-require File.dirname(__FILE__) + "/../lib/ruby-units"
+require File.dirname(__FILE__) + '/../lib/ruby-units'

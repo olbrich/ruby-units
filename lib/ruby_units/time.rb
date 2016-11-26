@@ -5,7 +5,6 @@ require 'time'
 # is in years, decades, or centuries.  This leads to less precise values, but ones that match the
 # calendar better.
 class Time
-
   class << self
     alias unit_time_at at
   end
@@ -15,15 +14,15 @@ class Time
   # @param [Time] arg
   # @param [Integer] ms
   # @return [RubyUnits::Unit, Time]
-  def self.at(arg, ms=nil)
+  def self.at(arg, ms = nil)
     case arg
     when Time
       unit_time_at(arg)
     when RubyUnits::Unit
       if ms
-        unit_time_at(arg.convert_to("s").scalar, ms)
+        unit_time_at(arg.convert_to('s').scalar, ms)
       else
-        unit_time_at(arg.convert_to("s").scalar)
+        unit_time_at(arg.convert_to('s').scalar)
       end
     else
       ms.nil? ? unit_time_at(arg) : unit_time_at(arg, ms)
@@ -41,16 +40,16 @@ class Time
     # :nocov_19:
   end
 
-  alias :unit_add :+
+  alias unit_add +
   # @return [RubyUnits::Unit, Time]
   def +(other)
     case other
     when RubyUnits::Unit
-      other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units
+      other = other.convert_to('d').round.convert_to('s') if %w(y decade century).include? other.units
       begin
         unit_add(other.convert_to('s').scalar)
       rescue RangeError
-        self.to_datetime + other
+        to_datetime + other
       end
     else
       unit_add(other)
@@ -64,17 +63,17 @@ class Time
     Time.now + duration.to_unit
   end
 
-  alias :unit_sub :-
+  alias unit_sub -
 
   # @return [RubyUnits::Unit, Time]
   def -(other)
     case other
     when RubyUnits::Unit
-      other = other.convert_to('d').round.convert_to('s') if ['y', 'decade', 'century'].include? other.units
+      other = other.convert_to('d').round.convert_to('s') if %w(y decade century).include? other.units
       begin
         unit_sub(other.convert_to('s').scalar)
       rescue RangeError
-        self.send(:to_datetime) - other
+        send(:to_datetime) - other
       end
     else
       unit_sub(other)

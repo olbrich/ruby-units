@@ -1,8 +1,6 @@
 class RubyUnits::Unit < Numeric
-
   # Handle the definition of units
   class Definition
-
     # @return [Array]
     attr_writer :aliases
 
@@ -30,14 +28,14 @@ class RubyUnits::Unit < Numeric
     #     unit.definition = RubyUnits::Unit.new("7/4 inches")
     #   end
     #
-    def initialize(_name, _definition = [], &block)
+    def initialize(name, definition = [])
       yield self if block_given?
-      self.name     ||= _name.gsub(/[<>]/,'')
-      @aliases      ||= (_definition[0] || [_name])
-      @scalar       ||= _definition[1]
-      @kind         ||= _definition[2]
-      @numerator    ||= _definition[3] || RubyUnits::Unit::UNITY_ARRAY
-      @denominator  ||= _definition[4] || RubyUnits::Unit::UNITY_ARRAY
+      self.name     ||= name.gsub(/[<>]/, '')
+      @aliases      ||= (definition[0] || [name])
+      @scalar       ||= definition[1]
+      @kind         ||= definition[2]
+      @numerator    ||= definition[3] || RubyUnits::Unit::UNITY_ARRAY
+      @denominator  ||= definition[4] || RubyUnits::Unit::UNITY_ARRAY
       @display_name ||= @aliases.first
     end
 
@@ -46,14 +44,14 @@ class RubyUnits::Unit < Numeric
     # @return [String, nil]
     # @todo refactor Unit and Unit::Definition so we don't need to wrap units with angle brackets
     def name
-      "<#{@name}>" if (defined?(@name) && @name)
+      "<#{@name}>" if defined?(@name) && @name
     end
 
     # set the name, strip off '<' and '>'
     # @param [String]
     # @return [String]
-    def name=(_name)
-      @name = _name.gsub(/[<>]/,'')
+    def name=(name_value)
+      @name = name_value.gsub(/[<>]/, '')
     end
 
     # alias array must contain the name of the unit and entries must be unique
@@ -66,35 +64,35 @@ class RubyUnits::Unit < Numeric
     # @param [Unit] unit
     # @return [Unit::Definition]
     def definition=(unit)
-      _base         = unit.to_base
-      @scalar       = _base.scalar
-      @kind         = _base.kind
-      @numerator    = _base.numerator
-      @denominator  = _base.denominator
+      base         = unit.to_base
+      @scalar      = base.scalar
+      @kind        = base.kind
+      @numerator   = base.numerator
+      @denominator = base.denominator
       self
     end
 
     # is this definition for a prefix?
     # @return [Boolean]
     def prefix?
-      self.kind == :prefix
+      kind == :prefix
     end
 
     # Is this definition the unity definition?
     # @return [Boolean]
     def unity?
-      self.prefix? && self.scalar == 1
+      prefix? && scalar == 1
     end
 
     # is this a base unit?
     # units are base units if the scalar is one, and the unit is defined in terms of itself.
     # @return [Boolean]
     def base?
-      (self.denominator     == RubyUnits::Unit::UNITY_ARRAY) &&
-      (self.numerator       != RubyUnits::Unit::UNITY_ARRAY) &&
-      (self.numerator.size  == 1) &&
-      (self.scalar          == 1) &&
-      (self.numerator.first == self.name)
+      (denominator     == RubyUnits::Unit::UNITY_ARRAY) &&
+        (numerator       != RubyUnits::Unit::UNITY_ARRAY) &&
+        (numerator.size  == 1) &&
+        (scalar          == 1) &&
+        (numerator.first == self.name)
     end
   end
 end
