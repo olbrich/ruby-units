@@ -47,20 +47,26 @@ describe Math do
       expect(
         Math.hypot(
           RubyUnits::Unit.new('1 m'),
-          RubyUnits::Unit.new('2 m'))).to be_within(RubyUnits::Unit.new('0.01 m')).of(RubyUnits::Unit.new('2.23607 m'))
+          RubyUnits::Unit.new('2 m')
+        )
+      ).to be_within(RubyUnits::Unit.new('0.01 m')).of(RubyUnits::Unit.new('2.23607 m'))
     end
     specify do
       expect(
         Math.hypot(
           RubyUnits::Unit.new('1 m'),
-          RubyUnits::Unit.new('2 ft'))).to be_within(RubyUnits::Unit.new('0.01 m')).of(RubyUnits::Unit.new('1.17116 m'))
+          RubyUnits::Unit.new('2 ft')
+        )
+      ).to be_within(RubyUnits::Unit.new('0.01 m')).of(RubyUnits::Unit.new('1.17116 m'))
     end
-    specify { expect(Math.hypot(3, 4)).to eq(5)}
+    specify { expect(Math.hypot(3, 4)).to eq(5) }
     specify do
-      expect {
+      expect do
         Math.hypot(
           RubyUnits::Unit.new('1 m'),
-          RubyUnits::Unit.new('2 lbs')) }.to raise_error(ArgumentError)
+          RubyUnits::Unit.new('2 lbs')
+        )
+      end.to raise_error(ArgumentError)
     end
 
     specify do

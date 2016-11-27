@@ -823,7 +823,7 @@ describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
       it { is_expected.to be_an Numeric }
-      it { is_expected.to eq (12.0 / 6.0) }
+      it { is_expected.to eq(12.0 / 6.0) }
     end
 
     describe '#units' do
