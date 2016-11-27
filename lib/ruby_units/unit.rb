@@ -1177,39 +1177,25 @@ module RubyUnits
 
     # returns the 'unit' part of the Unit object without the scalar
     # @return [String]
-    def units(with_prefix = true)
+    def units(with_prefix: true)
       return '' if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
-      output_numerator   = []
+      output_numerator   = ['1']
       output_denominator = []
       num                = @numerator.clone.compact
       den                = @denominator.clone.compact
 
-      if @numerator == UNITY_ARRAY
-        output_numerator << '1'
-      else
-        while defn = RubyUnits::Unit.definition(num.shift) do
-          if defn && defn.prefix?
-            if with_prefix
-              output_numerator << (defn.display_name + RubyUnits::Unit.definition(num.shift).display_name)
-            end
-          else
-            output_numerator << defn.display_name
-          end
-        end
+      unless @numerator == UNITY_ARRAY
+        definitions = num.map { |element| RubyUnits::Unit.definition(element) }
+        definitions.reject!(&:prefix?) unless with_prefix
+        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        output_numerator = definitions.map { |element| element.map(&:display_name).join }
       end
 
-      if @denominator == UNITY_ARRAY
-        output_denominator = []
-      else
-        while defn = RubyUnits::Unit.definition(den.shift) do
-          if defn && defn.prefix?
-            if with_prefix
-              output_denominator << (defn.display_name + RubyUnits::Unit.definition(den.shift).display_name)
-            end
-          else
-            output_denominator << defn.display_name
-          end
-        end
+      unless @denominator == UNITY_ARRAY
+        definitions = den.map { |element| RubyUnits::Unit.definition(element) }
+        definitions.reject!(&:prefix?) unless with_prefix
+        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        output_denominator = definitions.map { |element| element.map(&:display_name).join }
       end
 
       on  = output_numerator.uniq.
@@ -1393,7 +1379,7 @@ module RubyUnits
       else
         @@prefix_values.key(10**((Math.log10(base_scalar) / 3.0).floor * 3))
       end
-      to(RubyUnits::Unit.new(@@prefix_map.key(best_prefix) + units(false)))
+      to(RubyUnits::Unit.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
     end
 
     # override hash method so objects with same values are considered equal
