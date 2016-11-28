@@ -5,6 +5,7 @@ group :development do
   gem 'jeweler'
   gem 'pry-byebug', platforms: :mri
   gem 'guard-rspec'
+  gem 'terminal-notifier-guard'
 end
 
 group :test do
