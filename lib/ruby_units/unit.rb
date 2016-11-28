@@ -1384,13 +1384,15 @@ module RubyUnits
 
     # override hash method so objects with same values are considered equal
     def hash
-      [@scalar,
-      @numerator,
-      @denominator,
-      @base,
-      @signature,
-      @base_scalar,
-      @unit_name].hash
+      [
+        @scalar,
+        @numerator,
+        @denominator,
+        @base,
+        @signature,
+        @base_scalar,
+        @unit_name
+      ].hash
     end
 
     # Protected and Private Functions that should only be called from this class
@@ -1471,10 +1473,7 @@ module RubyUnits
       unit_string = "#{$1} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
 
-      unit_string.gsub!(/%/, 'percent')
-      unit_string.gsub!(/'/, 'feet')
-      unit_string.gsub!(/"/, 'inch')
-      unit_string.gsub!(/#/, 'pound')
+      unit_string.gsub!(/[%'"#]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound')
 
       if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
         real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]
@@ -1569,13 +1568,14 @@ module RubyUnits
       @scalar = 1 unless @scalar.is_a? Numeric
       @scalar = @scalar.to_int if @scalar.to_int == @scalar
 
-      case
-      when bottom_scalar.nil? || bottom_scalar.empty?
-      when bottom_scalar.to_i == bottom_scalar
-        @scalar /= bottom_scalar.to_i
-      else
-        @scalar /= bottom_scalar.to_f
-      end
+      bottom_scalar = 1 if bottom_scalar.nil? || bottom_scalar.empty?
+      bottom_scalar = if bottom_scalar.to_i == bottom_scalar
+                        bottom_scalar.to_i
+                      else
+                        bottom_scalar.to_f
+                      end
+
+      @scalar /= bottom_scalar
 
       @numerator   ||= UNITY_ARRAY
       @denominator ||= UNITY_ARRAY
