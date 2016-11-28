@@ -10,3 +10,5 @@ Style/FrozenStringLiteralComment:
   Enabled: false
 Metrics/LineLength:
   Enabled: false
+Style/SingleLineBlockParams:
+  Enabled: false

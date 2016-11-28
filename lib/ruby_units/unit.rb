@@ -47,11 +47,11 @@ module RubyUnits
     STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(\d+)\s*(?:#|lbs?|pounds?|pound-mass)*/
     STONE_LB_REGEX     = /(\d+)\s*#{STONE_LB_UNIT_REGEX}/
     TIME_REGEX         = /(\d+)*:(\d+)*:*(\d+)*[:,]*(\d+)*/
-    SCI_NUMBER         = %r{([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)}
-    RATIONAL_NUMBER    = /\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?/
+    SCI_NUMBER         = /([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)/
+    RATIONAL_NUMBER    = %r{\(?([+-])?(\d+[ -])?(\d+)\/(\d+)\)?}
     COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/
     NUMBER_REGEX       = /#{SCI_NUMBER}*\s*(.+)?/
-    UNIT_STRING_REGEX  = /#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*/
+    UNIT_STRING_REGEX  = %r{#{SCI_NUMBER}*\s*([^\/]*)\/*(.+)*}
     TOP_REGEX          = /([^ \*]+)(?:\^|\*\*)([\d-]+)/
     BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
     NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
@@ -62,67 +62,67 @@ module RubyUnits
     RANKINE            = ['<rankine>'].freeze
     CELSIUS            = ['<celsius>'].freeze
     @@temp_regex       = nil
-    SIGNATURE_VECTOR   = [
-        :length,
-        :time,
-        :temperature,
-        :mass,
-        :current,
-        :substance,
-        :luminosity,
-        :currency,
-        :information,
-        :angle
-    ].freeze
+    SIGNATURE_VECTOR   = %i(
+      length
+      time
+      temperature
+      mass
+      current
+      substance
+      luminosity
+      currency
+      information
+      angle
+    ).freeze
     @@kinds = {
-        -312_078     => :elastance,
-        -312_058     => :resistance,
-        -312_038     => :inductance,
-        -152_040     => :magnetism,
-        -152_038     => :magnetism,
-        -152_058     => :potential,
-        -7997        => :specific_volume,
-        -79          => :snap,
-        -59          => :jolt,
-        -39          => :acceleration,
-        -38          => :radiation,
-        -20          => :frequency,
-        -19          => :speed,
-        -18          => :viscosity,
-        -17          => :volumetric_flow,
-        -1           => :wavenumber,
-        0            => :unitless,
-        1            => :length,
-        2            => :area,
-        3            => :volume,
-        20           => :time,
-        400          => :temperature,
-        7941         => :yank,
-        7942         => :power,
-        7959         => :pressure,
-        7962         => :energy,
-        7979         => :viscosity,
-        7961         => :force,
-        7981         => :momentum,
-        7982         => :angular_momentum,
-        7997         => :density,
-        7998         => :area_density,
-        8000         => :mass,
-        152_020      => :radiation_exposure,
-        159_999      => :magnetism,
-        160_000      => :current,
-        160_020      => :charge,
-        312_058      => :conductance,
-        312_078      => :capacitance,
-        3_199_980    => :activity,
-        3_199_997    => :molar_concentration,
-        3_200_000    => :substance,
-        63_999_998   => :illuminance,
-        64_000_000   => :luminous_power,
-        1_280_000_000 => :currency,
-        25_600_000_000  => :information,
-        511_999_999_980 => :angular_velocity,
-        512_000_000_000 => :angle
+      -312_078     => :elastance,
+      -312_058     => :resistance,
+      -312_038     => :inductance,
+      -152_040     => :magnetism,
+      -152_038     => :magnetism,
+      -152_058     => :potential,
+      -7997        => :specific_volume,
+      -79          => :snap,
+      -59          => :jolt,
+      -39          => :acceleration,
+      -38          => :radiation,
+      -20          => :frequency,
+      -19          => :speed,
+      -18          => :viscosity,
+      -17          => :volumetric_flow,
+      -1           => :wavenumber,
+      0            => :unitless,
+      1            => :length,
+      2            => :area,
+      3            => :volume,
+      20           => :time,
+      400          => :temperature,
+      7941         => :yank,
+      7942         => :power,
+      7959         => :pressure,
+      7962         => :energy,
+      7979         => :viscosity,
+      7961         => :force,
+      7981         => :momentum,
+      7982         => :angular_momentum,
+      7997         => :density,
+      7998         => :area_density,
+      8000         => :mass,
+      152_020      => :radiation_exposure,
+      159_999      => :magnetism,
+      160_000      => :current,
+      160_020      => :charge,
+      312_058      => :conductance,
+      312_078      => :capacitance,
+      3_199_980    => :activity,
+      3_199_997    => :molar_concentration,
+      3_200_000    => :substance,
+      63_999_998   => :illuminance,
+      64_000_000   => :luminous_power,
+      1_280_000_000 => :currency,
+      25_600_000_000  => :information,
+      511_999_999_980 => :angular_velocity,
+      512_000_000_000 => :angle
     }.freeze
     @@cached_units     = {}
     @@base_unit_cache  = {}
@@ -160,7 +160,7 @@ module RubyUnits
     # @param [String] unit
     # @return [RubyUnits::Unit::Definition, nil]
     def self.definition(unit_name)
-      unit = (unit_name =~ /^<.+>$/) ? unit_name : "<#{unit_name}>"
+      unit = unit_name =~ /^<.+>$/ ? unit_name : "<#{unit_name}>"
       @@definitions[unit]
     end
 
@@ -201,7 +201,7 @@ module RubyUnits
     # @return (see RubyUnits::Unit.define)
     # Get the definition for a unit and allow it to be redefined
     def self.redefine!(name)
-      fail ArgumentError, 'A block is required to redefine a unit' unless block_given?
+      raise ArgumentError, 'A block is required to redefine a unit' unless block_given?
       unit_definition = definition(name)
       yield unit_definition
       @@definitions.delete("<#{name}>")
@@ -259,7 +259,7 @@ module RubyUnits
       i = 0
       loop do
         break if i > num.size
-        if @@prefix_values.has_key? num[i]
+        if @@prefix_values.key? num[i]
           k = [num[i], num[i + 1]]
           i += 2
         else
@@ -272,7 +272,7 @@ module RubyUnits
       j = 0
       loop do
         break if j > den.size
-        if @@prefix_values.has_key? den[j]
+        if @@prefix_values.key? den[j]
           k = [den[j], den[j + 1]]
           j += 2
         else
@@ -308,12 +308,12 @@ module RubyUnits
     # @return [Array] consisting of [Numeric, "unit"]
     def self.parse_into_numbers_and_units(string)
       # scientific notation.... 123.234E22, -123.456e-10
-      sci       = %r{[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*}
+      sci       = /[+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*/
       # rational numbers.... -1/3, 1/5, 20/100, -6 1/2, -6-1/2
       rational  = %r{\(?[+-]?(?:\d+[ -])?\d+\/\d+\)?}
       # complex numbers... -1.2+3i, +1.2-3.3i
-      complex   = %r{#{sci}{2,2}i}
-      anynumber = %r{(?:(#{complex}|#{rational}|#{sci}))?\s?([^-\d\.].*)?}
+      complex   = /#{sci}{2,2}i/
+      anynumber = /(?:(#{complex}|#{rational}|#{sci}))?\s?([^-\d\.].*)?/
 
       num, unit = string.scan(anynumber).first
 
@@ -332,9 +332,9 @@ module RubyUnits
         when rational
           # if it has whitespace, it will be of the form '6 1/2'
           if num =~ RATIONAL_NUMBER
-            sign = ($1 == '-') ? -1 : 1
+            sign = $1 == '-' ? -1 : 1
             n = $2.to_i
-            f = Rational($3.to_i,$4.to_i)
+            f = Rational($3.to_i, $4.to_i)
             sign * (n + f)
           else
             Rational(*num.split('/').map(&:to_i))
@@ -367,15 +367,15 @@ module RubyUnits
     end
 
     def self.temp_regex
-      @@temp_regex ||= Regexp.new "(?:#{
-      temp_units = %w(tempK tempC tempF tempR degK degC degF degR)
-      aliases = temp_units.map do |unit|
-        d = RubyUnits::Unit.definition(unit)
-        d && d.aliases
-      end.flatten.compact
-      regex_str = aliases.empty? ? '(?!x)x' : aliases.join('|')
-      regex_str
-      })"
+      @@temp_regex ||= begin
+        temp_units = %w(tempK tempC tempF tempR degK degC degF degR)
+        aliases = temp_units.map do |unit|
+          d = RubyUnits::Unit.definition(unit)
+          d && d.aliases
+        end.flatten.compact
+        regex_str = aliases.empty? ? '(?!x)x' : aliases.join('|')
+        Regexp.new "(?:#{regex_str})"
+      end
     end
 
     # inject a definition into the internal array and set it up for use
@@ -533,13 +533,13 @@ module RubyUnits
       unary_unit = units || ''
       if options.first.instance_of?(String)
         _opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
-        unless @@cached_units.keys.include?(opt_units) ||
-            (opt_units =~ %r{\D/[\d+\.]+}) ||
-            (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
+        unless  @@cached_units.keys.include?(opt_units) ||
+                (opt_units =~ %r{\D/[\d+\.]+}) ||
+                (opt_units =~ %r{(#{RubyUnits::Unit.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-})
           @@cached_units[opt_units] = (scalar == 1 ? self : opt_units.to_unit) if opt_units && !opt_units.empty?
         end
       end
-      unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{RubyUnits::Unit.temp_regex}/) then
+      unless @@cached_units.keys.include?(unary_unit) || (unary_unit =~ /#{RubyUnits::Unit.temp_regex}/)
         @@cached_units[unary_unit] = (scalar == 1 ? self : unary_unit.to_unit)
       end
       [@scalar, @numerator, @denominator, @base_scalar, @signature, @base].each(&:freeze)
@@ -565,10 +565,10 @@ module RubyUnits
     def base?
       return @base if defined? @base
       @base = (@numerator + @denominator)
-                .compact
-                .uniq
-                .map { |unit| RubyUnits::Unit.definition(unit) }
-                .all? { |element| element.unity? || element.base? }
+              .compact
+              .uniq
+              .map { |unit| RubyUnits::Unit.definition(unit) }
+              .all? { |element| element.unity? || element.base? }
       @base
     end
 
@@ -642,49 +642,46 @@ module RubyUnits
     # @return [String]
     def to_s(target_units = nil)
       out = @output[target_units]
-      if out
-        return out
-      else
-        case target_units
-        when :ft
-          inches = convert_to('in').scalar.to_int
-          out    = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
-        when :lbs
-          ounces = convert_to('oz').scalar.to_int
-          out    = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
-        when :stone
-          pounds = convert_to('lbs').scalar.to_int
-          out = "#{(pounds / 14).truncate} stone, #{(pounds % 14).round} lb"
-        when String
-          out = case target_units.strip
-                when /\A\s*\Z/ # whitespace only
-                  ''
-                when /(%[\-+\.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
-                  begin
-                    if $2 # unit specified, need to convert
-                      convert_to($2).to_s($1)
-                    else
-                      "#{$1 % @scalar} #{$2 || units}".strip
-                    end
-                  rescue # parse it like a strftime format string
-                    (DateTime.new(0) + self).strftime(target_units)
+      return out if out
+      case target_units
+      when :ft
+        inches = convert_to('in').scalar.to_int
+        out    = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
+      when :lbs
+        ounces = convert_to('oz').scalar.to_int
+        out    = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
+      when :stone
+        pounds = convert_to('lbs').scalar.to_int
+        out = "#{(pounds / 14).truncate} stone, #{(pounds % 14).round} lb"
+      when String
+        out = case target_units.strip
+              when /\A\s*\Z/ # whitespace only
+                ''
+              when /(%[\-+\.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
+                begin
+                  if $2 # unit specified, need to convert
+                    convert_to($2).to_s($1)
+                  else
+                    "#{$1 % @scalar} #{$2 || units}".strip
                   end
-                when /(\S+)/ # unit only 'mm' or '1/mm'
-                  convert_to($1).to_s
-                else
-                  raise 'unhandled case'
+                rescue # parse it like a strftime format string
+                  (DateTime.new(0) + self).strftime(target_units)
                 end
-        else
-          out = case @scalar
-                when Rational, Complex
-                  "#{@scalar} #{units}"
-                else
-                  "#{'%g' % @scalar} #{units}"
-                end.strip
-        end
-        @output[target_units] = out
-        return out
+              when /(\S+)/ # unit only 'mm' or '1/mm'
+                convert_to($1).to_s
+              else
+                raise 'unhandled case'
+              end
+      else
+        out = case @scalar
+              when Rational, Complex
+                "#{@scalar} #{units}"
+              else
+                "#{'%g' % @scalar} #{units}"
+              end.strip
       end
+      @output[target_units] = out
+      out
     end
 
     # Normally pretty prints the unit, but if you really want to see the guts of it, pass ':dump'
@@ -699,7 +696,7 @@ module RubyUnits
     # @return [Boolean]
     # @todo use unit definition to determine if it's a temperature instead of a regex
     def temperature?
-      degree? && (!(@@unit_map[units] =~ /temp[CFRK]/).nil?)
+      degree? && !(@@unit_map[units] =~ /temp[CFRK]/).nil?
     end
 
     alias is_temperature? temperature?
@@ -734,9 +731,8 @@ module RubyUnits
     # @raise [NoMethodError] when other does not define <=>
     # @raise [ArgumentError] when units are not compatible
     def <=>(other)
-      if !base_scalar.respond_to?(:<=>)
-        raise NoMethodError, "undefined method `<=>' for #{base_scalar.inspect}"
-      elsif other.nil?
+      raise NoMethodError, "undefined method `<=>' for #{base_scalar.inspect}" unless base_scalar.respond_to?(:<=>)
+      if other.nil?
         base_scalar <=> nil
       elsif !temperature? && other.respond_to?(:zero?) && other.zero?
         base_scalar <=> 0
@@ -944,11 +940,8 @@ module RubyUnits
     # @return [Array]
     def divmod(other)
       raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ other
-      if units == other.units
-        return scalar.divmod(other.scalar)
-      else
-        return to_base.scalar.divmod(other.to_base.scalar)
-      end
+      return scalar.divmod(other.scalar) if units == other.units
+      to_base.scalar.divmod(other.to_base.scalar)
     end
 
     # perform a modulo on a unit, will raise an exception if the units are not compatible
@@ -985,7 +978,7 @@ module RubyUnits
       when Integer
         return power(other)
       when Float
-        return self**(other.to_i) if other == other.to_i
+        return self**other.to_i if other == other.to_i
         valid = (1..9).map { |x| 1 / x }
         raise ArgumentError, 'Not a n-th root (1..9), use 1/n' unless valid.include? other.abs
         return root((1 / other).to_int)
@@ -1007,11 +1000,8 @@ module RubyUnits
       return inverse if n == -1
       return 1 if n.zero?
       return self if n == 1
-      if n.positive? then
-        return (1..(n - 1).to_i).inject(self) { |product, _| product * self }
-      else
-        return (1..-(n - 1).to_i).inject(self) { |product, _| product / self }
-      end
+      return (1..(n - 1).to_i).inject(self) { |acc, _elem| acc * self } if n.positive?
+      (1..-(n - 1).to_i).inject(self) { |acc, _elem| acc / self }
     end
 
     # Calculates the n-th root of a unit
@@ -1045,7 +1035,7 @@ module RubyUnits
         r = ((x / n) * (n - 1)).to_int
         r.times { den.delete_at(den.index(item)) }
       end
-      q = @scalar.negative? ? (-1)**Rational(1, n) * (@scalar.abs)**Rational(1, n) : @scalar**Rational(1, n)
+      q = @scalar.negative? ? -1**Rational(1, n) * @scalar.abs**Rational(1, n) : @scalar**Rational(1, n)
       RubyUnits::Unit.new(scalar: q, numerator: num, denominator: den)
     end
 
@@ -1121,8 +1111,8 @@ module RubyUnits
         numerator2   = target.numerator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
         denominator2 = target.denominator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
 
-        q = @scalar * ((numerator1 + denominator2).inject(1) { |product, n| product * n }) /
-            ((numerator2 + denominator1).inject(1) { |product, n| product * n })
+        q = @scalar * ((numerator1 + denominator2).inject(1) { |acc, elem| acc * elem }) /
+            ((numerator2 + denominator1).inject(1) { |acc, elem| acc * elem })
         return RubyUnits::Unit.new(scalar: q, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
       end
     end
@@ -1135,7 +1125,7 @@ module RubyUnits
     # @raise [RuntimeError] when not unitless
     def to_f
       return @scalar.to_f if unitless?
-      raise RuntimeError, "Cannot convert '#{self}' to Float unless unitless.  Use Unit#scalar"
+      raise "Cannot convert '#{self}' to Float unless unitless.  Use Unit#scalar"
     end
 
     # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
@@ -1143,7 +1133,7 @@ module RubyUnits
     # @raise [RuntimeError] when not unitless
     def to_c
       return Complex(@scalar) if unitless?
-      raise RuntimeError, "Cannot convert '#{self}' to Complex unless unitless.  Use Unit#scalar"
+      raise "Cannot convert '#{self}' to Complex unless unitless.  Use Unit#scalar"
     end
 
     # if unitless, returns an int, otherwise raises an error
@@ -1151,7 +1141,7 @@ module RubyUnits
     # @raise [RuntimeError] when not unitless
     def to_i
       return @scalar.to_int if unitless?
-      raise RuntimeError, "Cannot convert '#{self}' to Integer unless unitless.  Use Unit#scalar"
+      raise "Cannot convert '#{self}' to Integer unless unitless.  Use Unit#scalar"
     end
 
     alias to_int to_i
@@ -1161,7 +1151,7 @@ module RubyUnits
     # @raise [RuntimeError] when not unitless
     def to_r
       return @scalar.to_r if unitless?
-      raise RuntimeError, "Cannot convert '#{self}' to Rational unless unitless.  Use Unit#scalar"
+      raise "Cannot convert '#{self}' to Rational unless unitless.  Use Unit#scalar"
     end
 
     # Returns string formatted for json
@@ -1194,13 +1184,13 @@ module RubyUnits
       end
 
       on  = output_numerator
-              .uniq
-              .map { |x| [x, output_numerator.count(x)] }
-              .map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
+            .uniq
+            .map { |x| [x, output_numerator.count(x)] }
+            .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
       od  = output_denominator
-              .uniq
-              .map { |x| [x, output_denominator.count(x)] }
-              .map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
+            .uniq
+            .map { |x| [x, output_denominator.count(x)] }
+            .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
       "#{on.join('*')}#{od.empty? ? '' : '/' + od.join('*')}".strip
     end
 
@@ -1319,7 +1309,7 @@ module RubyUnits
       when DateTime, Date
         (DateTime.now - time_point).to_unit('d').convert_to(self)
       else
-        fail ArgumentError, 'Must specify a Time, Date, or DateTime'
+        raise ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
     end
 
@@ -1333,7 +1323,7 @@ module RubyUnits
       when DateTime, Date
         (time_point - DateTime.now).to_unit('d').convert_to(self)
       else
-        fail ArgumentError, 'Must specify a Time, Date, or DateTime'
+        raise ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
     end
 
@@ -1371,7 +1361,7 @@ module RubyUnits
     def best_prefix
       return to_base if scalar.zero?
       best_prefix = if kind == :information
-                      @@prefix_values.key(2**((Math.log(base_scalar,2) / 10.0).floor * 10))
+                      @@prefix_values.key(2**((Math.log(base_scalar, 2) / 10.0).floor * 10))
                     else
                       @@prefix_values.key(10**((Math.log10(base_scalar) / 3.0).floor * 3))
                     end
@@ -1447,7 +1437,7 @@ module RubyUnits
       return @signature unless @signature.nil?
       vector = unit_signature_vector
       vector.each_with_index { |item, index| vector[index] = item * 20**index }
-      @signature = vector.inject(0) { |sum, n| sum + n }
+      @signature = vector.inject(0) { |acc, elem| acc + elem }
       @signature
     end
 
@@ -1480,7 +1470,7 @@ module RubyUnits
 
       if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
         sign, proper, numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
-        sign = (sign == '-') ? -1 : 1
+        sign = sign == '-' ? -1 : 1
         rational = sign * (proper.to_i + Rational(numerator.to_i, denominator.to_i))
         result = RubyUnits::Unit.new(unit_s || '1') * rational
         copy(result)
@@ -1580,7 +1570,7 @@ module RubyUnits
 
       # eliminate all known terms from this string.  This is a quick check to see if the passed unit
       # contains terms that are not defined.
-      used = "#{top} #{bottom}".to_s.gsub(RubyUnits::Unit.unit_match_regex, '').gsub(/[\d\*, "'_^\/\$]/, '')
+      used = "#{top} #{bottom}".to_s.gsub(RubyUnits::Unit.unit_match_regex, '').gsub(%r{[\d\*, "'_^\/\$]}, '')
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
       @numerator = @numerator.map do |item|

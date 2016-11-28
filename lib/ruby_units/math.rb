@@ -113,9 +113,8 @@ module Math
   alias unit_atan2 atan2
   # @return [Numeric]
   def atan2(x, y)
-    if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && (x !~ y)
-      raise ArgumentError, 'Incompatible RubyUnits::Units'
-    elsif (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && (x =~ y)
+    raise ArgumentError, 'Incompatible RubyUnits::Units' if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && !x.compatible?(y)
+    if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && x.compatible?(y)
       Math.unit_atan2(x.base_scalar, y.base_scalar)
     else
       Math.unit_atan2(x, y)
