@@ -284,11 +284,10 @@ module RubyUnits
 
       num = []
       den = []
-      for key, value in combined do
-        case
-        when value.positive?
+      combined.each do |key, value|
+        if value.positive?
           value.times { num << key }
-        when value.negative?
+        elsif value.negative?
           value.abs.times { den << key }
         end
       end
@@ -533,7 +532,7 @@ module RubyUnits
       raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar.negative?
       unary_unit = units || ''
       if options.first.instance_of?(String)
-        opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
+        _opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
         unless @@cached_units.keys.include?(opt_units) ||
             (opt_units =~ %r{\D/[\d+\.]+}) ||
             (opt_units =~ /(#{RubyUnits::Unit.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+\/-/)
@@ -565,9 +564,11 @@ module RubyUnits
     # @return [Boolean]
     def base?
       return @base if defined? @base
-      @base = (@numerator + @denominator).compact.uniq.
-          map { |unit| RubyUnits::Unit.definition(unit) }.
-          all? { |element| element.unity? || element.base? }
+      @base = (@numerator + @denominator)
+                .compact
+                .uniq
+                .map { |unit| RubyUnits::Unit.definition(unit) }
+                .all? { |element| element.unity? || element.base? }
       @base
     end
 
@@ -581,10 +582,9 @@ module RubyUnits
       return self if base?
       if @@unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
         @signature = @@kinds.key(:temperature)
-        base = case
-               when temperature?
+        base = if temperature?
                  convert_to('tempK')
-               when degree?
+               elsif degree?
                  convert_to('degK')
                end
         return base
@@ -596,7 +596,7 @@ module RubyUnits
       num = []
       den = []
       q   = 1
-      for unit in @numerator.compact do
+      @numerator.compact.each do |unit|
         if @@prefix_values[unit]
           q *= @@prefix_values[unit]
         else
@@ -605,7 +605,7 @@ module RubyUnits
           den << @@unit_values[unit][:denominator] if @@unit_values[unit] && @@unit_values[unit][:denominator]
         end
       end
-      for unit in @denominator.compact do
+      @denominator.compact.each do |unit|
         if @@prefix_values[unit]
           q /= @@prefix_values[unit]
         else
@@ -734,14 +734,13 @@ module RubyUnits
     # @raise [NoMethodError] when other does not define <=>
     # @raise [ArgumentError] when units are not compatible
     def <=>(other)
-      case
-      when !base_scalar.respond_to?(:<=>)
+      if !base_scalar.respond_to?(:<=>)
         raise NoMethodError, "undefined method `<=>' for #{base_scalar.inspect}"
-      when other.nil?
+      elsif other.nil?
         base_scalar <=> nil
-      when !temperature? && other.respond_to?(:zero?) && other.zero?
+      elsif !temperature? && other.respond_to?(:zero?) && other.zero?
         base_scalar <=> 0
-      when other.instance_of?(Unit)
+      elsif other.instance_of?(Unit)
         raise ArgumentError, "Incompatible Units ('#{units}' not compatible with '#{other.units}')" unless self =~ other
         base_scalar <=> other.base_scalar
       else
@@ -759,10 +758,9 @@ module RubyUnits
     # @param [Object] other
     # @return [Boolean]
     def ==(other)
-      case
-      when other.respond_to?(:zero?) && other.zero?
+      if other.respond_to?(:zero?) && other.zero?
         zero?
-      when other.instance_of?(Unit)
+      elsif other.instance_of?(Unit)
         return false unless self =~ other
         base_scalar == other.base_scalar
       else
@@ -835,10 +833,9 @@ module RubyUnits
     def +(other)
       case other
       when Unit
-        case
-        when zero?
+        if zero?
           other.dup
-        when self =~ other
+        elsif self =~ other
           raise ArgumentError, 'Cannot add two temperatures' if [self, other].all?(&:temperature?)
           if [self, other].any?(&:temperature?)
             if temperature?
@@ -870,20 +867,18 @@ module RubyUnits
     def -(other)
       case other
       when Unit
-        case
-        when zero?
+        if zero?
           if other.zero?
             other.dup * -1 # preserve Units class
           else
             -other.dup
           end
-        when self =~ other
-          case
-          when [self, other].all?(&:temperature?)
+        elsif self =~ other
+          if [self, other].all?(&:temperature?)
             RubyUnits::Unit.new(scalar: (base_scalar - other.base_scalar), numerator: KELVIN, denominator: UNITY_ARRAY, signature: @signature).convert_to(temperature_scale)
-          when temperature?
+          elsif temperature?
             RubyUnits::Unit.new(scalar: (base_scalar - other.base_scalar), numerator: ['<tempK>'], denominator: UNITY_ARRAY, signature: @signature).convert_to(self)
-          when other.temperature?
+          elsif other.temperature?
             raise ArgumentError, 'Cannot subtract a temperature from a differential degree unit'
           else
             @q ||= ((@@cached_units[units].scalar / @@cached_units[units].base_scalar) rescue (units.to_unit.scalar / units.to_unit.to_base.scalar))
@@ -1039,13 +1034,13 @@ module RubyUnits
       num = @numerator.dup
       den = @denominator.dup
 
-      for item in @numerator.uniq do
+      @numerator.uniq.each do |item|
         x = num.find_all { |i| i == item }.size
         r = ((x / n) * (n - 1)).to_int
         r.times { num.delete_at(num.index(item)) }
       end
 
-      for item in @denominator.uniq do
+      @denominator.uniq.each do |item|
         x = den.find_all { |i| i == item }.size
         r = ((x / n) * (n - 1)).to_int
         r.times { den.delete_at(den.index(item)) }
@@ -1171,7 +1166,7 @@ module RubyUnits
 
     # Returns string formatted for json
     # @return [String]
-    def as_json(*args)
+    def as_json(*)
       to_s
     end
 
@@ -1198,14 +1193,15 @@ module RubyUnits
         output_denominator = definitions.map { |element| element.map(&:display_name).join }
       end
 
-      on  = output_numerator.uniq.
-          map { |x| [x, output_numerator.count(x)] }.
-          map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
-      od  = output_denominator.uniq.
-          map { |x| [x, output_denominator.count(x)] }.
-          map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
-      out = "#{on.join('*')}#{od.empty? ? '' : '/' + od.join('*')}".strip
-      out
+      on  = output_numerator
+              .uniq
+              .map { |x| [x, output_numerator.count(x)] }
+              .map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
+      od  = output_denominator
+              .uniq
+              .map { |x| [x, output_denominator.count(x)] }
+              .map { |element, power| ("#{element}".strip + (power > 1 ? "^#{power}" : '')) }
+      "#{on.join('*')}#{od.empty? ? '' : '/' + od.join('*')}".strip
     end
 
     # negates the scalar of the Unit
@@ -1375,10 +1371,10 @@ module RubyUnits
     def best_prefix
       return to_base if scalar.zero?
       best_prefix = if kind == :information
-        @@prefix_values.key(2**((Math.log(base_scalar,2) / 10.0).floor * 10))
-      else
-        @@prefix_values.key(10**((Math.log10(base_scalar) / 3.0).floor * 3))
-      end
+                      @@prefix_values.key(2**((Math.log(base_scalar,2) / 10.0).floor * 10))
+                    else
+                      @@prefix_values.key(10**((Math.log10(base_scalar) / 3.0).floor * 3))
+                    end
       to(RubyUnits::Unit.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
     end
 
@@ -1551,11 +1547,11 @@ module RubyUnits
       top.scan(TOP_REGEX).each do |item|
         n = item[1].to_i
         x = "#{item[0]} "
-        case
-        when n >= 0
+        if n >= 0
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) { x * n }
-        when n.negative?
-          bottom = "#{bottom} #{x * -n}"; top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
+        elsif n.negative?
+          bottom = "#{bottom} #{x * -n}"
+          top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
         end
       end
       if bottom
