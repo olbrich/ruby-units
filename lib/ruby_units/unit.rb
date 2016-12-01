@@ -203,6 +203,7 @@ module RubyUnits
     def self.redefine!(name)
       raise ArgumentError, 'A block is required to redefine a unit' unless block_given?
       unit_definition = definition(name)
+      raise(ArgumentError, "'#{name}' Unit not recognized") unless unit_definition
       yield unit_definition
       @@definitions.delete("<#{name}>")
       define(unit_definition)
