@@ -286,7 +286,7 @@ module RubyUnits
       num = []
       den = []
       combined.each do |key, value|
-        if value.positive?
+        if value >= 0
           value.times { num << key }
         elsif value.negative?
           value.abs.times { den << key }
@@ -1001,7 +1001,7 @@ module RubyUnits
       return inverse if n == -1
       return 1 if n.zero?
       return self if n == 1
-      return (1..(n - 1).to_i).inject(self) { |acc, _elem| acc * self } if n.positive?
+      return (1..(n - 1).to_i).inject(self) { |acc, _elem| acc * self } if n >= 0
       (1..-(n - 1).to_i).inject(self) { |acc, _elem| acc / self }
     end
 
@@ -1532,7 +1532,7 @@ module RubyUnits
 
       # more than one per.  I.e., "1 m/s/s"
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s[02-9]/).size.positive?
+      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string =~ /\s[02-9]/
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
       top.scan(TOP_REGEX).each do |item|
         n = item[1].to_i
