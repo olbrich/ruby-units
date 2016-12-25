@@ -6,7 +6,7 @@ module Math
   alias unit_sqrt sqrt
   # @return [Numeric]
   def sqrt(n)
-    if RubyUnits::Unit === n
+    if n.is_a?(RubyUnits::Unit)
       (n**Rational(1, 2)).to_unit
     else
       unit_sqrt(n)

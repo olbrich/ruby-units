@@ -1036,8 +1036,7 @@ module RubyUnits
         r = ((x / n) * (n - 1)).to_int
         r.times { den.delete_at(den.index(item)) }
       end
-      q = @scalar.negative? ? -1**Rational(1, n) * @scalar.abs**Rational(1, n) : @scalar**Rational(1, n)
-      RubyUnits::Unit.new(scalar: q, numerator: num, denominator: den)
+      RubyUnits::Unit.new(scalar: @scalar**Rational(1, n), numerator: num, denominator: den)
     end
 
     # returns inverse of Unit (1/unit)
