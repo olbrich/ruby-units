@@ -288,7 +288,7 @@ module RubyUnits
       combined.each do |key, value|
         if value >= 0
           value.times { num << key }
-        elsif value.negative?
+        elsif value < 0
           value.abs.times { den << key }
         end
       end
@@ -530,7 +530,7 @@ module RubyUnits
         raise ArgumentError, 'Invalid Unit Format'
       end
       update_base_scalar
-      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar.negative?
+      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar < 0
       unary_unit = units || ''
       if options.first.instance_of?(String)
         _opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
@@ -1017,7 +1017,7 @@ module RubyUnits
       raise ArgumentError, 'Exponent must an Integer' unless n.is_a?(Integer)
       raise ArgumentError, '0th root undefined' if n.zero?
       return self if n == 1
-      return root(n.abs).inverse if n.negative?
+      return root(n.abs).inverse if n < 0
 
       vec = unit_signature_vector
       vec = vec.map { |x| x % n }
@@ -1169,17 +1169,37 @@ module RubyUnits
       num                = @numerator.clone.compact
       den                = @denominator.clone.compact
 
-      unless @numerator == UNITY_ARRAY
+      unless num == UNITY_ARRAY
         definitions = num.map { |element| RubyUnits::Unit.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        definitions = if definitions.respond_to? :chunk_while
+                        definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+                      else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
+                        result = []
+                        enumerator = definitions.to_enum
+                        loop do
+                          first = enumerator.next
+                          result << (first.prefix? ? [first, enumerator.next] : [first])
+                        end
+                        result
+                      end
         output_numerator = definitions.map { |element| element.map(&:display_name).join }
       end
 
-      unless @denominator == UNITY_ARRAY
+      unless den == UNITY_ARRAY
         definitions = den.map { |element| RubyUnits::Unit.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        definitions = if definitions.respond_to? :chunk_while
+                        definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+                      else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
+                        result = []
+                        enumerator = definitions.to_enum
+                        loop do
+                          first = enumerator.next
+                          result << (first.prefix? ? [first, enumerator.next] : [first])
+                        end
+                        result
+                      end
         output_denominator = definitions.map { |element| element.map(&:display_name).join }
       end
 
@@ -1539,7 +1559,7 @@ module RubyUnits
         x = "#{item[0]} "
         if n >= 0
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) { x * n }
-        elsif n.negative?
+        elsif n < 0
           bottom = "#{bottom} #{x * -n}"
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
         end
