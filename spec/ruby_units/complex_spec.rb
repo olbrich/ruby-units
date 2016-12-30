@@ -12,8 +12,8 @@ end
 describe 'Complex Unit' do
   subject { Complex(1.0, -1.0).to_unit }
 
-  it { is_expected.to be_instance_of Unit }
-  it(:scalar) { is_expected.to be_kind_of Complex }
+  it { is_expected.to be_a Unit }
+  it { expect(subject.scalar).to be_a Complex }
 
   it { is_expected.to eq('1-1i'.to_unit) }
   it { is_expected.to be === '1-1i'.to_unit }

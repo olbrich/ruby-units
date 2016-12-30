@@ -4,7 +4,7 @@ describe Math do
   describe '#sqrt' do
     specify { expect(Math.sqrt(RubyUnits::Unit.new('1 mm^6'))).to eq(RubyUnits::Unit.new('1 mm^3')) }
     specify { expect(Math.sqrt(4)).to eq(2) }
-    specify { expect(Math.sqrt(RubyUnits::Unit.new('-9 mm^2'))).to be_kind_of(Complex) }
+    specify { expect(Math.sqrt(RubyUnits::Unit.new('-9 mm^2')).scalar).to be_kind_of(Complex) }
   end
 
   describe '#cbrt' do
