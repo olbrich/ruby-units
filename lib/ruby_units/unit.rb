@@ -426,15 +426,6 @@ module RubyUnits
     # @return [String]
     attr_accessor :unit_name
 
-    # needed to make complex units play nice -- otherwise not detected as a complex_generic
-    # @param [Class]
-    # @return [Boolean]
-    def kind_of?(klass)
-      # rubocop:disable Style/ClassCheck
-      scalar.kind_of?(klass)
-      # rubocop:enable Style/ClassCheck
-    end
-
     # Used to copy one unit to another
     # @param [Unit] from Unit to copy definition from
     # @return [Unit]

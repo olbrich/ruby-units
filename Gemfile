@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby RUBY_VERSION
+
 group :development do
   gem 'bundler', '~> 1.0'
   gem 'guard-rspec'
