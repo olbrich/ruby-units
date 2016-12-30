@@ -1,5 +1,7 @@
 Change Log for Ruby-units
 =========================
+2016-12-28  2.1.0   * add support for ruby 2.4.0
+                    * allow configuration for optional separator on output
 2015-11-07  2.0.0   * remove support for ruby versions less than 2.0
                     * remove `.unit` and `.u` from String
                     * remove `.unit` from Date
