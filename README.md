@@ -259,6 +259,21 @@ gem 'ruby-units', require: 'ruby_units/namespaced'
 
 Note: when using the namespaced version, the Unit.new('unit string') helper will not be defined.
 
+### Configuration
+
+Configuration options can be set like:
+
+```
+RubyUnits.configure do |config|
+  config.separator = false
+end
+```
+
+Currently there is only one configuration you can set:
+
+1. separator (true/false): should a space be used to separate the scalar from the unit part during output.
+
+
 ### NOTES
 
 #### Mathn
@@ -266,6 +281,7 @@ Note: when using the namespaced version, the Unit.new('unit string') helper will
 Note that the current implementation of ruby-units requires 'mathn' from the ruby standard library.
 This tends to change the behavior of integer math in ways that many people do not expect, and can be the source
 of numerous bugs and odd behaviors.  If you encounter what appears to be a bug in your code that seems to be related
+
 to the use of ruby-units, try to reproduce the bug by just including 'mathn' by itself.
 
 If you identify a bug in a gem or code that uses mathn, please file a bug report or create a pull request to fix it.

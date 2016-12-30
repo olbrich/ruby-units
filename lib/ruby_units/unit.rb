@@ -635,16 +635,17 @@ module RubyUnits
     def to_s(target_units = nil)
       out = @output[target_units]
       return out if out
+      separator = RubyUnits.configuration.separator
       case target_units
       when :ft
         inches = convert_to('in').scalar.to_int
         out    = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
       when :lbs
         ounces = convert_to('oz').scalar.to_int
-        out    = "#{(ounces / 16).truncate} lbs, #{(ounces % 16).round} oz"
+        out    = "#{(ounces / 16).truncate}#{separator}lbs, #{(ounces % 16).round}#{separator}oz"
       when :stone
         pounds = convert_to('lbs').scalar.to_int
-        out = "#{(pounds / 14).truncate} stone, #{(pounds % 14).round} lb"
+        out = "#{(pounds / 14).truncate}#{separator}stone, #{(pounds % 14).round}#{separator}lb"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
@@ -654,7 +655,7 @@ module RubyUnits
                   if $2 # unit specified, need to convert
                     convert_to($2).to_s($1)
                   else
-                    "#{$1 % @scalar} #{$2 || units}".strip
+                    "#{$1 % @scalar}#{separator}#{$2 || units}".strip
                   end
                 rescue # parse it like a strftime format string
                   (DateTime.new(0) + self).strftime(target_units)
@@ -667,9 +668,9 @@ module RubyUnits
       else
         out = case @scalar
               when Rational, Complex
-                "#{@scalar} #{units}"
+                "#{@scalar}#{separator}#{units}"
               else
-                "#{'%g' % @scalar} #{units}"
+                "#{'%g' % @scalar}#{separator}#{units}"
               end.strip
       end
       @output[target_units] = out
