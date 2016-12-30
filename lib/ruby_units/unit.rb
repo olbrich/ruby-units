@@ -286,9 +286,9 @@ module RubyUnits
       num = []
       den = []
       combined.each do |key, value|
-        if value.positive?
+        if value >= 0
           value.times { num << key }
-        elsif value.negative?
+        elsif value < 0
           value.abs.times { den << key }
         end
       end
@@ -530,7 +530,7 @@ module RubyUnits
         raise ArgumentError, 'Invalid Unit Format'
       end
       update_base_scalar
-      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar.negative?
+      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar < 0
       unary_unit = units || ''
       if options.first.instance_of?(String)
         _opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
@@ -1001,7 +1001,7 @@ module RubyUnits
       return inverse if n == -1
       return 1 if n.zero?
       return self if n == 1
-      return (1..(n - 1).to_i).inject(self) { |acc, _elem| acc * self } if n.positive?
+      return (1..(n - 1).to_i).inject(self) { |acc, _elem| acc * self } if n >= 0
       (1..-(n - 1).to_i).inject(self) { |acc, _elem| acc / self }
     end
 
@@ -1017,7 +1017,7 @@ module RubyUnits
       raise ArgumentError, 'Exponent must an Integer' unless n.is_a?(Integer)
       raise ArgumentError, '0th root undefined' if n.zero?
       return self if n == 1
-      return root(n.abs).inverse if n.negative?
+      return root(n.abs).inverse if n < 0
 
       vec = unit_signature_vector
       vec = vec.map { |x| x % n }
@@ -1036,8 +1036,7 @@ module RubyUnits
         r = ((x / n) * (n - 1)).to_int
         r.times { den.delete_at(den.index(item)) }
       end
-      q = @scalar.negative? ? -1**Rational(1, n) * @scalar.abs**Rational(1, n) : @scalar**Rational(1, n)
-      RubyUnits::Unit.new(scalar: q, numerator: num, denominator: den)
+      RubyUnits::Unit.new(scalar: @scalar**Rational(1, n), numerator: num, denominator: den)
     end
 
     # returns inverse of Unit (1/unit)
@@ -1170,17 +1169,43 @@ module RubyUnits
       num                = @numerator.clone.compact
       den                = @denominator.clone.compact
 
-      unless @numerator == UNITY_ARRAY
+      unless num == UNITY_ARRAY
         definitions = num.map { |element| RubyUnits::Unit.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        # there is a bug in jruby 9.1.6.0's implementation of chunk_while
+        # see https://github.com/jruby/jruby/issues/4410
+        # TODO: fix this after jruby fixes their bug.
+        definitions = if definitions.respond_to?(:chunk_while) && RUBY_ENGINE != 'jruby'
+                        definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+                      else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
+                        result = []
+                        enumerator = definitions.to_enum
+                        loop do
+                          first = enumerator.next
+                          result << (first.prefix? ? [first, enumerator.next] : [first])
+                        end
+                        result
+                      end
         output_numerator = definitions.map { |element| element.map(&:display_name).join }
       end
 
-      unless @denominator == UNITY_ARRAY
+      unless den == UNITY_ARRAY
         definitions = den.map { |element| RubyUnits::Unit.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        # there is a bug in jruby 9.1.6.0's implementation of chunk_while
+        # see https://github.com/jruby/jruby/issues/4410
+        # TODO: fix this after jruby fixes their bug.
+        definitions = if definitions.respond_to?(:chunk_while) && RUBY_ENGINE != 'jruby'
+                        definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+                      else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
+                        result = []
+                        enumerator = definitions.to_enum
+                        loop do
+                          first = enumerator.next
+                          result << (first.prefix? ? [first, enumerator.next] : [first])
+                        end
+                        result
+                      end
         output_denominator = definitions.map { |element| element.map(&:display_name).join }
       end
 
@@ -1533,14 +1558,14 @@ module RubyUnits
 
       # more than one per.  I.e., "1 m/s/s"
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.scan(/\s[02-9]/).size.positive?
+      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string =~ /\s[02-9]/
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
       top.scan(TOP_REGEX).each do |item|
         n = item[1].to_i
         x = "#{item[0]} "
         if n >= 0
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) { x * n }
-        elsif n.negative?
+        elsif n < 0
           bottom = "#{bottom} #{x * -n}"
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
         end

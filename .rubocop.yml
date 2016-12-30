@@ -1,6 +1,6 @@
 inherit_from: .rubocop_todo.yml
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.2
   Exclude:
     - ruby-units.gemspec
     - bin/*

@@ -230,7 +230,7 @@ end
 
 ### Namespaced Class
 
-Sometimes the default class 'Unit' may conflict with other gems or applications. Internally ruby-units defines itself using the RubyUnits namespace. The actual class of a unit is the RubyUnits::Unit. For simplicity and backwards compatiblity, the '::Unit' class is defined as an alias to '::RubyUnits::Unit'.
+Sometimes the default class 'Unit' may conflict with other gems or applications. Internally ruby-units defines itself using the RubyUnits namespace. The actual class of a unit is the RubyUnits::Unit. For simplicity and backwards compatibility, the '::Unit' class is defined as an alias to '::RubyUnits::Unit'.
 
 To load ruby-units without this alias...
 
@@ -245,3 +245,21 @@ gem 'ruby-units', require: 'ruby_units/namespaced'
 ```
 
 Note: when using the namespaced version, the Unit.new('unit string') helper will not be defined.
+
+### NOTES
+
+#### Mathn
+
+Note that the current implementation of ruby-units requires 'mathn' from the ruby standard library.
+This tends to change the behavior of integer math in ways that many people do not expect, and can be the source
+of numerous bugs and odd behaviors.  If you encounter what appears to be a bug in your code that seems to be related
+to the use of ruby-units, try to reproduce the bug by just including 'mathn' by itself.
+
+If you identify a bug in a gem or code that uses mathn, please file a bug report or create a pull request to fix it.
+
+#### Performance vs. Accuracy
+
+Ruby units was originally intended to provide a robust and accurate way to do arbitrary unit conversions.  
+In some cases, these conversions can result in the creation and garbage collection of a lot of intermediate objects during
+calculations.  This in turn can have a negative impact on performance.  The design of ruby-units has emphasized accuracy
+over speed.  YMMV if you are doing a lot of math involving units. 
