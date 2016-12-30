@@ -6,7 +6,6 @@
 #       config.separator = false
 #     end
 module RubyUnits
-
   class << self
     attr_writer :configuration
   end
@@ -23,8 +22,8 @@ module RubyUnits
     yield configuration
   end
 
+  # holds actual configuration values for RubyUnits
   class Configuration
-
     # used to separate the scalar from the unit when generating output.
     # set to nil to prevent adding a space to the string representation of a unit
     # separators other than ' ' and '' may work, but you may encounter problems

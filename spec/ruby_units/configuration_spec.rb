@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe RubyUnits::Configuration do
-
   context '.separator is true' do
     it 'has a space between the scalar and the unit' do
       expect(RubyUnits::Unit.new('1 m').to_s).to eq '1 m'
