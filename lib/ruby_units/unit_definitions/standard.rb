@@ -588,9 +588,9 @@ RubyUnits::Unit.define('degree') do |deg|
   deg.aliases       = %w(deg degree degrees)
 end
 
-RubyUnits::Unit.define('grad') do |grad|
+RubyUnits::Unit.define('gon') do |grad|
   grad.definition   = RubyUnits::Unit.new(Math::PI / 200.0, 'radian')
-  grad.aliases      = %w(grad gradian grads)
+  grad.aliases      = %w(gon grad gradian grads)
 end
 
 # rotation

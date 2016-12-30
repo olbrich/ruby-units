@@ -1,5 +1,6 @@
 Change Log for Ruby-units
 =========================
+                    * Fix issue #105 -- change 'grad' to 'gon'
 2015-11-07  2.0.0   * remove support for ruby versions less than 2.0
                     * remove `.unit` and `.u` from String
                     * remove `.unit` from Date
