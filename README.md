@@ -118,6 +118,7 @@ Unit.new('1.5 mm').to_s("%0.2f")  # "1.50 mm".  Enter any valid format
 Unit.new('1.5 mm').to_s("in")     # converts to inches before printing
 Unit.new("2 m").to_s(:ft)         # returns 6'7"
 Unit.new("100 kg").to_s(:lbs)     # returns 220 lbs, 7 oz
+Unit.new("100 kg").to_s(:stone)   # returns 15 stone, 10 lb
 ```
 
 Time Helpers
@@ -228,6 +229,18 @@ Unit.redefine!("cup") do |cup|
 end
 ```
 
+### Useful methods
+
+1. `scalar` will return the numeric portion of the unit without the attached units
+2. `base_scalar` will return the scalar in base units (SI)
+3. `units` will return the name of the units (without the scalar)
+4. `base` will return the unit converted to base units (SI)
+
+### Storing in a database
+
+Units can be stored in a database as either the string representation or in two separate columns defining the scalar and the units.
+Note that if sorting by units is desired you will want to ensure that you are storing the scalars in a consistent unit (i.e, the base units).
+
 ### Namespaced Class
 
 Sometimes the default class 'Unit' may conflict with other gems or applications. Internally ruby-units defines itself using the RubyUnits namespace. The actual class of a unit is the RubyUnits::Unit. For simplicity and backwards compatibility, the '::Unit' class is defined as an alias to '::RubyUnits::Unit'.
@@ -262,4 +275,4 @@ If you identify a bug in a gem or code that uses mathn, please file a bug report
 Ruby units was originally intended to provide a robust and accurate way to do arbitrary unit conversions.  
 In some cases, these conversions can result in the creation and garbage collection of a lot of intermediate objects during
 calculations.  This in turn can have a negative impact on performance.  The design of ruby-units has emphasized accuracy
-over speed.  YMMV if you are doing a lot of math involving units. 
+over speed.  YMMV if you are doing a lot of math involving units.
