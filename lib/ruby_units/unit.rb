@@ -1172,7 +1172,10 @@ module RubyUnits
       unless num == UNITY_ARRAY
         definitions = num.map { |element| RubyUnits::Unit.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = if definitions.respond_to? :chunk_while
+        # there is a bug in jruby 9.1.6.0's implementation of chunk_while
+        # see https://github.com/jruby/jruby/issues/4410
+        # TODO: fix this after jruby fixes their bug.
+        definitions = if definitions.respond_to?(:chunk_while) && RUBY_ENGINE != 'jruby'
                         definitions.chunk_while { |defn, _| defn.prefix? }.to_a
                       else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
                         result = []
@@ -1189,7 +1192,10 @@ module RubyUnits
       unless den == UNITY_ARRAY
         definitions = den.map { |element| RubyUnits::Unit.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = if definitions.respond_to? :chunk_while
+        # there is a bug in jruby 9.1.6.0's implementation of chunk_while
+        # see https://github.com/jruby/jruby/issues/4410
+        # TODO: fix this after jruby fixes their bug.
+        definitions = if definitions.respond_to?(:chunk_while) && RUBY_ENGINE != 'jruby'
                         definitions.chunk_while { |defn, _| defn.prefix? }.to_a
                       else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
                         result = []
