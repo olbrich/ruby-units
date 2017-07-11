@@ -587,23 +587,23 @@ module RubyUnits
 
       num = []
       den = []
-      q   = 1
-      @numerator.compact.each do |unit|
-        if @@prefix_values[unit]
-          q *= @@prefix_values[unit]
+      q   = Rational(1)
+      @numerator.compact.each do |num_unit|
+        if @@prefix_values[num_unit]
+          q *= @@prefix_values[num_unit]
         else
-          q *= @@unit_values[unit][:scalar] if @@unit_values[unit]
-          num << @@unit_values[unit][:numerator] if @@unit_values[unit] && @@unit_values[unit][:numerator]
-          den << @@unit_values[unit][:denominator] if @@unit_values[unit] && @@unit_values[unit][:denominator]
+          q *= @@unit_values[num_unit][:scalar] if @@unit_values[num_unit]
+          num << @@unit_values[num_unit][:numerator] if @@unit_values[num_unit] && @@unit_values[num_unit][:numerator]
+          den << @@unit_values[num_unit][:denominator] if @@unit_values[num_unit] && @@unit_values[num_unit][:denominator]
         end
       end
-      @denominator.compact.each do |unit|
-        if @@prefix_values[unit]
-          q /= @@prefix_values[unit]
+      @denominator.compact.each do |num_unit|
+        if @@prefix_values[num_unit]
+          q /= @@prefix_values[num_unit]
         else
-          q /= @@unit_values[unit][:scalar] if @@unit_values[unit]
-          den << @@unit_values[unit][:numerator] if @@unit_values[unit] && @@unit_values[unit][:numerator]
-          num << @@unit_values[unit][:denominator] if @@unit_values[unit] && @@unit_values[unit][:denominator]
+          q /= @@unit_values[num_unit][:scalar] if @@unit_values[num_unit]
+          den << @@unit_values[num_unit][:numerator] if @@unit_values[num_unit] && @@unit_values[num_unit][:numerator]
+          num << @@unit_values[num_unit][:denominator] if @@unit_values[num_unit] && @@unit_values[num_unit][:denominator]
         end
       end
 
@@ -833,7 +833,7 @@ module RubyUnits
               RubyUnits::Unit.new(scalar: (other.scalar + convert_to(other.temperature_scale).scalar), numerator: other.numerator, denominator: other.denominator, signature: other.signature)
             end
           else
-            @q ||= ((@@cached_units[units].scalar / @@cached_units[units].base_scalar) rescue units.to_unit.to_base.scalar)
+            @q ||= (Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar) rescue units.to_unit.to_base.scalar)
             RubyUnits::Unit.new(scalar: (base_scalar + other.base_scalar) * @q, numerator: @numerator, denominator: @denominator, signature: @signature)
           end
         else
@@ -870,7 +870,7 @@ module RubyUnits
           elsif other.temperature?
             raise ArgumentError, 'Cannot subtract a temperature from a differential degree unit'
           else
-            @q ||= ((@@cached_units[units].scalar / @@cached_units[units].base_scalar) rescue (units.to_unit.scalar / units.to_unit.to_base.scalar))
+            @q ||= (Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar) rescue Rational(units.to_unit.scalar, units.to_unit.to_base.scalar))
             RubyUnits::Unit.new(scalar: (base_scalar - other.base_scalar) * @q, numerator: @numerator, denominator: @denominator, signature: @signature)
           end
         else
@@ -914,12 +914,12 @@ module RubyUnits
       when Unit
         raise ZeroDivisionError if other.zero?
         raise ArgumentError, 'Cannot divide with temperatures' if [other, self].any?(&:temperature?)
-        opts = RubyUnits::Unit.eliminate_terms(@scalar / other.scalar, @numerator + other.denominator, @denominator + other.numerator)
+        opts = RubyUnits::Unit.eliminate_terms(Rational(@scalar, other.scalar), @numerator + other.denominator, @denominator + other.numerator)
         opts[:signature] = @signature - other.signature
         RubyUnits::Unit.new(opts)
       when Numeric
         raise ZeroDivisionError if other.zero?
-        RubyUnits::Unit.new(scalar: @scalar / other, numerator: @numerator, denominator: @denominator, signature: @signature)
+        RubyUnits::Unit.new(scalar: Rational(@scalar, other), numerator: @numerator, denominator: @denominator, signature: @signature)
       else
         x, y = coerce(other)
         y / x
@@ -972,11 +972,11 @@ module RubyUnits
         return power(other)
       when Float
         return self**other.to_i if other == other.to_i
-        valid = (1..9).map { |x| 1 / x }
+        valid = (1..9).map { |n| Rational(1, n) }
         raise ArgumentError, 'Not a n-th root (1..9), use 1/n' unless valid.include? other.abs
-        return root((1 / other).to_int)
+        return root(Rational(1, other).to_int)
       when Complex
-        raise ArgumentError, 'exponentiation of complex numbers is not yet supported.'
+        raise ArgumentError, 'exponentiation of complex numbers is not supported.'
       else
         raise ArgumentError, 'Invalid Exponent'
       end
