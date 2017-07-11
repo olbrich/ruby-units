@@ -914,12 +914,16 @@ module RubyUnits
       when Unit
         raise ZeroDivisionError if other.zero?
         raise ArgumentError, 'Cannot divide with temperatures' if [other, self].any?(&:temperature?)
-        opts = RubyUnits::Unit.eliminate_terms(Rational(@scalar, other.scalar), @numerator + other.denominator, @denominator + other.numerator)
+        sc = Rational(@scalar, other.scalar)
+        sc = sc.numerator if sc.denominator == 1
+        opts = RubyUnits::Unit.eliminate_terms(sc, @numerator + other.denominator, @denominator + other.numerator)
         opts[:signature] = @signature - other.signature
         RubyUnits::Unit.new(opts)
       when Numeric
         raise ZeroDivisionError if other.zero?
-        RubyUnits::Unit.new(scalar: Rational(@scalar, other), numerator: @numerator, denominator: @denominator, signature: @signature)
+        sc = Rational(@scalar, other)
+        sc = sc.numerator if sc.denominator == 1
+        RubyUnits::Unit.new(scalar: sc, numerator: @numerator, denominator: @denominator, signature: @signature)
       else
         x, y = coerce(other)
         y / x
