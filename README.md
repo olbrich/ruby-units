@@ -7,6 +7,13 @@ Kevin C. Olbrich, Ph.D.
 
 Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/ruby-units)
 
+Prerelease Notes
+----------------
+
+This is an experimental version that removes 'mathn' as a dependency.  Mathn alters the behavior of some mathematical operators, which
+frequently causes unexpected behavior and can be a source of difficult to diagnose bugs.  Mathn is also scheduled to be removed from
+the Ruby standard library.
+
 Introduction
 ------------
 
@@ -275,16 +282,6 @@ Currently there is only one configuration you can set:
 
 
 ### NOTES
-
-#### Mathn
-
-Note that the current implementation of ruby-units requires 'mathn' from the ruby standard library.
-This tends to change the behavior of integer math in ways that many people do not expect, and can be the source
-of numerous bugs and odd behaviors.  If you encounter what appears to be a bug in your code that seems to be related
-
-to the use of ruby-units, try to reproduce the bug by just including 'mathn' by itself.
-
-If you identify a bug in a gem or code that uses mathn, please file a bug report or create a pull request to fix it.
 
 #### Performance vs. Accuracy
 

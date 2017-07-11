@@ -45,7 +45,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "https://github.com/olbrich/ruby-units".freeze
   s.licenses = ["MIT".freeze]
-  s.rubygems_version = "2.6.8".freeze
+  s.rubygems_version = "2.6.10".freeze
   s.summary = "A class that performs unit conversions and unit math".freeze
 
   if s.respond_to? :specification_version then
@@ -75,4 +75,3 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<terminal-notifier-guard>.freeze, [">= 0"])
   end
 end
-
