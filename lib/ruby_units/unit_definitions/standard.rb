@@ -122,7 +122,7 @@ end
 # calculations
 RubyUnits::Unit.define('pound') do |pound|
   pound.definition = RubyUnits::Unit.new(Rational(45_359_237, 1e8), 'kg')
-  pound.aliases    = %w(lbs lb lbm pound-mass pound pounds #)
+  pound.aliases    = %w(lbs lb lbm lbr pound-mass pound pounds #)
 end
 
 RubyUnits::Unit.define('ounce') do |ounce|
