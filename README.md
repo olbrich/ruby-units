@@ -10,7 +10,7 @@ Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/r
 Prerelease Notes
 ----------------
 
-This is an experimental version that removes 'mathn' as a dependency.  Mathn alters the behavior of some mathematical operators, which
+This version removes 'mathn' as a dependency.  Mathn alters the behavior of some mathematical operators, which
 frequently causes unexpected behavior and can be a source of difficult to diagnose bugs.  Mathn is also scheduled to be removed from
 the Ruby standard library.
 
