@@ -896,7 +896,7 @@ describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
-      it { is_expected.to be_an Integer }
+      it { is_expected.to eq 60 }
     end
 
     describe '#units' do
@@ -1348,8 +1348,9 @@ describe Unit do
   describe '#define' do
     describe 'a new unit' do
       before(:each) do
+        # do this because the unit is not defined at the time this file is parsed, so it fails
         @jiffy = Unit.define('jiffy') do |jiffy|
-          jiffy.scalar = (1 / 100)
+          jiffy.scalar = Rational(1, 100)
           jiffy.aliases = %w(jif)
           jiffy.numerator = ['<second>']
           jiffy.kind = :time
@@ -1361,7 +1362,6 @@ describe Unit do
       end
 
       describe "RubyUnits::Unit.new('1e6 jiffy')" do
-        # do this because the unit is not defined at the time this file is parsed, so it fails
         subject { RubyUnits::Unit.new('1e6 jiffy') }
 
         it { is_expected.to be_a Numeric }
@@ -1857,9 +1857,9 @@ describe 'Unit Math' do
         it { expect(subject**-1).to eq(1 / subject) }
         it { expect(subject**2).to eq(RubyUnits::Unit.new('1 m^2')) }
         it { expect(subject**-2).to eq(RubyUnits::Unit.new('1 1/m^2')) }
-        specify { expect { subject**(1 / 2) }.to raise_error(ArgumentError, 'Illegal root') }
+        specify { expect { subject**Rational(1, 2) }.to raise_error(ArgumentError, 'Illegal root') }
         # because 1 m^(1/2) doesn't make any sense
-        specify { expect { subject**Complex(1, 1) }.to raise_error(ArgumentError, 'exponentiation of complex numbers is not yet supported.') }
+        specify { expect { subject**Complex(1, 1) }.to raise_error(ArgumentError, 'exponentiation of complex numbers is not supported.') }
         specify { expect { subject**RubyUnits::Unit.new('1 m') }.to raise_error(ArgumentError, 'Invalid Exponent') }
       end
 
@@ -2114,8 +2114,8 @@ describe 'Unit Math' do
 
     context '#from' do
       specify { expect(RubyUnits::Unit.new('1 day').from(Date.civil(2011, 10, 17))).to eq(Date.civil(2011, 10, 18)) }
-      specify { expect(RubyUnits::Unit.new('5 min').from(DateTime.civil(2011, 10, 21))).to eq(DateTime.civil(2011, 10, 21, 0o0, 0o5)) }
-      specify { expect(RubyUnits::Unit.new('5 min').from(Time.utc(2011, 10, 21))).to eq(Time.utc(2011, 10, 21, 0o0, 0o5)) }
+      specify { expect(RubyUnits::Unit.new('5 min').from(DateTime.civil(2011, 10, 21))).to eq(DateTime.civil(2011, 10, 21, 0, 5)) }
+      specify { expect(RubyUnits::Unit.new('5 min').from(Time.utc(2011, 10, 21))).to eq(Time.utc(2011, 10, 21, 0, 5)) }
       specify { expect { RubyUnits::Unit.new('5 min').from(nil) }.to raise_error(ArgumentError, 'Must specify a Time, Date, or DateTime') }
       specify { expect { RubyUnits::Unit.new('5 min').from('12:00') }.to raise_error(ArgumentError, 'Must specify a Time, Date, or DateTime') }
     end
