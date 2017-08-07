@@ -7,8 +7,8 @@ Kevin C. Olbrich, Ph.D.
 
 Project page: [http://github.com/olbrich/ruby-units](http://github.com/olbrich/ruby-units)
 
-Prerelease Notes
-----------------
+Notes
+-----
 
 This version removes 'mathn' as a dependency.  Mathn alters the behavior of some mathematical operators, which
 frequently causes unexpected behavior and can be a source of difficult to diagnose bugs.  Mathn is also scheduled to be removed from
