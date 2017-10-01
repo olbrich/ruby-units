@@ -9,6 +9,7 @@ group :development do
   gem 'pry'
   gem 'pry-byebug', platforms: :mri
   gem 'terminal-notifier-guard'
+  gem 'terminal-notifier'
 end
 
 group :test do

@@ -781,6 +781,14 @@ describe 'Create some simple units' do
     end
   end
 
+  describe RubyUnits::Unit.new('6/1 lbs') do
+    it { is_expected.to be_an_instance_of Unit }
+    describe '#to_s' do
+      subject { super().to_s }
+      it { is_expected.to eq '6 lbs'}
+    end
+  end
+
   # rational scalar with compound unit
   describe RubyUnits::Unit.new('1/2 kg/m') do
     it { is_expected.to be_an_instance_of Unit }
