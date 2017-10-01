@@ -8,8 +8,8 @@ group :development do
   gem 'jeweler'
   gem 'pry'
   gem 'pry-byebug', platforms: :mri
-  gem 'terminal-notifier-guard'
   gem 'terminal-notifier'
+  gem 'terminal-notifier-guard'
 end
 
 group :test do
