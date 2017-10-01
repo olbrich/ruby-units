@@ -45,7 +45,7 @@ class Time
   def +(other)
     case other
     when RubyUnits::Unit
-      other = other.convert_to('d').round.convert_to('s') if %w(y decade century).include? other.units
+      other = other.convert_to('d').round.convert_to('s') if %w[y decade century].include? other.units
       begin
         unit_add(other.convert_to('s').scalar)
       rescue RangeError
@@ -69,7 +69,7 @@ class Time
   def -(other)
     case other
     when RubyUnits::Unit
-      other = other.convert_to('d').round.convert_to('s') if %w(y decade century).include? other.units
+      other = other.convert_to('d').round.convert_to('s') if %w[y decade century].include? other.units
       begin
         unit_sub(other.convert_to('s').scalar)
       rescue RangeError

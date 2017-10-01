@@ -6,7 +6,7 @@ describe Unit.base_units do
   it 'has 14 elements' do
     expect(subject.size).to eq(14)
   end
-  %w(kilogram meter second ampere degK tempK mole candela each dollar steradian radian decibel byte).each do |u|
+  %w[kilogram meter second ampere degK tempK mole candela each dollar steradian radian decibel byte].each do |u|
     it { is_expected.to include(RubyUnits::Unit.new(u)) }
   end
 end
@@ -1331,7 +1331,7 @@ describe Unit do
       end
 
       specify { expect(@definition.name).to eq('<mph>') }
-      specify { expect(@definition.aliases).to eq(%w(mph)) }
+      specify { expect(@definition.aliases).to eq(%w[mph]) }
       specify { expect(@definition.numerator).to eq(['<meter>']) }
       specify { expect(@definition.denominator).to eq(['<second>']) }
       specify { expect(@definition.kind).to eq(:speed) }
@@ -1351,7 +1351,7 @@ describe Unit do
         # do this because the unit is not defined at the time this file is parsed, so it fails
         @jiffy = Unit.define('jiffy') do |jiffy|
           jiffy.scalar = Rational(1, 100)
-          jiffy.aliases = %w(jif)
+          jiffy.aliases = %w[jif]
           jiffy.numerator = ['<second>']
           jiffy.kind = :time
         end
@@ -1456,7 +1456,7 @@ describe Unit do
     before(:each) do
       @jiffy = Unit.define('jiffy') do |jiffy|
         jiffy.scalar = (1 / 100)
-        jiffy.aliases = %w(jif)
+        jiffy.aliases = %w[jif]
         jiffy.numerator = ['<second>']
         jiffy.kind = :time
       end
@@ -1477,7 +1477,7 @@ describe Unit do
     before(:each) do
       @jiffy = Unit.define('jiffy') do |jiffy|
         jiffy.scalar = (1 / 100)
-        jiffy.aliases = %w(jif)
+        jiffy.aliases = %w[jif]
         jiffy.numerator = ['<second>']
         jiffy.kind = :time
       end
@@ -1721,7 +1721,7 @@ describe 'Unit Math' do
       end
 
       context 'between a unit and coerceable types' do
-        specify { expect(RubyUnits::Unit.new('10 kg') + %w(1 kg)).to eq(RubyUnits::Unit.new('11 kg')) }
+        specify { expect(RubyUnits::Unit.new('10 kg') + %w[1 kg]).to eq(RubyUnits::Unit.new('11 kg')) }
         specify { expect(RubyUnits::Unit.new('10 kg') + '1 kg').to eq(RubyUnits::Unit.new('11 kg')) }
       end
 
@@ -1756,7 +1756,7 @@ describe 'Unit Math' do
       end
 
       context 'between a unit and coerceable types' do
-        specify { expect(RubyUnits::Unit.new('10 kg') - %w(1 kg)).to eq(RubyUnits::Unit.new('9 kg')) }
+        specify { expect(RubyUnits::Unit.new('10 kg') - %w[1 kg]).to eq(RubyUnits::Unit.new('9 kg')) }
         specify { expect(RubyUnits::Unit.new('10 kg') - '1 kg').to eq(RubyUnits::Unit.new('9 kg')) }
       end
 
@@ -1791,7 +1791,7 @@ describe 'Unit Math' do
       end
 
       context 'between a unit and coerceable types' do
-        specify { expect(RubyUnits::Unit.new('10 kg') * %w(1 kg)).to eq(RubyUnits::Unit.new('10 kg^2')) }
+        specify { expect(RubyUnits::Unit.new('10 kg') * %w[1 kg]).to eq(RubyUnits::Unit.new('10 kg^2')) }
         specify { expect(RubyUnits::Unit.new('10 kg') * '1 kg').to eq(RubyUnits::Unit.new('10 kg^2')) }
       end
 
@@ -1818,7 +1818,7 @@ describe 'Unit Math' do
       end
 
       context 'between a unit and coerceable types' do
-        specify { expect(RubyUnits::Unit.new('10 kg^2') / %w(1 kg)).to eq(RubyUnits::Unit.new('10 kg')) }
+        specify { expect(RubyUnits::Unit.new('10 kg^2') / %w[1 kg]).to eq(RubyUnits::Unit.new('10 kg')) }
         specify { expect(RubyUnits::Unit.new('10 kg^2') / '1 kg').to eq(RubyUnits::Unit.new('10 kg')) }
       end
 

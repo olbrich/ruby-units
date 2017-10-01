@@ -4,22 +4,22 @@ describe 'temperatures' do
   describe 'redfine display name' do
     before(:all) do
       Unit.redefine!('tempC') do |c|
-        c.aliases = %w(tC tempC)
+        c.aliases = %w[tC tempC]
         c.display_name = 'tC'
       end
 
       Unit.redefine!('tempF') do |f|
-        f.aliases = %w(tF tempF)
+        f.aliases = %w[tF tempF]
         f.display_name = 'tF'
       end
 
       Unit.redefine!('tempR') do |f|
-        f.aliases = %w(tR tempR)
+        f.aliases = %w[tR tempR]
         f.display_name = 'tR'
       end
 
       Unit.redefine!('tempK') do |f|
-        f.aliases = %w(tK tempK)
+        f.aliases = %w[tK tempK]
         f.display_name = 'tK'
       end
     end
@@ -28,8 +28,8 @@ describe 'temperatures' do
       # define the temp units back to normal
       Unit.define('tempK') do |unit|
         unit.scalar    = 1
-        unit.numerator = %w(<tempK>)
-        unit.aliases   = %w(tempK)
+        unit.numerator = %w[<tempK>]
+        unit.aliases   = %w[tempK]
         unit.kind      = :temperature
       end
 

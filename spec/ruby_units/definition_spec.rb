@@ -16,7 +16,7 @@ describe "Unit::Definition('eV')" do
 
   describe '#aliases' do
     subject { super().aliases }
-    it { is_expected.to eq(%w(eV electron-volt)) }
+    it { is_expected.to eq(%w[eV electron-volt]) }
   end
 
   describe '#scalar' do
