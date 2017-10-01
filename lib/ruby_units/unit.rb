@@ -1,4 +1,5 @@
 # encoding: utf-8
+
 require 'date'
 # Copyright 2006-2015
 # @author Kevin C. Olbrich, Ph.D.
@@ -62,7 +63,7 @@ module RubyUnits
     RANKINE            = ['<rankine>'].freeze
     CELSIUS            = ['<celsius>'].freeze
     @@temp_regex       = nil
-    SIGNATURE_VECTOR   = %i(
+    SIGNATURE_VECTOR   = %i[
       length
       time
       temperature
@@ -73,7 +74,7 @@ module RubyUnits
       currency
       information
       angle
-    ).freeze
+    ].freeze
     @@kinds = {
       -312_078     => :elastance,
       -312_058     => :resistance,
@@ -369,7 +370,7 @@ module RubyUnits
 
     def self.temp_regex
       @@temp_regex ||= begin
-        temp_units = %w(tempK tempC tempF tempR degK degC degF degR)
+        temp_units = %w[tempK tempC tempF tempR degK degC degF degR]
         aliases = temp_units.map do |unit|
           d = RubyUnits::Unit.definition(unit)
           d && d.aliases

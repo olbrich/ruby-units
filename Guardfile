@@ -2,7 +2,7 @@
 # More info at https://github.com/guard/guard#readme
 
 ## Uncomment and set this to only include directories you want to watch
-directories %w(lib spec)
+directories %w[lib spec]
 
 ## Uncomment to clear the screen before every task
 clearing :on

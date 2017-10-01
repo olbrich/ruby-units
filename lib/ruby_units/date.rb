@@ -9,7 +9,7 @@ class Date
   def +(other)
     case other
     when RubyUnits::Unit
-      other = other.convert_to('d').round if %w(y decade century).include? other.units
+      other = other.convert_to('d').round if %w[y decade century].include? other.units
       unit_date_add(other.convert_to('day').scalar)
     else
       unit_date_add(other)
@@ -22,7 +22,7 @@ class Date
   def -(other)
     case other
     when RubyUnits::Unit
-      other = other.convert_to('d').round if %w(y decade century).include? other.units
+      other = other.convert_to('d').round if %w[y decade century].include? other.units
       unit_date_sub(other.convert_to('day').scalar)
     else
       unit_date_sub(other)
