@@ -8,6 +8,7 @@ group :development do
   gem 'jeweler'
   gem 'pry'
   gem 'pry-byebug', platforms: :mri
+  gem 'terminal-notifier'
   gem 'terminal-notifier-guard'
 end
 

@@ -496,7 +496,7 @@ module RubyUnits
         copy(options[0])
         return
       when Hash
-        @scalar      = options[0][:scalar] || 1
+        @scalar      = (options[0][:scalar] || 1)
         @numerator   = options[0][:numerator] || UNITY_ARRAY
         @denominator = options[0][:denominator] || UNITY_ARRAY
         @signature   = options[0][:signature]
@@ -631,6 +631,7 @@ module RubyUnits
     #
     # output is cached so subsequent calls for the same format will be fast
     #
+    # @note Rational scalars that are equal to an integer will be represented as integers (i.e, 6/1 => 6, 4/2 => 2, etc..)
     # @param [Symbol] target_units
     # @return [String]
     def to_s(target_units = nil)
@@ -668,8 +669,10 @@ module RubyUnits
               end
       else
         out = case @scalar
-              when Rational, Complex
+              when Complex
                 "#{@scalar}#{separator}#{units}"
+              when Rational
+                "#{@scalar == @scalar.to_i ? @scalar.to_i : @scalar}#{separator}#{units}"
               else
                 "#{'%g' % @scalar}#{separator}#{units}"
               end.strip
