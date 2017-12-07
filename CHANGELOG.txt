@@ -1,5 +1,6 @@
 Change Log for Ruby-units
 =========================
+2017-12-07  2.2.1   * fix an issue with formatting of rational scalars (see #159)
 2017-08-07  2.2.0   * add support for ruby 2.4.1
                     * drop support for ruby 2.1.0
                     * remove dependency on mathn (see #157)
