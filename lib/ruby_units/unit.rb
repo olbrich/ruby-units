@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require 'date'
 # Copyright 2006-2015
 # @author Kevin C. Olbrich, Ph.D.
@@ -334,9 +332,9 @@ module RubyUnits
         when rational
           # if it has whitespace, it will be of the form '6 1/2'
           if num =~ RATIONAL_NUMBER
-            sign = $1 == '-' ? -1 : 1
-            n = $2.to_i
-            f = Rational($3.to_i, $4.to_i)
+            sign = Regexp.last_match(1) == '-' ? -1 : 1
+            n = Regexp.last_match(2).to_i
+            f = Rational(Regexp.last_match(3).to_i, Regexp.last_match(4).to_i)
             sign * (n + f)
           else
             Rational(*num.split('/').map(&:to_i))
@@ -437,7 +435,11 @@ module RubyUnits
       @base = from.base?
       @signature   = from.signature
       @base_scalar = from.base_scalar
-      @unit_name = from.unit_name rescue nil
+      @unit_name = begin
+                     from.unit_name
+                   rescue
+                     nil
+                   end
       self
     end
 
@@ -475,7 +477,11 @@ module RubyUnits
           cached = @@cached_units[options[1]] * options[0]
           copy(cached)
         rescue
-          initialize("#{options[0]} #{(options[1].units rescue options[1])}")
+          initialize("#{options[0]} #{(begin
+                                         options[1].units
+                                       rescue
+                                         options[1]
+                                       end)}")
         end
         return
       end
@@ -583,7 +589,11 @@ module RubyUnits
         return base
       end
 
-      cached = ((@@base_unit_cache[units] * scalar) rescue nil)
+      cached = (begin
+                  (@@base_unit_cache[units] * scalar)
+                rescue
+                  nil
+                end)
       return cached if cached
 
       num = []
@@ -654,16 +664,16 @@ module RubyUnits
                 ''
               when /(%[\-+\.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
                 begin
-                  if $2 # unit specified, need to convert
-                    convert_to($2).to_s($1)
+                  if Regexp.last_match(2) # unit specified, need to convert
+                    convert_to(Regexp.last_match(2)).to_s(Regexp.last_match(1))
                   else
-                    "#{$1 % @scalar}#{separator}#{$2 || units}".strip
+                    "#{Regexp.last_match(1) % @scalar}#{separator}#{Regexp.last_match(2) || units}".strip
                   end
                 rescue # parse it like a strftime format string
                   (DateTime.new(0) + self).strftime(target_units)
                 end
               when /(\S+)/ # unit only 'mm' or '1/mm'
-                convert_to($1).to_s
+                convert_to(Regexp.last_match(1)).to_s
               else
                 raise 'unhandled case'
               end
@@ -837,7 +847,13 @@ module RubyUnits
               RubyUnits::Unit.new(scalar: (other.scalar + convert_to(other.temperature_scale).scalar), numerator: other.numerator, denominator: other.denominator, signature: other.signature)
             end
           else
-            @q ||= (Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar) rescue units.to_unit.to_base.scalar)
+            @q ||= begin
+                     begin
+                      Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar)
+                    rescue
+                      units.to_unit.to_base.scalar
+                    end
+                   end
             RubyUnits::Unit.new(scalar: (base_scalar + other.base_scalar) * @q, numerator: @numerator, denominator: @denominator, signature: @signature)
           end
         else
@@ -874,7 +890,13 @@ module RubyUnits
           elsif other.temperature?
             raise ArgumentError, 'Cannot subtract a temperature from a differential degree unit'
           else
-            @q ||= (Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar) rescue Rational(units.to_unit.scalar, units.to_unit.to_base.scalar))
+            @q ||= begin
+                     begin
+                      Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar)
+                    rescue
+                      Rational(units.to_unit.scalar, units.to_unit.to_base.scalar)
+                    end
+                   end
             RubyUnits::Unit.new(scalar: (base_scalar - other.base_scalar) * @q, numerator: @numerator, denominator: @denominator, signature: @signature)
           end
         else
@@ -1071,9 +1093,12 @@ module RubyUnits
       if (Unit === other && other.temperature?) || (String === other && other =~ /temp[CFRK]/)
         raise ArgumentError, 'Receiver is not a temperature unit' unless degree?
         start_unit = units
-        target_unit = other.units rescue other
-        unless @base_scalar
-          @base_scalar = case @@unit_map[start_unit]
+        target_unit = begin
+                        other.units
+                      rescue
+                        other
+                      end
+        @base_scalar ||= case @@unit_map[start_unit]
                          when '<tempC>'
                            @scalar + 273.15
                          when '<tempK>'
@@ -1083,7 +1108,6 @@ module RubyUnits
                          when '<tempR>'
                            @scalar * Rational(5, 9)
                          end
-        end
         q = case @@unit_map[target_unit]
             when '<tempC>'
               @base_scalar - 273.15
@@ -1316,7 +1340,11 @@ module RubyUnits
     def before(time_point = ::Time.now)
       case time_point
       when Time, Date, DateTime
-        return (time_point - self rescue time_point.to_datetime - self)
+        return (begin
+                  time_point - self
+                rescue
+                  time_point.to_datetime - self
+                end)
       else
         raise ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
@@ -1360,7 +1388,11 @@ module RubyUnits
     def from(time_point)
       case time_point
       when Time, DateTime, Date
-        (time_point + self rescue time_point.to_datetime + self)
+        (begin
+           time_point + self
+         rescue
+           time_point.to_datetime + self
+         end)
       else
         raise ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
@@ -1482,7 +1514,7 @@ module RubyUnits
     # @todo This should either be a separate class or at least a class method
     def parse(passed_unit_string = '0')
       unit_string = passed_unit_string.dup
-      unit_string = "#{$1} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
+      unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
 
       unit_string.gsub!(/[%'"#]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound')
@@ -1504,8 +1536,12 @@ module RubyUnits
       end
 
       unit_string =~ NUMBER_REGEX
-      unit = @@cached_units[$2]
-      mult = ($1.empty? ? 1.0 : $1.to_f) rescue 1.0
+      unit = @@cached_units[Regexp.last_match(2)]
+      mult = begin
+               (Regexp.last_match(1).empty? ? 1.0 : Regexp.last_match(1).to_f)
+             rescue
+               1.0
+             end
       mult = mult.to_int if mult.to_int == mult
       if unit
         copy(unit)
@@ -1571,7 +1607,7 @@ module RubyUnits
         end
       end
       if bottom
-        bottom.gsub!(BOTTOM_REGEX) { "#{$1} " * $2.to_i }
+        bottom.gsub!(BOTTOM_REGEX) { "#{Regexp.last_match(1)} " * Regexp.last_match(2).to_i }
         # Separate leading decimal from denominator, if any
         bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
       end

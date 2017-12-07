@@ -785,7 +785,7 @@ describe 'Create some simple units' do
     it { is_expected.to be_an_instance_of Unit }
     describe '#to_s' do
       subject { super().to_s }
-      it { is_expected.to eq '6 lbs'}
+      it { is_expected.to eq '6 lbs' }
     end
   end
 
@@ -1581,7 +1581,7 @@ describe 'Unit Comparisons' do
       specify { expect(RubyUnits::Unit.new('1 m')).not_to be_same_as RubyUnits::Unit.new('2 m') }
     end
 
-    specify { expect(RubyUnits::Unit.new('1 m')).not_to be === nil }
+    specify { expect(RubyUnits::Unit.new('1 m')).not_to be_nil }
   end
 
   context 'Comparisons' do
