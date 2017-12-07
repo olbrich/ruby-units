@@ -15,7 +15,7 @@ end
 group :test do
   gem 'rake'
   gem 'rspec'
-  gem 'rubocop', '= 0.49.1' # match codeclimate
+  gem 'rubocop', '~> 0.51.0' # match codeclimate
   gem 'simplecov'
   gem 'simplecov-html'
 end

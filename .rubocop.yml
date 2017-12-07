@@ -1,4 +1,3 @@
-inherit_from: .rubocop_todo.yml
 AllCops:
   TargetRubyVersion: 2.2
   Exclude:
@@ -11,4 +10,11 @@ Style/FrozenStringLiteralComment:
 Metrics/LineLength:
   Enabled: false
 Style/SingleLineBlockParams:
+  Enabled: false
+Naming/FileName:
+  Exclude:
+    - 'lib/ruby-units.rb'
+Style/FormatString:
+  Enabled: false
+Style/DateTime:
   Enabled: false
