@@ -6,10 +6,11 @@ group :development do
   gem 'bundler', '~> 1.0'
   gem 'guard-rspec'
   gem 'jeweler'
-  gem 'pry'
+  gem 'parslet'
   gem 'pry-byebug', platforms: :mri
-  gem 'terminal-notifier'
+  gem 'pry'
   gem 'terminal-notifier-guard'
+  gem 'terminal-notifier'
 end
 
 group :test do

@@ -1499,6 +1499,14 @@ module RubyUnits
       @signature
     end
 
+
+    # @param string [String] the string to parse into a Unit
+    # @return [Unit]
+    # @return [nil]
+    def _parse(string = '0')
+      RubyUnits::Unit.new(RubyUnits::Parser.new(string).parse)
+    end
+
     # parse a string into a unit object.
     # Typical formats like :
     #  "5.6 kg*m/s^2"

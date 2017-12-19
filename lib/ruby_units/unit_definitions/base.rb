@@ -1,4 +1,7 @@
 # seed the cache
+
+require_relative '../parsers/metric'
+
 RubyUnits::Unit.new('1')
 
 RubyUnits::Unit.define('meter') do |unit|
