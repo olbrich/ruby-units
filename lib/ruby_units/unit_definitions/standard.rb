@@ -71,7 +71,7 @@ end
 
 RubyUnits::Unit.define('pica') do |pica|
   pica.definition = RubyUnits::Unit.new('1/72 ft')
-  pica.aliases    = %w[P pica picas]
+  pica.aliases    = %w[pica picas]
 end
 
 RubyUnits::Unit.define('point') do |point|
