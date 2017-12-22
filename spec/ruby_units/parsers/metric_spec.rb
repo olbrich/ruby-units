@@ -107,6 +107,7 @@ RSpec.describe RubyUnits::Parsers::Metric do
     expect(subject.unit_atom).to parse('m')
     expect(subject.unit_atom).to parse('mm')
     expect(subject.unit_atom).to parse('1 m')
+    expect(subject.unit_atom).to parse('1,000 m')
     expect(subject.unit_atom).to parse('1 mm')
     expect(subject.unit_atom).to parse('1 mm^-2')
     expect(subject.unit_atom).to parse('1 mm^0.5')
