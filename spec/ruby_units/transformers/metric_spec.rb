@@ -43,5 +43,19 @@ RSpec.describe RubyUnits::Transformers::Metric do
     expect(subject.apply(result)).to eq RubyUnits::Unit.new('-1-3i rad')
   end
 
+  it 'constructs a unit from a parse tree' do
+    result = parser.parse('1 ft x lb')
+    expect(subject.apply(result)).to eq RubyUnits::Unit.new('1 ft*lb')
+  end
+
+  it 'constructs a unit from a foot-in' do
+    result = parser.parse('6 foot 4')
+    expect(subject.apply(result)).to eq RubyUnits::Unit.new('6 ft') + RubyUnits::Unit.new('4 in')
+  end
+
+  it 'constructs a unit from a lbs-oz' do
+    result = parser.parse('10 lbs 8 oz')
+    expect(subject.apply(result)).to eq RubyUnits::Unit.new('10 lbs') + RubyUnits::Unit.new('8 oz')
+  end
 
 end

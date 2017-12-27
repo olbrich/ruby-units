@@ -29,7 +29,7 @@ module RubyUnits
       rule(:integer_with_separators) { (sign? >> non_zero_digit >> digit.repeat(0, 2) >> (separators >> digit.repeat(3, 3)).repeat(1)).as(:integer_with_separators) }
       rule(:integer) { (sign? >> unsigned_integer).as(:integer) }
       rule(:mixed_fraction) { (integer.as(:whole) >> (space | str('-')) >> rational.as(:fraction)).as(:mixed_fraction) }
-      rule(:mult_operator) { ((space? >> str('*') >> space?) | (space? >> str('x') >> space?) | space) }
+      rule(:mult_operator) { ((space? >> str('*') >> space?) | (space? >> str('x') >> space?) | space).as(:multiply) }
       rule(:non_zero_digit) { match['1-9'] }
       rule(:operator) { (div_operator | mult_operator).as(:operator) }
       rule(:power) { str('^') | str('**') }
@@ -46,10 +46,13 @@ module RubyUnits
       rule(:space) { str(' ') }
       rule(:unit_atom) { (scalar? >> space? >> prefix? >> unit_part >> (power >> (rational | decimal | integer).as(:power)).maybe).as(:unit) }
       rule(:unit_part) { unit_names.as(:name) >> match['\w'].absent? }
-      rule(:unit) { infix_expression(unit_atom, [operator, 1, :left]) }
+      rule(:unit) { irregular_forms | infix_expression(unit_atom, [operator, 1, :left]) }
       rule(:unsigned_integer) { zero | non_zero_digit >> digits? | integer_with_separators }
       rule(:zero) { str('0') }
-
+      rule(:irregular_forms) { feet_inches.maybe | lbs_oz.maybe | stone.maybe }
+      rule(:feet_inches) { (rational | decimal | integer).as(:ft) >> space? >> (str('feet') | str('foot') | str('ft') | str('"')) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:in) >> space? >> (str('inches') | str('inch') | str('in') | str("'")).maybe }
+      rule(:lbs_oz) { (rational | decimal | integer).as(:lbs) >> space? >> (str('pounds') | str('pound') | str('lbs') | str('lb')) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:oz) >> space? >> (str('ounces') | str('ounce') | str('oz')) }
+      rule(:stone) { (rational | decimal | integer).as(:stone) >> space? >> (str('stones') | str('stone') | str('st')) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:lbs) >> space? >> (str('pounds') | str('pound') | str('lbs') | str('lb')).maybe }
       root(:unit)
     end
   end

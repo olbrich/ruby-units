@@ -121,4 +121,27 @@ RSpec.describe RubyUnits::Parsers::Metric do
     expect(subject.unit).to parse('1 mm/s/s')
     expect(subject.unit).to parse('1 m*m/s/s')
   end
+
+  it 'parses ft-in' do
+    expect(subject.feet_inches).to parse('6ft 4in')
+    expect(subject.feet_inches).to parse('6 ft 4 in')
+    expect(subject.feet_inches).to parse('6 feet 4 inches')
+    expect(subject.feet_inches).to parse('1 foot 1 inch')
+    expect(subject.feet_inches).to parse(%Q{6" 4'})
+    expect(subject.feet_inches).to parse('6 foot 4')
+  end
+
+  it 'parses lbs-oz' do
+    expect(subject.lbs_oz).to parse('4 lbs 4 oz')
+    expect(subject.lbs_oz).to parse('1 pound 6 ounces')
+    expect(subject.lbs_oz).to parse('4 pounds 1 ounce')
+  end
+
+  it 'parses stone-lbs' do
+    expect(subject.stone).to parse('4 stone 4 lbs')
+    expect(subject.stone).to parse('1 st 6')
+    expect(subject.stone).to parse('4 stone 1')
+    expect(subject.stone).to parse('10st 4')
+  end
+
 end
