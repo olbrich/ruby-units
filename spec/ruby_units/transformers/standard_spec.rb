@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-RSpec.describe RubyUnits::Transformers::Metric do
-  let(:parser) { RubyUnits::Parsers::Metric.new }
+RSpec.describe RubyUnits::Transformers::Standard do
+  let(:parser) { RubyUnits::Parsers::Standard.new }
   it 'constructs a unit from a parse tree' do
     result = parser.parse('-1 m/s/s')
     expect(subject.apply(result)).to eq RubyUnits::Unit.new('-1 m/s^2')

@@ -1,6 +1,6 @@
 module RubyUnits
   module Transformers
-    class Metric < Parslet::Transform
+    class Standard < Parslet::Transform
       rule(integer: simple(:value)) { Integer(value) }
       rule(integer_with_separators: simple(:value)) { Integer(value.to_s.delete(',_')) }
       rule(decimal: simple(:value)) { Float(value) }

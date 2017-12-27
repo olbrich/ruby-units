@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'parslet/rig/rspec'
 
-RSpec.describe RubyUnits::Parsers::Metric do
+RSpec.describe RubyUnits::Parsers::Standard do
 
   it 'parses unsigned integers' do
     expect(subject.unsigned_integer).to parse('0')

@@ -1,6 +1,6 @@
 # seed the cache
 
-require_relative '../parsers/metric'
+require_relative '../parsers/standard'
 
 RubyUnits::Unit.new('1')
 
