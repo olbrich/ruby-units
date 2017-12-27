@@ -2,11 +2,10 @@ require 'parslet'
 module RubyUnits
   module Parsers
     class UCUM < ::Parslet::Parser
-
-      UNITS = %w[g m s]
-      UPCASE_UNITS = %w[G M S]
-      PREFIXES = %w[M k h da d c m u n]
-      UPCASE_PREFIXES = %w[MA K H DA D C M U N]
+      UNITS = %w[g m s].freeze
+      UPCASE_UNITS = %w[G M S].freeze
+      PREFIXES = %w[M k h da d c m u n].freeze
+      UPCASE_PREFIXES = %w[MA K H DA D C M U N].freeze
       rule(:annotation) { str('{') >> match['[:alpha:]'].repeat(1).as(:annotation) >> str('}') }
       rule(:complex) { ((rational | decimal | integer).as(:real) >> (rational | decimal | integer).as(:imaginary) >> str('i')).as(:complex) }
       rule(:decimal) { (integer >> str('.') >> digits).as(:decimal) }
@@ -21,12 +20,12 @@ module RubyUnits
       rule(:operator) { (div_operator | mult_operator).as(:operator) }
       rule(:prefix?) { prefix.maybe }
       # prefix needs to dynamically determine which prefix names to search for
-      rule(:prefix) { unit_part.absent? >> (PREFIXES.map {|p| str(p)}.reduce(:|)).as(:prefix) }
-      rule(:prefix_upcase) { unit_part_upcase.absent? >> (UPCASE_PREFIXES.map {|p| str(p)}.reduce(:|)).as(:prefix) }
+      rule(:prefix) { unit_part.absent? >> PREFIXES.map { |p| str(p) }.reduce(:|).as(:prefix) }
+      rule(:prefix_upcase) { unit_part_upcase.absent? >> UPCASE_PREFIXES.map { |p| str(p) }.reduce(:|).as(:prefix) }
       rule(:prefix_upcase?) { prefix_upcase.maybe }
       rule(:rational) { ((decimal | integer).as(:numerator) >> str('/') >> (decimal | integer).as(:denominator)).as(:rational) }
       rule(:scalar?) { scalar.maybe }
-      rule(:scalar) { ( exponent | complex | rational | scientific | decimal | integer).as(:scalar) }
+      rule(:scalar) { (exponent | complex | rational | scientific | decimal | integer).as(:scalar) }
       rule(:scientific) { ((decimal | integer).as(:mantissa) >> match['eE'] >> (sign? >> digits).as(:exponent)).as(:scientific) }
       rule(:sign?) { sign.maybe }
       rule(:sign) { str('+') | str('-') }
@@ -38,9 +37,9 @@ module RubyUnits
       rule(:power?) { power.maybe }
       rule(:unit_atom) { (scalar? >> space? >> (prefix? | prefix_upcase?) >> (unit_part? | unit_part_upcase?) >> power?).as(:unit) }
       # unit_part needs to dynamically determine which unit names to search for
-      rule(:unit_part) { (UNITS.map { |u| str(u) }.reduce(:|)).as(:name)  }
+      rule(:unit_part) { UNITS.map { |u| str(u) }.reduce(:|).as(:name) }
       rule(:unit_part?) { unit_part.maybe }
-      rule(:unit_part_upcase) { (UPCASE_UNITS.map { |u| str(u) }.reduce(:|)).as(:name) }
+      rule(:unit_part_upcase) { UPCASE_UNITS.map { |u| str(u) }.reduce(:|).as(:name) }
       rule(:unit_part_upcase?) { unit_part_upcase.maybe }
       rule(:unit) { any.present? >> infix_expression(unit_atom, [operator, 1, :left]) }
       rule(:unsigned_integer) { zero | non_zero_digit >> digits? }
