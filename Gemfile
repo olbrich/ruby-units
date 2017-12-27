@@ -2,11 +2,12 @@ source 'https://rubygems.org'
 
 ruby RUBY_VERSION
 
+gem 'parslet'
+
 group :development do
   gem 'bundler', '~> 1.0'
   gem 'guard-rspec'
   gem 'jeweler'
-  gem 'parslet'
   gem 'pry-byebug', platforms: :mri
   gem 'pry'
   gem 'terminal-notifier-guard'
