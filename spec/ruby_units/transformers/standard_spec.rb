@@ -8,8 +8,8 @@ RSpec.describe RubyUnits::Transformers::Standard do
   end
 
   it 'constructs a unit from a parse tree' do
-    result = parser.parse('+1 m/s^2')
-    expect(subject.apply(result)).to eq RubyUnits::Unit.new('1 m/s^2')
+    result = parser.parse('+1,234.52 m/s^2')
+    expect(subject.apply(result)).to eq RubyUnits::Unit.new('1234.52 m/s^2')
   end
 
   it 'constructs a unit from a parse tree' do
@@ -23,10 +23,9 @@ RSpec.describe RubyUnits::Transformers::Standard do
   end
 
   it 'constructs a unit from a parse tree' do
-    result = parser.parse('10,000 m')
-    expect(subject.apply(result)).to eq RubyUnits::Unit.new('1E4 m')
+    result = parser.parse('10,000 mm')
+    expect(subject.apply(result)).to eq RubyUnits::Unit.new('1E4 mm')
   end
-
 
   it 'constructs a unit from a parse tree' do
     result = parser.parse('1.05e-4 m')
@@ -57,5 +56,4 @@ RSpec.describe RubyUnits::Transformers::Standard do
     result = parser.parse('10 lbs 8 oz')
     expect(subject.apply(result)).to eq RubyUnits::Unit.new('10 lbs') + RubyUnits::Unit.new('8 oz')
   end
-
 end

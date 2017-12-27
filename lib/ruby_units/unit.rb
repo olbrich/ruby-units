@@ -503,9 +503,14 @@ module RubyUnits
         return
       when Hash
         @scalar      = (options[0][:scalar] || 1)
-        @numerator   = options[0][:numerator] || UNITY_ARRAY
         @denominator = options[0][:denominator] || UNITY_ARRAY
         @signature   = options[0][:signature]
+        @numerator = []
+        @numerator << @@prefix_map[options[0][:prefix].to_s] if options[0][:prefix]
+        @numerator << @@unit_map[options[0][:name].to_s] if options[0][:name]
+        @numerator.compact!
+        @numerator = options[0][:numerator] if options[0][:numerator]
+        @numerator = UNITY_ARRAY if numerator.size.zero?
       when Array
         initialize(*options[0])
         return

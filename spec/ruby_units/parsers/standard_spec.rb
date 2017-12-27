@@ -8,6 +8,8 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.unsigned_integer).to parse('1')
     expect(subject.unsigned_integer).to parse('1,000')
     expect(subject.unsigned_integer).to_not parse('01')
+    expect(subject.unsigned_integer).to_not parse('-1')
+    expect(subject.unsigned_integer).to_not parse('+1')
   end
 
   it 'parses integers' do
@@ -17,6 +19,7 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.integer).to parse('-1')
     expect(subject.integer).to parse('+1')
     expect(subject.integer).to parse('1,000')
+    expect(subject.integer).to parse('-1,000')
     expect(subject.integer).to_not parse('01')
   end
 
@@ -47,6 +50,7 @@ RSpec.describe RubyUnits::Parsers::Standard do
 
   it 'parses integers with separators' do
     expect(subject.integer_with_separators).to parse('1,000')
+    expect(subject.integer_with_separators).to parse('-1,000')
     expect(subject.integer_with_separators).to parse('10,000')
     expect(subject.integer_with_separators).to parse('100,000')
     expect(subject.integer_with_separators).to parse('1,000,000')
@@ -56,6 +60,7 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.integer_with_separators).to parse('100_000')
     expect(subject.integer_with_separators).to parse('1_000_000')
     expect(subject.integer_with_separators).to parse('12,345')
+    expect(subject.integer_with_separators).to parse('-12,345')
     expect(subject.integer_with_separators).to_not parse('1000_000')
   end
 
@@ -65,6 +70,8 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.decimal).to parse('-1234.567')
     expect(subject.decimal).to parse('0.567')
     expect(subject.decimal).to parse('12,345.56')
+    expect(subject.decimal).to parse('-12,345.56')
+    expect(subject.decimal).to parse('+12,345.56')
   end
 
   it 'parses rationals' do
