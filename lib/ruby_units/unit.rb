@@ -1,6 +1,5 @@
 require 'date'
-require 'pry'
-# Copyright 2006-2015
+# Copyright 2006-2018
 # @author Kevin C. Olbrich, Ph.D.
 # @see https://github.com/olbrich/ruby-units
 #
