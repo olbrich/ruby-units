@@ -31,18 +31,19 @@ module RubyUnits
     # @return [RubyUnits::Unit]
     # @todo extend this to use additional parsers if configured
     def parse(string)
+      t = Time.now
       string = string.gsub(/></,'>*<')
-      RubyUnits.configuration.logger.debug { "Factory#parse(#{string})" }
+      RubyUnits.configuration.logger.debug { "↓ Factory#parse(#{string})" }
       raise ArgumentError, 'No Unit Specified' if string =~ /^\s*$/
       begin
         result = RubyUnits::Parsers::Standard.new.parse(string)
-        RubyUnits.configuration.logger.debug { "Factory#parse(#{string}) result=#{result.inspect}" }
+        RubyUnits.configuration.logger.debug { "  Factory#parse(#{string}) result=#{result.inspect}" }
       rescue Parslet::ParseFailed => error
         raise(ArgumentError, "'#{string}' Unit not recognized")
       end
       RubyUnits::Transformers::Standard.new.apply(result).tap do |value|
         raise "Untransformed Unit #{value.inspect}" unless value.is_a?(Numeric)
-        RubyUnits.configuration.logger.debug { "Factory#parse(#{string}) = #{value}" }
+        RubyUnits.configuration.logger.debug { "↑ Factory#parse(#{string}) = #{value} (#{Time.now - t})" }
       end
     end
   end

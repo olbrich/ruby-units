@@ -483,7 +483,8 @@ module RubyUnits
     # @raise [ArgumentError] if no unit is specified
     # @raise [ArgumentError] if an invalid unit is specified
     def initialize(*options)
-      RubyUnits.configuration.logger.debug { ".initialize(#{options.inspect})" }
+      t = Time.now
+      RubyUnits.configuration.logger.debug { "↓ .initialize(#{options.inspect})" }
       @scalar      = 1
       @base_scalar = nil
       @unit_name   = nil
@@ -528,10 +529,11 @@ module RubyUnits
       when Hash
         if options[0][:name] && self.class.cached.keys.include?("#{options[0][:prefix]}#{options[0][:name]}")
           cached = self.class.cached["#{options[0][:prefix]}#{options[0][:name]}"] * (options[0][:scalar] || 1)
-          copy(cached)
           RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache HIT for (#{options[0][:prefix]}#{options[0][:name]})" }
+          copy(cached)
           return
         else
+          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache MISS for (#{options[0][:prefix]}#{options[0][:name]})" } if options[0][:name]
           @scalar      = (options[0][:scalar] || 1)
           @denominator = options[0][:denominator]
           @signature   = options[0][:signature]
@@ -555,7 +557,14 @@ module RubyUnits
       when /^\s*$/
         raise ArgumentError, 'No Unit Specified'
       when String
-        copy(parse(options[0]))
+        cached = self.class.cached[options[0]]
+        if cached
+          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache HIT for (#{options[0]})" }
+          copy(cached)
+        else
+          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache MISS for (#{options[0]})" }
+          copy(parse(options[0]))
+        end
         return
       else
         raise ArgumentError, 'Invalid Unit Format'
@@ -563,6 +572,18 @@ module RubyUnits
       update_base_scalar
       raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar < 0
       unary_unit = units || ''
+
+      if numerator.size == 1 && denominator == UNITY_ARRAY && numerator != UNITY_ARRAY && scalar == 1 && !temperature?
+        binding.pry unless numerator.size == 1
+        definition = self.class.definition(numerator.first)
+
+        definition.aliases.each do |n|
+          next if self.class.cached.keys.include?(n)
+          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache WRITE for (#{n}) => #{self}" }
+          self.class.cached[n] = self
+        end
+      end
+
       if options.first.instance_of?(String)
         _opt_scalar, opt_units = RubyUnits::Unit.parse_into_numbers_and_units(options[0])
         unless  @@cached_units.keys.include?(opt_units) ||
@@ -589,6 +610,7 @@ module RubyUnits
           unary_unit.to_unit
         end
       end
+      RubyUnits.configuration.logger.debug { "↑ .initialize(#{options}) = #{self} (#{Time.now-t})"}
       self
     end
 
