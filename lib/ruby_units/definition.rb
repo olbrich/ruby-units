@@ -44,14 +44,14 @@ class RubyUnits::Unit < Numeric
     # @return [String, nil]
     # @todo refactor Unit and Unit::Definition so we don't need to wrap units with angle brackets
     def name
-      "<#{@name}>" if defined?(@name) && @name
+      "<#{@name}>".freeze if defined?(@name) && @name
     end
 
     # set the name, strip off '<' and '>'
     # @param [String]
     # @return [String]
     def name=(name_value)
-      @name = name_value.gsub(/[<>]/, '')
+      @name = name_value.gsub(/[<>]/, '').freeze
     end
 
     # alias array must contain the name of the unit and entries must be unique

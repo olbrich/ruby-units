@@ -527,14 +527,21 @@ module RubyUnits
         copy(options[0])
         return
       when Hash
-        @scalar      = (options[0][:scalar] || 1)
-        @denominator = options[0][:denominator]
-        @signature   = options[0][:signature]
-        @numerator = []
-        @numerator << @@prefix_map[options[0][:prefix].to_s] if options[0][:prefix]
-        @numerator << @@unit_map[options[0][:name].to_s] if options[0][:name]
-        @numerator.compact!
-        @numerator = options[0][:numerator] if options[0][:numerator]
+        if options[0][:name] && self.class.cached.keys.include?("#{options[0][:prefix]}#{options[0][:name]}")
+          cached = self.class.cached["#{options[0][:prefix]}#{options[0][:name]}"] * (options[0][:scalar] || 1)
+          copy(cached)
+          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache HIT for (#{options[0][:prefix]}#{options[0][:name]})" }
+          return
+        else
+          @scalar      = (options[0][:scalar] || 1)
+          @denominator = options[0][:denominator]
+          @signature   = options[0][:signature]
+          @numerator = []
+          @numerator << @@prefix_map[options[0][:prefix].to_s] if options[0][:prefix]
+          @numerator << @@unit_map[options[0][:name].to_s] if options[0][:name]
+          @numerator.compact!
+          @numerator = options[0][:numerator] if options[0][:numerator]
+        end
       when Array
         initialize(*options[0])
         return
@@ -875,6 +882,7 @@ module RubyUnits
     # @raise [ArgumentError] when units are not compatible
     # @raise [ArgumentError] when adding a fixed time or date to a time span
     def +(other)
+      RubyUnits.configuration.logger.debug { "ADD: #{self} + #{other}" }
       case other
       when Unit
         if zero?
@@ -905,6 +913,8 @@ module RubyUnits
       else
         x, y = coerce(other)
         y + x
+      end.tap do |result|
+        RubyUnits.configuration.logger.debug { "ADD: #{self} + #{other} = #{result}" }
       end
     end
 
@@ -915,6 +925,7 @@ module RubyUnits
     # @raise [ArgumentError] when units are not compatible
     # @raise [ArgumentError] when subtracting a fixed time from a time span
     def -(other)
+      RubyUnits.configuration.logger.debug { "SUBTRACT: #{self} - #{other} " }
       case other
       when Unit
         if zero?
@@ -948,6 +959,8 @@ module RubyUnits
       else
         x, y = coerce(other)
         y - x
+      end.tap do |result|
+        RubyUnits.configuration.logger.debug { "SUBTRACT: #{self} - #{other} = #{result}" }
       end
     end
 
@@ -956,16 +969,23 @@ module RubyUnits
     # @return [Unit]
     # @raise [ArgumentError] when attempting to multiply two temperatures
     def *(other)
+      RubyUnits.configuration.logger.debug { "MULTIPLY: #{self} * #{other}" }
       case other
       when Unit
         raise ArgumentError, 'Cannot multiply by temperatures' if [other, self].any?(&:temperature?)
         opts = RubyUnits::Unit.eliminate_terms(scalar * other.scalar, numerator + other.numerator, denominator + other.denominator)
         RubyUnits::Unit.new(opts)
       when Numeric
-        RubyUnits::Unit.new(scalar: scalar * other, numerator: numerator, denominator: denominator, signature: signature)
+        if other == 1
+          self
+        else
+          RubyUnits::Unit.new(scalar: scalar * other, numerator: numerator, denominator: denominator, signature: signature)
+        end
       else
         x, y = coerce(other)
         x * y
+      end.tap do |result|
+        RubyUnits.configuration.logger.debug { "MULTIPLY: #{self} * #{other} = #{result}" }
       end
     end
 
@@ -976,6 +996,7 @@ module RubyUnits
     # @raise [ZeroDivisionError] if divisor is zero
     # @raise [ArgumentError] if attempting to divide a temperature by another temperature
     def /(other)
+      RubyUnits.configuration.logger.debug { "DIVIDE: #{self} / #{other}" }
       case other
       when Unit
         raise ZeroDivisionError if other.zero?
@@ -986,12 +1007,18 @@ module RubyUnits
         RubyUnits::Unit.new(opts)
       when Numeric
         raise ZeroDivisionError if other.zero?
-        sc = Rational(@scalar, other)
-        sc = sc.numerator if sc.denominator == 1
-        RubyUnits::Unit.new(scalar: sc, numerator: numerator, denominator: denominator, signature: signature)
+        if other == 1
+          self
+        else
+          sc = Rational(@scalar, other)
+          sc = sc.numerator if sc.denominator == 1
+          RubyUnits::Unit.new(scalar: sc, numerator: numerator, denominator: denominator, signature: signature)
+        end
       else
         x, y = coerce(other)
         y / x
+      end.tap do |result|
+        RubyUnits.configuration.logger.debug { "DIVIDE: #{self} / #{other} = #{result}" }
       end
     end
 
@@ -1029,27 +1056,30 @@ module RubyUnits
     # @raise [ArgumentError] when attempting to raise to a complex number
     # @raise [ArgumentError] when an invalid exponent is passed
     def **(other)
+      RubyUnits.configuration.logger.debug { "EXPONENTIATE: #{self}**#{other}" }
       raise ArgumentError, 'Cannot raise a temperature to a power' if temperature?
       if other.is_a?(Numeric)
-        return inverse if other == -1
-        return self if other == 1
-        return RubyUnits::Unit.new(1) if other.zero?
+        return result = inverse if other == -1
+        return result = self if other == 1
+        return result = RubyUnits::Unit.new(1) if other.zero?
       end
       case other
       when Rational
-        return power(other.numerator).root(other.denominator)
+        return result = power(other.numerator).root(other.denominator)
       when Integer
-        return power(other)
+        return result = power(other)
       when Float
-        return self**other.to_i if other == other.to_i
+        return result = self**other.to_i if other == other.to_i
         valid = (1..9).map { |n| Rational(1, n) }
         raise ArgumentError, 'Not a n-th root (1..9), use 1/n' unless valid.include? other.abs
-        return root(Rational(1, other).to_int)
+        return result = root(Rational(1, other).to_int)
       when Complex
         raise ArgumentError, 'exponentiation of complex numbers is not supported.'
       else
         raise ArgumentError, 'Invalid Exponent'
       end
+    ensure
+      RubyUnits.configuration.logger.debug { "EXPONENTIATE: #{self}**#{other} = #{result}" }
     end
 
     # returns the unit raised to the n-th power

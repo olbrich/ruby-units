@@ -36,13 +36,13 @@ module RubyUnits
       raise ArgumentError, 'No Unit Specified' if string =~ /^\s*$/
       begin
         result = RubyUnits::Parsers::Standard.new.parse(string)
-        RubyUnits.configuration.logger.debug { "result: #{result.inspect}" }
+        RubyUnits.configuration.logger.debug { "Factory#parse(#{string}) result=#{result.inspect}" }
       rescue Parslet::ParseFailed => error
         raise(ArgumentError, "'#{string}' Unit not recognized")
       end
       RubyUnits::Transformers::Standard.new.apply(result).tap do |value|
         raise "Untransformed Unit #{value.inspect}" unless value.is_a?(Numeric)
-        RubyUnits.configuration.logger.debug { "value: #{value}" }
+        RubyUnits.configuration.logger.debug { "Factory#parse(#{string}) = #{value}" }
       end
     end
   end
