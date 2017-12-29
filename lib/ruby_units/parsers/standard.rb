@@ -12,22 +12,18 @@ module RubyUnits
       # will be honored first.
       # @return [Parslet::Parser]
       def unit_names
-        @unit_names ||= begin
-          definitions = RubyUnits::Unit.definitions.values.reject(&:prefix?)
-          names = definitions.map(&:aliases).flatten.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse
-          names.map { |name| str(name) }.reduce(:|)
-        end
+        definitions = RubyUnits::Unit.definitions.values.reject(&:prefix?)
+        names = definitions.map(&:aliases).flatten.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse
+        names.map { |name| str(name) }.reduce(:|)
       end
 
       # Checks agains a list of all defined prefixes. Prefixes are sorted longest
       # first so that the most specific ones are honored first.
       # @return [Parslet::Parser]
       def prefixes
-        @prefixes ||= begin
-          definitions = RubyUnits::Unit.definitions.values.select(&:prefix?)
-          names = definitions.map(&:aliases).flatten.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse
-          names.map { |name| str(name) }.reduce(:|)
-        end
+        definitions = RubyUnits::Unit.definitions.values.select(&:prefix?)
+        names = definitions.map(&:aliases).flatten.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse
+        names.map { |name| str(name) }.reduce(:|)
       end
 
       rule(:complex) { ((rational | decimal | integer).as(:real) >> (rational | decimal | integer).as(:imaginary) >> str('i')).as(:complex) }
@@ -36,10 +32,10 @@ module RubyUnits
       rule(:digits?) { digits.maybe }
       rule(:digits) { digit.repeat(1) }
       rule(:div_operator) { space? >> str('/') >> space? }
-      rule(:feet_inches) { (rational | decimal | integer).as(:ft) >> space? >> (str('feet') | str('foot') | str('ft') | str('"')) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:in) >> space? >> (str('inches') | str('inch') | str('in') | str("'")).maybe }
+      rule(:feet_inches) { (rational | decimal | integer).as(:ft) >> space? >> (str('feet') | str('foot') | str('ft') | str("'")) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:in) >> space? >> (str('inches') | str('inch') | str('in') | str('"')).maybe }
       rule(:integer_with_separators) { (sign? >> non_zero_digit >> digit.repeat(0, 2) >> (separators >> digit.repeat(3, 3)).repeat(1)) }
       rule(:integer) { (sign? >> unsigned_integer).as(:integer) }
-      rule(:irregular_forms) { feet_inches.maybe | lbs_oz.maybe | stone.maybe }
+      rule(:irregular_forms) { times | feet_inches.maybe | lbs_oz.maybe | stone.maybe }
       rule(:lbs_oz) { (rational | decimal | integer).as(:lbs) >> space? >> (str('pounds') | str('pound') | str('lbs') | str('lb')) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:oz) >> space? >> (str('ounces') | str('ounce') | str('oz')) }
       rule(:mixed_fraction) { (integer.as(:whole) >> (space | str('-')) >> rational.as(:fraction)).as(:mixed_fraction) }
       rule(:mult_operator) { ((space? >> str('*') >> space?) | (space? >> str('x') >> space?) | space).as(:multiply) }
@@ -58,9 +54,11 @@ module RubyUnits
       rule(:space?) { space.maybe }
       rule(:space) { str(' ') }
       rule(:stone) { (rational | decimal | integer).as(:stone) >> space? >> (str('stones') | str('stone') | str('st')) >> str(',').maybe >> space? >> (rational | decimal | integer).as(:lbs) >> space? >> (str('pounds') | str('pound') | str('lbs') | str('lb')).maybe }
-      rule(:unit_atom) { (scalar? >> space? >> prefix? >> unit_part >> (power >> (rational | decimal | integer).as(:power)).maybe).as(:unit) }
-      rule(:unit_part) { unit_names.as(:name) >> match['\w'].absent? }
-      rule(:unit) { irregular_forms | infix_expression(unit_atom, [operator, 1, :left]) }
+      rule(:times) { (zero | digits).as(:hours) >> str(':') >> (match['0-5'] >> digit).as(:minutes) >> (str(':') >> (match['0-5'] >> digit).as(:seconds)).maybe >> (str(',') >> unsigned_integer.as(:microseconds)).maybe }
+      rule(:unit_atom) { (scalar? >> space? >> prefix? >> unit_part? >> (power >> (rational | decimal | integer).as(:power)).maybe).as(:unit) }
+      rule(:unit_part?) { unit_part.maybe }
+      rule(:unit_part) { str('<').maybe >> unit_names.as(:name) >> str('>').maybe >> match['\w'].absent? }
+      rule(:unit) { irregular_forms | infix_expression(unit_atom, [power, 3, :left], [mult_operator, 2, :left], [div_operator, 1, :left]) }
       rule(:unsigned_integer) { zero | integer_with_separators | non_zero_digit >> digits? }
       rule(:zero) { str('0') }
 

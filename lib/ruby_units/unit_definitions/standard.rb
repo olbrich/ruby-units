@@ -321,17 +321,17 @@ temp_convert_factor = Rational(2_501_999_792_983_609, 4_503_599_627_370_496) # a
 
 RubyUnits::Unit.define('celsius') do |celsius|
   celsius.definition  = RubyUnits::Unit.new('1 degK')
-  celsius.aliases     = %w[degC celsius centigrade]
+  celsius.aliases     = %w[degC °C celsius centigrade]
 end
 
 RubyUnits::Unit.define('fahrenheit') do |fahrenheit|
   fahrenheit.definition = RubyUnits::Unit.new(temp_convert_factor, 'degK')
-  fahrenheit.aliases    = %w[degF fahrenheit]
+  fahrenheit.aliases    = %w[degF °F fahrenheit]
 end
 
 RubyUnits::Unit.define('rankine') do |rankine|
   rankine.definition  = RubyUnits::Unit.new('1 degF')
-  rankine.aliases     = %w[degR rankine]
+  rankine.aliases     = %w[degR °R rankine]
 end
 
 RubyUnits::Unit.define('tempC') do |temp_c|
@@ -585,7 +585,7 @@ end
 # angle
 RubyUnits::Unit.define('degree') do |deg|
   deg.definition    = RubyUnits::Unit.new(Math::PI / 180.0, 'radian')
-  deg.aliases       = %w[deg degree degrees]
+  deg.aliases       = %w[deg ° degree degrees]
 end
 
 RubyUnits::Unit.define('gon') do |grad|

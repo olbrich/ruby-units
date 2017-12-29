@@ -2,8 +2,6 @@
 
 require_relative '../parsers/standard'
 
-RubyUnits::Unit.new('1')
-
 RubyUnits::Unit.define('meter') do |unit|
   unit.scalar    = 1
   unit.numerator = %w[<meter>]
@@ -101,3 +99,5 @@ RubyUnits::Unit.define('decibel') do |unit|
   unit.aliases   = %w[dB decibel decibels]
   unit.kind      = :logarithmic
 end
+
+RubyUnits::Unit.new('1')

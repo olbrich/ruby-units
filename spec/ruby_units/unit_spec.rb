@@ -1078,7 +1078,7 @@ describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
-      it { is_expected.to be_an Integer }
+      it { is_expected.to be_a Float }
     end
 
     describe '#scalar' do
@@ -1243,20 +1243,20 @@ describe 'Unit handles attempts to create bad units' do
     expect { RubyUnits::Unit.new("\n") }.to raise_error(ArgumentError, 'No Unit Specified')
   end
 
-  specify 'no double slashes' do
-    expect { RubyUnits::Unit.new('3 s/s/ft') }.to raise_error(ArgumentError, /Unit not recognized/)
+  specify 'multiple slashes ok' do
+    expect(RubyUnits::Unit.new('3 s/s/ft')).to eq(RubyUnits::Unit.new('3 1/ft'))
   end
 
   specify 'no pipes or commas' do
     expect { RubyUnits::Unit.new('3 s**2|,s**2') }.to raise_error(ArgumentError, /Unit not recognized/)
   end
 
-  specify 'no multiple spaces' do
-    expect { RubyUnits::Unit.new('3 s**2 4s s**2') }.to raise_error(ArgumentError, /Unit not recognized/)
+  specify 'complex expressions work' do
+    expect(RubyUnits::Unit.new('3 s**2 4s s**2')).to eq(RubyUnits::Unit.new('12s^5'))
   end
 
-  specify 'no exponentiation of numbers' do
-    expect { RubyUnits::Unit.new('3 s 5^6') }.to raise_error(ArgumentError, /Unit not recognized/)
+  specify 'exponentiation of numbers works' do
+    expect(RubyUnits::Unit.new('3 s 5^6')).to eq(RubyUnits::Unit.new('46875 s'))
   end
 
   specify "no strings that don't specify a valid unit" do
@@ -1382,7 +1382,7 @@ describe Unit do
 
         describe '#scalar' do
           subject { super().scalar }
-          it { is_expected.to be_an Integer }
+          it { is_expected.to be_a Float }
         end
 
         describe '#units' do
@@ -1956,7 +1956,7 @@ describe 'Unit Math' do
     specify { expect { RubyUnits::Unit.new('10.0 m').to_f }.to raise_error(RuntimeError, "Cannot convert '10 m' to Float unless unitless.  Use Unit#scalar") }
 
     specify { expect(RubyUnits::Unit.new('1+1i').to_c).to be_kind_of(Complex) }
-    specify { expect { RubyUnits::Unit.new('1+1i m').to_c }.to raise_error(RuntimeError, "Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") }
+    specify { expect { RubyUnits::Unit.new('1+1i m').to_c }.to raise_error(RuntimeError, "Cannot convert '1+1i m' to Complex unless unitless.  Use Unit#scalar") }
 
     specify { expect(RubyUnits::Unit.new('3/7').to_r).to be_kind_of(Rational) }
     specify { expect { RubyUnits::Unit.new('3/7 m').to_r }.to raise_error(RuntimeError, "Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }
@@ -2132,11 +2132,11 @@ end
 
 describe 'Unit Output formatting' do
   context RubyUnits::Unit.new('10.5 m/s^2') do
-    specify { expect(subject.to_s).to eq('10.5 m/s^2') }
+    specify { expect(subject.to_s).to eq('21/2 m/s^2') }
     specify { expect(subject.to_s('%0.2f')).to eq('10.50 m/s^2') }
     specify { expect(subject.to_s('%0.2e km/s^2')).to eq('1.05e-02 km/s^2') }
     specify { expect(subject.to_s('km/s^2')).to eq('0.0105 km/s^2') }
-    specify { expect(subject.to_s(STDOUT)).to eq('10.5 m/s^2') }
+    specify { expect(subject.to_s(STDOUT)).to eq('21/2 m/s^2') }
     specify { expect { subject.to_s('random string') }.to raise_error(ArgumentError, "'random' Unit not recognized") }
   end
 

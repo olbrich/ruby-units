@@ -56,4 +56,11 @@ RSpec.describe RubyUnits::Transformers::Standard do
     result = parser.parse('10 lbs 8 oz')
     expect(subject.apply(result)).to eq RubyUnits::Unit.new('10 lbs') + RubyUnits::Unit.new('8 oz')
   end
+
+  it 'constructs a unit with exponents' do
+    result = parser.parse('10 m^2')
+    unit = subject.apply(result)
+    expect(unit.scalar).to eq 10
+    expect(unit.units).to eq 'm^2'
+  end
 end

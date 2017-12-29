@@ -26,14 +26,24 @@ module RubyUnits
   # If the basic parser fails to match then fall back to the irregular case
   # parser. By default, we need to load the SI definitions (because the internal
   # handling needs this).
-  class Parser
-    # @param string [String]
-    def initialize(string)
-      @string = string
-    end
-
-    # @return [Hash]
-    def parse
+  class Factory
+    # @param [String] string representation of unit
+    # @return [RubyUnits::Unit]
+    # @todo extend this to use additional parsers if configured
+    def parse(string)
+      string = string.gsub(/></,'>*<')
+      RubyUnits.configuration.logger.debug { "Factory#parse(#{string})" }
+      raise ArgumentError, 'No Unit Specified' if string =~ /^\s*$/
+      begin
+        result = RubyUnits::Parsers::Standard.new.parse(string)
+        RubyUnits.configuration.logger.debug { "result: #{result.inspect}" }
+      rescue Parslet::ParseFailed => error
+        raise(ArgumentError, "'#{string}' Unit not recognized")
+      end
+      RubyUnits::Transformers::Standard.new.apply(result).tap do |value|
+        raise "Untransformed Unit #{value.inspect}" unless value.is_a?(Numeric)
+        RubyUnits.configuration.logger.debug { "value: #{value}" }
+      end
     end
   end
 end

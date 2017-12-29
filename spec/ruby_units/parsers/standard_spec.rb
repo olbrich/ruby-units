@@ -111,6 +111,17 @@ RSpec.describe RubyUnits::Parsers::Standard do
   end
 
   it 'parses unit_atom' do
+    expect(subject.unit_atom).to parse('1')
+    expect(subject.unit_atom).to parse('-1')
+    expect(subject.unit_atom).to parse('+1')
+    expect(subject.unit_atom).to parse('1,000')
+    expect(subject.unit_atom).to parse('-1,000')
+    expect(subject.unit_atom).to parse('+1,000')
+    expect(subject.unit_atom).to parse('-1.2E4')
+    expect(subject.unit_atom).to parse('-1.2E-4')
+    expect(subject.unit_atom).to parse('1.2E+4')
+    expect(subject.unit_atom).to parse('1/2')
+    expect(subject.unit_atom).to parse('-1/2')
     expect(subject.unit_atom).to parse('m')
     expect(subject.unit_atom).to parse('mm')
     expect(subject.unit_atom).to parse('1 m')
@@ -121,12 +132,14 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.unit_atom).to parse('1 mm^2')
     expect(subject.unit_atom).to parse('1 mm**-2')
     expect(subject.unit_atom).to parse('1 mm**0.5')
-    expect(subject.unit_atom).to parse('1 mm**2')
+    expect(subject.unit_atom).to parse('10 mm**2')
   end
 
   it 'parses a unit' do
     expect(subject.unit).to parse('1 mm/s/s')
     expect(subject.unit).to parse('1 m*m/s/s')
+    expect(subject.unit).to parse('1 <meter>*<meter>')
+    expect(subject.unit).to parse('1 <meter>/<second>')
   end
 
   it 'parses ft-in' do
@@ -134,7 +147,7 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.feet_inches).to parse('6 ft 4 in')
     expect(subject.feet_inches).to parse('6 feet 4 inches')
     expect(subject.feet_inches).to parse('1 foot 1 inch')
-    expect(subject.feet_inches).to parse(%Q{6" 4'})
+    expect(subject.feet_inches).to parse(%Q{6' 4"})
     expect(subject.feet_inches).to parse('6 foot 4')
   end
 
@@ -151,4 +164,13 @@ RSpec.describe RubyUnits::Parsers::Standard do
     expect(subject.stone).to parse('10st 4')
   end
 
+  it 'parses times' do
+    expect(subject.times).to parse('1:23')
+    expect(subject.times).to parse('1:23:45')
+    expect(subject.times).to parse('1:23:45,200')
+  end
+
+  it 'parses the unit_part' do
+    expect(subject.unit_part).to parse('<kilogram>')
+  end
 end

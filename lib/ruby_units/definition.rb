@@ -57,7 +57,7 @@ class RubyUnits::Unit < Numeric
     # alias array must contain the name of the unit and entries must be unique
     # @return [Array]
     def aliases
-      [[@aliases], @name].flatten.compact.uniq
+      ([@aliases] + [@name, display_name]).flatten.compact.uniq
     end
 
     # define a unit in terms of another unit
