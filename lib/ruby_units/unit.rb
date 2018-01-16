@@ -1104,19 +1104,19 @@ module RubyUnits
                          when '<tempK>'
                            @scalar
                          when '<tempF>'
-                           (@scalar + 459.67) * Rational(5, 9)
+                           (@scalar + 459.67).to_r * Rational(5, 9)
                          when '<tempR>'
-                           @scalar * Rational(5, 9)
+                           @scalar.to_r * Rational(5, 9)
                          end
         q = case @@unit_map[target_unit]
             when '<tempC>'
-              @base_scalar - 273.15
+              @base_scalar - 273.15r
             when '<tempK>'
               @base_scalar
             when '<tempF>'
-              @base_scalar * Rational(9, 5) - 459.67
+              @base_scalar.to_r * Rational(9, 5) - 459.67r
             when '<tempR>'
-              @base_scalar * Rational(9, 5)
+              @base_scalar.to_r * Rational(9, 5)
             end
         return RubyUnits::Unit.new("#{q} #{target_unit}")
       else

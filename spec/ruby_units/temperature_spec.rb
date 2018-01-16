@@ -104,6 +104,8 @@ describe 'temperatures' do
       specify { expect(RubyUnits::Unit.new('100 tK').convert_to('tempC')).to be_within(RubyUnits::Unit.new('0.01 degC')).of(RubyUnits::Unit.new('-173.15 tempC')) }
       specify { expect(RubyUnits::Unit.new('100 tK').convert_to('tempF')).to be_within(RubyUnits::Unit.new('0.01 degF')).of(RubyUnits::Unit.new('-279.67 tempF')) }
       specify { expect(RubyUnits::Unit.new('100 tK').convert_to('tempR')).to be_within(RubyUnits::Unit.new('0.01 degR')).of(RubyUnits::Unit.new('180 tempR')) }
+
+      specify { expect(RubyUnits::Unit.new('32 tF').convert_to('tempC')).to eq(RubyUnits::Unit.new('0 tC')) }
     end
   end
 end
