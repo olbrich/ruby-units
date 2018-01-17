@@ -12,6 +12,7 @@ group :development do
   gem 'pry'
   gem 'terminal-notifier-guard'
   gem 'terminal-notifier'
+  gem 'ruby-prof'
 end
 
 group :test do

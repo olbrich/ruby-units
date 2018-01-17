@@ -348,11 +348,23 @@ module RubyUnits
       ]
     end
 
+    # A list of unit names reverse sorted by length (longest first)
+    # @return [Array<String>]
+    def self.sorted_unit_names
+      @sorted_unit_names ||= @@unit_map.keys.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse
+    end
+
+    # A list of prefix names reverse sorted by length (longest first)
+    # @return [Array<String>]
+    def self.sorted_prefix_names
+      @sorted_prefix_names ||= @@prefix_map.keys.sort_by { |prefix| [prefix.length, prefix] }.reverse
+    end
+
     # return a fragment of a regex to be used for matching units or reconstruct it if hasn't been used yet.
     # Unit names are reverse sorted by length so the regexp matcher will prefer longer and more specific names
     # @return [String]
     def self.unit_regex
-      @@unit_regex ||= @@unit_map.keys.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse.join('|')
+      @@unit_regex ||= sorted_unit_names.join('|')
     end
 
     # return a regex used to match units
@@ -365,7 +377,7 @@ module RubyUnits
     # @return [String]
     # @private
     def self.prefix_regex
-      @@prefix_regex ||= @@prefix_map.keys.sort_by { |prefix| [prefix.length, prefix] }.reverse.join('|')
+      @@prefix_regex ||= sorted_prefix_names.join('|')
     end
 
     def self.temp_regex
@@ -382,14 +394,13 @@ module RubyUnits
 
     # inject a definition into the internal array and set it up for use
     def self.use_definition(definition)
-      RubyUnits.configuration.logger.debug { __method__ }
-      RubyUnits.configuration.logger.debug { definition }
       @@unit_match_regex = nil # invalidate the unit match regex
       @@temp_regex       = nil # invalidate the temp regex
       if definition.prefix?
         @@prefix_values[definition.name] = definition.scalar
         definition.aliases.each { |alias_name| @@prefix_map[alias_name] = definition.name }
         @@prefix_regex = nil # invalidate the prefix regex
+        @sorted_prefix_names = nil
         RubyUnits.configuration.logger.debug { "value: #{@@prefix_values[definition.name].inspect}" }
       else
         @@unit_values[definition.name]          = {}
@@ -398,6 +409,7 @@ module RubyUnits
         @@unit_values[definition.name][:denominator] = definition.denominator if definition.denominator
         definition.aliases.each { |alias_name| @@unit_map[alias_name] = definition.name }
         @@unit_regex = nil # invalidate the unit regex
+        @sorted_unit_names = nil
         RubyUnits.configuration.logger.debug { "value: #{@@unit_values[definition.name].inspect}" }
       end
     end
@@ -527,9 +539,10 @@ module RubyUnits
         copy(options[0])
         return
       when Hash
-        if options[0][:name] && self.class.cached.keys.include?("#{options[0][:prefix]}#{options[0][:name]}")
-          cached = self.class.cached["#{options[0][:prefix]}#{options[0][:name]}"] * (options[0][:scalar] || 1)
-          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache HIT for (#{options[0][:prefix]}#{options[0][:name]})" }
+        cache_key = "#{options[0][:prefix]}#{options[0][:name]}#{"^#{options[0][:power]}" if options[0][:power]}"
+        if options[0][:name] && self.class.cached.keys.include?(cache_key)
+          cached = self.class.cached[cache_key] * (options[0][:scalar] || 1)
+          RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache HIT for (#{cache_key})" }
           copy(cached)
           return
         else
@@ -541,6 +554,7 @@ module RubyUnits
           @numerator << @@prefix_map[options[0][:prefix].to_s] if options[0][:prefix]
           @numerator << @@unit_map[options[0][:name].to_s] if options[0][:name]
           @numerator.compact!
+          @numerator = @numerator * options[0][:power] if options[0][:power]
           @numerator = options[0][:numerator] if options[0][:numerator]
         end
       when Array
@@ -563,7 +577,7 @@ module RubyUnits
           copy(cached)
         else
           RubyUnits.configuration.logger.debug { "#{__LINE__}: Cache MISS for (#{options[0]})" }
-          copy(parse(options[0]))
+          copy(_parse(options[0]))
         end
         return
       else
@@ -647,6 +661,8 @@ module RubyUnits
     # @return [Unit]
     # @todo this is brittle as it depends on the display_name of a unit, which can be changed
     def to_base
+      t = Time.now
+      RubyUnits.configuration.logger.debug { "+ (#{self}).to_base" }
       return self if base?
       if @@unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
         @signature = @@kinds.key(:temperature)
@@ -663,8 +679,12 @@ module RubyUnits
                 rescue
                   nil
                 end)
-      return cached if cached
+      return cached.tap do |result|
+        RubyUnits.configuration.logger.debug { "#{__LINE__} Cache HIT for (#{units})" }
+        RubyUnits.configuration.logger.debug { "[#{Time.now - t}] (#{self}).to_base = #{result}" }
+      end if cached
 
+      RubyUnits.configuration.logger.debug { "#{__LINE__} Cache MISS for (#{units})" }
       num = []
       den = []
       q   = Rational(1)
@@ -692,7 +712,9 @@ module RubyUnits
       num = UNITY_ARRAY if num.empty?
       base = RubyUnits::Unit.new(RubyUnits::Unit.eliminate_terms(q, num, den))
       @@base_unit_cache[units] = base
-      base * @scalar
+      (base * @scalar).tap do |result|
+        RubyUnits.configuration.logger.debug { "[#{Time.now - t}] #{self}.to_base = #{result}" }
+      end
     end
 
     alias base to_base
@@ -990,7 +1012,11 @@ module RubyUnits
     # @return [Unit]
     # @raise [ArgumentError] when attempting to multiply two temperatures
     def *(other)
+      t = Time.now
       RubyUnits.configuration.logger.debug { "MULTIPLY: #{self} * #{other}" }
+      return other.tap do |result|
+        RubyUnits.configuration.logger.debug { "[#{Time.now - t}] MULTIPLY: #{self} * #{other} = #{result}" }
+      end if scalar == 1 && unitless?
       case other
       when Unit
         raise ArgumentError, 'Cannot multiply by temperatures' if [other, self].any?(&:temperature?)
@@ -1006,7 +1032,7 @@ module RubyUnits
         x, y = coerce(other)
         x * y
       end.tap do |result|
-        RubyUnits.configuration.logger.debug { "MULTIPLY: #{self} * #{other} = #{result}" }
+        RubyUnits.configuration.logger.debug { "[#{Time.now - t}] MULTIPLY: #{self} * #{other} = #{result}" }
       end
     end
 
@@ -1017,12 +1043,13 @@ module RubyUnits
     # @raise [ZeroDivisionError] if divisor is zero
     # @raise [ArgumentError] if attempting to divide a temperature by another temperature
     def /(other)
+      t = Time.now
       RubyUnits.configuration.logger.debug { "DIVIDE: #{self} / #{other}" }
       case other
       when Unit
         raise ZeroDivisionError if other.zero?
         raise ArgumentError, 'Cannot divide with temperatures' if [other, self].any?(&:temperature?)
-        sc = Rational(@scalar, other.scalar)
+        sc = Rational(scalar, other.scalar)
         sc = sc.numerator if sc.denominator == 1
         opts = RubyUnits::Unit.eliminate_terms(sc, numerator + other.denominator, denominator + other.numerator)
         RubyUnits::Unit.new(opts)
@@ -1039,7 +1066,7 @@ module RubyUnits
         x, y = coerce(other)
         y / x
       end.tap do |result|
-        RubyUnits.configuration.logger.debug { "DIVIDE: #{self} / #{other} = #{result}" }
+        RubyUnits.configuration.logger.debug { "[#{Time.now - t}] DIVIDE: #{self} / #{other} = #{result}" }
       end
     end
 
@@ -1077,6 +1104,7 @@ module RubyUnits
     # @raise [ArgumentError] when attempting to raise to a complex number
     # @raise [ArgumentError] when an invalid exponent is passed
     def **(other)
+      t = Time.now
       RubyUnits.configuration.logger.debug { "EXPONENTIATE: #{self}**#{other}" }
       raise ArgumentError, 'Cannot raise a temperature to a power' if temperature?
       if other.is_a?(Numeric)
@@ -1100,7 +1128,7 @@ module RubyUnits
         raise ArgumentError, 'Invalid Exponent'
       end
     ensure
-      RubyUnits.configuration.logger.debug { "EXPONENTIATE: #{self}**#{other} = #{result}" }
+      RubyUnits.configuration.logger.debug { "[#{Time.now - t}] EXPONENTIATE: #{self}**#{other} = #{result}" }
     end
 
     # returns the unit raised to the n-th power
@@ -1156,7 +1184,7 @@ module RubyUnits
     # returns inverse of Unit (1/unit)
     # @return [Unit]
     def inverse
-      RubyUnits::Unit.new('1') / self
+      RubyUnits::Unit.new(1) / self
     end
 
     # convert to a specified unit string or to the same units as another Unit
@@ -1179,9 +1207,11 @@ module RubyUnits
     # @raise [ArgumentError] when target unit is unknown
     # @raise [ArgumentError] when target unit is incompatible
     def convert_to(other)
-      return self if other.nil?
-      return self if TrueClass === other
-      return self if FalseClass === other
+      t = Time.now
+      RubyUnits.configuration.logger.debug { "CONVERT_TO(#{other})" }
+      return result = self if other.nil?
+      return result = self if TrueClass === other
+      return result = self if FalseClass === other
       if (Unit === other && other.temperature?) || (String === other && other =~ /temp[CFRK]/)
         raise ArgumentError, 'Receiver is not a temperature unit' unless degree?
         start_unit = units
@@ -1210,11 +1240,11 @@ module RubyUnits
             when '<tempR>'
               @base_scalar * Rational(9, 5)
             end
-        return RubyUnits::Unit.new("#{q} #{target_unit}")
+        return result = RubyUnits::Unit.new(q, target_unit)
       else
         case other
         when Unit
-          return self if other.units == units
+          return result = self if other.units == units
           target = other
         when String
           target = RubyUnits::Unit.new(other)
@@ -1228,8 +1258,10 @@ module RubyUnits
         denominator2 = target.denominator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
 
         q = @scalar * ((numerator1 + denominator2).inject(1) { |acc, elem| acc * elem }) / ((numerator2 + denominator1).inject(1) { |acc, elem| acc * elem })
-        return RubyUnits::Unit.new(scalar: q, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
+        return result = RubyUnits::Unit.new(scalar: q, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
       end
+    ensure
+      RubyUnits.configuration.logger.debug { "[#{Time.now - t}] CONVERT_TO(#{other}) = #{result}" }
     end
 
     alias >> convert_to
@@ -1550,7 +1582,9 @@ module RubyUnits
     # @return [Array]
     # @raise [ArgumentError] when exponent associated with a unit is > 20 or < -20
     def unit_signature_vector
-      return to_base.unit_signature_vector unless base?
+      t = Time.now
+      RubyUnits.configuration.logger.debug { "UNIT_SIGNATURE_VECTOR: #{self}" }
+      return result = to_base.unit_signature_vector unless base?
       vector = Array.new(SIGNATURE_VECTOR.size, 0)
       # it's possible to have a kind that misses the array... kinds like :counting
       # are more like prefixes, so don't use them to calculate the vector
@@ -1563,7 +1597,9 @@ module RubyUnits
         vector[index] -= 1 if index
       end
       raise ArgumentError, 'Power out of range (-20 < net power of a unit < 20)' if vector.any? { |x| x.abs >= 20 }
-      vector
+      result = vector
+    ensure
+      RubyUnits.configuration.logger.debug { "[#{Time.now - t}] UNIT_SIGNATURE_VECTOR: #{self} = #{result} #{result.hash}" }
     end
 
     private
@@ -1593,7 +1629,7 @@ module RubyUnits
     # @param string [String] the string to parse into a Unit
     # @return [Unit]
     # @return [nil]
-    def parse(string)
+    def _parse(string)
       RubyUnits::Factory.new.parse(string)
     end
 
@@ -1610,7 +1646,7 @@ module RubyUnits
     #  8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
     # @return [nil | Unit]
     # @todo This should either be a separate class or at least a class method
-    def _parse(passed_unit_string = '0')
+    def parse(passed_unit_string = '0')
       unit_string = passed_unit_string.dup
       unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
@@ -1736,16 +1772,16 @@ module RubyUnits
       used = "#{top} #{bottom}".to_s.gsub(RubyUnits::Unit.unit_match_regex, '').gsub(%r{[\d\*, "'_^\/\$]}, '')
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
-      @numerator = numerator.map do |item|
+      @numerator = @numerator.map do |item|
         @@prefix_map[item[0]] ? [@@prefix_map[item[0]], @@unit_map[item[1]]] : [@@unit_map[item[1]]]
       end.flatten.compact.delete_if(&:empty?)
 
-      @denominator = denominator.map do |item|
+      @denominator = @denominator.map do |item|
         @@prefix_map[item[0]] ? [@@prefix_map[item[0]], @@unit_map[item[1]]] : [@@unit_map[item[1]]]
       end.flatten.compact.delete_if(&:empty?)
 
-      @numerator = UNITY_ARRAY if numerator.empty?
-      @denominator = UNITY_ARRAY if denominator.empty?
+      @numerator = UNITY_ARRAY if @numerator.empty?
+      @denominator = UNITY_ARRAY if @denominator.empty?
       self
     end
   end

@@ -1,3 +1,5 @@
+require_relative 'parsers/standard'
+require_relative 'transformers/standard'
 module RubyUnits
   # This class attempts to convert a string representation of a unit into
   # the arguments needed by {Unit.initialize} to construct a {Unit}.
@@ -27,23 +29,29 @@ module RubyUnits
   # parser. By default, we need to load the SI definitions (because the internal
   # handling needs this).
   class Factory
+
+    def self.parser
+      @parser ||= RubyUnits::Parsers::Standard.new
+    end
+
+    def self.transformer
+      @transformer ||= RubyUnits::Transformers::Standard.new
+    end
+
     # @param [String] string representation of unit
     # @return [RubyUnits::Unit]
     # @todo extend this to use additional parsers if configured
     def parse(string)
-      t = Time.now
       string = string.gsub(/></,'>*<')
-      RubyUnits.configuration.logger.debug { "↓ Factory#parse(#{string})" }
       raise ArgumentError, 'No Unit Specified' if string =~ /^\s*$/
       begin
-        result = RubyUnits::Parsers::Standard.new.parse(string)
-        RubyUnits.configuration.logger.debug { "  Factory#parse(#{string}) result=#{result.inspect}" }
+        result = self.class.parser.parse(string)
       rescue Parslet::ParseFailed => error
+        RubyUnits.configuration.logger.debug { error }
         raise(ArgumentError, "'#{string}' Unit not recognized")
       end
-      RubyUnits::Transformers::Standard.new.apply(result).tap do |value|
+      self.class.transformer.apply(result).tap do |value|
         raise "Untransformed Unit #{value.inspect}" unless value.is_a?(Numeric)
-        RubyUnits.configuration.logger.debug { "↑ Factory#parse(#{string}) = #{value} (#{Time.now - t})" }
       end
     end
   end

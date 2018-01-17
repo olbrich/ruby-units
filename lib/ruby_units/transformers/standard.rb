@@ -19,7 +19,7 @@ module RubyUnits
       rule(stone: simple(:stone), lbs: simple(:lbs)) { RubyUnits::Unit.new(stone, 'stone') + RubyUnits::Unit.new(lbs, 'lbs') }
 
       rule(unit: { scalar: simple(:scalar), prefix: simple(:prefix), name: simple(:name), power: simple(:power) }) do
-        scalar * RubyUnits::Unit.new(prefix: prefix.to_s, name: name.to_s)**power
+        scalar * RubyUnits::Unit.new(prefix: prefix.to_s, name: name.to_s, power: power)
       end
 
       rule(unit: { scalar: simple(:scalar), name: simple(:name), power: simple(:power) }) do
