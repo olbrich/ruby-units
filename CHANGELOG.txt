@@ -1,5 +1,8 @@
 Change Log for Ruby-units
 =========================
+2018-03-06  2.3.0   * Fix add (+) and subtract (-) for BigDecimal scalars. (see #167)
+                    * Update ruby versions (#163)
+                    * fix: temperature converting rational issue (#164)
 2017-12-07  2.2.1   * fix an issue with formatting of rational scalars (see #159)
 2017-08-07  2.2.0   * add support for ruby 2.4.1
                     * drop support for ruby 2.1.0
