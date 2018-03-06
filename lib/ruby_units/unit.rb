@@ -847,14 +847,7 @@ module RubyUnits
               RubyUnits::Unit.new(scalar: (other.scalar + convert_to(other.temperature_scale).scalar), numerator: other.numerator, denominator: other.denominator, signature: other.signature)
             end
           else
-            @q ||= begin
-                     begin
-                      Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar)
-                    rescue
-                      units.to_unit.to_base.scalar
-                    end
-                   end
-            RubyUnits::Unit.new(scalar: (base_scalar + other.base_scalar) * @q, numerator: @numerator, denominator: @denominator, signature: @signature)
+            RubyUnits::Unit.new(scalar: (base_scalar + other.base_scalar), numerator: base.numerator, denominator: base.denominator, signature: @signature).to(units)
           end
         else
           raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
@@ -890,14 +883,7 @@ module RubyUnits
           elsif other.temperature?
             raise ArgumentError, 'Cannot subtract a temperature from a differential degree unit'
           else
-            @q ||= begin
-                     begin
-                      Rational(@@cached_units[units].scalar, @@cached_units[units].base_scalar)
-                    rescue
-                      Rational(units.to_unit.scalar, units.to_unit.to_base.scalar)
-                    end
-                   end
-            RubyUnits::Unit.new(scalar: (base_scalar - other.base_scalar) * @q, numerator: @numerator, denominator: @denominator, signature: @signature)
+            RubyUnits::Unit.new(scalar: (base_scalar - other.base_scalar), numerator: base.numerator, denominator: base.denominator, signature: @signature).to(units)
           end
         else
           raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
