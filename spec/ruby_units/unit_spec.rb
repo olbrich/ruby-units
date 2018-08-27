@@ -2083,6 +2083,14 @@ describe 'Unit Math' do
     specify { expect { RubyUnits::Unit.new('0 m').best_prefix }.to_not raise_error }
   end
 
+  context '#simplify' do
+    it 'should simplify kg*m^2/s^2 to J' do
+      result = RubyUnits::Unit.new('1 kg*m^2/s^2').simplify
+      expect(result.units).to eq "J"
+      expect(result.scalar).to eq 1
+    end
+  end
+
   context 'Time helper functions' do
     before do
       allow(Time).to receive(:now).and_return(Time.utc(2011, 10, 16))
