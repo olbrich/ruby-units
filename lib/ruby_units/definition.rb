@@ -19,6 +19,9 @@ class RubyUnits::Unit < Numeric
     # @return [String]
     attr_accessor :display_name
 
+    # @return [Symbol]
+    attr_accessor :system
+
     # @example Raw definition from a hash
     #   Unit::Definition.new("rack-unit",[%w{U rack-U}, (6405920109971793/144115188075855872), :length, %w{<meter>} ])
     #
@@ -69,6 +72,7 @@ class RubyUnits::Unit < Numeric
       @kind        = base.kind
       @numerator   = base.numerator
       @denominator = base.denominator
+      @system = unit.system
       self
     end
 
@@ -93,6 +97,13 @@ class RubyUnits::Unit < Numeric
         (numerator.size  == 1) &&
         (scalar          == 1) &&
         (numerator.first == self.name)
+    end
+
+    def signature
+      @signature ||= begin
+        return if prefix?
+        RubyUnits::Unit.new(display_name).signature
+      end
     end
   end
 end

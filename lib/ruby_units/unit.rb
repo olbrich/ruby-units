@@ -73,55 +73,69 @@ module RubyUnits
       information
       angle
     ].freeze
+
+    UNITLESS = 1
+    # These are the 10th..20th prime numbers
+    LENGTH = 31
+    TIME = 37
+    TEMPERATURE = 41
+    MASS = 43
+    CURRENT = 47
+    SUBSTANCE = 53
+    LUMINOSITY = 59
+    CURRENCY = 61
+    INFORMATION = 67
+    ANGLE = 71
+
     @@kinds = {
-      -312_078     => :elastance,
-      -312_058     => :resistance,
-      -312_038     => :inductance,
-      -152_040     => :magnetism,
-      -152_038     => :magnetism,
-      -152_058     => :potential,
-      -7997        => :specific_volume,
-      -79          => :snap,
-      -59          => :jolt,
-      -39          => :acceleration,
-      -38          => :radiation,
-      -20          => :frequency,
-      -19          => :speed,
-      -18          => :viscosity,
-      -17          => :volumetric_flow,
-      -1           => :wavenumber,
-      0            => :unitless,
-      1            => :length,
-      2            => :area,
-      3            => :volume,
-      20           => :time,
-      400          => :temperature,
-      7941         => :yank,
-      7942         => :power,
-      7959         => :pressure,
-      7962         => :energy,
-      7979         => :viscosity,
-      7961         => :force,
-      7981         => :momentum,
-      7982         => :angular_momentum,
-      7997         => :density,
-      7998         => :area_density,
-      8000         => :mass,
-      152_020      => :radiation_exposure,
-      159_999      => :magnetism,
-      160_000      => :current,
-      160_020      => :charge,
-      312_058      => :conductance,
-      312_078      => :capacitance,
-      3_199_980    => :activity,
-      3_199_997    => :molar_concentration,
-      3_200_000    => :substance,
-      63_999_998   => :illuminance,
-      64_000_000   => :luminous_power,
-      1_280_000_000 => :currency,
-      25_600_000_000  => :information,
-      511_999_999_980 => :angular_velocity,
-      512_000_000_000 => :angle
+      UNITLESS => :unitless,
+      ANGLE => :angle,
+      CURRENCY => :currency,
+      CURRENT * TIME => :charge,
+      CURRENT => :current,
+      INFORMATION => :information,
+      LENGTH => :length,
+      LENGTH**2 => :area,
+      LENGTH**3 => :volume,
+      LUMINOSITY => :luminous_power,
+      MASS => :mass,
+      Rational(1, LENGTH) => :wavenumber,
+      Rational(1, TIME) => :frequency,
+      Rational(ANGLE, TIME) => :angular_velocity,
+      Rational(LENGTH, TIME) => :speed,
+      Rational(LENGTH, TIME**2) => :acceleration,
+      Rational(LENGTH, TIME**3) => :jerk,
+      Rational(LENGTH, TIME**4) => :snap,
+      Rational(LENGTH**2, TIME) => :kinematic_viscosity,
+      Rational(LENGTH**2, TIME**2) => :radiation,
+      Rational(LENGTH**3, MASS) => :specific_volume,
+      Rational(LENGTH**3, TIME) => :volumetric_flow,
+      Rational(LUMINOSITY, LENGTH**2) => :illuminance,
+      Rational(MASS * LENGTH, TIME) => :momentum,
+      Rational(MASS * LENGTH, TIME**2) => :force,
+      Rational(MASS * LENGTH, TIME**3) => :yank,
+      Rational(MASS * LENGTH**2, CURRENT * TIME**2) => :magnetic_flux,
+      Rational(MASS * LENGTH**2, CURRENT * TIME**3) => :potential,
+      Rational(MASS * LENGTH**2, CURRENT**2 * TIME**2) => :inductance,
+      Rational(MASS * LENGTH**2, CURRENT**2 * TIME**3) => :resistance,
+      Rational(MASS * LENGTH**2, CURRENT**2 * TIME**4) => :elastance,
+      Rational(MASS * LENGTH**2, TIME) => :angular_momentum,
+      Rational(MASS * LENGTH**2, TIME**2) => :energy,
+      Rational(MASS * LENGTH**2, TIME**3) => :power,
+      Rational(MASS, LENGTH * TIME) => :dynamic_viscosity,
+      Rational(MASS, LENGTH * TIME**2) => :pressure,
+      Rational(MASS, LENGTH**2) => :area_density,
+      Rational(MASS, LENGTH**3) => :density,
+      Rational(MASS, TIME**2 * CURRENT) => :magnetic_flux_density,
+      Rational(SUBSTANCE, LENGTH**3) => :molar_concentration,
+      Rational(SUBSTANCE, TIME) => :activity,
+      Rational(TIME * CURRENT, MASS)=> :radiation_exposure,
+      Rational(TIME * LENGTH, MASS) => :fluidity,
+      Rational(TIME**3 * CURRENT**2, MASS * LENGTH**2) => :conductance,
+      Rational(TIME**4 * CURRENT**2, LENGTH**2 * MASS) => :capacitance,
+      SUBSTANCE => :substance,
+      TEMPERATURE => :temperature,
+      TIME => :time
     }.freeze
     @@cached_units     = {}
     @@base_unit_cache  = {}
@@ -905,7 +919,7 @@ module RubyUnits
       when Unit
         raise ArgumentError, 'Cannot multiply by temperatures' if [other, self].any?(&:temperature?)
         opts = RubyUnits::Unit.eliminate_terms(@scalar * other.scalar, @numerator + other.numerator, @denominator + other.denominator)
-        opts[:signature] = @signature + other.signature
+        opts[:signature] = @signature * other.signature
         RubyUnits::Unit.new(opts)
       when Numeric
         RubyUnits::Unit.new(scalar: @scalar * other, numerator: @numerator, denominator: @denominator, signature: @signature)
@@ -929,7 +943,7 @@ module RubyUnits
         sc = Rational(@scalar, other.scalar)
         sc = sc.numerator if sc.denominator == 1
         opts = RubyUnits::Unit.eliminate_terms(sc, @numerator + other.denominator, @denominator + other.numerator)
-        opts[:signature] = @signature - other.signature
+        opts[:signature] = Rational(@signature, other.signature)
         RubyUnits::Unit.new(opts)
       when Numeric
         raise ZeroDivisionError if other.zero?
@@ -1412,6 +1426,36 @@ module RubyUnits
       to(RubyUnits::Unit.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
     end
 
+    # @return [RubyUnit::Unit] equivalent unit expressed as simply as possible in other units
+    def simplify
+      scalar = self.scalar
+      numerator = self.numerator
+      denominator = self.denominator
+      candidate_units = RubyUnits::Unit.definitions.values.reject do |defn|
+        defn.prefix? || defn.base? || (defn.denominator == UNITY_ARRAY && defn.numerator.size == 1)
+      end
+      candidate_units = candidate_units.sort_by {|defn| defn.numerator.size + defn.denominator.size}.reverse
+      proposed_unit = candidate_units.select do |defn|
+        # this is only going to replace an exact match
+        self.signature.divmod(defn.signature) == [1, 0] && self.system == defn.system
+      end
+      binding.pry if proposed_unit.count > 1
+      return self if proposed_unit.empty?
+      convert_to(RubyUnits::Unit.new(proposed_unit.first.name))
+    end
+
+    def system
+      @system ||= begin
+        if base?
+          RubyUnits::Unit.definitions[numerator.first].system
+        else
+          systems = (numerator.map {|element| RubyUnits::Unit.definitions[element].system } + denominator.map {|element| RubyUnits::Unit.definitions[element].system}).compact
+          systems.uniq.max_by { |system| systems.count(system) }
+        end
+      end
+    end
+
+
     # override hash method so objects with same values are considered equal
     def hash
       [
@@ -1471,18 +1515,21 @@ module RubyUnits
       @denominator = other.denominator.dup
     end
 
+    require 'prime'
     # calculates the unit signature id for use in comparing compatible units and simplification
     # the signature is based on a simple classification of units and is based on the following publication
     #
     # Novak, G.S., Jr. "Conversion of units of measurement", IEEE Transactions on Software Engineering, 21(8), Aug 1995, pp.651-661
     # @see http://doi.ieeecomputersociety.org/10.1109/32.403789
-    # @return [Array]
+    # @return [Rational]
     def unit_signature
-      return @signature unless @signature.nil?
-      vector = unit_signature_vector
-      vector.each_with_index { |item, index| vector[index] = item * 20**index }
-      @signature = vector.inject(0) { |acc, elem| acc + elem }
-      @signature
+      @signature ||= begin
+        vector = unit_signature_vector
+        primes = Prime.take(vector.size+10).last(10)
+        Prime.int_from_prime_division(primes.zip(vector))
+        #vector.each.with_index { |item, index| vector[index] = item * 20**index }
+        #vector.inject(0) { |acc, elem| acc + elem }
+      end
     end
 
     # parse a string into a unit object.

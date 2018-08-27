@@ -3,6 +3,7 @@
 RubyUnits::Unit.define('inch') do |inch|
   inch.definition = RubyUnits::Unit.new('254/10000 meter')
   inch.aliases    = %w[in inch inches "]
+  inch.system     = :imperial
 end
 
 RubyUnits::Unit.define('foot') do |foot|
@@ -13,6 +14,7 @@ end
 RubyUnits::Unit.define('survey-foot') do |sft|
   sft.definition = RubyUnits::Unit.new('1200/3937 meter')
   sft.aliases    = %w[sft sfoot sfeet]
+  sft.system     = :imperial
 end
 
 RubyUnits::Unit.define('yard') do |yard|
@@ -28,6 +30,7 @@ end
 RubyUnits::Unit.define('naut-mile') do |naut|
   naut.definition = RubyUnits::Unit.new('1852 m')
   naut.aliases    = %w[nmi M NM]
+  naut.system     = :imperial
 end
 
 # on land
@@ -65,6 +68,7 @@ end
 RubyUnits::Unit.define('angstrom') do |ang|
   ang.definition = RubyUnits::Unit.new('1/10 nm')
   ang.aliases    = %w[ang angstrom angstroms]
+  ang.system = :si
 end
 
 # typesetting
@@ -123,21 +127,25 @@ end
 RubyUnits::Unit.define('pound') do |pound|
   pound.definition = RubyUnits::Unit.new(Rational(45_359_237, 1e8), 'kg')
   pound.aliases    = %w[lbs lb lbm pound-mass pound pounds #]
+  pound.system = :imperial
 end
 
 RubyUnits::Unit.define('ounce') do |ounce|
   ounce.definition = RubyUnits::Unit.new('1/16 lbs')
   ounce.aliases    = %w[oz ounce ounces]
+  ounce.system     = :imperial
 end
 
 RubyUnits::Unit.define('gram') do |gram|
   gram.definition = RubyUnits::Unit.new('1/1000 kg')
   gram.aliases    = %w[g gram grams gramme grammes]
+  gram.system = :si
 end
 
 RubyUnits::Unit.define('short-ton') do |ton|
   ton.definition = RubyUnits::Unit.new('2000 lbs')
   ton.aliases    = %w[tn ton tons short-tons]
+  ton.system = :imperial
 end
 
 RubyUnits::Unit.define('carat') do |carat|
@@ -148,6 +156,7 @@ end
 RubyUnits::Unit.define('stone') do |stone|
   stone.definition = RubyUnits::Unit.new('14 lbs')
   stone.aliases    = %w[st stone]
+  stone.system = :imperial
 end
 
 # time
@@ -175,6 +184,7 @@ end
 RubyUnits::Unit.define('fortnight') do |fortnight|
   fortnight.definition  = RubyUnits::Unit.new('2 weeks')
   fortnight.aliases     = %w[fortnight fortnights]
+  fortnight.system = :imperial
 end
 
 RubyUnits::Unit.define('year') do |year|
@@ -196,6 +206,7 @@ end
 
 RubyUnits::Unit.define('hectare') do |hectare|
   hectare.definition = RubyUnits::Unit.new('10000 m^2')
+  hectare.system = :si
 end
 
 RubyUnits::Unit.define('acre') do |acre|
@@ -305,6 +316,7 @@ end
 RubyUnits::Unit.define('dyne') do |dyne|
   dyne.definition = RubyUnits::Unit.new('1/100000 N')
   dyne.aliases    = %w[dyn dyne]
+  dyne.system = :cgs
 end
 
 RubyUnits::Unit.define('pound-force') do |lbf|
@@ -414,6 +426,7 @@ end
 RubyUnits::Unit.define('inHg') do |inhg|
   density_of_mercury = RubyUnits::Unit.new('7653360911758079/562949953421312 g/cm^3') # 13.5951 g/cm^3 at 0 tempC
   inhg.definition    = RubyUnits::Unit.new('1 in') * RubyUnits::Unit.new('1 gee') * density_of_mercury
+  inhg.system = nil
 end
 
 RubyUnits::Unit.define('torr') do |torr|
@@ -435,6 +448,7 @@ RubyUnits::Unit.define('inh2o') do |inh2o|
   density_of_water  = RubyUnits::Unit.new('1 g/cm^3') # at 4 tempC
   inh2o.definition  = RubyUnits::Unit.new('1 in') * RubyUnits::Unit.new('1 gee') * density_of_water
   inh2o.aliases     = %w[inH2O inh2o inAq]
+  inh2o.system = :imperial
 end
 
 # viscosity
@@ -442,11 +456,13 @@ end
 RubyUnits::Unit.define('poise') do |poise|
   poise.definition  = RubyUnits::Unit.new('dPa*s')
   poise.aliases     = %w[P poise]
+  poise.system = :cgs
 end
 
 RubyUnits::Unit.define('stokes') do |stokes|
   stokes.definition = RubyUnits::Unit.new('1 cm^2/s')
   stokes.aliases    = %w[St stokes]
+  stokes.system = :cgs
 end
 
 # #energy
@@ -459,6 +475,7 @@ end
 RubyUnits::Unit.define('erg') do |erg|
   erg.definition  = RubyUnits::Unit.new('1 g*cm^2/s^2')
   erg.aliases     = %w[erg ergs]
+  erg.system = :cgs
 end
 
 # power
@@ -477,23 +494,27 @@ end
 RubyUnits::Unit.define('btu') do |btu|
   btu.definition  = RubyUnits::Unit.new('2320092679909671/2199023255552 J') # 1055.056 J  --- ISO standard
   btu.aliases     = %w[Btu btu Btus btus]
+  btu.system = nil
 end
 
 RubyUnits::Unit.define('therm') do |therm|
   therm.definition  = RubyUnits::Unit.new('100 kBtu')
   therm.aliases     = %w[thm therm therms Therm]
+  therm.system = nil
 end
 
 # "small" calorie
 RubyUnits::Unit.define('calorie') do |calorie|
   calorie.definition  = RubyUnits::Unit.new('4.184 J')
   calorie.aliases     = %w[cal calorie calories]
+  calorie.system = nil
 end
 
 # "big" calorie
 RubyUnits::Unit.define('Calorie') do |calorie|
   calorie.definition  = RubyUnits::Unit.new('1 kcal')
   calorie.aliases     = %w[Cal Calorie Calories]
+  calorie.system = nil
 end
 
 RubyUnits::Unit.define('molar') do |molar|
