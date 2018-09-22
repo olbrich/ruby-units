@@ -99,6 +99,13 @@ class RubyUnits::Unit < Numeric
         (numerator.first == self.name)
     end
 
+    # The sum of the number of elements in the numerator and denominator
+    # A numerator or denominator of UNITY_ARRAY don't count
+    # @return [Integer]
+    def complexity
+      (numerator + denominator - RubyUnits::Unit::UNITY_ARRAY).size
+    end
+
     def signature
       @signature ||= begin
         return if prefix?

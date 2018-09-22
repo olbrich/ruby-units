@@ -601,6 +601,7 @@ end
 RubyUnits::Unit.define('hertz') do |hz|
   hz.definition   = RubyUnits::Unit.new('1 1/s')
   hz.aliases      = %w[Hz hertz]
+  hz.system       = :si
 end
 
 # angle

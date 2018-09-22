@@ -1328,27 +1328,16 @@ describe Unit do
     end
   end
 
-  describe '#definition' do
-    context 'The requested unit is defined' do
-      before(:each) do
-        @definition = Unit.definition('mph')
+  describe '#definition(name)' do
+    context 'when the requested unit is already defined' do
+      specify do
+        expect(RubyUnits::Unit.definition('mph')).to be_a(RubyUnits::Unit::Definition)
       end
-
-      it 'should return a Unit::Definition' do
-        expect(@definition).to be_instance_of(Unit::Definition)
-      end
-
-      specify { expect(@definition.name).to eq('<mph>') }
-      specify { expect(@definition.aliases).to eq(%w[mph]) }
-      specify { expect(@definition.numerator).to eq(['<meter>']) }
-      specify { expect(@definition.denominator).to eq(['<second>']) }
-      specify { expect(@definition.kind).to eq(:speed) }
-      specify { expect(@definition.scalar).to be === 0.44704 }
     end
 
-    context 'The requested unit is not defined' do
+    context 'when the requested unit is not defined' do
       it 'should return nil' do
-        expect(Unit.definition('doohickey')).to be_nil
+        expect(RubyUnits::Unit.definition('doohickey')).to be_nil
       end
     end
   end
