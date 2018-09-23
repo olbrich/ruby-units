@@ -121,6 +121,26 @@ describe 'definition of percent' do
   end
 end
 
+# mega is a prefix
+describe 'definition of mega' do
+  subject(:percent) { RubyUnits::Unit.definition('mega') }
+  specify do
+    expect(percent).to be_a RubyUnits::Unit::Definition
+    expect(percent.aliases).to eq %w[M Mega mega]
+    expect(percent.base?).to eq false
+    expect(percent.complexity).to eq 0
+    expect(percent.denominator).to eq RubyUnits::Unit::UNITY_ARRAY
+    expect(percent.display_name).to eq 'M'
+    expect(percent.kind).to eq :prefix
+    expect(percent.name).to eq '<mega>'
+    expect(percent.numerator).to eq RubyUnits::Unit::UNITY_ARRAY
+    expect(percent.prefix?).to eq true
+    expect(percent.scalar).to eq 1_000_000.0
+    expect(percent.signature).to be_nil # prefixes don't have signatures
+    expect(percent.system).to be_nil # while SI prefixes are part of the SI system, they also get used in other systems as well.
+  end
+end
+
 describe 'new unit definition for electron volt (not normally definied)' do
   subject do
     Unit::Definition.new('eV') do |ev|
