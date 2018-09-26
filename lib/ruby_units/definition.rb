@@ -109,8 +109,12 @@ class RubyUnits::Unit < Numeric
     def signature
       @signature ||= begin
         return if prefix?
-        RubyUnits::Unit.new(display_name).signature
+        to_unit.signature
       end
+    end
+
+    def to_unit
+      RubyUnits::Unit.new(display_name)
     end
   end
 end

@@ -1431,17 +1431,29 @@ module RubyUnits
       scalar = self.scalar
       numerator = self.numerator
       denominator = self.denominator
-      candidate_units = RubyUnits::Unit.definitions.values.reject do |defn|
-        defn.prefix? || defn.base? || (defn.denominator == UNITY_ARRAY && defn.numerator.size == 1)
+      # units to consider for simplification should be
+      # 1. composite units made up of two or more other units
+      # 2. not a prefix
+      # 3. part of the same system as this unit
+      candidate_units = RubyUnits::Unit.definitions.values.select do |defn|
+        !defn.prefix? &&
+        defn.complexity > 1 &&
+        defn.system == self.system
       end
-      candidate_units = candidate_units.sort_by {|defn| defn.numerator.size + defn.denominator.size}.reverse
-      proposed_unit = candidate_units.select do |defn|
-        # this is only going to replace an exact match
-        self.signature.divmod(defn.signature) == [1, 0] && self.system == defn.system
-      end
-      binding.pry if proposed_unit.count > 1
-      return self if proposed_unit.empty?
-      convert_to(RubyUnits::Unit.new(proposed_unit.first.name))
+      candidate_units = candidate_units.sort_by {|defn| defn.complexity }.reverse
+      proposed_unit = candidate_units.detect do |defn|
+        self.signature.numerator.lcm(defn.signature.numerator) == self.signature.numerator &&
+        self.signature.denominator.lcm(defn.signature.denominator) == self.signature.denominator
+      end&.to_unit
+      proposed_unit ||= candidate_units.detect do |defn|
+        self.signature.numerator.lcm(defn.signature.denominator) == self.signature.numerator &&
+        self.signature.denominator.lcm(defn.signature.numerator) == self.signature.denominator
+      end&.to_unit&.inverse
+      binding.pry #if proposed_unit.count > 1
+      return self if proposed_unit.nil?
+      (self / proposed_unit).to_base.simplify * proposed_unit
+    rescue => e
+      binding.pry
     end
 
     def system
@@ -1521,14 +1533,12 @@ module RubyUnits
     #
     # Novak, G.S., Jr. "Conversion of units of measurement", IEEE Transactions on Software Engineering, 21(8), Aug 1995, pp.651-661
     # @see http://doi.ieeecomputersociety.org/10.1109/32.403789
-    # @return [Rational]
+    # @return [Rational, Integer]
     def unit_signature
       @signature ||= begin
         vector = unit_signature_vector
         primes = Prime.take(vector.size+10).last(10)
         Prime.int_from_prime_division(primes.zip(vector))
-        #vector.each.with_index { |item, index| vector[index] = item * 20**index }
-        #vector.inject(0) { |acc, elem| acc + elem }
       end
     end
 

@@ -2078,6 +2078,31 @@ describe 'Unit Math' do
       expect(result.units).to eq "J"
       expect(result.scalar).to eq 1
     end
+
+    it 'should simplify kg*m^2/s^4 to W/s' do
+      result = RubyUnits::Unit.new('1 kg*m^2/s^4').simplify
+      expect(result.units).to eq "W/s"
+      expect(result.scalar).to eq 1
+    end
+
+    it 'should simplify kg*m^2/s^3 to W' do
+      result = RubyUnits::Unit.new('1 kg*m^2/s^3').simplify
+      expect(result.units).to eq "W"
+      expect(result.scalar).to eq 1
+    end
+
+    it 'should simplify 1 s^2/kg*m^2 to 1/J' do
+      result = RubyUnits::Unit.new('1 s^2/kg*m^2').simplify
+      expect(result.units).to eq "1/J"
+      expect(result.scalar).to eq 1
+    end
+
+    fit 'should simplify 5280 ft to 1 mile' do
+      result = RubyUnits::Unit.new('5280 ft').simplify
+      expect(result.units).to eq "mi"
+      expect(result.scalar).to eq 1
+    end
+
   end
 
   context 'Time helper functions' do
