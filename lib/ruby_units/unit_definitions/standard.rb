@@ -25,12 +25,13 @@ end
 RubyUnits::Unit.define('mile') do |mile|
   mile.definition = RubyUnits::Unit.new('5280 ft')
   mile.aliases    = %w[mi mile miles]
+  mile.system     = :imperial
 end
 
 RubyUnits::Unit.define('naut-mile') do |naut|
   naut.definition = RubyUnits::Unit.new('1852 m')
   naut.aliases    = %w[nmi M NM]
-  naut.system     = :imperial
+  naut.system     = :naut_imperial
 end
 
 # on land
@@ -43,6 +44,7 @@ end
 RubyUnits::Unit.define('naut-league') do |naut_league|
   naut_league.definition = RubyUnits::Unit.new('3 nmi')
   naut_league.aliases    = %w[nleague nleagues]
+  naut_league.system     = :naut_imperial
 end
 
 RubyUnits::Unit.define('furlong') do |furlong|
@@ -58,6 +60,7 @@ end
 RubyUnits::Unit.define('fathom') do |fathom|
   fathom.definition = RubyUnits::Unit.new('6 ft')
   fathom.aliases    = %w[fathom fathoms]
+  fathom.system     = :naut_imperial
 end
 
 RubyUnits::Unit.define('mil') do |mil|
@@ -68,7 +71,7 @@ end
 RubyUnits::Unit.define('angstrom') do |ang|
   ang.definition = RubyUnits::Unit.new('1/10 nm')
   ang.aliases    = %w[ang angstrom angstroms]
-  ang.system = :si
+  ang.system     = :si
 end
 
 # typesetting
@@ -76,31 +79,37 @@ end
 RubyUnits::Unit.define('pica') do |pica|
   pica.definition = RubyUnits::Unit.new('1/72 ft')
   pica.aliases    = %w[P pica picas]
+  pica.system     = :typesetting
 end
 
 RubyUnits::Unit.define('point') do |point|
   point.definition = RubyUnits::Unit.new('1/12 pica')
   point.aliases    = %w[point points]
+  point.system     = :typesetting
 end
 
 RubyUnits::Unit.define('dot') do |dot|
   dot.definition  = RubyUnits::Unit.new('1 each')
   dot.aliases     = %w[dot dots]
   dot.kind        = :counting
+  dot.system      = :typesetting
 end
 
 RubyUnits::Unit.define('pixel') do |pixel|
   pixel.definition  = RubyUnits::Unit.new('1 each')
   pixel.aliases     = %w[px pixel pixels]
   pixel.kind        = :counting
+  pixel.system      = :typesetting
 end
 
 RubyUnits::Unit.define('ppi') do |ppi|
   ppi.definition  = RubyUnits::Unit.new('1 pixel/inch')
+  ppi.system      = :typesetting
 end
 
 RubyUnits::Unit.define('dpi') do |dpi|
   dpi.definition  = RubyUnits::Unit.new('1 dot/inch')
+  dpi.system     = :typesetting
 end
 
 # Mass
@@ -127,7 +136,7 @@ end
 RubyUnits::Unit.define('pound') do |pound|
   pound.definition = RubyUnits::Unit.new(Rational(45_359_237, 1e8), 'kg')
   pound.aliases    = %w[lbs lb lbm pound-mass pound pounds #]
-  pound.system = :imperial
+  pound.system     = :imperial
 end
 
 RubyUnits::Unit.define('ounce') do |ounce|
@@ -272,6 +281,7 @@ end
 RubyUnits::Unit.define('bdft') do |bdft|
   bdft.definition = RubyUnits::Unit.new('1/12 ft^3')
   bdft.aliases    = %w[fbm boardfoot boardfeet bf]
+  bdft.system = :lumber
 end
 
 # volumetric flow
@@ -298,6 +308,7 @@ end
 RubyUnits::Unit.define('knot') do |knot|
   knot.definition   = RubyUnits::Unit.new('1 nmi/hour')
   knot.aliases      = %w[kt kn kts knot knots]
+  knot.system = :naut_imperial
 end
 
 RubyUnits::Unit.define('gee') do |gee|
@@ -365,21 +376,25 @@ speed_of_light = RubyUnits::Unit.new('299792458 m/s')
 RubyUnits::Unit.define('light-second') do |ls|
   ls.definition = RubyUnits::Unit.new('1 s') * speed_of_light
   ls.aliases    = %w[ls lsec light-second]
+  ls.system = :astronomy
 end
 
 RubyUnits::Unit.define('light-minute') do |lmin|
   lmin.definition = RubyUnits::Unit.new('1 min') * speed_of_light
   lmin.aliases    = %w[lmin light-minute]
+  lmin.system = :astronomy
 end
 
 RubyUnits::Unit.define('light-year') do |ly|
   ly.definition = RubyUnits::Unit.new('1 y') * speed_of_light
   ly.aliases    = %w[ly light-year]
+  ly.system = :astronomy
 end
 
 RubyUnits::Unit.define('parsec') do |parsec|
   parsec.definition = RubyUnits::Unit.new('3.26163626 ly')
   parsec.aliases    = %w[pc parsec parsecs]
+  parsec.system = :astronomy
 end
 
 # once was '149597900000 m' but there appears to be a more accurate estimate according to wikipedia
@@ -387,11 +402,13 @@ end
 RubyUnits::Unit.define('AU') do |au|
   au.definition = RubyUnits::Unit.new('149597870700 m')
   au.aliases    = %w[AU astronomical-unit]
+  au.system = :astronomy
 end
 
 RubyUnits::Unit.define('redshift') do |red|
   red.definition = RubyUnits::Unit.new('1.302773e26 m')
   red.aliases    = %w[z red-shift]
+  red.system = :astronomy
 end
 
 # mass
@@ -494,27 +511,25 @@ end
 RubyUnits::Unit.define('btu') do |btu|
   btu.definition  = RubyUnits::Unit.new('2320092679909671/2199023255552 J') # 1055.056 J  --- ISO standard
   btu.aliases     = %w[Btu btu Btus btus]
-  btu.system = nil
 end
 
 RubyUnits::Unit.define('therm') do |therm|
   therm.definition  = RubyUnits::Unit.new('100 kBtu')
   therm.aliases     = %w[thm therm therms Therm]
-  therm.system = nil
 end
 
 # "small" calorie
 RubyUnits::Unit.define('calorie') do |calorie|
   calorie.definition  = RubyUnits::Unit.new('4.184 J')
   calorie.aliases     = %w[cal calorie calories]
-  calorie.system = nil
+  calorie.system = nil  # this unit is considered obsolete so we don't simplify to it
 end
 
 # "big" calorie
 RubyUnits::Unit.define('Calorie') do |calorie|
   calorie.definition  = RubyUnits::Unit.new('1 kcal')
   calorie.aliases     = %w[Cal Calorie Calories]
-  calorie.system = nil
+  calorie.system = :food
 end
 
 RubyUnits::Unit.define('molar') do |molar|
@@ -649,26 +664,31 @@ end
 RubyUnits::Unit.define('gray') do |gray|
   gray.definition = RubyUnits::Unit.new('1 J/kg')
   gray.aliases    = %w[Gy gray grays]
+  gray.system = :si_radiation
 end
 
 RubyUnits::Unit.define('roentgen') do |roentgen|
   roentgen.definition = RubyUnits::Unit.new('2.58e-4 C/kg')
   roentgen.aliases    = %w[R roentgen]
+  roentgen.system = :si_radiation
 end
 
 RubyUnits::Unit.define('sievert') do |sievert|
   sievert.definition  = RubyUnits::Unit.new('1 J/kg')
   sievert.aliases     = %w[Sv sievert sieverts]
+  sievert.system = :si_radiation
 end
 
 RubyUnits::Unit.define('becquerel') do |becquerel|
   becquerel.definition  = RubyUnits::Unit.new('1 1/s')
   becquerel.aliases     = %w[Bq becquerel becquerels]
+  becquerel.system = :si_radiation
 end
 
 RubyUnits::Unit.define('curie') do |curie|
   curie.definition  = RubyUnits::Unit.new('37 GBq')
   curie.aliases     = %w[Ci curie curies]
+  curie.system = :si_radiation
 end
 
 RubyUnits::Unit.define('count') do |count|

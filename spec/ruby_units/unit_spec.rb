@@ -2097,11 +2097,24 @@ describe 'Unit Math' do
       expect(result.scalar).to eq 1
     end
 
-    fit 'should simplify 5280 ft to 1 mile' do
+    it 'should simplify 5280 ft to 1 mile' do
       result = RubyUnits::Unit.new('5280 ft').simplify
-      expect(result.units).to eq "mi"
       expect(result.scalar).to eq 1
+      expect(result.units).to eq "mi"
     end
+
+    it 'should simplify 10000 ft to 1 mile' do
+      result = RubyUnits::Unit.new('10000 ft').simplify
+      expect(result.scalar).to eq Rational(125,66)
+      expect(result.units).to eq "mi"
+    end
+
+    fit 'should simplify 10000 g to 10 kg' do
+      result = RubyUnits::Unit.new('10000 g').simplify
+      expect(result.scalar).to eq 10
+      expect(result.units).to eq "kg"
+    end
+
 
   end
 

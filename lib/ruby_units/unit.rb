@@ -1427,7 +1427,9 @@ module RubyUnits
     end
 
     # @return [RubyUnit::Unit] equivalent unit expressed as simply as possible in other units
+    # @todo allow specifying a target system
     def simplify
+      return self if unitless?
       scalar = self.scalar
       numerator = self.numerator
       denominator = self.denominator
@@ -1437,20 +1439,25 @@ module RubyUnits
       # 3. part of the same system as this unit
       candidate_units = RubyUnits::Unit.definitions.values.select do |defn|
         !defn.prefix? &&
-        defn.complexity > 1 &&
+        !(defn.base? && defn.scalar == 1) && # if we transform by a base unit with a scalar of 1 we get back the same thing and get into an infinite loop
+        ![:counting, :unitless, :temperature].include?(defn.kind) &&
         defn.system == self.system
       end
-      candidate_units = candidate_units.sort_by {|defn| defn.complexity }.reverse
+      candidate_units = candidate_units.sort_by {|defn| [defn.complexity, defn.scalar] }.reverse
       proposed_unit = candidate_units.detect do |defn|
+        puts "#{self} numerator #{defn.name}"
         self.signature.numerator.lcm(defn.signature.numerator) == self.signature.numerator &&
-        self.signature.denominator.lcm(defn.signature.denominator) == self.signature.denominator
+        self.signature.denominator.lcm(defn.signature.denominator) == self.signature.denominator &&
+        (1.0...10.0).cover?((self.base_scalar.abs/defn.scalar))
       end&.to_unit
       proposed_unit ||= candidate_units.detect do |defn|
+        puts "#{self} denominator #{defn.name}"
         self.signature.numerator.lcm(defn.signature.denominator) == self.signature.numerator &&
-        self.signature.denominator.lcm(defn.signature.numerator) == self.signature.denominator
+        self.signature.denominator.lcm(defn.signature.numerator) == self.signature.denominator &&
+        (1.0...10.0).cover?((self.base_scalar.abs * defn.scalar))
       end&.to_unit&.inverse
-      binding.pry #if proposed_unit.count > 1
       return self if proposed_unit.nil?
+      puts "proposed unit #{proposed_unit}"
       (self / proposed_unit).to_base.simplify * proposed_unit
     rescue => e
       binding.pry
