@@ -12,7 +12,6 @@ rvm:
   - jruby-head
   - ruby-head
 before_install:
-  - rvm get stable
   - gem update --system
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
