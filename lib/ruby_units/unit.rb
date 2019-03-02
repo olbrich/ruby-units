@@ -268,6 +268,8 @@ module RubyUnits
 
       num.delete_if { |v| v == UNITY }
       den.delete_if { |v| v == UNITY }
+      num = num - %w[<kilo> <gram>] + %w[<kilogram>] if num & %w[<kilo> <gram>]
+      den = den - %w[<kilo> <gram>] + %w[<kilogram>] if den & %w[<kilo> <gram>]
       combined = Hash.new(0)
 
       i = 0
@@ -1419,11 +1421,11 @@ module RubyUnits
     def best_prefix
       return to_base if scalar.zero?
       best_prefix = if kind == :information
-                      @@prefix_values.key(2**((Math.log(base_scalar, 2) / 10.0).floor * 10))
+                      @@prefix_values.key(2**((Math.log(scalar, 2) / 10.0).floor * 10))
                     else
-                      @@prefix_values.key(10**((Math.log10(base_scalar) / 3.0).floor * 3))
+                      @@prefix_values.key(10**((Math.log10(scalar) / 3.0).floor * 3))
                     end
-      to(RubyUnits::Unit.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
+      convert_to(RubyUnits::Unit.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
     end
 
     # @return [RubyUnit::Unit] equivalent unit expressed as simply as possible in other units
@@ -1456,9 +1458,9 @@ module RubyUnits
         self.signature.denominator.lcm(defn.signature.numerator) == self.signature.denominator &&
         (1.0...10.0).cover?((self.base_scalar.abs * defn.scalar))
       end&.to_unit&.inverse
-      return self if proposed_unit.nil?
+      return self.best_prefix if proposed_unit.nil?
       puts "proposed unit #{proposed_unit}"
-      (self / proposed_unit).to_base.simplify * proposed_unit
+      ((self / proposed_unit).to_base.simplify * proposed_unit).best_prefix
     rescue => e
       binding.pry
     end

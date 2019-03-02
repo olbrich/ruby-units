@@ -2067,8 +2067,16 @@ describe 'Unit Math' do
   end
 
   context '#best_prefix' do
-    specify { expect(RubyUnits::Unit.new('1024 KiB').best_prefix).to eq(RubyUnits::Unit.new('1 MiB')) }
-    specify { expect(RubyUnits::Unit.new('1000 m').best_prefix).to eq(RubyUnits::Unit.new('1 km')) }
+    it 'handles information units in the proper prefixes' do
+      expect(RubyUnits::Unit.new('1024 KiB').best_prefix.units).to eq(RubyUnits::Unit.new('MiB'))
+      expect(RubyUnits::Unit.new('1024 KiB').best_prefix.scalar).to eq 1
+    end
+    it 'properly handles large scalars' do
+      expect(RubyUnits::Unit.new('1000 m').best_prefix.units).to eq 'km'
+      expect(RubyUnits::Unit.new('1000 m').best_prefix.scalar).to eq 1
+    end
+    specify { expect(RubyUnits::Unit.new('1000 km').best_prefix).to eq(RubyUnits::Unit.new('1 Mm')) }
+    specify { expect(RubyUnits::Unit.new('1000 g').best_prefix).to eq(RubyUnits::Unit.new('1 kg')) }
     specify { expect { RubyUnits::Unit.new('0 m').best_prefix }.to_not raise_error }
   end
 
