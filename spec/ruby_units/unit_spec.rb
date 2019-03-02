@@ -1744,6 +1744,10 @@ describe 'Unit Math' do
       context 'between a degree and a temperature' do
         specify { expect(RubyUnits::Unit.new('100 degK') + RubyUnits::Unit.new('100 tempK')).to eq(RubyUnits::Unit.new('200 tempK')) }
       end
+
+      context 'between two unitless units' do
+        specify { expect(RubyUnits::Unit.new('1') + RubyUnits::Unit.new('2')).to eq 3 }
+      end
     end
 
     context 'subtracting (-)' do
@@ -1783,6 +1787,10 @@ describe 'Unit Math' do
 
       context 'between a degree and a temperature' do
         specify { expect { (RubyUnits::Unit.new('100 degK') - RubyUnits::Unit.new('100 tempK')) }.to raise_error(ArgumentError, 'Cannot subtract a temperature from a differential degree unit') }
+      end
+
+      context 'a unitless unit from another unitless unit' do
+        specify { expect(RubyUnits::Unit.new('1') - RubyUnits::Unit.new('2')).to eq -1 }
       end
     end
 
