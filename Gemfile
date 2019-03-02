@@ -1,22 +1,22 @@
 source 'https://rubygems.org'
 
-ruby RUBY_VERSION
-
 group :development do
-  gem 'bundler', '~> 1.0'
-  gem 'guard-rspec'
-  gem 'jeweler'
+  gem 'bundler'
+  gem 'guard-rspec', require: false
+  gem 'jeweler', require: false
+  gem 'pry-byebug', platform: :mri
   gem 'pry'
-  gem 'pry-byebug', platforms: :mri
-  gem 'ruby-prof', platforms: :mri
-  gem 'terminal-notifier'
+  gem 'rubocop', '~> 0.63.0', require: false # match codeclimate
+  gem 'ruby-maven', platform: :jruby
+  gem 'ruby-prof', platform: :mri
   gem 'terminal-notifier-guard'
+  gem 'terminal-notifier'
 end
 
 group :test do
-  gem 'rake'
+  gem 'rake', require: false
   gem 'rspec'
-  gem 'rubocop', '~> 0.51.0' # match codeclimate
+  gem 'simplecov-html', require: false
   gem 'simplecov'
-  gem 'simplecov-html'
+  gem 'wwtd', require: false
 end
