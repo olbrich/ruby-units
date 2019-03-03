@@ -22,7 +22,6 @@ require 'date'
 #
 module RubyUnits
   class Unit < Numeric
-    VERSION            = Unit::Version::STRING
     @@definitions      = {}
     @@prefix_values    = {}
     @@prefix_map       = {}

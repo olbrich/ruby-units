@@ -1,14 +1,14 @@
-pkg
-.yardoc
-.bundle
-coverage
-Gemfile.lock
-*.rbc
-.rspec
-.rvmrc
-.rbx
-.idea
-doc
-bin
-tmp
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+/bin/
+# rspec failure tracking
+.rspec_status
 
+# don't check in Gemfile.lock for a gem
+Gemfile.lock
