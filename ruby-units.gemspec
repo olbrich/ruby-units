@@ -26,15 +26,15 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ['lib']
 
+  spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rubocop', '~> 0.63.0' # match codeclimate
   spec.add_development_dependency 'simplecov-html'
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'terminal-notifier-guard'
   spec.add_development_dependency 'terminal-notifier'
   spec.add_development_dependency 'wwtd'
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rspec', '~> 3.0'
 end
