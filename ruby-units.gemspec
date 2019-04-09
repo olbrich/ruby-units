@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['kevin.olbrich@gmail.com']
 
   spec.required_rubygems_version = '>= 2.0'
-  spec.required_ruby_version = '>= 2.3'
+  spec.required_ruby_version = '>= 2.4'
   spec.summary       = 'Provides classes and methods to perform unit math and conversions'
   spec.description   = 'Provides classes and methods to perform unit math and conversions'
   spec.homepage      = 'https://github.com/olbrich/ruby-units'
