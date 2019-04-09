@@ -158,7 +158,7 @@ module RubyUnits
     # @param [String] unit
     # @return [RubyUnits::Unit::Definition, nil]
     def self.definition(unit_name)
-      unit = unit_name =~ /^<.+>$/ ? unit_name : "<#{unit_name}>"
+      unit = unit_name&.match?(/^<.+>$/) ? unit_name : "<#{unit_name}>"
       @@definitions[unit]
     end
 
@@ -578,7 +578,7 @@ module RubyUnits
     # @todo this is brittle as it depends on the display_name of a unit, which can be changed
     def to_base
       return self if base?
-      if @@unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
+      if @@unit_map[units]&.match?(/\A<(?:temp|deg)[CRF]>\Z/)
         @signature = @@kinds.key(:temperature)
         base = if temperature?
                  convert_to('tempK')
@@ -1541,7 +1541,7 @@ module RubyUnits
       # ... and then strip the remaining brackets for x*y*z
       unit_string.gsub!(/[<>]/, '')
 
-      if unit_string =~ /:/
+      if unit_string&.match?(/:/)
         hours, minutes, seconds, microseconds = unit_string.scan(TIME_REGEX)[0]
         raise ArgumentError, 'Invalid Duration' if [hours, minutes, seconds, microseconds].all?(&:nil?)
         result = RubyUnits::Unit.new("#{hours || 0} h") +
