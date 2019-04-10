@@ -8,7 +8,7 @@ end
 
 # This is a minimal set of Gems required to build on travis
 group :test do
-  gem 'bundler'
+  gem 'bundler', '~>1.16'
   gem 'rake'
   gem 'rspec'
   gem 'simplecov'
