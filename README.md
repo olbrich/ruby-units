@@ -1,7 +1,7 @@
 Ruby Units
 ==========
 
-[![Build Status](https://secure.travis-ci.org/olbrich/ruby-units.png)](http://travis-ci.org/olbrich/ruby-units)
+[![Build Status](https://secure.travis-ci.org/olbrich/ruby-units.svg)](http://travis-ci.org/olbrich/ruby-units)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Folbrich%2Fruby-units.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Folbrich%2Fruby-units?ref=badge_shield)
 
 Kevin C. Olbrich, Ph.D.
