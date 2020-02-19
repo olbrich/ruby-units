@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rubocop', '~> 0.77.0' # match codeclimate
+  spec.add_development_dependency 'rubocop', '~> 0.80.0' # match codeclimate
   spec.add_development_dependency 'simplecov-html'
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'terminal-notifier-guard'
