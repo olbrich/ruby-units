@@ -861,6 +861,94 @@ describe 'Create some simple units' do
     end
   end
 
+  describe 'Units with rates of <unit> per N <unit>' do
+    subject { Unit.new(2, 'kg/100kg') }
+
+    before do
+      Unit.clear_cache # Needed for the following definition to consistently work
+      Unit.define('100kg') do |u|
+        u.definition = Unit.new('100 kg')
+        u.aliases = %w[100kg]
+      end
+    end
+
+    it { is_expected.to be_an_instance_of Unit }
+
+    describe '#scalar' do
+      subject { super().scalar }
+      it { is_expected.to be_an Numeric }
+      it { is_expected.to eq(2) }
+    end
+
+    describe '#units' do
+      subject { super().units }
+      it { is_expected.to be_a String }
+      it { is_expected.to eq('kg/100kg') }
+    end
+
+    context 'when there is a power involved (e.g. liters squared)' do
+      subject { Unit.new(2, 'l^2/100kg') }
+
+      it { is_expected.to be_an_instance_of Unit }
+
+      describe '#scalar' do
+        subject { super().scalar }
+        it { is_expected.to be_an Numeric }
+        it { is_expected.to eq(2) }
+      end
+
+      describe '#units' do
+        subject { super().units }
+        it { is_expected.to be_a String }
+        it { is_expected.to eq('l^2/100kg') }
+      end
+    end
+
+    describe 'Calculations' do
+      describe 'Addition' do
+        subject { Unit.new(2, 'kg/100kg') + Unit.new(2, 'kg/100kg') }
+
+        describe '#scalar', skip: 'TODO: Fix the 4/1 here' do
+          subject { super().scalar }
+          it { is_expected.to eq('4') }
+        end
+
+        describe '#units' do
+          subject { super().units }
+          it { is_expected.to eq('kg/100kg') }
+        end
+      end
+
+      describe 'Multiplication' do
+        subject { Unit.new(2, 'kg/100kg') * Unit.new(2, 'kg/100kg') }
+
+        describe '#scalar', skip: 'TODO: Fix the infinite loop here' do
+          subject { super().scalar }
+          it { is_expected.to eq('4') }
+        end
+
+        describe '#units', skip: 'TODO: Fix the infinite loop here' do
+          subject { super().units }
+          it { is_expected.to eq('kg/100kg') }
+        end
+      end
+
+      describe 'Division' do
+        subject { Unit.new(4, 'kg/100kg') / Unit.new(2, 'kg/100kg') }
+
+        describe '#scalar' do
+          subject { super().scalar }
+          it { is_expected.to eq(2) }
+        end
+
+        describe '#units' do
+          subject { super().units }
+          it { is_expected.to eq('') }
+        end
+      end
+    end
+  end
+
   # time string
   describe RubyUnits::Unit.new('1:23:45,200') do
     it { is_expected.to be_an_instance_of Unit }

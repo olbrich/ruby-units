@@ -1511,7 +1511,8 @@ module RubyUnits
         return
       end
 
-      if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
+      power_match = %r{\^\d+/\d+} # This prevents thinking e.g. kg^2/100l is rational because of 2/100
+      if defined?(Rational) && unit_string =~ RATIONAL_NUMBER && !unit_string.match(power_match)
         sign, proper, numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
         sign = sign == '-' ? -1 : 1
         rational = sign * (proper.to_i + Rational(numerator.to_i, denominator.to_i))
@@ -1594,7 +1595,7 @@ module RubyUnits
       if bottom
         bottom.gsub!(BOTTOM_REGEX) { "#{Regexp.last_match(1)} " * Regexp.last_match(2).to_i }
         # Separate leading decimal from denominator, if any
-        bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
+        bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0] unless self.class.defined?(bottom) # Maintain scalar if it's part of the unit definition
       end
 
       @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
