@@ -5,7 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  worflow_dispatch:
+  workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
