@@ -22,7 +22,7 @@ describe 'Complex Unit' do
   it { is_expected.to be === '1-1i'.to_unit }
 
   it 'is not comparable' do
-    if Complex.respond_to?(:<=>) # this is true for Ruby >= 2.7
+    if subject.scalar.respond_to?(:<=>) # this is true for Ruby >= 2.7
       expect { subject > '1+1i'.to_unit }.to raise_error(ArgumentError)
       expect { subject < '1+1i'.to_unit }.to raise_error(ArgumentError)
     else
