@@ -30,6 +30,3 @@ checks:
   identical-code:
     config:
       threshold: # language-specific defaults. an override will affect all languages.
-plugins:
-  rubocop:
-    enabled: true
