@@ -20,18 +20,18 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
     - name: Tests for Ruby ${{ matrix.ruby }}
-      env:
-        # simplecov will format with json if CC_TEST_REPORTER_ID is defined
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       run: bundle exec rake
   coverage:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - run: ls -R ${{github.workspace}}
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
     - name: Publish code coverage
       uses: paambaati/codeclimate-action@v2.7.5
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
-        debug: true
+        coverageCommand: bundle exec rake
