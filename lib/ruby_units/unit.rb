@@ -1094,23 +1094,23 @@ module RubyUnits
                       end
         return self if target_unit == start_unit
 
-        # @type [Rational]
+        # @type [Numeric]
         @base_scalar ||= case @@unit_map[start_unit]
                          when '<tempC>'
-                           @scalar + 273.15r
+                           @scalar + 273.15
                          when '<tempK>'
-                           @scalar.to_r
+                           @scalar
                          when '<tempF>'
                            (@scalar + 459.67).to_r * Rational(5, 9)
                          when '<tempR>'
                            @scalar.to_r * Rational(5, 9)
                          end
-        # @type [Rational]
+        # @type [Numeric]
         q = case @@unit_map[target_unit]
             when '<tempC>'
-              @base_scalar - 273.15r
+              @base_scalar - 273.15
             when '<tempK>'
-              @base_scalar.to_r
+              @base_scalar
             when '<tempF>'
               @base_scalar.to_r * Rational(9, 5) - 459.67r
             when '<tempR>'
@@ -1146,6 +1146,7 @@ module RubyUnits
           ) / (
             (numerator2 + denominator1).inject(1) { |acc, elem| acc * elem }
           )
+        q = q.to_i if q.to_i == q && @scalar.is_a?(Integer)
         return RubyUnits::Unit.new(scalar: q, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
       end
     end

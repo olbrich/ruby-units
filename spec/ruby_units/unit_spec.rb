@@ -1664,8 +1664,12 @@ describe 'Unit Conversions' do
   # and it leads to subtle, unexpected bugs.
   # see #203
   context 'when the unit scalar is an Integer' do
-    it 'accurately does the conversion' do
+    it 'the conversion is done accurately' do
       expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB')).to be_within(RubyUnits::Unit.new('0.01 GiB')).of(RubyUnits::Unit.new('1.5 GiB'))
+    end
+
+    it 'the converted unit has an Integer scalar if the calculated value is a scalar' do
+      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to be_an(Integer)
     end
   end
 
