@@ -28,7 +28,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - run: ls coverage
+    - run: ls -R ${{github.workspace}}
     - name: Publish code coverage
       uses: paambaati/codeclimate-action@v2.7.5
       env:
