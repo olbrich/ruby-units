@@ -24,6 +24,7 @@ jobs:
         # simplecov will format with json if CC_TEST_REPORTER_ID is defined
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       run: bundle exec rake
+    - run: ls coverage
   coverage:
     needs: test
     runs-on: ubuntu-latest
