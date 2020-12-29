@@ -1,5 +1,9 @@
 Change Log for Ruby-units
 =========================
+2020-12-29  2.3.2   * Remove Jeweler (see #178) also adds Code of Conduct
+                    * Fix specs related to Complex comparisons (see #213)
+                    * Add support for Ruby 3.0 (also drop support for 2.3 and 2.4) (see #211)
+2018-09-26  2.3.1   * Addition and subtraction of unitless values. (see #175)
 2018-03-06  2.3.0   * Fix add (+) and subtract (-) for BigDecimal scalars. (see #167)
                     * Update ruby versions (#163)
                     * fix: temperature converting rational issue (#164)
