@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'redcarpet'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rubocop'
   spec.add_development_dependency 'rubocop-rake'
@@ -38,4 +39,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'solargraph'
   spec.add_development_dependency 'terminal-notifier-guard'
   spec.add_development_dependency 'terminal-notifier'
+  spec.add_development_dependency 'webrick'
+  spec.add_development_dependency 'yard'
 end

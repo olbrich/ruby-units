@@ -48,7 +48,7 @@ class RubyUnits::Unit < Numeric
     end
 
     # set the name, strip off '<' and '>'
-    # @param [String]
+    # @param name_value [String]
     # @return [String]
     def name=(name_value)
       @name = name_value.gsub(/[<>]/, '')
