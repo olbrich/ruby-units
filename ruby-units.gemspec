@@ -33,9 +33,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop'
   spec.add_development_dependency 'rubocop-rake'
   spec.add_development_dependency 'rubocop-rspec'
-  spec.add_development_dependency 'simplecov-html'
   spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'simplecov-html'
   spec.add_development_dependency 'solargraph'
-  spec.add_development_dependency 'terminal-notifier-guard'
   spec.add_development_dependency 'terminal-notifier'
+  spec.add_development_dependency 'terminal-notifier-guard'
+  spec.add_development_dependency 'webrick'
+  spec.add_development_dependency 'yard'
 end

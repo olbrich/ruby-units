@@ -68,6 +68,7 @@ GEM
     rb-fsevent (0.10.4)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
+    redcarpet (3.5.1)
     regexp_parser (2.0.3)
     reverse_markdown (2.0.0)
       nokogiri
@@ -134,6 +135,7 @@ GEM
     thor (1.0.1)
     tilt (2.0.10)
     unicode-display_width (1.7.0)
+    webrick (1.7.0)
     yard (0.9.26)
 
 PLATFORMS
@@ -147,6 +149,7 @@ DEPENDENCIES
   pry
   pry-byebug
   rake
+  redcarpet
   rspec (~> 3.0)
   rubocop
   rubocop-rake
@@ -159,6 +162,8 @@ DEPENDENCIES
   solargraph
   terminal-notifier
   terminal-notifier-guard
+  webrick
+  yard
 
 BUNDLED WITH
    2.2.3

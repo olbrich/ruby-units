@@ -155,7 +155,7 @@ module RubyUnits
     end
 
     # return the unit definition for a unit
-    # @param [String] unit
+    # @param unit_name [String]
     # @return [RubyUnits::Unit::Definition, nil]
     def self.definition(unit_name)
       unit = unit_name =~ /^<.+>$/ ? unit_name : "<#{unit_name}>"
@@ -198,7 +198,7 @@ module RubyUnits
     # @yield [RubyUnits::Unit::Definition]
     # @return (see RubyUnits::Unit.define)
     # Get the definition for a unit and allow it to be redefined
-    def self.redefine!(name)
+    def self.redefine!(name, &block)
       raise ArgumentError, 'A block is required to redefine a unit' unless block_given?
       unit_definition = definition(name)
       raise(ArgumentError, "'#{name}' Unit not recognized") unless unit_definition
@@ -208,7 +208,7 @@ module RubyUnits
       RubyUnits::Unit.setup
     end
 
-    # @param [String] name of unit to undefine
+    # @param unit [String] name of unit to undefine
     # @return (see RubyUnits::Unit.setup)
     # Undefine a unit.  Will not raise an exception for unknown units.
     def self.undefine!(unit)
@@ -1413,7 +1413,7 @@ module RubyUnits
 
     # automatically coerce objects to units when possible
     # if an object defines a 'to_unit' method, it will be coerced using that method
-    # @param [Object, #to_unit]
+    # @param other [Object, #to_unit]
     # @return [Array]
     def coerce(other)
       return [other.to_unit, self] if other.respond_to? :to_unit
