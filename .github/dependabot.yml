@@ -1,0 +1,16 @@
+version: 2
+updates:
+- package-ecosystem: bundler
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: solargraph
+    versions:
+    - 0.40.2
+    - 0.40.3
+  - dependency-name: nokogiri
+    versions:
+    - 1.11.1
