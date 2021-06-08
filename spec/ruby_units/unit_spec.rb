@@ -1659,6 +1659,20 @@ describe 'Unit Conversions' do
     specify { expect((RubyUnits::Unit.new('189 Mtonne') * RubyUnits::Unit.new('1189 g/tonne')).convert_to('tonne')).to eq(RubyUnits::Unit.new('224721 tonne')) }
   end
 
+  # When converting storage units it does not make sense to do the conversions
+  # with integer math. There doesn't seem to be a use case for maintaining that
+  # and it leads to subtle, unexpected bugs.
+  # see #203
+  context 'when the unit scalar is an Integer' do
+    it 'the conversion is done accurately' do
+      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB')).to be_within(RubyUnits::Unit.new('0.01 GiB')).of(RubyUnits::Unit.new('1.5 GiB'))
+    end
+
+    it 'the converted unit has an Integer scalar if the calculated value is a scalar' do
+      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to be_an(Integer)
+    end
+  end
+
   describe 'Foot-inch conversions' do
     [
       ['76 in', %(6'4")],
