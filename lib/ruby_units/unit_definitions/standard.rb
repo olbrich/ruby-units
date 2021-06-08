@@ -211,6 +211,11 @@ RubyUnits::Unit.define('sqin') do |sqin|
   sqin.definition = RubyUnits::Unit.new('1 in^2')
 end
 
+# Japanese standard unit for land
+RubyUnits::Unit.define('tsubo') do |tsubo|
+  tsubo.definition = RubyUnits::Unit.new('3.30579 m^2')
+end
+
 # volume
 
 RubyUnits::Unit.define('liter') do |liter|
