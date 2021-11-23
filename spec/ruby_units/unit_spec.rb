@@ -1694,7 +1694,7 @@ describe 'Unit Conversions' do
   end
 
   context 'when the unit scalar is Complex' do
-    subject(:unit) { RubyUnits::Unit.new(2.0 + 1i, 'm') }
+    subject(:unit) { RubyUnits::Unit.new(2.0 + 1.0i, 'm') }
 
     it 'preserves the scalar type' do
       expect(unit.convert_to('mm').scalar).to eql 2000.0 + 1000.0i
