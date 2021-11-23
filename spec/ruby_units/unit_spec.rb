@@ -1679,10 +1679,7 @@ describe 'Unit Conversions' do
     it 'preserves the scalar type' do
       # when the scalar of the original unit is an Integer or Rational we use
       # Rational internally so we don't lose precision due to Integer math
-      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eq 2500/381r
-      # expect(RubyUnits::Unit.new(2/1r, 'm').convert_to('ft').scalar).to eq 2500/381r
-      # when the scalar of the original unit is a Float, the result will be a Float
-      # expect(RubyUnits::Unit.new(2.0, 'm').convert_to('ft').scalar).to eq 6.561679790026246
+      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eql 2500/381r
     end
   end
 
@@ -1692,7 +1689,7 @@ describe 'Unit Conversions' do
     # even though the result is numerically equivalent to an Integer, we leave
     # it alone
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to be 2000.0
+      expect(unit.convert_to('mm').scalar).to eql 2000.0
     end
   end
 
@@ -1700,7 +1697,7 @@ describe 'Unit Conversions' do
     subject(:unit) { RubyUnits::Unit.new(2.0 + 1i, 'm') }
 
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to eq 2000.0 + 1000i
+      expect(unit.convert_to('mm').scalar).to eql 2000.0 + 1000.0i
     end
   end
 
@@ -1708,7 +1705,7 @@ describe 'Unit Conversions' do
     subject(:unit) { RubyUnits::Unit.new(2r, 'm') }
 
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to eq 2000r
+      expect(unit.convert_to('mm').scalar).to eql 2000r
     end
   end
 
