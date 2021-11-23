@@ -1082,6 +1082,7 @@ module RubyUnits
 
       if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && other =~ /temp[CFRK]/)
         raise ArgumentError, 'Receiver is not a temperature unit' unless degree?
+
         start_unit = units
         # @type [String]
         target_unit = case other
@@ -1112,7 +1113,7 @@ module RubyUnits
             when '<tempK>'
               @base_scalar
             when '<tempF>'
-              @base_scalar.to_r * Rational(9, 5) - 459.67r
+              (@base_scalar.to_r * Rational(9, 5)) - 459.67r
             when '<tempR>'
               @base_scalar.to_r * Rational(9, 5)
             end
@@ -1121,33 +1122,32 @@ module RubyUnits
         # @type [Unit]
         target = case other
                  when Unit
-                  other
+                   other
                  when String
-                  RubyUnits::Unit.new(other)
+                   RubyUnits::Unit.new(other)
                  else
-                  raise ArgumentError, 'Unknown target units'
+                   raise ArgumentError, 'Unknown target units'
                  end
         return self if target.units == units
 
         raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ target
 
-        numerator1   = @numerator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |i| i.is_a?(Numeric) ? i : @@unit_values[i][:scalar] }.compact
-        denominator1 = @denominator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |i| i.is_a?(Numeric) ? i : @@unit_values[i][:scalar] }.compact
-        numerator2   = target.numerator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
-        denominator2 = target.denominator.map { |x| @@prefix_values[x] ? @@prefix_values[x] : x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
+        numerator1   = @numerator.map { |x| @@prefix_values[x] || x }.map { |i| i.is_a?(Numeric) ? i : @@unit_values[i][:scalar] }.compact
+        denominator1 = @denominator.map { |x| @@prefix_values[x] || x }.map { |i| i.is_a?(Numeric) ? i : @@unit_values[i][:scalar] }.compact
+        numerator2   = target.numerator.map { |x| @@prefix_values[x] || x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
+        denominator2 = target.denominator.map { |x| @@prefix_values[x] || x }.map { |x| x.is_a?(Numeric) ? x : @@unit_values[x][:scalar] }.compact
 
         # If the scalar is an Integer, convert it to a Rational number so that
         # if the value is scaled during conversion, resolution is not lost due
-        # to integer math.
+        # to integer math
         # @type [Rational, Numeric]
         conversion_scalar = @scalar.is_a?(Integer) ? @scalar.to_r : @scalar
-        q = conversion_scalar * (
-            (numerator1 + denominator2).inject(1) { |acc, elem| acc * elem }
-          ) / (
-            (numerator2 + denominator1).inject(1) { |acc, elem| acc * elem }
-          )
-        q = q.to_i if q.to_i == q && @scalar.is_a?(Integer)
-        return RubyUnits::Unit.new(scalar: q, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
+        q = conversion_scalar * (numerator1 + denominator2).reduce(1, :*) / (numerator2 + denominator1).reduce(1, :*)
+        # Convert the scalar to an Integer if the result is equivalent to an
+        # integer
+
+        q = q.to_i if @scalar.is_a?(Integer) && q.to_i == q
+        RubyUnits::Unit.new(scalar: q, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
       end
     end
 

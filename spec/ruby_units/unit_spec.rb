@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative '../spec_helper'
 require 'yaml'
 
 describe Unit.base_units do
@@ -1668,8 +1668,47 @@ describe 'Unit Conversions' do
       expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB')).to be_within(RubyUnits::Unit.new('0.01 GiB')).of(RubyUnits::Unit.new('1.5 GiB'))
     end
 
-    it 'the converted unit has an Integer scalar if the calculated value is a scalar' do
+    it 'the converted unit has an Integer scalar if the initial unit has an Integer scalar and the scalar is equivalent to an integer' do
       expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to be_an(Integer)
+    end
+
+    it 'the converted unit has an Float scalar if the initial unit has a Float scalar' do
+      expect(RubyUnits::Unit.new(2.0, 'm').convert_to('mm').scalar).to be_a(Float)
+    end
+
+    it 'preserves the scalar type' do
+      # when the scalar of the original unit is an Integer or Rational we use
+      # Rational internally so we don't lose precision due to Integer math
+      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eq 2500/381r
+      # expect(RubyUnits::Unit.new(2/1r, 'm').convert_to('ft').scalar).to eq 2500/381r
+      # when the scalar of the original unit is a Float, the result will be a Float
+      # expect(RubyUnits::Unit.new(2.0, 'm').convert_to('ft').scalar).to eq 6.561679790026246
+    end
+  end
+
+  context 'when the unit scalar is a Float' do
+    subject(:unit) { RubyUnits::Unit.new(2.0, 'm') }
+
+    # even though the result is numerically equivalent to an Integer, we leave
+    # it alone
+    it 'preserves the scalar type' do
+      expect(unit.convert_to('mm').scalar).to be 2000.0
+    end
+  end
+
+  context 'when the unit scalar is Complex' do
+    subject(:unit) { RubyUnits::Unit.new(2.0 + 1i, 'm') }
+
+    it 'preserves the scalar type' do
+      expect(unit.convert_to('mm').scalar).to eq 2000.0 + 1000i
+    end
+  end
+
+  context 'when the unit scalar is Rational' do
+    subject(:unit) { RubyUnits::Unit.new(2r, 'm') }
+
+    it 'preserves the scalar type' do
+      expect(unit.convert_to('mm').scalar).to eq 2000r
     end
   end
 
