@@ -150,7 +150,7 @@ module RubyUnits
       @@unit_match_regex = nil
       @@prefix_regex     = nil
 
-      @@definitions.each do |_name, definition|
+      @@definitions.each_value do |definition|
         use_definition(definition)
       end
 
@@ -174,12 +174,12 @@ module RubyUnits
     end
 
     # return a list of all defined units
-    # @return [Array]
+    # @return [Array<RubyUnits::Units::Definition>]
     def self.definitions
       @@definitions
     end
 
-    # @param  [RubyUnits::Unit::Definition|String] unit_definition
+    # @param  [RubyUnits::Unit::Definition, String] unit_definition
     # @param  [Block] block
     # @return [RubyUnits::Unit::Definition]
     # @raise  [ArgumentError] when passed a non-string if using the block form
@@ -203,13 +203,14 @@ module RubyUnits
       unit_definition
     end
 
+    # Get the definition for a unit and allow it to be redefined
+    #
     # @param [String] name Name of unit to redefine
-    # @param [Block] block
+    # @param [Block] _block
     # @raise [ArgumentError] if a block is not given
     # @yieldparam [RubyUnits::Unit::Definition] the definition of the unit being
     #   redefined
     # @return (see RubyUnits::Unit.define)
-    # Get the definition for a unit and allow it to be redefined
     def self.redefine!(name, &_block)
       raise ArgumentError, 'A block is required to redefine a unit' unless block_given?
 
@@ -222,9 +223,10 @@ module RubyUnits
       setup
     end
 
+    # Undefine a unit.  Will not raise an exception for unknown units.
+    #
     # @param unit [String] name of unit to undefine
     # @return (see RubyUnits::Unit.setup)
-    # Undefine a unit.  Will not raise an exception for unknown units.
     def self.undefine!(unit)
       @@definitions.delete("<#{unit}>")
       setup
@@ -375,6 +377,8 @@ module RubyUnits
     end
 
     # inject a definition into the internal array and set it up for use
+    #
+    # @param definition [RubyUnits::Unit::Definition]
     def self.use_definition(definition)
       @@unit_match_regex = nil # invalidate the unit match regex
       @@temp_regex       = nil # invalidate the temp regex
