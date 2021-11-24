@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require_relative '../spec_helper'
 require 'yaml'
 
 describe Unit.base_units do
@@ -1657,6 +1657,50 @@ describe 'Unit Conversions' do
   context 'reported bugs' do
     specify { expect(RubyUnits::Unit.new('189 Mtonne') * RubyUnits::Unit.new('1189 g/tonne')).to eq(RubyUnits::Unit.new('224721 tonne')) }
     specify { expect((RubyUnits::Unit.new('189 Mtonne') * RubyUnits::Unit.new('1189 g/tonne')).convert_to('tonne')).to eq(RubyUnits::Unit.new('224721 tonne')) }
+  end
+
+  # When converting storage units it does not make sense to do the conversions
+  # with integer math. There doesn't seem to be a use case for maintaining that
+  # and it leads to subtle, unexpected bugs.
+  # see #203
+  context 'when the unit scalar is an Integer' do
+    it 'the conversion is done accurately' do
+      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to eql 100663125/67108864r
+    end
+
+    it 'the converted unit has an Integer scalar if the initial unit has an Integer scalar and the scalar is equivalent to an integer' do
+      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to eql 2000
+    end
+
+    it 'the scalar becomes a Rational when necessary to preserve accuracy' do
+      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eql 2500/381r
+    end
+  end
+
+  context 'when the unit scalar is a Float' do
+    subject(:unit) { RubyUnits::Unit.new(2.0, 'm') }
+
+    # even though the result is numerically equivalent to an Integer, we leave
+    # it alone
+    it 'preserves the scalar type' do
+      expect(unit.convert_to('mm').scalar).to eql 2000.0
+    end
+  end
+
+  context 'when the unit scalar is Complex' do
+    subject(:unit) { RubyUnits::Unit.new(2.0 + 1.0i, 'm') }
+
+    it 'preserves the scalar type' do
+      expect(unit.convert_to('mm').scalar).to eql 2000.0 + 1000.0i
+    end
+  end
+
+  context 'when the unit scalar is Rational' do
+    subject(:unit) { RubyUnits::Unit.new(2r, 'm') }
+
+    it 'preserves the scalar type' do
+      expect(unit.convert_to('mm').scalar).to eql 2000r
+    end
   end
 
   describe 'Foot-inch conversions' do
