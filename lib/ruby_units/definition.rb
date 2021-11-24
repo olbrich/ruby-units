@@ -16,6 +16,10 @@ class RubyUnits::Unit < Numeric
     # @return [Array]
     attr_accessor :denominator
 
+    # Unit name to be used when generating output. This MUST be a parseable
+    # string or it won't be possible to round trip the unit to a String and
+    # back.
+    #
     # @return [String]
     attr_accessor :display_name
 
@@ -57,7 +61,7 @@ class RubyUnits::Unit < Numeric
     # alias array must contain the name of the unit and entries must be unique
     # @return [Array]
     def aliases
-      [[@aliases], @name].flatten.compact.uniq
+      [[@aliases], @name, @display_name].flatten.compact.uniq
     end
 
     # define a unit in terms of another unit

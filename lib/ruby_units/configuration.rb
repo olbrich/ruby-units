@@ -24,9 +24,9 @@ module RubyUnits
 
   # holds actual configuration values for RubyUnits
   class Configuration
-    # used to separate the scalar from the unit when generating output.
-    # set to nil to prevent adding a space to the string representation of a unit
-    # separators other than ' ' and '' may work, but you may encounter problems
+    # Used to separate the scalar from the unit when generating output. A value
+    # of `true` will insert a single space, and `false` will prevent adding a
+    # space to the string representation of a unit.
     attr_reader :separator
 
     def initialize
@@ -34,7 +34,8 @@ module RubyUnits
     end
 
     def separator=(value)
-      raise ArgumentError, "configuration 'separator' may only be true or false" unless value.class == TrueClass || value.class == FalseClass
+      raise ArgumentError, "configuration 'separator' may only be true or false" unless value == true || value == false
+
       @separator = value ? ' ' : nil
     end
   end

@@ -1712,7 +1712,9 @@ describe 'Unit Conversions' do
       ['80 in', %(6'8")],
       ['87 in', %(7'3")],
       ['88 in', %(7'4")],
-      ['89 in', %(7'5")]
+      ['89 in', %(7'5")],
+      ['66 in', %(5'6")],
+      ['66in', %(5'6")]
     ].each do |inches, feet|
       specify { expect(RubyUnits::Unit.new(inches).convert_to('ft')).to eq(RubyUnits::Unit.new(feet)) }
       specify { expect(RubyUnits::Unit.new(inches).to_s(:ft)).to eq(feet) }
@@ -2193,21 +2195,19 @@ describe 'Unit Output formatting' do
   end
 
   context 'for a unit with a custom display_name' do
-    before(:each) do
-      Unit.redefine!('cup') do |cup|
+    around do |example|
+      RubyUnits::Unit.redefine!('cup') do |cup|
         cup.display_name = 'cupz'
       end
-    end
-
-    after(:each) do
-      Unit.redefine!('cup') do |cup|
+      example.run
+      RubyUnits::Unit.redefine!('cup') do |cup|
         cup.display_name = cup.aliases.first
       end
     end
 
-    subject { Unit.new('8 cups') }
+    subject { RubyUnits::Unit.new('8 cups') }
 
-    specify { expect(subject.to_s).to eq('8 cupz') }
+    it { is_expected.to have_attributes(to_s: '8 cupz') }
   end
 end
 
