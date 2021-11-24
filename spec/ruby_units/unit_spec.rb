@@ -1665,20 +1665,14 @@ describe 'Unit Conversions' do
   # see #203
   context 'when the unit scalar is an Integer' do
     it 'the conversion is done accurately' do
-      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB')).to be_within(RubyUnits::Unit.new('0.01 GiB')).of(RubyUnits::Unit.new('1.5 GiB'))
+      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to eql 100663125/67108864r
     end
 
     it 'the converted unit has an Integer scalar if the initial unit has an Integer scalar and the scalar is equivalent to an integer' do
-      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to be_an(Integer)
+      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to eql 2000
     end
 
-    it 'the converted unit has an Float scalar if the initial unit has a Float scalar' do
-      expect(RubyUnits::Unit.new(2.0, 'm').convert_to('mm').scalar).to be_a(Float)
-    end
-
-    it 'preserves the scalar type' do
-      # when the scalar of the original unit is an Integer or Rational we use
-      # Rational internally so we don't lose precision due to Integer math
+    it 'the scalar becomes a Rational when necessary to preserve accuracy' do
       expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eql 2500/381r
     end
   end

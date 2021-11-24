@@ -119,7 +119,7 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.3)
-    solargraph (0.44.1)
+    solargraph (0.44.2)
       backport (~> 1.2)
       benchmark
       bundler (>= 1.17.2)
@@ -172,4 +172,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   2.2.31
+   2.2.32
