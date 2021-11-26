@@ -2038,8 +2038,14 @@ describe 'Unit Math' do
     end
 
     context 'of a unit' do
-      specify 'returns a unit with the ceil of the scalar' do
-        expect(RubyUnits::Unit.new('10.1 m').ceil).to eq(RubyUnits::Unit.new('11 m'))
+      subject(:unit) { RubyUnits::Unit.new('1.2345 m') }
+
+      it 'returns a unit with the ceil of the scalar' do
+        expect(unit.ceil).to eq(RubyUnits::Unit.new('2 m'))
+      end
+
+      it 'forwards arguments to the scalar' do
+        expect(unit.ceil(2)).to eq(RubyUnits::Unit.new('1.24 m'))
       end
     end
   end
@@ -2052,8 +2058,14 @@ describe 'Unit Math' do
     end
 
     context 'of a unit' do
-      specify 'returns a unit with the floor of the scalar' do
-        expect(RubyUnits::Unit.new('10.1 m').floor).to eq(RubyUnits::Unit.new('10 m'))
+      subject(:unit) { RubyUnits::Unit.new('1.2345 m') }
+
+      it 'returns a unit with the floor of the scalar' do
+        expect(unit.floor).to eq(RubyUnits::Unit.new('1 m'))
+      end
+
+      it 'forwards arguments to the scalar' do
+        expect(unit.floor(2)).to eq(RubyUnits::Unit.new('1.23 m'))
       end
     end
   end
@@ -2066,8 +2078,14 @@ describe 'Unit Math' do
     end
 
     context 'of a unit' do
-      specify 'returns a unit with the round of the scalar' do
-        expect(RubyUnits::Unit.new('10.5 m').round).to eq(RubyUnits::Unit.new('11 m'))
+      subject(:unit) { RubyUnits::Unit.new('1.2345 m') }
+
+      it 'returns a unit with the round of the scalar' do
+        expect(unit.round).to eq(RubyUnits::Unit.new('1 m'))
+      end
+
+      it 'forwards arguments to the scalar' do
+        expect(unit.round(3, half: :down)).to eq(RubyUnits::Unit.new('1.234 m'))
       end
     end
   end
@@ -2080,8 +2098,14 @@ describe 'Unit Math' do
     end
 
     context 'of a unit' do
-      specify 'returns a unit with the truncate of the scalar' do
-        expect(RubyUnits::Unit.new('10.5 m').truncate).to eq(RubyUnits::Unit.new('10 m'))
+      subject(:unit) { RubyUnits::Unit.new('1.2345 m') }
+
+      it 'returns a unit with the truncate of the scalar' do
+        expect(unit.truncate).to eq(RubyUnits::Unit.new('1 m'))
+      end
+
+      it 'forwards arguments to the scalar' do
+        expect(unit.truncate(2)).to eq(RubyUnits::Unit.new('1.23 m'))
       end
     end
 
