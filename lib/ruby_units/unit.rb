@@ -1296,10 +1296,10 @@ module RubyUnits
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').to_s('%0.1f') #=> 21.9 m/min
     #
     # @return [Numeric,Unit]
-    def round(*args)
-      return @scalar.round(*args) if unitless?
+    def round(*args, **kwargs)
+      return @scalar.round(*args, **kwargs) if unitless?
 
-      self.class.new(@scalar.round(*args), @numerator, @denominator)
+      self.class.new(@scalar.round(*args, **kwargs), @numerator, @denominator)
     end
 
     # @return [Numeric, Unit]

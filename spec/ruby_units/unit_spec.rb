@@ -2032,7 +2032,7 @@ describe 'Unit Math' do
 
   context '#ceil' do
     context 'of a unitless unit' do
-      specify 'returns the ceil of the scalar' do
+      it 'returns the ceil of the scalar' do
         expect(RubyUnits::Unit.new('10.1').ceil).to eq(11)
       end
     end
