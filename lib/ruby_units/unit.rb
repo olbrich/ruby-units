@@ -1273,27 +1273,40 @@ module RubyUnits
 
     # ceil of a unit
     # @return [Numeric,Unit]
-    def ceil
-      return @scalar.ceil if unitless?
-      self.class.new(@scalar.ceil, @numerator, @denominator)
+    def ceil(*args)
+      return @scalar.ceil(*args) if unitless?
+
+      self.class.new(@scalar.ceil(*args), @numerator, @denominator)
     end
 
     # @return [Numeric,Unit]
-    def floor
-      return @scalar.floor if unitless?
-      self.class.new(@scalar.floor, @numerator, @denominator)
+    def floor(*args)
+      return @scalar.floor(*args) if unitless?
+
+      self.class.new(@scalar.floor(*args), @numerator, @denominator)
     end
 
+    # Round the unit according to the rules of the scalar's class. Call this
+    # with the arguments appropriate for the scalar's class (e.g., Integer,
+    # Rational, etc..). Because unit conversions can often result in Rational
+    # scalars (to preserve precision), it may be advisable to use +to_s+ to
+    # format output instead of using +round+.
+    # @example
+    #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').round(1) #=> 2187/100 m/min
+    #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').to_s('%0.1f') #=> 21.9 m/min
+    #
     # @return [Numeric,Unit]
-    def round(ndigits = 0)
-      return @scalar.round(ndigits) if unitless?
-      self.class.new(@scalar.round(ndigits), @numerator, @denominator)
+    def round(*args, **kwargs)
+      return @scalar.round(*args, **kwargs) if unitless?
+
+      self.class.new(@scalar.round(*args, **kwargs), @numerator, @denominator)
     end
 
     # @return [Numeric, Unit]
-    def truncate
-      return @scalar.truncate if unitless?
-      self.class.new(@scalar.truncate, @numerator, @denominator)
+    def truncate(*args)
+      return @scalar.truncate(*args) if unitless?
+
+      self.class.new(@scalar.truncate(*args), @numerator, @denominator)
     end
 
     # returns next unit in a range.  '1 mm'.to_unit.succ #=> '2 mm'.to_unit
