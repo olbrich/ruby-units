@@ -1197,10 +1197,13 @@ module RubyUnits
       to_s
     end
 
-    # returns the 'unit' part of the Unit object without the scalar
+    # Returns the 'unit' part of the Unit object without the scalar
+    #
+    # @param with_prefix [Boolean] include prefixes in output
     # @return [String]
     def units(with_prefix: true)
       return '' if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
+
       output_numerator   = ['1']
       output_denominator = []
       num                = @numerator.clone.compact
@@ -1209,40 +1212,14 @@ module RubyUnits
       unless num == UNITY_ARRAY
         definitions = num.map { |element| self.class.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        # there is a bug in jruby 9.1.6.0's implementation of chunk_while
-        # see https://github.com/jruby/jruby/issues/4410
-        # TODO: fix this after jruby fixes their bug.
-        definitions = if definitions.respond_to?(:chunk_while) && RUBY_ENGINE != 'jruby'
-                        definitions.chunk_while { |defn, _| defn.prefix? }.to_a
-                      else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
-                        result = []
-                        enumerator = definitions.to_enum
-                        loop do
-                          first = enumerator.next
-                          result << (first.prefix? ? [first, enumerator.next] : [first])
-                        end
-                        result
-                      end
+        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
         output_numerator = definitions.map { |element| element.map(&:display_name).join }
       end
 
       unless den == UNITY_ARRAY
         definitions = den.map { |element| self.class.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        # there is a bug in jruby 9.1.6.0's implementation of chunk_while
-        # see https://github.com/jruby/jruby/issues/4410
-        # TODO: fix this after jruby fixes their bug.
-        definitions = if definitions.respond_to?(:chunk_while) && RUBY_ENGINE != 'jruby'
-                        definitions.chunk_while { |defn, _| defn.prefix? }.to_a
-                      else # chunk_while is new to ruby 2.3+, so fallback to less efficient methods for older ruby
-                        result = []
-                        enumerator = definitions.to_enum
-                        loop do
-                          first = enumerator.next
-                          result << (first.prefix? ? [first, enumerator.next] : [first])
-                        end
-                        result
-                      end
+        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
         output_denominator = definitions.map { |element| element.map(&:display_name).join }
       end
 
@@ -1254,7 +1231,7 @@ module RubyUnits
             .uniq
             .map { |x| [x, output_denominator.count(x)] }
             .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
-      "#{on.join('*')}#{od.empty? ? '' : '/' + od.join('*')}".strip
+      "#{on.join('*')}#{od.empty? ? '' : "/#{od.join('*')}"}".strip
     end
 
     # negates the scalar of the Unit
