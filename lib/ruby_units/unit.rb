@@ -259,9 +259,9 @@ module RubyUnits
       second.nil? ? new(first) : new(first).convert_to(second)
     end
 
-    # @param [Numeric] q quantity
-    # @param [Array] n numerator
-    # @param [Array] d denominator
+    # @param q [Numeric] quantity
+    # @param n [Array] numerator
+    # @param d [Array] denominator
     # @return [Hash]
     def self.eliminate_terms(q, n, d)
       num = n.dup
@@ -309,6 +309,13 @@ module RubyUnits
       num = UNITY_ARRAY if num.empty?
       den = UNITY_ARRAY if den.empty?
       { scalar: q, numerator: num.flatten.compact, denominator: den.flatten.compact }
+    end
+
+    # Creates a new unit from the current one with all common terms eliminated.
+    #
+    # @return [RubyUnits::Unit]
+    def eliminate_terms
+      self.class.new(self.class.eliminate_terms(@scalar, @numerator, @denominator))
     end
 
     # return an array of base units
