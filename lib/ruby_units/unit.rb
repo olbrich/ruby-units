@@ -266,49 +266,29 @@ module RubyUnits
     def self.eliminate_terms(q, n, d)
       num = n.dup
       den = d.dup
+      num.delete(UNITY)
+      den.delete(UNITY)
 
-      num.delete_if { |v| v == UNITY }
-      den.delete_if { |v| v == UNITY }
       combined = Hash.new(0)
 
-      i = 0
-      loop do
-        break if i > num.size
-        if @@prefix_values.key? num[i]
-          k = [num[i], num[i + 1]]
-          i += 2
-        else
-          k = num[i]
-          i += 1
-        end
-        combined[k] += 1 unless k.nil? || k == UNITY
-      end
-
-      j = 0
-      loop do
-        break if j > den.size
-        if @@prefix_values.key? den[j]
-          k = [den[j], den[j + 1]]
-          j += 2
-        else
-          k = den[j]
-          j += 1
-        end
-        combined[k] -= 1 unless k.nil? || k == UNITY
+      [[num, 1], [den, -1]].each do |array, increment|
+        array.chunk_while { |elt_before, _| definition(elt_before).prefix? }
+             .to_a
+             .each { |unit| combined[unit] += increment }
       end
 
       num = []
       den = []
       combined.each do |key, value|
-        if value >= 0
+        if value.positive?
           value.times { num << key }
-        elsif value < 0
+        elsif value.negative?
           value.abs.times { den << key }
         end
       end
       num = UNITY_ARRAY if num.empty?
       den = UNITY_ARRAY if den.empty?
-      { scalar: q, numerator: num.flatten.compact, denominator: den.flatten.compact }
+      { scalar: q, numerator: num.flatten, denominator: den.flatten }
     end
 
     # Creates a new unit from the current one with all common terms eliminated.
