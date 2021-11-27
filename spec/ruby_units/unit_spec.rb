@@ -1514,6 +1514,23 @@ describe Unit do
       it { is_expected.to be === subject }
     end
   end
+
+  describe '#eliminate_terms' do
+    subject(:unit) { RubyUnits::Unit.new('1 kg*m/kg*s').eliminate_terms }
+
+    it 'returns a new Unit' do
+      expect(unit).to be_a(RubyUnits::Unit)
+    end
+
+    it 'the new unit has common terms removed' do
+      expect(unit).to have_attributes(
+        to_s: '1 m/s',
+        denominator: ['<second>'],
+        kind: :speed,
+        numerator: ['<meter>']
+      )
+    end
+  end
 end
 
 describe 'Unit Comparisons' do
