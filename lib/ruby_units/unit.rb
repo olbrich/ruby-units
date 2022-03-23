@@ -1070,7 +1070,7 @@ module RubyUnits
       return self if TrueClass === other
       return self if FalseClass === other
 
-      if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && other =~ /temp[CFRK]/)
+      if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && @@unit_map[other] =~ /<temp[CFRK]>/)
         raise ArgumentError, 'Receiver is not a temperature unit' unless degree?
 
         start_unit = units
