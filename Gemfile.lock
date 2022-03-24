@@ -142,7 +142,8 @@ GEM
     tilt (2.0.10)
     unicode-display_width (2.1.0)
     webrick (1.7.0)
-    yard (0.9.26)
+    yard (0.9.27)
+      webrick (~> 1.7.0)
 
 PLATFORMS
   java
