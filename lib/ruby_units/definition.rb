@@ -82,6 +82,22 @@ class RubyUnits::Unit < Numeric
       kind == :prefix
     end
 
+    # is this definition a temperature unit?
+    # @return [Boolean]
+    def temperature?
+      kind == :temperature
+    end
+
+    # By convention, temperature degree units (like 'degC') are associated with
+    # the known set of temperature scales by naming the scale like 'tempC'.
+    #
+    # @return [String, nil]
+    def temperature_scale
+      return nil if !temperature? || !@name.start_with?('temp')
+
+      @name.gsub('temp', 'deg')
+    end
+
     # Is this definition the unity definition?
     # @return [Boolean]
     def unity?

@@ -1974,13 +1974,13 @@ describe 'Unit Math' do
   context '#power' do
     subject { RubyUnits::Unit.new('1 m') }
     it 'raises an exception when passed a Float argument' do
-      expect { subject.power(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
+      expect { subject.power(1.5) }.to raise_error(ArgumentError, 'Exponent must be an Integer')
     end
     it 'raises an exception when passed a Rational argument' do
-      expect { subject.power(Rational(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
+      expect { subject.power(Rational(1, 2)) }.to raise_error(ArgumentError, 'Exponent must be an Integer')
     end
     it 'raises an exception when passed a Complex argument' do
-      expect { subject.power(Complex(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
+      expect { subject.power(Complex(1, 2)) }.to raise_error(ArgumentError, 'Exponent must be an Integer')
     end
     it 'raises an exception when called on a temperature unit' do
       expect { RubyUnits::Unit.new('100 tempC').power(2) }.to raise_error(ArgumentError, 'Cannot raise a temperature to a power')
@@ -1995,13 +1995,13 @@ describe 'Unit Math' do
   context '#root' do
     subject { RubyUnits::Unit.new('1 m') }
     it 'raises an exception when passed a Float argument' do
-      expect { subject.root(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
+      expect { subject.root(1.5) }.to raise_error(ArgumentError, 'Exponent must be an Integer')
     end
     it 'raises an exception when passed a Rational argument' do
-      expect { subject.root(Rational(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
+      expect { subject.root(Rational(1, 2)) }.to raise_error(ArgumentError, 'Exponent must be an Integer')
     end
     it 'raises an exception when passed a Complex argument' do
-      expect { subject.root(Complex(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
+      expect { subject.root(Complex(1, 2)) }.to raise_error(ArgumentError, 'Exponent must be an Integer')
     end
     it 'raises an exception when called on a temperature unit' do
       expect { RubyUnits::Unit.new('100 tempC').root(2) }.to raise_error(ArgumentError, 'Cannot take the root of a temperature')
