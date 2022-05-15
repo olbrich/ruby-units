@@ -1,5 +1,12 @@
 Change Log for Ruby-units
 =========================
+TBD         3.0.0   * [Breaking Change] Numeric#to_unit behavior changed. It now
+                      converts to a Unit instead of creating a new Unit with the
+                      scalar. This makes it more consistent with other uses of
+                      #to_unit (see )
+                    * Add support for Ruby 3.1, JRuby 9.3, dropped support for
+                      Ruby 2.5, JRuby 9.2.
+
 2020-12-29  2.3.2   * Remove Jeweler (see #178) also adds Code of Conduct
                     * Fix specs related to Complex comparisons (see #213)
                     * Add support for Ruby 3.0 (also drop support for 2.3 and 2.4) (see #211)

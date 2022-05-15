@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require 'spec_helper'
 
-describe Math do
+RSpec.describe Math do
   describe '#sqrt' do
     specify { expect(Math.sqrt(RubyUnits::Unit.new('1 mm^6'))).to eq(RubyUnits::Unit.new('1 mm^3')) }
     specify { expect(Math.sqrt(4)).to eq(2) }
@@ -15,6 +15,7 @@ describe Math do
   context 'Trigonometry functions' do
     context "with '45 deg' unit" do
       subject { RubyUnits::Unit.new('45 deg') }
+
       specify { expect(Math.sin(subject)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.cos(subject)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.tan(subject)).to be_within(0.01).of(1) }
@@ -25,6 +26,7 @@ describe Math do
 
     context "with 'PI/4 radians' unit" do
       subject { RubyUnits::Unit.new((Math::PI / 4), 'radians') }
+
       specify { expect(Math.sin(subject)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.cos(subject)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.tan(subject)).to be_within(0.01).of(1) }
@@ -35,6 +37,7 @@ describe Math do
 
     context "with 'PI/4' continues to work" do
       subject { (Math::PI / 4) }
+
       specify { expect(Math.sin(subject)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.cos(subject)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.tan(subject)).to be_within(0.01).of(1) }
@@ -51,6 +54,7 @@ describe Math do
         )
       ).to be_within(RubyUnits::Unit.new('0.01 m')).of(RubyUnits::Unit.new('2.23607 m'))
     end
+
     specify do
       expect(
         Math.hypot(
@@ -59,7 +63,9 @@ describe Math do
         )
       ).to be_within(RubyUnits::Unit.new('0.01 m')).of(RubyUnits::Unit.new('1.17116 m'))
     end
+
     specify { expect(Math.hypot(3, 4)).to eq(5) }
+
     specify do
       expect do
         Math.hypot(
@@ -72,9 +78,11 @@ describe Math do
     specify do
       expect(Math.atan2(RubyUnits::Unit.new('1 m'), RubyUnits::Unit.new('2 m'))).to be_within(0.01).of(0.4636476090008061)
     end
+
     specify do
       expect(Math.atan2(RubyUnits::Unit.new('1 m'), RubyUnits::Unit.new('2 ft'))).to be_within(0.01).of(1.0233478888629426)
     end
+
     specify { expect(Math.atan2(1, 1)).to be_within(0.01).of(0.785398163397448) }
     specify { expect { Math.atan2(RubyUnits::Unit.new('1 m'), RubyUnits::Unit.new('2 lbs')) }.to raise_error(ArgumentError) }
   end

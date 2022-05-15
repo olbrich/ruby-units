@@ -1152,19 +1152,6 @@ describe 'Create some simple units' do
     end
   end
 
-  # create with another unit
-  describe 10.to_unit(RubyUnits::Unit.new('1 mm')) do
-    describe '#units' do
-      subject { super().units }
-      it { is_expected.to eq('mm') }
-    end
-
-    describe '#scalar' do
-      subject { super().scalar }
-      it { is_expected.to eq(10) }
-    end
-  end
-
   # explicit create
   describe RubyUnits::Unit.new('1 <meter>/<second>') do
     describe '#kind' do
