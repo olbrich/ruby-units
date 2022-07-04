@@ -1,56 +1,72 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+RSpec.describe RubyUnits::Time do
+  let(:now) { Time.at(1_303_656_390, in: '-04:00') }
 
-describe Time do
-  let(:now) { Time.at(1_303_656_390) }
-  before(:each) do
+  before do
     allow(Time).to receive(:now).and_return(now)
   end
 
-  context '.at' do
-    subject { Date.new(2011, 4, 1).to_unit }
+  # We need to make sure this works will all the variations of the way that ruby
+  # allows `at` to be called.
+  describe '.at' do
+    subject(:date_unit) { Date.new(2011, 4, 1).to_unit - Date.new(1970, 1, 1) }
+
     specify { expect(Time.at(Time.at(0)).utc.strftime('%D %T')).to eq('01/01/70 00:00:00') }
-    specify { expect(Time.at(subject - Date.new(1970, 1, 1)).getutc.strftime('%D %T')).to eq('04/01/11 00:00:00') }
-    specify { expect(Time.at(subject - Date.new(1970, 1, 1), 500).usec).to eq(500) }
+    specify { expect(Time.at(date_unit).getutc.strftime('%D %T')).to eq('04/01/11 00:00:00') }
+
+    specify { expect(Time.at(date_unit, 500).usec).to eq(500) } # at(seconds, microseconds_with_fraction)
+    specify { expect(Time.at(date_unit, 5, :millisecond).usec).to eq(5000) } # at(seconds, milliseconds, :millisecond)
+    specify { expect(Time.at(date_unit, 500, :usec).usec).to eq(500) } # at(seconds, microseconds, :usec)
+    specify { expect(Time.at(date_unit, 500, :microsecond).usec).to eq(500) } # at(seconds, microseconds, :microsecond)
+    specify { expect(Time.at(date_unit, 500, :nsec).nsec).to eq(500) } # at(seconds, nanoseconds, :nsec)
+    specify { expect(Time.at(date_unit, 500, :nanosecond).nsec).to eq(500) } # at(seconds, nanoseconds, :nanosecond)
+    specify { expect(Time.at(date_unit, in: '-05:00').utc_offset).to eq(-18_000) } # at(seconds, in: timezone)
+    specify { expect(Time.at(date_unit, 500, in: '-05:00')).to have_attributes(usec: 500, utc_offset: -18_000) } # at(seconds, microseconds, in: timezone)
+    specify { expect(Time.at(date_unit, 5, :millisecond, in: '-05:00')).to have_attributes(usec: 5000, utc_offset: -18_000) } # at(seconds, milliseconds, :millisecond, in: timezone)
+    specify { expect(Time.at(date_unit, 500, :usec, in: '-05:00')).to have_attributes(usec: 500, utc_offset: -18_000) } # at(seconds, microseconds, :usec, in: timezone)
+    specify { expect(Time.at(date_unit, 500, :microsecond, in: '-05:00')).to have_attributes(usec: 500, utc_offset: -18_000) } # at(seconds, microseconds, :microsecond, in: timezone)
+    specify { expect(Time.at(date_unit, 500, :nsec, in: '-05:00')).to have_attributes(nsec: 500, utc_offset: -18_000) } # at(seconds, nanoseconds, :nsec, in: timezone)
+    specify { expect(Time.at(date_unit, 500, :nanosecond, in: '-05:00')).to have_attributes(nsec: 500, utc_offset: -18_000) } # at(seconds, nanoseconds, :nanosecond, in: timezone)
+
+    specify { expect(Time.at(now.to_i, 500).usec).to eq(500) } # at(seconds, microseconds_with_fraction)
+    specify { expect(Time.at(now.to_i, 5, :millisecond).usec).to eq(5000) } # at(seconds, milliseconds, :millisecond)
+    specify { expect(Time.at(now.to_i, 500, :usec).usec).to eq(500) } # at(seconds, microseconds, :usec)
+    specify { expect(Time.at(now.to_i, 500, :microsecond).usec).to eq(500) } # at(seconds, microseconds, :microsecond)
+    specify { expect(Time.at(now.to_i, 500, :nsec).nsec).to eq(500) } # at(seconds, nanoseconds, :nsec)
+    specify { expect(Time.at(now.to_i, 500, :nanosecond).nsec).to eq(500) } # at(seconds, nanoseconds, :nanosecond)
+    specify { expect(Time.at(now.to_i, in: '-05:00').utc_offset).to eq(-18_000) } # at(seconds, in: timezone)
+    specify { expect(Time.at(now.to_i, 500, in: '-05:00')).to have_attributes(usec: 500, utc_offset: -18_000) } # at(seconds, microseconds, in: timezone)
+    specify { expect(Time.at(now.to_i, 5, :millisecond, in: '-05:00')).to have_attributes(usec: 5000, utc_offset: -18_000) } # at(seconds, milliseconds, :millisecond, in: timezone)
+    specify { expect(Time.at(now.to_i, 500, :usec, in: '-05:00')).to have_attributes(usec: 500, utc_offset: -18_000) } # at(seconds, microseconds, :usec, in: timezone)
+    specify { expect(Time.at(now.to_i, 500, :microsecond, in: '-05:00')).to have_attributes(usec: 500, utc_offset: -18_000) } # at(seconds, microseconds, :microsecond, in: timezone)
+    specify { expect(Time.at(now.to_i, 500, :nsec, in: '-05:00')).to have_attributes(nsec: 500, utc_offset: -18_000) } # at(seconds, nanoseconds, :nsec, in: timezone)
+    specify { expect(Time.at(now.to_i, 500, :nanosecond, in: '-05:00')).to have_attributes(nsec: 500, utc_offset: -18_000) } # at(seconds, nanoseconds, :nanosecond, in: timezone)
   end
 
-  context '.in' do
-    specify { expect(Time.in('5 min')).to be_a Time }
-    specify { expect(Time.in('5 min')).to be > Time.now }
+  describe '.in' do
+    specify { expect(Time.in('5 min')).to have_attributes(to_s: '2011-04-24 10:51:30 -0400') }
+    specify { expect(Time.in([5, 'min'])).to have_attributes(to_s: '2011-04-24 10:51:30 -0400') }
+    specify { expect { Time.in(300) }.to raise_error(ArgumentError, "Incompatible Units ('300' not compatible with 's')") }
   end
 
-  context '#to_date' do
-    subject { Time.parse('2012-01-31 11:59:59') }
-    specify { expect(subject.to_date.to_s).to eq('2012-01-31') }
-    specify { expect((subject + 1).to_date.to_s).to eq('2012-01-31') }
-  end
+  describe '#to_unit' do
+    subject { now.to_unit }
 
-  context '#to_unit' do
-    subject { now }
+    it { is_expected.to have_attributes(units: 's', scalar: now.to_f, kind: :time) }
 
-    describe '#to_unit' do
-      subject { super().to_unit }
-      it { is_expected.to be_an_instance_of(Unit) }
+    context 'when an argument is passed' do
+      subject { now.to_unit('min') }
+
+      it { is_expected.to have_attributes(units: 'min', scalar: now.to_f / 60.0, kind: :time) }
     end
-
-    describe '#to_unit' do
-      subject { super().to_unit }
-      describe '#units' do
-        subject { super().units }
-        it { is_expected.to eq('s') }
-      end
-    end
-    specify               { expect(subject.to_unit('h').kind).to eq(:time) }
-    specify               { expect(subject.to_unit('h').units).to eq('h') }
   end
 
-  context 'addition (+)' do
-    specify { expect(Time.now + 1).to eq(Time.at(1_303_656_390 + 1)) }
-    specify { expect(Time.now + RubyUnits::Unit.new('10 min')).to eq(Time.at(1_303_656_390 + 600)) }
+  describe 'addition (+)' do
+    specify { expect(Time.now + 1).to eq(now + 1) }
+    specify { expect(Time.now + RubyUnits::Unit.new('10 min')).to eq(now + 600) }
   end
 
-  context 'subtraction (-)' do
-    specify { expect(Time.now - 1).to eq(Time.at(1_303_656_390 - 1)) }
-    specify { expect(Time.now - RubyUnits::Unit.new('10 min')).to eq(Time.at(1_303_656_390 - 600)) }
-    specify { expect(Time.now - RubyUnits::Unit.new('150 years')).to eq(Time.parse('1861-04-24 09:46:30 -0500')) }
+  describe 'subtraction (-)' do
+    specify { expect(Time.now - 1).to eq(now - 1) }
+    specify { expect(Time.now - RubyUnits::Unit.new('10 min')).to eq(now - 600) }
   end
 end

@@ -1,6 +1,4 @@
-require 'spec_helper'
-
-RSpec.describe Math do
+RSpec.describe RubyUnits::Math do
   describe '#sqrt' do
     specify { expect(Math.sqrt(RubyUnits::Unit.new('1 mm^6'))).to eq(RubyUnits::Unit.new('1 mm^3')) }
     specify { expect(Math.sqrt(4)).to eq(2) }
@@ -12,7 +10,7 @@ RSpec.describe Math do
     specify { expect(Math.cbrt(8)).to eq(2) }
   end
 
-  context 'Trigonometry functions' do
+  describe 'Trigonometry functions' do
     context "with '45 deg' unit" do
       subject { RubyUnits::Unit.new('45 deg') }
 
@@ -76,11 +74,21 @@ RSpec.describe Math do
     end
 
     specify do
-      expect(Math.atan2(RubyUnits::Unit.new('1 m'), RubyUnits::Unit.new('2 m'))).to be_within(0.01).of(0.4636476090008061)
+      expect(
+        Math.atan2(
+          RubyUnits::Unit.new('1 m'),
+          RubyUnits::Unit.new('2 m')
+        )
+      ).to be_within(RubyUnits::Unit.new('0.1 rad')).of('0.4636476090008061 rad'.to_unit)
     end
 
     specify do
-      expect(Math.atan2(RubyUnits::Unit.new('1 m'), RubyUnits::Unit.new('2 ft'))).to be_within(0.01).of(1.0233478888629426)
+      expect(
+        Math.atan2(
+          RubyUnits::Unit.new('1 m'),
+          RubyUnits::Unit.new('2 ft')
+        )
+      ).to be_within(RubyUnits::Unit.new('0.1 rad')).of('1.0233478888629426 rad'.to_unit)
     end
 
     specify { expect(Math.atan2(1, 1)).to be_within(0.01).of(0.785398163397448) }

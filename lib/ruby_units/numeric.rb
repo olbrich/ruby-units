@@ -16,4 +16,8 @@ module RubyUnits
   end
 end
 
-Numeric.prepend(RubyUnits::Numeric)
+# @note Do this instead of Numeric.prepend(RubyUnits::Numeric) to avoid YARD warnings
+# @see https://github.com/lsegal/yard/issues/1353
+class Numeric
+  prepend(RubyUnits::Numeric)
+end

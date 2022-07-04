@@ -1,109 +1,137 @@
-# Math will convert unit objects to radians and then attempt to use the value for
-# trigonometric functions.
 module RubyUnits
+  # Math will convert unit objects to radians and then attempt to use the value for
+  # trigonometric functions.
   module Math
-    # @param number [Numeric]
-    # @return [Numeric]
+    # Take the square root of a unit or number
+    #
+    # @param number [Numeric, RubyUnits::Unit]
+    # @return [Numeric, RubyUnits::Unit]
     def sqrt(number)
       if number.is_a?(RubyUnits::Unit)
         (number**Rational(1, 2)).to_unit
       else
-        super(number)
+        super
       end
     end
 
-    # @param number [Numeric]
-    # @return [Numeric]
+    # Take the cube root of a unit or number
+    #
+    # @param number [Numeric, RubyUnits::Unit]
+    # @return [Numeric, RubyUnits::Unit]
     def cbrt(number)
       if number.is_a?(RubyUnits::Unit)
         (number**Rational(1, 3)).to_unit
       else
-        super(number)
+        super
       end
     end
 
-    # @param n [Numeric]
+    # @param angle [Numeric, RubyUnits::Unit]
     # @return [Numeric]
-    def sin(n)
-      n.is_a?(RubyUnits::Unit) ? super(n.convert_to('radian').scalar) : super(n)
+    def sin(angle)
+      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to('radian').scalar) : super
     end
 
-    # @param n [Numeric]
-    # @return [Numeric]
-    def cos(n)
-      n.is_a?(RubyUnits::Unit) ? super(n.convert_to('radian').scalar) : super(n)
+    # @param number [Numeric, RubyUnits::Unit]
+    # @return [Numeric, RubyUnits::Unit]
+    def asin(number)
+      if number.is_a?(RubyUnits::Unit)
+        [super(number), 'radian'].to_unit
+      else
+        super
+      end
     end
 
-    # @param n [Numeric]
+    # @param angle [Numeric, RubyUnits::Unit]
     # @return [Numeric]
-    def sinh(n)
-      n.is_a?(RubyUnits::Unit) ? super(n.convert_to('radian').scalar) : super(n)
+    def cos(angle)
+      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to('radian').scalar) : super
     end
 
-    # @param n [Numeric]
-    # @return [Numeric]
-    def cosh(n)
-      n.is_a?(RubyUnits::Unit) ? super(n.convert_to('radian').scalar) : super(n)
+    # @param number [Numeric, RubyUnits::Unit]
+    # @return [Numeric, RubyUnits::Unit]
+    def acos(number)
+      if number.is_a?(RubyUnits::Unit)
+        [super(number), 'radian'].to_unit
+      else
+        super
+      end
     end
 
-    # @param n [Numeric]
+    # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric]
-    def tan(n)
-      n.is_a?(RubyUnits::Unit) ? super(n.convert_to('radian').scalar) : super(n)
+    def sinh(number)
+      number.is_a?(RubyUnits::Unit) ? super(number.convert_to('radian').scalar) : super
     end
 
-    # @param n [Numeric]
+    # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric]
-    def tanh(n)
-      n.is_a?(RubyUnits::Unit) ? super(n.convert_to('radian').scalar) : super(n)
+    def cosh(number)
+      number.is_a?(RubyUnits::Unit) ? super(number.convert_to('radian').scalar) : super
     end
 
-    # Convert parameters to consistent units and perform the function
-    # @param x [Numeric]
-    # @param y [Numeric]
+    # @param angle [Numeric, RubyUnits::Unit]
+    # @return [Numeric]
+    def tan(angle)
+      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to('radian').scalar) : super
+    end
+
+    # @param number [Numeric, RubyUnits::Unit]
+    # @return [Numeric]
+    def tanh(number)
+      number.is_a?(RubyUnits::Unit) ? super(number.convert_to('radian').scalar) : super
+    end
+
+    # @param x [Numeric, RubyUnits::Unit]
+    # @param y [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def hypot(x, y)
       if x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)
         ((x**2) + (y**2))**Rational(1, 2)
       else
-        super(x, y)
+        super
       end
     end
 
-    # @param x [Numeric]
-    # @param y [Numeric]
-    # @return [Numeric]
+    # @param x [Numeric, RubyUnits::Unit]
+    # @param y [Numeric, RubyUnits::Unit]
+    # @return [Numeric] if all parameters are numbers
+    # @return [RubyUnits::Unit] if parameters are units
+    # @raise [ArgumentError] if parameters are not numbers or compatible units
     def atan2(x, y)
       raise ArgumentError, 'Incompatible RubyUnits::Units' if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && !x.compatible?(y)
 
       if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && x.compatible?(y)
-        super(x.base_scalar, y.base_scalar)
+        [super(x.base_scalar, y.base_scalar), 'radian'].to_unit
       else
-        super(x, y)
+        super
       end
     end
 
-    # @param number [Numeric]
+    # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def log10(number)
       if number.is_a?(RubyUnits::Unit)
         super(number.to_f)
       else
-        super(number)
+        super
       end
     end
 
-    # @param number [Numeric]
+    # @param number [Numeric, RubyUnits::Unit]
     # @param base [Numeric]
     # @return [Numeric]
     def log(number, base = ::Math::E)
       if number.is_a?(RubyUnits::Unit)
         super(number.to_f, base)
       else
-        super(number, base)
+        super
       end
     end
   end
 end
 
-Math.singleton_class.prepend(RubyUnits::Math)
+# @see https://github.com/lsegal/yard/issues/1353
+module Math
+  singleton_class.prepend(RubyUnits::Math)
+end

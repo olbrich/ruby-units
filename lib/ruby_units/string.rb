@@ -1,21 +1,27 @@
 require 'time'
 
 module RubyUnits
+  # Extra methods for converting [String] objects to [RubyUnits::Unit] objects
+  # and using string formatting with Units.
   module String
-    # make a string into a unit
-    # @return (see RubyUnits::Unit#initialize)
+    # Make a string into a unit
+    #
+    # @param other [RubyUnits::Unit, String] unit to convert to
+    # @return [RubyUnits::Unit]
     def to_unit(other = nil)
       other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
     end
 
-    # format unit output using formatting codes
+    # Format unit output using formatting codes
     # @example '%0.2f' % '1 mm'.to_unit => '1.00 mm'
+    #
+    # @param other [RubyUnits::Unit, Object]
     # @return [String]
     def %(*other)
       if other.first.is_a?(RubyUnits::Unit)
         other.first.to_s(self)
       else
-        super(*other)
+        super
       end
     end
 
@@ -27,4 +33,8 @@ module RubyUnits
   end
 end
 
-String.prepend(RubyUnits::String)
+# @note Do this instead of String.prepend(RubyUnits::String) to avoid YARD warnings
+# @see https://github.com/lsegal/yard/issues/1353
+class String
+  prepend(RubyUnits::String)
+end

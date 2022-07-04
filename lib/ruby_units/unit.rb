@@ -542,9 +542,14 @@ module RubyUnits
       @@kinds[signature]
     end
 
-    # @return [Unit]
-    def to_unit
-      self
+    # Convert the unit to a Unit, possibly performing a conversion.
+    # > The ability to pass a Unit to convert to was added in v3.0.0 for
+    # > consistency with other uses of #to_unit.
+    #
+    # @param other [RubyUnits::Unit, String] unit to convert to
+    # @return [RubyUnits::Unit]
+    def to_unit(other = nil)
+      other ? convert_to(other) : self
     end
 
     alias unit to_unit
@@ -879,7 +884,7 @@ module RubyUnits
           raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Time
-        raise ArgumentError, 'Date and Time objects represent fixed points in time and cannot be subtracted from to a Unit, which can only represent time spans'
+        raise ArgumentError, 'Date and Time objects represent fixed points in time and cannot be subtracted from a Unit'
       else
         x, y = coerce(other)
         y - x
