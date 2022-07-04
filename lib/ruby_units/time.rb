@@ -13,16 +13,16 @@ module RubyUnits
       #
       # @param [Array<RubyUnits::Unit, Numeric, Symbol, Hash>] args
       # @return [::Time]
-      def at(*args)
+      def at(*args, **kwargs)
         case args.first
         when RubyUnits::Unit
-          options = args.last.is_a?(Hash) ? args.pop : {}
+          options = args.last.is_a?(Hash) ? args.pop : kwargs
           secondary_unit = args[2] || 'microsecond'
           case args[1]
           when Numeric
-            super((args.first + RubyUnits::Unit.new(args[1], secondary_unit.to_s)).convert_to('second').scalar, options)
+            super((args.first + RubyUnits::Unit.new(args[1], secondary_unit.to_s)).convert_to('second').scalar, **options)
           else
-            super(args.first.convert_to('second').scalar, options)
+            super(args.first.convert_to('second').scalar, **options)
           end
         else
           super
