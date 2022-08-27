@@ -1,5 +1,7 @@
 Change Log for Ruby-units
 =========================
+see Github releases (https://github.com/olbrich/ruby-units/releases)
+
 2020-12-29  2.3.2   * Remove Jeweler (see #178) also adds Code of Conduct
                     * Fix specs related to Complex comparisons (see #213)
                     * Add support for Ruby 3.0 (also drop support for 2.3 and 2.4) (see #211)
