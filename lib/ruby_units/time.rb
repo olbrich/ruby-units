@@ -25,7 +25,7 @@ module RubyUnits
             super(args.first.convert_to('second').scalar, **options)
           end
         else
-          super
+          super(*args, **kwargs)
         end
       end
 

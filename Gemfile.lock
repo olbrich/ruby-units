@@ -98,7 +98,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.11.0)
     rspec-support (3.11.0)
-    rubocop (1.31.1)
+    rubocop (1.31.2)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.0.0)
@@ -156,6 +156,7 @@ PLATFORMS
   java
   ruby
   universal-java-11
+  universal-java-18
   x86_64-darwin-19
 
 DEPENDENCIES
