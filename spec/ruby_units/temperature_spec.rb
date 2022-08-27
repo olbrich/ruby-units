@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe 'temperatures' do
-  describe 'redfine display name' do
+  describe 'redefine display name' do
     before(:all) do
       Unit.redefine!('tempC') do |c|
         c.aliases = %w[tC tempC]
