@@ -1,5 +1,5 @@
 RSpec.describe 'temperatures' do
-  describe 'redfine display name' do
+  describe 'redefine display name' do
     before(:all) do
       Unit.redefine!('tempC') do |c|
         c.aliases = %w[tC tempC]
@@ -104,6 +104,9 @@ RSpec.describe 'temperatures' do
       specify { expect(RubyUnits::Unit.new('100 tK').convert_to('tempR')).to be_within(RubyUnits::Unit.new('0.01 degR')).of(RubyUnits::Unit.new('180 tempR')) }
 
       specify { expect(RubyUnits::Unit.new('32 tF').convert_to('tempC')).to eq(RubyUnits::Unit.new('0 tC')) }
+
+      # See https://github.com/olbrich/ruby-units/issues/251
+      specify { expect(RubyUnits::Unit.new('32 tF').convert_to('tC')).to eq(RubyUnits::Unit.new('0 tC')) }
     end
   end
 end

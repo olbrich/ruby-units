@@ -352,6 +352,9 @@ module RubyUnits
       @@prefix_regex ||= @@prefix_map.keys.sort_by { |prefix| [prefix.length, prefix] }.reverse.join('|')
     end
 
+    # Generates (and memoizes) a regexp matching any of the temperature units or their aliases.
+    #
+    # @return [RegExp]
     def self.temp_regex
       @@temp_regex ||= begin
         temp_units = %w[tempK tempC tempF tempR degK degC degF degR]
@@ -1076,7 +1079,7 @@ module RubyUnits
       return self if TrueClass === other
       return self if FalseClass === other
 
-      if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && other =~ /temp[CFRK]/)
+      if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && other =~ self.class.temp_regex)
         raise ArgumentError, 'Receiver is not a temperature unit' unless degree?
 
         start_unit = units
