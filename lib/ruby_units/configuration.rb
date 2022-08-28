@@ -1,10 +1,3 @@
-# allow for optional configuration of RubyUnits
-#
-# Usage:
-#
-#     RubyUnits.configure do |config|
-#       config.separator = false
-#     end
 module RubyUnits
   class << self
     attr_writer :configuration
@@ -18,6 +11,13 @@ module RubyUnits
     @configuration = Configuration.new
   end
 
+  # allow for optional configuration of RubyUnits
+  #
+  # Usage:
+  #
+  #     RubyUnits.configure do |config|
+  #       config.separator = false
+  #     end
   def self.configure
     yield configuration
   end
@@ -34,7 +34,7 @@ module RubyUnits
     end
 
     def separator=(value)
-      raise ArgumentError, "configuration 'separator' may only be true or false" unless value == true || value == false
+      raise ArgumentError, "configuration 'separator' may only be true or false" unless [true, false].include?(value)
 
       @separator = value ? ' ' : nil
     end

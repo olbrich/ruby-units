@@ -1,31 +1,30 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+RSpec.describe RubyUnits::Cache do
+  subject(:cache) { described_class.new }
 
-describe Unit::Cache do
-  subject { Unit::Cache }
   let(:unit) { RubyUnits::Unit.new('1 m') }
 
-  before(:each) do
-    subject.clear
-    subject.set('m', unit)
+  before do
+    cache.clear
+    cache.set('m', unit)
   end
 
-  context '.clear' do
-    it 'should clear the cache' do
-      subject.clear
-      expect(subject.get('m')).to be_nil
+  describe '.clear' do
+    it 'clears the cache' do
+      cache.clear
+      expect(cache.get('m')).to be_nil
     end
   end
 
-  context '.get' do
-    it 'should retrieve values already in the cache' do
-      expect(subject.get['m']).to eq(unit)
+  describe '.get' do
+    it 'retrieves values already in the cache' do
+      expect(cache.get('m')).to eq(unit)
     end
   end
 
-  context '.set' do
-    it 'should put a unit into the cache' do
-      subject.set('kg', RubyUnits::Unit.new('1 kg'))
-      expect(subject.get['kg']).to eq(RubyUnits::Unit.new('1 kg'))
+  describe '.set' do
+    it 'puts a unit into the cache' do
+      cache.set('kg', RubyUnits::Unit.new('1 kg'))
+      expect(cache.get('kg')).to eq(RubyUnits::Unit.new('1 kg'))
     end
   end
 end

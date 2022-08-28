@@ -1,21 +1,26 @@
 module RubyUnits
-  class Unit < Numeric
-    @@cached_units = {}
+  # Performance optimizations to avoid creating units unnecessarily
+  class Cache
+    attr_accessor :cached
 
-    class Cache
-      def self.get(key = nil)
-        key.nil? ? @@cached_units : @@cached_units[key]
-      end
+    def initialize
+      @cached = {}
+    end
 
-      def self.set(key, value)
-        @@cached_units[key] = value
-      end
+    def get(key)
+      cached[key]
+    end
 
-      def self.clear
-        @@cached_units = {}
-        @@base_unit_cache = {}
-        Unit.new(1)
-      end
+    def set(key, value)
+      cached[key] = value
+    end
+
+    def keys
+      cached.keys
+    end
+
+    def clear
+      @cached = {}
     end
   end
 end
