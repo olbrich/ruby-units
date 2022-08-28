@@ -133,7 +133,6 @@ module RubyUnits
       511_999_999_980 => :angular_velocity,
       512_000_000_000 => :angle
     }.freeze
-    @@base_unit_cache = {}
 
     # Class Methods
 
@@ -242,14 +241,14 @@ module RubyUnits
     # @return [true]
     def self.clear_cache
       cached.clear
-      @@base_unit_cache = {}
+      base_unit_cache.clear
       new(1)
       true
     end
 
     # @return [Hash]
     def self.base_unit_cache
-      @@base_unit_cache
+      @base_unit_cache ||= RubyUnits::Cache.new
     end
 
     # @example parse strings
@@ -419,20 +418,16 @@ module RubyUnits
     attr_accessor :unit_name
 
     # Used to copy one unit to another
-    # @param [Unit] from Unit to copy definition from
-    # @return [Unit]
+    # @param from [RubyUnits::Unit] Unit to copy definition from
+    # @return [RubyUnits::Unit]
     def copy(from)
-      @scalar      = from.scalar
-      @numerator   = from.numerator
+      @scalar = from.scalar
+      @numerator = from.numerator
       @denominator = from.denominator
       @base = from.base?
-      @signature   = from.signature
+      @signature = from.signature
       @base_scalar = from.base_scalar
-      @unit_name = begin
-        from.unit_name
-      rescue StandardError
-        nil
-      end
+      @unit_name = from.unit_name
       self
     end
 
@@ -467,10 +462,9 @@ module RubyUnits
       if options.size == 2
         # options[0] is the scalar
         # options[1] is a unit string
-        unit_string = options[1].is_a?(String) ? options[1] : options[1].to_unit.units
-        cached = self.class.cached.get(unit_string)
+        cached = self.class.cached.get(options[1])
         if cached.nil?
-          initialize("#{options[0]} #{unit_string}")
+          initialize("#{options[0]} #{options[1]}")
         else
           copy(cached * options[0])
         end
@@ -583,12 +577,8 @@ module RubyUnits
         return base
       end
 
-      cached = (begin
-        (@@base_unit_cache[units] * scalar)
-      rescue StandardError
-        nil
-      end)
-      return cached if cached
+      cached_unit = self.class.base_unit_cache.get(units)
+      return cached_unit * scalar unless cached_unit.nil?
 
       num = []
       den = []
@@ -616,7 +606,7 @@ module RubyUnits
       den = den.flatten.compact
       num = UNITY_ARRAY if num.empty?
       base = self.class.new(self.class.eliminate_terms(q, num, den))
-      @@base_unit_cache[units] = base
+      self.class.base_unit_cache.set(units, base)
       base * @scalar
     end
 
@@ -699,7 +689,7 @@ module RubyUnits
     # @return [Boolean]
     # @todo use unit definition to determine if it's a temperature instead of a regex
     def temperature?
-      degree? && !(@@unit_map[units] =~ /temp[CFRK]/).nil?
+      degree? && units.match?(self.class.temp_regex)
     end
 
     alias is_temperature? temperature?
@@ -1560,12 +1550,9 @@ module RubyUnits
 
       unit_string =~ NUMBER_REGEX
       unit = self.class.cached.get(Regexp.last_match(2))
-      mult = begin
-        (Regexp.last_match(1).empty? ? 1.0 : Regexp.last_match(1).to_f)
-      rescue StandardError
-        1.0
-      end
+      mult = Regexp.last_match(1).nil? ? 1.0 : Regexp.last_match(1).to_f
       mult = mult.to_int if mult.to_int == mult
+
       if unit
         copy(unit)
         @scalar      *= mult
