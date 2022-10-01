@@ -93,6 +93,17 @@ module RubyUnits
       end
     end
 
+    # @param number [Numeric, RubyUnits::Unit]
+    # @return [Numeric] if argument is a number
+    # @return [RubyUnits::Unit] if argument is a unit
+    def atan(number)
+      if number.is_a?(RubyUnits::Unit)
+        [super(number), 'radian'].to_unit
+      else
+        super
+      end
+    end
+
     # @param x [Numeric, RubyUnits::Unit]
     # @param y [Numeric, RubyUnits::Unit]
     # @return [Numeric] if all parameters are numbers
