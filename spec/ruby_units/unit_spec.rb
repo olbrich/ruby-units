@@ -1698,7 +1698,7 @@ describe 'Unit Conversions' do
     # even though the result is numerically equivalent to an Integer, we leave
     # it alone
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to eql 2000.0
+      expect(unit.convert_to('mm').scalar).to be 2000.0
     end
   end
 
