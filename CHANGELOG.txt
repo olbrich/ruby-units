@@ -1,16 +1,8 @@
 Change Log for Ruby-units
 =========================
-TBD         3.0.0   * [Breaking Change] Numeric#to_unit behavior changed. It now
-                      converts to a Unit instead of creating a new Unit with the
-                      scalar. This makes it more consistent with other uses of
-                      #to_unit (see #266).
-                    * [Breaking Change] Math.atan2 now returns a radian Unit
-                      instead of a scalar when the arguments are Unit objects.
-                    * Add support for Ruby 3.1, JRuby 9.3, dropped support for
-                      Ruby 2.5, JRuby 9.2.
 
-see Github releases (https://github.com/olbrich/ruby-units/releases)
-
+see GitHub releases (https://github.com/olbrich/ruby-units/releases) for more recent releases. This file will no longer
+be updated.
 
 2020-12-29  2.3.2   * Remove Jeweler (see #178) also adds Code of Conduct
                     * Fix specs related to Complex comparisons (see #213)
