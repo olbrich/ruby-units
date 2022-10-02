@@ -12,7 +12,7 @@ module RubyUnits
   # While there are a large number of unit specified in the base package,
   # there are also a large number of units that are not included.
   # This package covers nearly all SI, Imperial, and units commonly used
-  # in the United States. If your favorite units are not listed here, file an issue on github.
+  # in the United States. If your favorite units are not listed here, file an issue on GitHub.
   #
   # To add or override a unit definition, add a code block like this..
   # @example Define a new unit
@@ -137,7 +137,7 @@ module RubyUnits
     # Class Methods
 
     # setup internal arrays and hashes
-    # @return [true]
+    # @return [Boolean]
     def self.setup
       clear_cache
       @@prefix_values    = {}
@@ -178,7 +178,7 @@ module RubyUnits
     end
 
     # @param  [RubyUnits::Unit::Definition, String] unit_definition
-    # @param  [Block] block
+    # @param  [Proc] block
     # @return [RubyUnits::Unit::Definition]
     # @raise  [ArgumentError] when passed a non-string if using the block form
     # Unpack a unit definition and add it to the array of defined units
@@ -205,7 +205,7 @@ module RubyUnits
     # Get the definition for a unit and allow it to be redefined
     #
     # @param [String] name Name of unit to redefine
-    # @param [Block] _block
+    # @param [Proc] _block
     # @raise [ArgumentError] if a block is not given
     # @yieldparam [RubyUnits::Unit::Definition] the definition of the unit being
     #   redefined
@@ -238,7 +238,7 @@ module RubyUnits
       @cached ||= RubyUnits::Cache.new
     end
 
-    # @return [true]
+    # @return [Boolean]
     def self.clear_cache
       cached.clear
       base_unit_cache.clear
@@ -246,7 +246,7 @@ module RubyUnits
       true
     end
 
-    # @return [Hash]
+    # @return [RubyUnits::Cache]
     def self.base_unit_cache
       @base_unit_cache ||= RubyUnits::Cache.new
     end
@@ -302,7 +302,7 @@ module RubyUnits
     # return an array of base units
     # @return [Array]
     def self.base_units
-      @@base_units ||= @@definitions.dup.delete_if { |_, defn| !defn.base? }.keys.map { |u| new(u) }
+      @@base_units ||= @@definitions.dup.select { |_, definition| definition.base? }.keys.map { |u| new(u) }
     end
 
     # Parse a string consisting of a number and a unit string
@@ -528,7 +528,7 @@ module RubyUnits
         self.class.cached.set(unary_unit, scalar == 1 ? self : unary_unit.to_unit)
       end
       [@scalar, @numerator, @denominator, @base_scalar, @signature, @base].each(&:freeze)
-      self
+      super()
     end
 
     # @todo: figure out how to handle :counting units.  This method should probably return :counting instead of :unitless for 'each'
@@ -726,7 +726,7 @@ module RubyUnits
     # Compare two Unit objects. Throws an exception if they are not of compatible types.
     # Comparisons are done based on the value of the unit in base SI units.
     # @param [Object] other
-    # @return [-1|0|1|nil]
+    # @return [Integer,nil]
     # @raise [NoMethodError] when other does not define <=>
     # @raise [ArgumentError] when units are not compatible
     def <=>(other)
@@ -960,7 +960,7 @@ module RubyUnits
       divmod(other).last
     end
 
-    # Exponentiate.  Only takes integer powers.
+    # Exponentiation.  Only takes integer powers.
     # Note that anything raised to the power of 0 results in a Unit object with a scalar of 1, and no units.
     # Throws an exception if exponent is not an integer.
     # Ideally this routine should accept a float for the exponent
@@ -1021,7 +1021,7 @@ module RubyUnits
     # if n < 0, returns 1/unit^(1/n)
     # @param [Integer] n
     # @return [Unit]
-    # @raise [ArgumentError] when attemptint to take the root of a temperature
+    # @raise [ArgumentError] when attempting to take the root of a temperature
     # @raise [ArgumentError] when n is not an integer
     # @raise [ArgumentError] when n is 0
     def root(n)
@@ -1218,14 +1218,14 @@ module RubyUnits
       unless num == UNITY_ARRAY
         definitions = num.map { |element| self.class.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        definitions = definitions.chunk_while { |definition, _| definition.prefix? }.to_a
         output_numerator = definitions.map { |element| element.map(&:display_name).join }
       end
 
       unless den == UNITY_ARRAY
         definitions = den.map { |element| self.class.definition(element) }
         definitions.reject!(&:prefix?) unless with_prefix
-        definitions = definitions.chunk_while { |defn, _| defn.prefix? }.to_a
+        definitions = definitions.chunk_while { |definition, _| definition.prefix? }.to_a
         output_denominator = definitions.map { |element| element.map(&:display_name).join }
       end
 
@@ -1326,7 +1326,7 @@ module RubyUnits
 
     # convert a duration to a DateTime.  This will work so long as the duration is the duration from the zero date
     # defined by DateTime
-    # @return [DateTime]
+    # @return [::DateTime]
     def to_datetime
       DateTime.new!(convert_to('d').scalar)
     end
@@ -1527,7 +1527,7 @@ module RubyUnits
     #  "GPa"  -- creates a unit with scalar 1 with units 'GPa'
     #  6'4"  -- recognized as 6 feet + 4 inches
     #  8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
-    # @return [nil | Unit]
+    # @return [nil,RubyUnits::Unit]
     # @todo This should either be a separate class or at least a class method
     def parse(passed_unit_string = '0')
       unit_string = passed_unit_string.dup
