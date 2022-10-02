@@ -1,6 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
-
-describe 'temperatures' do
+RSpec.describe 'temperatures' do
   describe 'redefine display name' do
     before(:all) do
       Unit.redefine!('tempC') do |c|
