@@ -21,7 +21,7 @@ require 'date'
 #  end
 #
 module RubyUnits
-  class Unit < Numeric
+  class Unit < ::Numeric
     @@definitions      = {}
     @@prefix_values    = {}
     @@prefix_map       = {}
@@ -195,7 +195,8 @@ module RubyUnits
     #   RubyUnits::Unit.define(unit_definition)
     def self.define(unit_definition, &block)
       if block_given?
-        raise ArgumentError, 'When using the block form of RubyUnits::Unit.define, pass the name of the unit' unless unit_definition.instance_of?(String)
+        raise ArgumentError, 'When using the block form of RubyUnits::Unit.define, pass the name of the unit' unless unit_definition.is_a?(String)
+
         unit_definition = RubyUnits::Unit::Definition.new(unit_definition, &block)
       end
       definitions[unit_definition.name] = unit_definition
@@ -269,7 +270,7 @@ module RubyUnits
       num.delete(UNITY)
       den.delete(UNITY)
 
-      combined = Hash.new(0)
+      combined = ::Hash.new(0)
 
       [[num, 1], [den, -1]].each do |array, increment|
         array.chunk_while { |elt_before, _| definition(elt_before).prefix? }
@@ -544,9 +545,14 @@ module RubyUnits
       @@kinds[signature]
     end
 
-    # @return [Unit]
-    def to_unit
-      self
+    # Convert the unit to a Unit, possibly performing a conversion.
+    # > The ability to pass a Unit to convert to was added in v3.0.0 for
+    # > consistency with other uses of #to_unit.
+    #
+    # @param other [RubyUnits::Unit, String] unit to convert to
+    # @return [RubyUnits::Unit]
+    def to_unit(other = nil)
+      other ? convert_to(other) : self
     end
 
     alias unit to_unit
@@ -881,7 +887,7 @@ module RubyUnits
           raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Time
-        raise ArgumentError, 'Date and Time objects represent fixed points in time and cannot be subtracted from to a Unit, which can only represent time spans'
+        raise ArgumentError, 'Date and Time objects represent fixed points in time and cannot be subtracted from a Unit'
       else
         x, y = coerce(other)
         y - x
@@ -1352,9 +1358,9 @@ module RubyUnits
     def since(time_point)
       case time_point
       when Time
-        (Time.now - time_point).to_unit('s').convert_to(self)
+        self.class.new(::Time.now - time_point, 'second').convert_to(self)
       when DateTime, Date
-        (DateTime.now - time_point).to_unit('d').convert_to(self)
+        self.class.new(::DateTime.now - time_point, 'day').convert_to(self)
       else
         raise ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
@@ -1366,9 +1372,9 @@ module RubyUnits
     def until(time_point)
       case time_point
       when Time
-        (time_point - Time.now).to_unit('s').convert_to(self)
+        self.class.new(time_point - ::Time.now, 'second').convert_to(self)
       when DateTime, Date
-        (time_point - DateTime.now).to_unit('d').convert_to(self)
+        self.class.new(time_point - ::DateTime.now, 'day').convert_to(self)
       else
         raise ArgumentError, 'Must specify a Time, Date, or DateTime'
       end
@@ -1412,9 +1418,9 @@ module RubyUnits
     def best_prefix
       return to_base if scalar.zero?
       best_prefix = if kind == :information
-                      @@prefix_values.key(2**((Math.log(base_scalar, 2) / 10.0).floor * 10))
+                      @@prefix_values.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
                     else
-                      @@prefix_values.key(10**((Math.log10(base_scalar) / 3.0).floor * 3))
+                      @@prefix_values.key(10**((::Math.log10(base_scalar) / 3.0).floor * 3))
                     end
       to(self.class.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
     end
@@ -1453,7 +1459,7 @@ module RubyUnits
     # @raise [ArgumentError] when exponent associated with a unit is > 20 or < -20
     def unit_signature_vector
       return to_base.unit_signature_vector unless base?
-      vector = Array.new(SIGNATURE_VECTOR.size, 0)
+      vector = ::Array.new(SIGNATURE_VECTOR.size, 0)
       # it's possible to have a kind that misses the array... kinds like :counting
       # are more like prefixes, so don't use them to calculate the vector
       @numerator.map { |element| self.class.definition(element) }.each do |definition|

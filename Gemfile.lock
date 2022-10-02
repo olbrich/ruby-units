@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-units (2.4.1)
+    ruby-units (3.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -156,6 +156,7 @@ PLATFORMS
   java
   ruby
   universal-java-11
+  universal-java-18
   x86_64-darwin-19
 
 DEPENDENCIES
