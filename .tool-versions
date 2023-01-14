@@ -1,3 +1,2 @@
-# ruby jruby-9.3.8.0
-# uncomment this to use jruby
 java adoptopenjdk-18.0.1+10
+ruby 2.7.7
