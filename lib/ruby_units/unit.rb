@@ -287,7 +287,7 @@ module RubyUnits
       combined = ::Hash.new(0)
 
       [[num, 1], [den, -1]].each do |array, increment|
-        array.chunk_while { definition(_1).prefix? }
+        array.chunk_while { |elt_before, _| definition(elt_before).prefix? }
              .to_a
              .each { combined[_1] += increment }
       end
@@ -527,7 +527,7 @@ module RubyUnits
         raise ArgumentError, 'Invalid Unit Format'
       end
       update_base_scalar
-      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar < 0
+      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar.negative?
 
       unary_unit = units || ''
       if options.first.instance_of?(String)
@@ -1043,7 +1043,7 @@ module RubyUnits
       raise ArgumentError, 'Exponent must an Integer' unless n.is_a?(Integer)
       raise ArgumentError, '0th root undefined' if n.zero?
       return self if n == 1
-      return root(n.abs).inverse if n < 0
+      return root(n.abs).inverse if n.negative?
 
       vec = unit_signature_vector
       vec = vec.map { _1 % n }
@@ -1632,7 +1632,7 @@ module RubyUnits
         x = "#{item[0]} "
         if n >= 0
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) { x * n }
-        elsif n < 0
+        elsif n.negative?
           bottom = "#{bottom} #{x * -n}"
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
         end
