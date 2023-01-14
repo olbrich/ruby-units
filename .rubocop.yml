@@ -18,6 +18,8 @@ Style/SingleLineBlockParams:
 Naming/FileName:
   Exclude:
     - 'lib/ruby-units.rb'
+Naming/MethodParameterName:
+  Enabled: false
 Style/FormatString:
   Enabled: false
 Style/DateTime:

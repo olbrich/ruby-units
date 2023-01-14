@@ -1,6 +1,6 @@
 require 'date'
 module RubyUnits
-  # Copyright 2006-2022
+  # Copyright 2006-2023
   # @author Kevin C. Olbrich, Ph.D.
   # @see https://github.com/olbrich/ruby-units
   #
@@ -180,7 +180,7 @@ module RubyUnits
     # @param [String] unit
     # @return [Boolean]
     def self.defined?(unit)
-      definitions.values.any? { |d| d.aliases.include?(unit) }
+      definitions.values.any? { _1.aliases.include?(unit) }
     end
 
     # return the unit definition for a unit
@@ -289,7 +289,7 @@ module RubyUnits
       [[num, 1], [den, -1]].each do |array, increment|
         array.chunk_while { |elt_before, _| definition(elt_before).prefix? }
              .to_a
-             .each { |unit| combined[unit] += increment }
+             .each { combined[_1] += increment }
       end
 
       num = []
@@ -316,7 +316,7 @@ module RubyUnits
     # return an array of base units
     # @return [Array]
     def self.base_units
-      @base_units ||= definitions.dup.select { |_, definition| definition.base? }.keys.map { |u| new(u) }
+      @base_units ||= definitions.dup.select { |_, definition| definition.base? }.keys.map { new(_1) }
     end
 
     # Parse a string consisting of a number and a unit string
@@ -351,7 +351,7 @@ module RubyUnits
     # Unit names are reverse sorted by length so the regexp matcher will prefer longer and more specific names
     # @return [String]
     def self.unit_regex
-      @unit_regex ||= unit_map.keys.sort_by { |unit_name| [unit_name.length, unit_name] }.reverse.join('|')
+      @unit_regex ||= unit_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
     end
 
     # return a regex used to match units
@@ -364,7 +364,7 @@ module RubyUnits
     # @return [String]
     # @private
     def self.prefix_regex
-      @prefix_regex ||= prefix_map.keys.sort_by { |prefix| [prefix.length, prefix] }.reverse.join('|')
+      @prefix_regex ||= prefix_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
     end
 
     # Generates (and memoizes) a regexp matching any of the temperature units or their aliases.
@@ -390,14 +390,14 @@ module RubyUnits
       @temp_regex = nil # invalidate the temp regex
       if definition.prefix?
         prefix_values[definition.name] = definition.scalar
-        definition.aliases.each { |alias_name| prefix_map[alias_name] = definition.name }
+        definition.aliases.each { prefix_map[_1] = definition.name }
         @prefix_regex = nil # invalidate the prefix regex
       else
         unit_values[definition.name]          = {}
         unit_values[definition.name][:scalar] = definition.scalar
         unit_values[definition.name][:numerator] = definition.numerator if definition.numerator
         unit_values[definition.name][:denominator] = definition.denominator if definition.denominator
-        definition.aliases.each { |alias_name| unit_map[alias_name] = definition.name }
+        definition.aliases.each { unit_map[_1] = definition.name }
         @unit_regex = nil # invalidate the unit regex
       end
     end
@@ -527,7 +527,7 @@ module RubyUnits
         raise ArgumentError, 'Invalid Unit Format'
       end
       update_base_scalar
-      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar < 0
+      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar.negative?
 
       unary_unit = units || ''
       if options.first.instance_of?(String)
@@ -572,8 +572,8 @@ module RubyUnits
       @base = (@numerator + @denominator)
               .compact
               .uniq
-              .map { |unit| self.class.definition(unit) }
-              .all? { |element| element.unity? || element.base? }
+              .map { self.class.definition(_1) }
+              .all? { _1.unity? || _1.base? }
       @base
     end
 
@@ -1004,7 +1004,7 @@ module RubyUnits
       when Float
         return self**other.to_i if other == other.to_i
 
-        valid = (1..9).map { |n| Rational(1, n) }
+        valid = (1..9).map { Rational(1, _1) }
         raise ArgumentError, 'Not a n-th root (1..9), use 1/n' unless valid.include? other.abs
 
         root(Rational(1, other).to_int)
@@ -1043,23 +1043,23 @@ module RubyUnits
       raise ArgumentError, 'Exponent must an Integer' unless n.is_a?(Integer)
       raise ArgumentError, '0th root undefined' if n.zero?
       return self if n == 1
-      return root(n.abs).inverse if n < 0
+      return root(n.abs).inverse if n.negative?
 
       vec = unit_signature_vector
-      vec = vec.map { |x| x % n }
+      vec = vec.map { _1 % n }
       raise ArgumentError, 'Illegal root' unless vec.max.zero?
 
       num = @numerator.dup
       den = @denominator.dup
 
       @numerator.uniq.each do |item|
-        x = num.find_all { |i| i == item }.size
+        x = num.find_all { _1 == item }.size
         r = ((x / n) * (n - 1)).to_int
         r.times { num.delete_at(num.index(item)) }
       end
 
       @denominator.uniq.each do |item|
-        x = den.find_all { |i| i == item }.size
+        x = den.find_all { _1 == item }.size
         r = ((x / n) * (n - 1)).to_int
         r.times { den.delete_at(den.index(item)) }
       end
@@ -1152,10 +1152,10 @@ module RubyUnits
 
         raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ target
 
-        numerator1   = @numerator.map { |x| self.class.prefix_values[x] || x }.map { |i| i.is_a?(Numeric) ? i : self.class.unit_values[i][:scalar] }.compact
-        denominator1 = @denominator.map { |x| self.class.prefix_values[x] || x }.map { |i| i.is_a?(Numeric) ? i : self.class.unit_values[i][:scalar] }.compact
-        numerator2   = target.numerator.map { |x| self.class.prefix_values[x] || x }.map { |x| x.is_a?(Numeric) ? x : self.class.unit_values[x][:scalar] }.compact
-        denominator2 = target.denominator.map { |x| self.class.prefix_values[x] || x }.map { |x| x.is_a?(Numeric) ? x : self.class.unit_values[x][:scalar] }.compact
+        numerator1   = @numerator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        denominator1 = @denominator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        numerator2   = target.numerator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        denominator2 = target.denominator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
 
         # If the scalar is an Integer, convert it to a Rational number so that
         # if the value is scaled during conversion, resolution is not lost due
@@ -1230,26 +1230,26 @@ module RubyUnits
       den                = @denominator.clone.compact
 
       unless num == UNITY_ARRAY
-        definitions = num.map { |element| self.class.definition(element) }
+        definitions = num.map { self.class.definition(_1) }
         definitions.reject!(&:prefix?) unless with_prefix
         definitions = definitions.chunk_while { |definition, _| definition.prefix? }.to_a
-        output_numerator = definitions.map { |element| element.map(&:display_name).join }
+        output_numerator = definitions.map { _1.map(&:display_name).join }
       end
 
       unless den == UNITY_ARRAY
-        definitions = den.map { |element| self.class.definition(element) }
+        definitions = den.map { self.class.definition(_1) }
         definitions.reject!(&:prefix?) unless with_prefix
         definitions = definitions.chunk_while { |definition, _| definition.prefix? }.to_a
-        output_denominator = definitions.map { |element| element.map(&:display_name).join }
+        output_denominator = definitions.map { _1.map(&:display_name).join }
       end
 
       on  = output_numerator
             .uniq
-            .map { |x| [x, output_numerator.count(x)] }
+            .map { [_1, output_numerator.count(_1)] }
             .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
       od  = output_denominator
             .uniq
-            .map { |x| [x, output_denominator.count(x)] }
+            .map { [_1, output_denominator.count(_1)] }
             .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
       "#{on.join('*')}#{od.empty? ? '' : "/#{od.join('*')}"}".strip
     end
@@ -1493,15 +1493,15 @@ module RubyUnits
       vector = ::Array.new(SIGNATURE_VECTOR.size, 0)
       # it's possible to have a kind that misses the array... kinds like :counting
       # are more like prefixes, so don't use them to calculate the vector
-      @numerator.map { |element| self.class.definition(element) }.each do |definition|
+      @numerator.map { self.class.definition(_1) }.each do |definition|
         index = SIGNATURE_VECTOR.index(definition.kind)
         vector[index] += 1 if index
       end
-      @denominator.map { |element| self.class.definition(element) }.each do |definition|
+      @denominator.map { self.class.definition(_1) }.each do |definition|
         index = SIGNATURE_VECTOR.index(definition.kind)
         vector[index] -= 1 if index
       end
-      raise ArgumentError, 'Power out of range (-20 < net power of a unit < 20)' if vector.any? { |x| x.abs >= 20 }
+      raise ArgumentError, 'Power out of range (-20 < net power of a unit < 20)' if vector.any? { _1.abs >= 20 }
 
       vector
     end
@@ -1632,7 +1632,7 @@ module RubyUnits
         x = "#{item[0]} "
         if n >= 0
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) { x * n }
-        elsif n < 0
+        elsif n.negative?
           bottom = "#{bottom} #{x * -n}"
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
         end
