@@ -1153,9 +1153,9 @@ module RubyUnits
         raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ target
 
         numerator1   = @numerator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
-        denominator1 = @denominator.map { |x| self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
-        numerator2   = target.numerator.map { |x| self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
-        denominator2 = target.denominator.map { |x| self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        denominator1 = @denominator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        numerator2   = target.numerator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        denominator2 = target.denominator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
 
         # If the scalar is an Integer, convert it to a Rational number so that
         # if the value is scaled during conversion, resolution is not lost due
