@@ -51,11 +51,20 @@ module RubyUnits
     @unit_match_regex = nil
     UNITY              = '<1>'.freeze
     UNITY_ARRAY        = [UNITY].freeze
+
+    SIGN_REGEX = /(?:[+-])?/.freeze # +, -, or nothing
+
+    # regex for matching an integer number but not a fraction
+    INTEGER_DIGITS_REGEX = %r{(?<!/)\d+(?!/)}.freeze # 1, 2, 3, but not 1/2 or -1
+    INTEGER_REGEX = /(#{SIGN_REGEX}#{INTEGER_DIGITS_REGEX})/.freeze # -1, 1, +1, but not 1/2
+    UNSIGNED_INTEGER_REGEX = /((?<!-)#{INTEGER_DIGITS_REGEX})/.freeze # 1, 2, 3, but not -1
+    # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
+    RATIONAL_NUMBER  = %r{\(?([+-])?(\d+[ -])?(\d+)/(\d+)\)?}.freeze # 1 2/3, -1 2/3, 5/3, 1-2/3, etc.
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
-    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inch(?:es)?)/.freeze
-    FEET_INCH_REGEX    = /(\d+)\s*#{FEET_INCH_UNITS_REGEX}/.freeze
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(#{UNSIGNED_INTEGER_REGEX}|#{RATIONAL_NUMBER})\s*(?:"|in|inch(?:es)?)/.freeze
+    FEET_INCH_REGEX    = /#{INTEGER_REGEX}\s*#{FEET_INCH_UNITS_REGEX}/.freeze
     # ideally we would like to generate this regex from the alias for a 'pound'
     # and 'ounce', but they aren't defined at the point in the code where we
     # need this regex.
@@ -72,8 +81,6 @@ module RubyUnits
     # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
     #   -123.4E+5, -123.4e-5, etc.
     SCI_NUMBER         = /([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)/.freeze
-    # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
-    RATIONAL_NUMBER    = %r{\(?([+-])?(\d+[ -])?(\d+)/(\d+)\)?}.freeze
     # Complex numbers: 1+2i, 1.0+2.0i, -1-1i, etc.
     COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/.freeze
     # Any Complex, Rational, or scientific number
@@ -1551,14 +1558,14 @@ module RubyUnits
 
       unit_string.gsub!(/[%'"#]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound')
 
-      if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
+      if unit_string.start_with? COMPLEX_NUMBER
         real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]
-        result                  = self.class.new(unit_s || '1') * Complex(real.to_f, imaginary.to_f)
+        result = self.class.new(unit_s || '1') * Complex(real.to_f, imaginary.to_f)
         copy(result)
         return
       end
 
-      if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
+      if unit_string.start_with? RATIONAL_NUMBER
         sign, proper, numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
         sign = sign == '-' ? -1 : 1
         rational = sign * (proper.to_i + Rational(numerator.to_i, denominator.to_i))
@@ -1599,9 +1606,14 @@ module RubyUnits
 
       # Special processing for unusual unit strings
       # feet -- 6'5"
-      feet, inches = unit_string.scan(FEET_INCH_REGEX)[0]
+      # binding.pry if unit_string =~ FEET_INCH_REGEX
+      feet, inches = unit_string.scan(FEET_INCH_REGEX).first
       if feet && inches
-        result = self.class.new("#{feet} ft") + self.class.new("#{inches} inches")
+        result = if feet.start_with? '-'
+                  self.class.new("#{feet} ft") - self.class.new("#{inches} inches")
+                else
+                  self.class.new("#{feet} ft") + self.class.new("#{inches} inches")
+                end
         copy(result)
         return
       end

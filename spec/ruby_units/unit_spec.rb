@@ -453,38 +453,30 @@ RSpec.describe 'Create some simple units' do
   end
 
   # feet/in form
-  ['5 feet 6 inches', '5 feet 6 inch', '5ft 6in', '5 ft 6 in', %(5'6"), %(5' 6")].each do |unit|
-    describe unit do
-      subject { RubyUnits::Unit.new(unit) }
+  ['5 feet 6 inches', '5 feet 6 inch', '5ft 6in', '5 ft 6 in', %(5'6"), %(5' 6")].each do |unit_string|
+    describe unit_string do
+      subject(:unit) { RubyUnits::Unit.new(unit_string) }
 
       it { is_expected.to be_an_instance_of Unit }
-
-      describe '#scalar' do
-        subject { super().scalar }
-        it { is_expected.to eq(5.5) }
-      end
-
-      describe '#units' do
-        subject { super().units }
-        it { is_expected.to eq('ft') }
-      end
-
-      describe '#kind' do
-        subject { super().kind }
-        it { is_expected.to eq(:length) }
-      end
+      it { is_expected.to have_attributes(scalar: 5.5, units: 'ft', kind: :length) }
       it { is_expected.not_to be_temperature }
       it { is_expected.not_to be_degree }
       it { is_expected.not_to be_base }
       it { is_expected.not_to be_unitless }
       it { is_expected.not_to be_zero }
-
-      describe '#base' do
-        subject { super().base }
-        it { is_expected.to be_within(RubyUnits::Unit.new('0.01 m')).of RubyUnits::Unit.new('1.6764 m') }
-      end
-      specify { expect(subject.to_s(:ft)).to eq(%(5'6")) }
+      it { expect(unit.base).to be_within(RubyUnits::Unit.new('0.01 m')).of RubyUnits::Unit.new('1.6764 m') }
+      it { expect(unit.to_s(:ft)).to eq(%(5'6")) }
     end
+  end
+
+  describe RubyUnits::Unit.new(%(-5' 3/4")) do
+    it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: -5.0625, units: 'ft', kind: :length) }
+  end
+
+  describe RubyUnits::Unit.new(%(-5' 1 3/4")) do
+    it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: (-247/48r), units: 'ft', kind: :length) }
   end
 
   # pound/ounces form
