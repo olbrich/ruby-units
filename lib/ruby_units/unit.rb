@@ -63,19 +63,19 @@ module RubyUnits
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
-    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(#{UNSIGNED_INTEGER_REGEX}|#{RATIONAL_NUMBER})\s*(?:"|in|inch(?:es)?)/.freeze
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:"|in|inch(?:es)?)/.freeze
     FEET_INCH_REGEX    = /#{INTEGER_REGEX}\s*#{FEET_INCH_UNITS_REGEX}/.freeze
     # ideally we would like to generate this regex from the alias for a 'pound'
     # and 'ounce', but they aren't defined at the point in the code where we
     # need this regex.
-    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(\d+)\s*(?:ozs?|ounces?)/.freeze
-    LBS_OZ_REGEX       = /(\d+)\s*#{LBS_OZ_UNIT_REGEX}/.freeze
+    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:ozs?|ounces?)/.freeze
+    LBS_OZ_REGEX       = /#{INTEGER_REGEX}\s*#{LBS_OZ_UNIT_REGEX}/.freeze
     # ideally we would like to generate this regex from the alias for a 'stone'
     # and 'pound', but they aren't defined at the point in the code where we
     # need this regex. also note that the plural of 'stone' is still 'stone',
     # but we accept 'stones' anyway.
-    STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(\d+)\s*(?:#|lbs?|pounds?|pound-mass)*/.freeze
-    STONE_LB_REGEX     = /(\d+)\s*#{STONE_LB_UNIT_REGEX}/.freeze
+    STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:#|lbs?|pounds?|pound-mass)*/.freeze
+    STONE_LB_REGEX     = /#{INTEGER_REGEX}\s*#{STONE_LB_UNIT_REGEX}/.freeze
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
     TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):(?:(?<sec>\d+))?(?:,(?<msec>\d+))?/.freeze
     # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
@@ -662,13 +662,13 @@ module RubyUnits
       case target_units
       when :ft
         inches = convert_to('in').scalar.to_int
-        out    = "#{(inches / 12).truncate}'#{(inches % 12).round}\""
+        out    = "#{inches.negative? ? '-' : nil}#{(inches.abs / 12).truncate}'#{(inches.abs % 12).round}\""
       when :lbs
         ounces = convert_to('oz').scalar.to_int
-        out    = "#{(ounces / 16).truncate}#{separator}lbs, #{(ounces % 16).round}#{separator}oz"
+        out    = "#{ounces.negative? ? '-' : nil}#{(ounces.abs / 16).truncate}#{separator}lbs, #{(ounces.abs % 16).round}#{separator}oz"
       when :stone
         pounds = convert_to('lbs').scalar.to_int
-        out = "#{(pounds / 14).truncate}#{separator}stone, #{(pounds % 14).round}#{separator}lb"
+        out = "#{pounds.negative? ? '-' : nil}#{(pounds.abs / 14).truncate}#{separator}stone, #{(pounds.abs % 14).round}#{separator}lb"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
@@ -1610,26 +1610,34 @@ module RubyUnits
       feet, inches = unit_string.scan(FEET_INCH_REGEX).first
       if feet && inches
         result = if feet.start_with? '-'
-                  self.class.new("#{feet} ft") - self.class.new("#{inches} inches")
-                else
-                  self.class.new("#{feet} ft") + self.class.new("#{inches} inches")
-                end
+                   self.class.new("#{feet} ft") - self.class.new("#{inches} inches")
+                 else
+                   self.class.new("#{feet} ft") + self.class.new("#{inches} inches")
+                 end
         copy(result)
         return
       end
 
       # weight -- 8 lbs 12 oz
-      pounds, oz = unit_string.scan(LBS_OZ_REGEX)[0]
+      pounds, oz = unit_string.scan(LBS_OZ_REGEX).first
       if pounds && oz
-        result = self.class.new("#{pounds} lbs") + self.class.new("#{oz} oz")
+        result = if pounds.start_with? '-'
+                   self.class.new("#{pounds} lbs") - self.class.new("#{oz} oz")
+                 else
+                   self.class.new("#{pounds} lbs") + self.class.new("#{oz} oz")
+                 end
         copy(result)
         return
       end
 
       # stone -- 3 stone 5, 2 stone, 14 stone 3 pounds, etc.
-      stone, pounds = unit_string.scan(STONE_LB_REGEX)[0]
+      stone, pounds = unit_string.scan(STONE_LB_REGEX).first
       if stone && pounds
-        result = self.class.new("#{stone} stone") + self.class.new("#{pounds} lbs")
+        result = if stone.start_with? '-'
+                   self.class.new("#{stone} stone") - self.class.new("#{pounds} lbs")
+                 else
+                   self.class.new("#{stone} stone") + self.class.new("#{pounds} lbs")
+                 end
         copy(result)
         return
       end
