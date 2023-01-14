@@ -22,13 +22,33 @@ module RubyUnits
   #  end
   #
   class Unit < ::Numeric
-    @@definitions      = {}
-    @@prefix_values    = {}
-    @@prefix_map       = {}
-    @@unit_map         = {}
-    @@unit_values      = {}
-    @@unit_regex       = nil
-    @@unit_match_regex = nil
+    class << self
+      # return a list of all defined units
+      # @return [Hash{Symbol=>RubyUnits::Units::Definition}]
+      attr_accessor :definitions
+
+      # @return [Hash{Symbol => String}] the list of units and their prefixes
+      attr_accessor :prefix_values
+
+      # @return [Hash{Symbol => String}]
+      attr_accessor :prefix_map
+
+      # @return [Hash{Symbol => String}]
+      attr_accessor :unit_map
+
+      # @return [Hash{Symbol => String}]
+      attr_accessor :unit_values
+
+      # @return [Hash{Integer => Symbol}]
+      attr_reader :kinds
+    end
+    self.definitions = {}
+    self.prefix_values = {}
+    self.prefix_map = {}
+    self.unit_map = {}
+    self.unit_values = {}
+    @unit_regex = nil
+    @unit_match_regex = nil
     UNITY              = '<1>'.freeze
     UNITY_ARRAY        = [UNITY].freeze
     # ideally we would like to generate this regex from the alias for a 'feet'
@@ -70,8 +90,8 @@ module RubyUnits
     FAHRENHEIT         = ['<fahrenheit>'].freeze
     RANKINE            = ['<rankine>'].freeze
     CELSIUS            = ['<celsius>'].freeze
-    @@temp_regex       = nil
-    SIGNATURE_VECTOR   = %i[
+    @temp_regex = nil
+    SIGNATURE_VECTOR = %i[
       length
       time
       temperature
@@ -83,7 +103,7 @@ module RubyUnits
       information
       angle
     ].freeze
-    @@kinds = {
+    @kinds = {
       -312_078 => :elastance,
       -312_058 => :resistance,
       -312_038 => :inductance,
@@ -140,15 +160,15 @@ module RubyUnits
     # @return [Boolean]
     def self.setup
       clear_cache
-      @@prefix_values    = {}
-      @@prefix_map       = {}
-      @@unit_values      = {}
-      @@unit_map         = {}
-      @@unit_regex       = nil
-      @@unit_match_regex = nil
-      @@prefix_regex     = nil
+      self.prefix_values = {}
+      self.prefix_map = {}
+      self.unit_map = {}
+      self.unit_values = {}
+      @unit_regex = nil
+      @unit_match_regex = nil
+      @prefix_regex = nil
 
-      @@definitions.each_value do |definition|
+      definitions.each_value do |definition|
         use_definition(definition)
       end
 
@@ -168,13 +188,7 @@ module RubyUnits
     # @return [RubyUnits::Unit::Definition, nil]
     def self.definition(unit_name)
       unit = unit_name =~ /^<.+>$/ ? unit_name : "<#{unit_name}>"
-      @@definitions[unit]
-    end
-
-    # return a list of all defined units
-    # @return [Array<RubyUnits::Units::Definition>]
-    def self.definitions
-      @@definitions
+      definitions[unit]
     end
 
     # @param  [RubyUnits::Unit::Definition, String] unit_definition
@@ -217,7 +231,7 @@ module RubyUnits
       raise(ArgumentError, "'#{name}' Unit not recognized") unless unit_definition
 
       yield unit_definition
-      @@definitions.delete("<#{name}>")
+      definitions.delete("<#{name}>")
       define(unit_definition)
       setup
     end
@@ -227,7 +241,7 @@ module RubyUnits
     # @param unit [String] name of unit to undefine
     # @return (see RubyUnits::Unit.setup)
     def self.undefine!(unit)
-      @@definitions.delete("<#{unit}>")
+      definitions.delete("<#{unit}>")
       setup
     end
 
@@ -302,7 +316,7 @@ module RubyUnits
     # return an array of base units
     # @return [Array]
     def self.base_units
-      @@base_units ||= @@definitions.dup.select { |_, definition| definition.base? }.keys.map { new(_1) }
+      @base_units ||= definitions.dup.select { |_, definition| definition.base? }.keys.map { new(_1) }
     end
 
     # Parse a string consisting of a number and a unit string
@@ -337,27 +351,27 @@ module RubyUnits
     # Unit names are reverse sorted by length so the regexp matcher will prefer longer and more specific names
     # @return [String]
     def self.unit_regex
-      @@unit_regex ||= @@unit_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
+      @unit_regex ||= unit_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
     end
 
     # return a regex used to match units
     # @return [Regexp]
     def self.unit_match_regex
-      @@unit_match_regex ||= /(#{prefix_regex})??(#{unit_regex})\b/
+      @unit_match_regex ||= /(#{prefix_regex})??(#{unit_regex})\b/
     end
 
     # return a regexp fragment used to match prefixes
     # @return [String]
     # @private
     def self.prefix_regex
-      @@prefix_regex ||= @@prefix_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
+      @prefix_regex ||= prefix_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
     end
 
     # Generates (and memoizes) a regexp matching any of the temperature units or their aliases.
     #
     # @return [Regexp]
     def self.temp_regex
-      @@temp_regex ||= begin
+      @temp_regex ||= begin
         temp_units = %w[tempK tempC tempF tempR degK degC degF degR]
         aliases = temp_units.map do |unit|
           d = definition(unit)
@@ -372,19 +386,19 @@ module RubyUnits
     #
     # @param definition [RubyUnits::Unit::Definition]
     def self.use_definition(definition)
-      @@unit_match_regex = nil # invalidate the unit match regex
-      @@temp_regex       = nil # invalidate the temp regex
+      @unit_match_regex = nil # invalidate the unit match regex
+      @temp_regex = nil # invalidate the temp regex
       if definition.prefix?
-        @@prefix_values[definition.name] = definition.scalar
-        definition.aliases.each { @@prefix_map[_1] = definition.name }
-        @@prefix_regex = nil # invalidate the prefix regex
+        prefix_values[definition.name] = definition.scalar
+        definition.aliases.each { prefix_map[_1] = definition.name }
+        @prefix_regex = nil # invalidate the prefix regex
       else
-        @@unit_values[definition.name]          = {}
-        @@unit_values[definition.name][:scalar] = definition.scalar
-        @@unit_values[definition.name][:numerator] = definition.numerator if definition.numerator
-        @@unit_values[definition.name][:denominator] = definition.denominator if definition.denominator
-        definition.aliases.each { @@unit_map[_1] = definition.name }
-        @@unit_regex = nil # invalidate the unit regex
+        unit_values[definition.name]          = {}
+        unit_values[definition.name][:scalar] = definition.scalar
+        unit_values[definition.name][:numerator] = definition.numerator if definition.numerator
+        unit_values[definition.name][:denominator] = definition.denominator if definition.denominator
+        definition.aliases.each { unit_map[_1] = definition.name }
+        @unit_regex = nil # invalidate the unit regex
       end
     end
 
@@ -535,7 +549,7 @@ module RubyUnits
     # return the kind of the unit (:mass, :length, etc...)
     # @return [Symbol]
     def kind
-      @@kinds[signature]
+      self.class.kinds[signature]
     end
 
     # Convert the unit to a Unit, possibly performing a conversion.
@@ -572,8 +586,8 @@ module RubyUnits
     def to_base
       return self if base?
 
-      if @@unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
-        @signature = @@kinds.key(:temperature)
+      if self.class.unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
+        @signature = self.class.kinds.key(:temperature)
         base = if temperature?
                  convert_to('tempK')
                elsif degree?
@@ -589,21 +603,21 @@ module RubyUnits
       den = []
       q   = Rational(1)
       @numerator.compact.each do |num_unit|
-        if @@prefix_values[num_unit]
-          q *= @@prefix_values[num_unit]
+        if self.class.prefix_values[num_unit]
+          q *= self.class.prefix_values[num_unit]
         else
-          q *= @@unit_values[num_unit][:scalar] if @@unit_values[num_unit]
-          num << @@unit_values[num_unit][:numerator] if @@unit_values[num_unit] && @@unit_values[num_unit][:numerator]
-          den << @@unit_values[num_unit][:denominator] if @@unit_values[num_unit] && @@unit_values[num_unit][:denominator]
+          q *= self.class.unit_values[num_unit][:scalar] if self.class.unit_values[num_unit]
+          num << self.class.unit_values[num_unit][:numerator] if self.class.unit_values[num_unit] && self.class.unit_values[num_unit][:numerator]
+          den << self.class.unit_values[num_unit][:denominator] if self.class.unit_values[num_unit] && self.class.unit_values[num_unit][:denominator]
         end
       end
       @denominator.compact.each do |num_unit|
-        if @@prefix_values[num_unit]
-          q /= @@prefix_values[num_unit]
+        if self.class.prefix_values[num_unit]
+          q /= self.class.prefix_values[num_unit]
         else
-          q /= @@unit_values[num_unit][:scalar] if @@unit_values[num_unit]
-          den << @@unit_values[num_unit][:numerator] if @@unit_values[num_unit] && @@unit_values[num_unit][:numerator]
-          num << @@unit_values[num_unit][:denominator] if @@unit_values[num_unit] && @@unit_values[num_unit][:denominator]
+          q /= self.class.unit_values[num_unit][:scalar] if self.class.unit_values[num_unit]
+          den << self.class.unit_values[num_unit][:numerator] if self.class.unit_values[num_unit] && self.class.unit_values[num_unit][:numerator]
+          num << self.class.unit_values[num_unit][:denominator] if self.class.unit_values[num_unit] && self.class.unit_values[num_unit][:denominator]
         end
       end
 
@@ -641,7 +655,7 @@ module RubyUnits
       case target_units
       when :ft
         inches = convert_to('in').scalar.to_int
-        out    = "#{(inches / 12).truncate}\'#{(inches % 12).round}\""
+        out    = "#{(inches / 12).truncate}'#{(inches % 12).round}\""
       when :lbs
         ounces = convert_to('oz').scalar.to_int
         out    = "#{(ounces / 16).truncate}#{separator}lbs, #{(ounces % 16).round}#{separator}oz"
@@ -652,7 +666,7 @@ module RubyUnits
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
                 ''
-              when /(%[\-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
+              when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
                 begin
                   if Regexp.last_match(2) # unit specified, need to convert
                     convert_to(Regexp.last_match(2)).to_s(Regexp.last_match(1))
@@ -713,7 +727,7 @@ module RubyUnits
     def temperature_scale
       return nil unless temperature?
 
-      "deg#{@@unit_map[units][/temp([CFRK])/, 1]}"
+      "deg#{self.class.unit_map[units][/temp([CFRK])/, 1]}"
     end
 
     # returns true if no associated units
@@ -1102,7 +1116,7 @@ module RubyUnits
         return self if target_unit == start_unit
 
         # @type [Numeric]
-        @base_scalar ||= case @@unit_map[start_unit]
+        @base_scalar ||= case self.class.unit_map[start_unit]
                          when '<tempC>'
                            @scalar + 273.15
                          when '<tempK>'
@@ -1113,7 +1127,7 @@ module RubyUnits
                            @scalar.to_r * Rational(5, 9)
                          end
         # @type [Numeric]
-        q = case @@unit_map[target_unit]
+        q = case self.class.unit_map[target_unit]
             when '<tempC>'
               @base_scalar - 273.15
             when '<tempK>'
@@ -1138,10 +1152,10 @@ module RubyUnits
 
         raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ target
 
-        numerator1   = @numerator.map { @@prefix_values[_1] || _1}.map { _1.is_a?(Numeric) ? _1 : @@unit_values[_1][:scalar] }.compact
-        denominator1 = @denominator.map { @@prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : @@unit_values[_1][:scalar] }.compact
-        numerator2   = target.numerator.map { @@prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : @@unit_values[_1][:scalar] }.compact
-        denominator2 = target.denominator.map { @@prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : @@unit_values[_1][:scalar] }.compact
+        numerator1   = @numerator.map { self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        denominator1 = @denominator.map { |x| self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        numerator2   = target.numerator.map { |x| self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
+        denominator2 = target.denominator.map { |x| self.class.prefix_values[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : self.class.unit_values[_1][:scalar] }.compact
 
         # If the scalar is an Integer, convert it to a Rational number so that
         # if the value is scaled during conversion, resolution is not lost due
@@ -1434,11 +1448,11 @@ module RubyUnits
       return to_base if scalar.zero?
 
       best_prefix = if kind == :information
-                      @@prefix_values.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
+                      self.class.prefix_values.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
                     else
-                      @@prefix_values.key(10**((::Math.log10(base_scalar) / 3.0).floor * 3))
+                      self.class.prefix_values.key(10**((::Math.log10(base_scalar) / 3.0).floor * 3))
                     end
-      to(self.class.new(@@prefix_map.key(best_prefix) + units(with_prefix: false)))
+      to(self.class.new(self.class.prefix_map.key(best_prefix) + units(with_prefix: false)))
     end
 
     # override hash method so objects with same values are considered equal
@@ -1475,6 +1489,7 @@ module RubyUnits
     # @raise [ArgumentError] when exponent associated with a unit is > 20 or < -20
     def unit_signature_vector
       return to_base.unit_signature_vector unless base?
+
       vector = ::Array.new(SIGNATURE_VECTOR.size, 0)
       # it's possible to have a kind that misses the array... kinds like :counting
       # are more like prefixes, so don't use them to calculate the vector
@@ -1564,7 +1579,7 @@ module RubyUnits
         return self
       end
 
-      while unit_string.gsub!(/(<#{@@unit_regex})><(#{@@unit_regex}>)/, '\1*\2')
+      while unit_string.gsub!(/(<#{self.class.unit_regex})><(#{self.class.unit_regex}>)/, '\1*\2')
         # collapse <x><y><z> into <x*y*z>...
       end
       # ... and then strip the remaining brackets for x*y*z
@@ -1652,11 +1667,11 @@ module RubyUnits
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
       @numerator = @numerator.map do |item|
-        @@prefix_map[item[0]] ? [@@prefix_map[item[0]], @@unit_map[item[1]]] : [@@unit_map[item[1]]]
+        self.class.prefix_map[item[0]] ? [self.class.prefix_map[item[0]], self.class.unit_map[item[1]]] : [self.class.unit_map[item[1]]]
       end.flatten.compact.delete_if(&:empty?)
 
       @denominator = @denominator.map do |item|
-        @@prefix_map[item[0]] ? [@@prefix_map[item[0]], @@unit_map[item[1]]] : [@@unit_map[item[1]]]
+        self.class.prefix_map[item[0]] ? [self.class.prefix_map[item[0]], self.class.unit_map[item[1]]] : [self.class.unit_map[item[1]]]
       end.flatten.compact.delete_if(&:empty?)
 
       @numerator = UNITY_ARRAY if @numerator.empty?
