@@ -62,10 +62,13 @@ module RubyUnits
     DECIMAL_REGEX = /\d*[.]?#{DIGITS_REGEX}/.freeze # 1, 0.1, .1
     # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
     RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?}.freeze # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
+    # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
+    #   -123.4E+5, -123.4e-5, etc.
+    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/.freeze
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
-    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(?<inches>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:"|in|inch(?:es)?)/.freeze
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(?<inches>#{RATIONAL_NUMBER}|#{SCI_NUMBER})\s*(?:"|in|inch(?:es)?)/.freeze
     FEET_INCH_REGEX    = /(?<feet>#{INTEGER_REGEX})\s*#{FEET_INCH_UNITS_REGEX}/.freeze
     # ideally we would like to generate this regex from the alias for a 'pound'
     # and 'ounce', but they aren't defined at the point in the code where we
@@ -80,9 +83,7 @@ module RubyUnits
     STONE_LB_REGEX     = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/.freeze
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
     TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/.freeze
-    # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
-    #   -123.4E+5, -123.4e-5, etc.
-    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/.freeze
+
     # Complex numbers: 1+2i, 1.0+2.0i, -1-1i, etc.
     COMPLEX_NUMBER     = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/.freeze
     # Any Complex, Rational, or scientific number
@@ -655,22 +656,29 @@ module RubyUnits
     #
     # @note Rational scalars that are equal to an integer will be represented as integers (i.e, 6/1 => 6, 4/2 => 2, etc..)
     # @param [Symbol] target_units
+    # @param [Float] precision - the precision to use when converting to a rational
     # @return [String]
-    def to_s(target_units = nil)
+    def to_s(target_units = nil, precision: 0.0001)
       out = @output[target_units]
       return out if out
 
       separator = RubyUnits.configuration.separator
       case target_units
       when :ft
-        inches = convert_to('in').scalar.to_int
-        out    = "#{inches.negative? ? '-' : nil}#{(inches.abs / 12).truncate}'#{(inches.abs % 12).round}\""
+        feet, inches = convert_to('in').scalar.abs.divmod(12)
+        improper, frac = inches.divmod(1)
+        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        out = "#{negative? ? '-' : nil}#{feet}'#{improper}#{frac}\""
       when :lbs
-        ounces = convert_to('oz').scalar.to_int
-        out    = "#{ounces.negative? ? '-' : nil}#{(ounces.abs / 16).truncate}#{separator}lbs, #{(ounces.abs % 16).round}#{separator}oz"
+        pounds, ounces = convert_to('oz').scalar.abs.divmod(16)
+        improper, frac = ounces.divmod(1)
+        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        out  = "#{negative? ? '-' : nil}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
       when :stone
-        pounds = convert_to('lbs').scalar.to_int
-        out = "#{pounds.negative? ? '-' : nil}#{(pounds.abs / 14).truncate}#{separator}stone, #{(pounds.abs % 14).round}#{separator}lb"
+        stone, pounds = convert_to('lbs').scalar.abs.divmod(14)
+        improper, frac = pounds.divmod(1)
+        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        out = "#{negative? ? '-' : nil}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
@@ -1578,7 +1586,7 @@ module RubyUnits
         numerator = Integer(match[:numerator])
         denominator = Integer(match[:denominator])
         raise ArgumentError, 'Improper fractions must have a whole number part' if !match[:proper].nil? && !match[:proper].match?(/^#{INTEGER_REGEX}$/)
-        
+
         proper = match[:proper].to_i
         unit_s = match[:unit]
         rational = if proper.negative?
@@ -1596,7 +1604,7 @@ module RubyUnits
       unit = self.class.cached.get(match[:unit])
       mult = match[:scalar] == '' ? 1.0 : match[:scalar].to_f
       mult = mult.to_int if mult.to_int == mult
-      
+
       if unit
         copy(unit)
         @scalar      *= mult

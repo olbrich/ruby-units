@@ -491,7 +491,7 @@ RSpec.describe 'Create some simple units' do
     it { is_expected.not_to be_unitless }
     it { is_expected.not_to be_zero }
     it { expect(unit.base).to be_within(RubyUnits::Unit.new('0.01 kg')).of RubyUnits::Unit.new('2.8633 kg') }
-    it { expect(unit.to_s(:lbs)).to eq('6 lbs, 5 oz') }
+    it { expect(unit.to_s(:lbs)).to eq('6 lbs 5 oz') }
   end
 
   describe RubyUnits::Unit.new('-6lbs 5oz') do
@@ -1707,7 +1707,7 @@ describe 'Unit Conversions' do
   describe 'Foot-inch conversions' do
     [
       ['76 in', %(6'4")],
-      ['-76.5 in', %(-6'4.5")],
+      ['-153/2 in', %(-6'4-1/2")],
       ['77 in', %(6'5")],
       ['78 in', %(6'6")],
       ['79 in', %(6'7")],
@@ -1718,22 +1718,22 @@ describe 'Unit Conversions' do
       ['66 in', %(5'6")],
       ['66in', %(5'6")]
     ].each do |inches, feet|
-      specify { expect(RubyUnits::Unit.new(inches).convert_to('ft')).to eq(RubyUnits::Unit.new(feet)) }
+      specify { expect(RubyUnits::Unit.new(inches)).to eq(RubyUnits::Unit.new(feet)) }
       specify { expect(RubyUnits::Unit.new(inches).to_s(:ft)).to eq(feet) }
     end
   end
 
   describe 'pound-ounce conversions' do
     [
-      ['76 oz', '4 lbs, 12 oz'],
-      ['-76.5 oz', '-4 lbs, 12.5 oz'],
-      ['77 oz', '4 lbs, 13 oz'],
-      ['78 oz', '4 lbs, 14 oz'],
-      ['79 oz', '4 lbs, 15 oz'],
-      ['80 oz', '5 lbs, 0 oz'],
-      ['87 oz', '5 lbs, 7 oz'],
-      ['88 oz', '5 lbs, 8 oz'],
-      ['89 oz', '5 lbs, 9 oz']
+      ['76 oz', '4 lbs 12 oz'],
+      ['-76.5 oz', '-4 lbs 12-1/2 oz'],
+      ['77 oz', '4 lbs 13 oz'],
+      ['78 oz', '4 lbs 14 oz'],
+      ['79 oz', '4 lbs 15 oz'],
+      ['80 oz', '5 lbs 0 oz'],
+      ['87 oz', '5 lbs 7 oz'],
+      ['88 oz', '5 lbs 8 oz'],
+      ['89 oz', '5 lbs 9 oz']
     ].each do |ounces, pounds|
       specify { expect(RubyUnits::Unit.new(ounces).convert_to('lbs')).to eq(RubyUnits::Unit.new(pounds)) }
       specify { expect(RubyUnits::Unit.new(ounces).to_s(:lbs)).to eq(pounds) }
@@ -1750,8 +1750,8 @@ describe 'Unit Conversions' do
     ].each do |stone, pounds|
       specify { expect(RubyUnits::Unit.new(stone).convert_to('lbs')).to eq(RubyUnits::Unit.new(pounds)) }
     end
-    it { expect(RubyUnits::Unit.new('200 lbs').to_s(:stone)).to eq '14 stone, 4 lb' }
-    it { expect(RubyUnits::Unit.new('-200 lbs').to_s(:stone)).to eq '-14 stone, 4 lb' }
+    it { expect(RubyUnits::Unit.new('200 lbs').to_s(:stone)).to eq '14 stone 4 lbs' }
+    it { expect(RubyUnits::Unit.new('-200 lbs').to_s(:stone)).to eq '-14 stone 4 lbs' }
     it { expect(RubyUnits::Unit.new('-14 stone, 4 1/2 lbs')).to eq RubyUnits::Unit.new('-200.5 lbs') }
   end
 end
