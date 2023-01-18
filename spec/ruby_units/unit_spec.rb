@@ -1949,13 +1949,15 @@ describe 'Unit Math' do
       end
     end
 
-    context 'modulo (%)' do
-      context 'compatible units' do
-        specify { expect(RubyUnits::Unit.new('2 m') % RubyUnits::Unit.new('1 m')).to eq(0) }
-        specify { expect(RubyUnits::Unit.new('5 m') % RubyUnits::Unit.new('2 m')).to eq(1) }
-      end
+    describe 'modulo (%)' do
+      it { expect(RubyUnits::Unit.new('2 m') % RubyUnits::Unit.new('1 m')).to eq(0) }
+      it { expect(RubyUnits::Unit.new('2 m') % RubyUnits::Unit.new('1 m')).to eq(RubyUnits::Unit.new('0 m')) }
+      it { expect(RubyUnits::Unit.new('5 m') % RubyUnits::Unit.new('2 m')).to eq(RubyUnits::Unit.new('1 m')) }
+      it { expect(RubyUnits::Unit.new('5 m') % RubyUnits::Unit.new('-2 m')).to eq(RubyUnits::Unit.new('-1 m')) }
+      it { expect(RubyUnits::Unit.new(127) % 2).to eq(1) }
+      it { expect(RubyUnits::Unit.new(127) % -2).to eq(-1) }
 
-      specify 'incompatible units raises an exception' do
+      it 'raises and exception with incompatible units' do
         expect { RubyUnits::Unit.new('1 m') % RubyUnits::Unit.new('1 kg') }.to raise_error(ArgumentError, "Incompatible Units ('1 m' not compatible with '1 kg')")
       end
     end
@@ -2160,10 +2162,27 @@ describe 'Unit Math' do
     specify { expect { RubyUnits::Unit.new('1.5 mm').pred }.to raise_error(ArgumentError, 'Non Integer Scalar') }
   end
 
-  context '#divmod' do
-    specify { expect(RubyUnits::Unit.new('5 mm').divmod(RubyUnits::Unit.new('2 mm'))).to eq([2, 1]) }
-    specify { expect(RubyUnits::Unit.new('1 km').divmod(RubyUnits::Unit.new('2 m'))).to eq([500, 0]) }
-    specify { expect { RubyUnits::Unit.new('1 m').divmod(RubyUnits::Unit.new('2 kg')) }.to raise_error(ArgumentError, "Incompatible Units ('1 m' not compatible with '2 kg')") }
+  describe '#remainder' do
+    it { expect { RubyUnits::Unit.new('5 mm').remainder(2) }.to raise_error(ArgumentError, "Incompatible Units ('5 mm' not compatible with '2')") }
+    it { expect { RubyUnits::Unit.new('5 mm').remainder(RubyUnits::Unit.new('2 kg')) }.to raise_error(ArgumentError, "Incompatible Units ('5 mm' not compatible with '2 kg')") }
+    it { expect(RubyUnits::Unit.new('5 mm').remainder(RubyUnits::Unit.new('2 mm'))).to eq(RubyUnits::Unit.new('1 mm')) }
+    it { expect(RubyUnits::Unit.new('5 mm').remainder(RubyUnits::Unit.new('-2 mm'))).to eq(RubyUnits::Unit.new('1 mm')) }
+    it { expect(RubyUnits::Unit.new('5 cm').remainder(RubyUnits::Unit.new('1 in'))).to eq(RubyUnits::Unit.new('2.46 cm')) }
+    it { expect(RubyUnits::Unit.new(127).remainder(2)).to eq(1) }
+    it { expect(RubyUnits::Unit.new(127).remainder(-2)).to eq(1) }
+  end
+
+  describe '#divmod' do
+    it { expect(RubyUnits::Unit.new('5 mm').divmod(RubyUnits::Unit.new('2 mm'))).to eq([2, RubyUnits::Unit.new('1 mm')]) }
+    it { expect(RubyUnits::Unit.new('5 mm').divmod(RubyUnits::Unit.new('-2 mm'))).to eq([-3, RubyUnits::Unit.new('-1 mm')]) }
+    it { expect(RubyUnits::Unit.new('1 km').divmod(RubyUnits::Unit.new('2 m'))).to eq([500, RubyUnits::Unit.new('0 mm')]) }
+    it { expect { RubyUnits::Unit.new('1 m').divmod(RubyUnits::Unit.new('2 kg')) }.to raise_error(ArgumentError, "Incompatible Units ('1 m' not compatible with '2 kg')") }
+  end
+
+  describe '#quo' do
+    it { expect(RubyUnits::Unit.new('5 mm').quo(RubyUnits::Unit.new('2 mm'))).to eq(2.5) }
+    it { expect(RubyUnits::Unit.new('1 km').quo(RubyUnits::Unit.new('2 s'))).to eq(RubyUnits::Unit.new('1/2 km/s')) }
+    it { expect { RubyUnits::Unit.new('1 km').quo(RubyUnits::Unit.new('0 s'))}.to raise_error(ZeroDivisionError) }
   end
 
   context '#div' do
