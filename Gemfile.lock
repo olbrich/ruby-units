@@ -150,8 +150,7 @@ GEM
     tilt (2.0.11)
     unicode-display_width (2.4.2)
     webrick (1.7.0)
-    yard (0.9.28)
-      webrick (~> 1.7.0)
+    yard (0.9.33)
 
 PLATFORMS
   arm64-darwin-21
