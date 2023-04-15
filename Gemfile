@@ -12,7 +12,6 @@ group :optional do
   gem 'rubocop-rspec'
   gem 'ruby-maven', platform: :jruby
   gem 'ruby-prof', platform: :mri
-  gem 'simplecov'
   gem 'simplecov-html'
   gem 'solargraph'
   gem 'terminal-notifier'
@@ -20,5 +19,7 @@ group :optional do
   gem 'webrick'
   gem 'yard'
 end
+
+gem 'simplecov'
 
 gemspec
