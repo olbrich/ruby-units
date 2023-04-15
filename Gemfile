@@ -4,9 +4,22 @@ source 'https://rubygems.org'
 # The CI process will not install them.
 group :optional do
   gem 'debug', '>= 1.0.0', platform: :mri
+  gem 'guard-rspec'
+  gem 'pry'
   gem 'redcarpet', platform: :mri # redcarpet doesn't support jruby
+  gem 'rubocop'
+  gem 'rubocop-rake'
+  gem 'rubocop-rspec'
   gem 'ruby-maven', platform: :jruby
   gem 'ruby-prof', platform: :mri
+  gem 'simplecov-html'
+  gem 'solargraph'
+  gem 'terminal-notifier'
+  gem 'terminal-notifier-guard'
+  gem 'webrick'
+  gem 'yard'
 end
+
+gem 'simplecov'
 
 gemspec
