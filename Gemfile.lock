@@ -122,7 +122,7 @@ GEM
     ruby-maven (3.3.13)
       ruby-maven-libs (~> 3.3.9)
     ruby-maven-libs (3.3.9)
-    ruby-prof (1.6.1)
+    ruby-prof (1.6.2)
     ruby-progressbar (1.13.0)
     shellany (0.0.1)
     simplecov (0.22.0)
