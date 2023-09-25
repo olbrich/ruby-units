@@ -68,7 +68,7 @@ module RubyUnits
     STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(\d+)\s*(?:#|lbs?|pounds?|pound-mass)*/.freeze
     STONE_LB_REGEX     = /(\d+)\s*#{STONE_LB_UNIT_REGEX}/.freeze
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
-    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):(?:(?<sec>\d+))?(?:,(?<msec>\d+))?/.freeze
+    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:,(?<msec>\d+))?/.freeze
     # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
     #   -123.4E+5, -123.4e-5, etc.
     SCI_NUMBER         = /([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)/.freeze
@@ -1600,7 +1600,6 @@ module RubyUnits
       end
       # ... and then strip the remaining brackets for x*y*z
       unit_string.gsub!(/[<>]/, '')
-
       if unit_string =~ TIME_REGEX
         hours, minutes, seconds, microseconds = unit_string.scan(TIME_REGEX)[0]
         raise ArgumentError, 'Invalid Duration' if [hours, minutes, seconds, microseconds].all?(&:nil?)
