@@ -802,9 +802,10 @@ module RubyUnits
       end
     end
 
-    # check to see if units are compatible, but not the scalar part
-    # this check is done by comparing signatures for performance reasons
-    # if passed a string, it will create a unit object with the string and then do the comparison
+    # Check to see if units are compatible, ignoring the scalar part.  This check is done by comparing unit signatures
+    # for performance reasons.  If passed a string, this will create a [Unit] object with the string and then do the
+    # comparison.
+    #
     # @example this permits a syntax like:
     #  unit =~ "mm"
     # @note if you want to do a regexp comparison of the unit string do this ...
@@ -812,17 +813,12 @@ module RubyUnits
     # @param [Object] other
     # @return [Boolean]
     def =~(other)
-      case other
-      when Unit
-        signature == other.signature
-      else
-        begin
-          x, y = coerce(other)
-          x =~ y
-        rescue ArgumentError
-          false
-        end
-      end
+      return signature == other.signature if other.is_a?(Unit)
+
+      x, y = coerce(other)
+      x =~ y
+    rescue ArgumentError # return false when `other` cannot be converted to a [Unit]
+      false
     end
 
     alias compatible? =~
@@ -972,27 +968,50 @@ module RubyUnits
       end
     end
 
-    # divide two units and return quotient and remainder
-    # when both units are in the same units we just use divmod on the raw scalars
-    # otherwise we use the scalar of the base unit which will be a float
-    # @param [Object] other
-    # @return [Array]
+    # Returns the remainder when one unit is divided by another
+    #
+    # @param [Unit] other
+    # @return [Unit]
+    # @raise [ArgumentError] if units are not compatible
+    def remainder(other)
+      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
+
+      self.class.new(base_scalar.remainder(other.to_unit.base_scalar), to_base.units).convert_to(self)
+    end
+
+    # Divide two units and return quotient and remainder
+    #
+    # @param [Unit] other
+    # @return [Array(Integer, Unit)]
+    # @raise [ArgumentError] if units are not compatible
     def divmod(other)
-      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ other
-      return scalar.divmod(other.scalar) if units == other.units
+      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
 
-      to_base.scalar.divmod(other.to_base.scalar)
+      [quo(other).to_base.floor, self % other]
     end
 
-    # perform a modulo on a unit, will raise an exception if the units are not compatible
-    # @param [Object] other
+    # Perform a modulo on a unit, will raise an exception if the units are not compatible
+    #
+    # @param [Unit] other
     # @return [Integer]
+    # @raise [ArgumentError] if units are not compatible
     def %(other)
-      divmod(other).last
+      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
+
+      self.class.new(base_scalar % other.to_unit.base_scalar, to_base.units).convert_to(self)
     end
+    alias modulo %
+
+    # @param [Object] other
+    # @return [Unit]
+    # @raise [ZeroDivisionError] if other is zero
+    def quo(other)
+      self / other
+    end
+    alias fdiv quo
 
     # Exponentiation.  Only takes integer powers.
-    # Note that anything raised to the power of 0 results in a Unit object with a scalar of 1, and no units.
+    # Note that anything raised to the power of 0 results in a [Unit] object with a scalar of 1, and no units.
     # Throws an exception if exponent is not an integer.
     # Ideally this routine should accept a float for the exponent
     # It should then convert the float to a rational and raise the unit by the numerator and root it by the denominator
@@ -1445,19 +1464,16 @@ module RubyUnits
     alias after from
     alias from_now from
 
-    # automatically coerce objects to units when possible
-    # if an object defines a 'to_unit' method, it will be coerced using that method
+    # Automatically coerce objects to [Unit] when possible. If an object defines a '#to_unit' method, it will be coerced
+    # using that method.
+    #
     # @param other [Object, #to_unit]
-    # @return [Array]
+    # @return [Array(Unit, Unit)]
+    # @raise [ArgumentError] when `other` cannot be converted to a [Unit]
     def coerce(other)
-      return [other.to_unit, self] if other.respond_to? :to_unit
+      return [other.to_unit, self] if other.respond_to?(:to_unit)
 
-      case other
-      when Unit
-        [other, self]
-      else
-        [self.class.new(other), self]
-      end
+      [self.class.new(other), self]
     end
 
     # returns a new unit that has been scaled to be more in line with typical usage.
