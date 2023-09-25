@@ -1680,15 +1680,15 @@ describe 'Unit Conversions' do
   # see #203
   context 'when the unit scalar is an Integer' do
     it 'the conversion is done accurately' do
-      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to eql 100663125/67108864r
+      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to be === 100663125/67108864r
     end
 
     it 'the converted unit has an Integer scalar if the initial unit has an Integer scalar and the scalar is equivalent to an integer' do
-      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to eql 2000
+      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to be === 2000
     end
 
     it 'the scalar becomes a Rational when necessary to preserve accuracy' do
-      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eql 2500/381r
+      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to be === 2500/381r
     end
   end
 
@@ -1698,7 +1698,7 @@ describe 'Unit Conversions' do
     # even though the result is numerically equivalent to an Integer, we leave
     # it alone
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to be 2000.0
+      expect(unit.convert_to('mm').scalar).to be === 2000.0
     end
   end
 
@@ -1706,7 +1706,7 @@ describe 'Unit Conversions' do
     subject(:unit) { RubyUnits::Unit.new(2.0 + 1.0i, 'm') }
 
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to eql 2000.0 + 1000.0i
+      expect(unit.convert_to('mm').scalar).to be === 2000.0 + 1000.0i
     end
   end
 
@@ -1714,7 +1714,7 @@ describe 'Unit Conversions' do
     subject(:unit) { RubyUnits::Unit.new(2r, 'm') }
 
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to eql 2000r
+      expect(unit.convert_to('mm').scalar).to be === 2000r
     end
   end
 
