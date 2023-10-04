@@ -453,69 +453,55 @@ RSpec.describe 'Create some simple units' do
   end
 
   # feet/in form
-  ['5 feet 6 inches', '5 feet 6 inch', '5ft 6in', '5 ft 6 in', %(5'6"), %(5' 6")].each do |unit|
-    describe unit do
-      subject { RubyUnits::Unit.new(unit) }
+  ['5 feet 6 inches', '5 feet 6 inch', '5ft 6in', '5 ft 6 in', %(5'6"), %(5' 6")].each do |unit_string|
+    describe unit_string do
+      subject(:unit) { RubyUnits::Unit.new(unit_string) }
 
       it { is_expected.to be_an_instance_of Unit }
-
-      describe '#scalar' do
-        subject { super().scalar }
-        it { is_expected.to eq(5.5) }
-      end
-
-      describe '#units' do
-        subject { super().units }
-        it { is_expected.to eq('ft') }
-      end
-
-      describe '#kind' do
-        subject { super().kind }
-        it { is_expected.to eq(:length) }
-      end
+      it { is_expected.to have_attributes(scalar: 5.5, units: 'ft', kind: :length) }
       it { is_expected.not_to be_temperature }
       it { is_expected.not_to be_degree }
       it { is_expected.not_to be_base }
       it { is_expected.not_to be_unitless }
       it { is_expected.not_to be_zero }
-
-      describe '#base' do
-        subject { super().base }
-        it { is_expected.to be_within(RubyUnits::Unit.new('0.01 m')).of RubyUnits::Unit.new('1.6764 m') }
-      end
-      specify { expect(subject.to_s(:ft)).to eq(%(5'6")) }
+      it { expect(unit.base).to be_within(RubyUnits::Unit.new('0.01 m')).of RubyUnits::Unit.new('1.6764 m') }
+      it { expect(unit.to_s(:ft)).to eq(%(5'6")) }
     end
   end
 
-  # pound/ounces form
-  describe RubyUnits::Unit.new('6lbs 5oz') do
+  describe RubyUnits::Unit.new(%(-5' 3/4")) do
     it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: -5.0625, units: 'ft', kind: :length) }
+  end
 
-    describe '#scalar' do
-      subject { super().scalar }
-      it { is_expected.to be_within(0.001).of 6.312 }
-    end
+  describe RubyUnits::Unit.new(%(-5' 1 3/4")) do
+    it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: (-247/48r), units: 'ft', kind: :length) }
+  end
 
-    describe '#units' do
-      subject { super().units }
-      it { is_expected.to eq('lbs') }
-    end
+  # pound/ounces form
+  describe '6lbs 5oz' do
+    subject(:unit) { RubyUnits::Unit.new('6lbs 5oz') }
 
-    describe '#kind' do
-      subject { super().kind }
-      it { is_expected.to eq(:mass) }
-    end
+    it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: 6.3125, units: 'lbs', kind: :mass) }
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
     it { is_expected.not_to be_unitless }
     it { is_expected.not_to be_zero }
+    it { expect(unit.base).to be_within(RubyUnits::Unit.new('0.01 kg')).of RubyUnits::Unit.new('2.8633 kg') }
+    it { expect(unit.to_s(:lbs)).to eq('6 lbs 5 oz') }
+  end
 
-    describe '#base' do
-      subject { super().base }
-      it { is_expected.to be_within(RubyUnits::Unit.new('0.01 kg')).of RubyUnits::Unit.new('2.8633 kg') }
-    end
-    specify { expect(subject.to_s(:lbs)).to eq('6 lbs, 5 oz') }
+  describe RubyUnits::Unit.new('-6lbs 5oz') do
+    it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: -6.3125, units: 'lbs', kind: :mass) }
+  end
+
+  describe RubyUnits::Unit.new('-6lbs 5 3/4oz') do
+    it { is_expected.to be_an_instance_of Unit }
+    it { is_expected.to have_attributes(scalar: -6.359375, units: 'lbs', kind: :mass) }
   end
 
   # temperature
@@ -611,14 +597,14 @@ RSpec.describe 'Create some simple units' do
     end
   end
 
-  describe RubyUnits::Unit.new("1:23:45,67") do
+  describe RubyUnits::Unit.new("1:23:45.67") do
     it { is_expected.to be_an_instance_of Unit }
 
     describe '#scalar' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to be === 5025000067/3600000000r }
+      it { is_expected.to be === 5025067/3600000r }
     end
 
     describe '#units' do
@@ -947,9 +933,9 @@ RSpec.describe 'Create some simple units' do
   end
 
   # time string
-  describe RubyUnits::Unit.new('1:23:45,200') do
+  describe RubyUnits::Unit.new('1:23:45.200') do
     it { is_expected.to be_an_instance_of Unit }
-    it { is_expected.to eq(RubyUnits::Unit.new('1 h') + RubyUnits::Unit.new('23 min') + RubyUnits::Unit.new('45 seconds') + RubyUnits::Unit.new('200 usec')) }
+    it { is_expected.to eq(RubyUnits::Unit.new('1 h') + RubyUnits::Unit.new('23 min') + RubyUnits::Unit.new('45 seconds') + RubyUnits::Unit.new('200 ms')) }
 
     describe '#scalar' do
       subject { super().scalar }
@@ -1795,6 +1781,7 @@ describe 'Unit Conversions' do
   describe 'Foot-inch conversions' do
     [
       ['76 in', %(6'4")],
+      ['-153/2 in', %(-6'4-1/2")],
       ['77 in', %(6'5")],
       ['78 in', %(6'6")],
       ['79 in', %(6'7")],
@@ -1805,21 +1792,22 @@ describe 'Unit Conversions' do
       ['66 in', %(5'6")],
       ['66in', %(5'6")]
     ].each do |inches, feet|
-      specify { expect(RubyUnits::Unit.new(inches).convert_to('ft')).to eq(RubyUnits::Unit.new(feet)) }
+      specify { expect(RubyUnits::Unit.new(inches)).to eq(RubyUnits::Unit.new(feet)) }
       specify { expect(RubyUnits::Unit.new(inches).to_s(:ft)).to eq(feet) }
     end
   end
 
   describe 'pound-ounce conversions' do
     [
-      ['76 oz', '4 lbs, 12 oz'],
-      ['77 oz', '4 lbs, 13 oz'],
-      ['78 oz', '4 lbs, 14 oz'],
-      ['79 oz', '4 lbs, 15 oz'],
-      ['80 oz', '5 lbs, 0 oz'],
-      ['87 oz', '5 lbs, 7 oz'],
-      ['88 oz', '5 lbs, 8 oz'],
-      ['89 oz', '5 lbs, 9 oz']
+      ['76 oz', '4 lbs 12 oz'],
+      ['-76.5 oz', '-4 lbs 12-1/2 oz'],
+      ['77 oz', '4 lbs 13 oz'],
+      ['78 oz', '4 lbs 14 oz'],
+      ['79 oz', '4 lbs 15 oz'],
+      ['80 oz', '5 lbs 0 oz'],
+      ['87 oz', '5 lbs 7 oz'],
+      ['88 oz', '5 lbs 8 oz'],
+      ['89 oz', '5 lbs 9 oz']
     ].each do |ounces, pounds|
       specify { expect(RubyUnits::Unit.new(ounces).convert_to('lbs')).to eq(RubyUnits::Unit.new(pounds)) }
       specify { expect(RubyUnits::Unit.new(ounces).to_s(:lbs)).to eq(pounds) }
@@ -1831,11 +1819,14 @@ describe 'Unit Conversions' do
       ['14 stone 4', '200 lbs'],
       ['14 st 4', '200 lbs'],
       ['14 stone, 4 pounds', '200 lbs'],
+      ['-14 stone, 4 pounds', '-200 lbs'],
       ['14 st, 4 lbs', '200 lbs']
     ].each do |stone, pounds|
       specify { expect(RubyUnits::Unit.new(stone).convert_to('lbs')).to eq(RubyUnits::Unit.new(pounds)) }
     end
-    specify { expect(RubyUnits::Unit.new('200 lbs').to_s(:stone)).to eq '14 stone, 4 lb' }
+    it { expect(RubyUnits::Unit.new('200 lbs').to_s(:stone)).to eq '14 stone 4 lbs' }
+    it { expect(RubyUnits::Unit.new('-200 lbs').to_s(:stone)).to eq '-14 stone 4 lbs' }
+    it { expect(RubyUnits::Unit.new('-14 stone, 4 1/2 lbs')).to eq RubyUnits::Unit.new('-200.5 lbs') }
   end
 end
 
@@ -2093,18 +2084,18 @@ describe 'Unit Math' do
     specify { expect { RubyUnits::Unit.new('100 tempK').inverse }.to raise_error(ArgumentError, 'Cannot divide with temperatures') }
   end
 
-  context 'convert to scalars' do
-    specify { expect(RubyUnits::Unit.new('10').to_i).to be_kind_of(Integer) }
-    specify { expect { RubyUnits::Unit.new('10 m').to_i }.to raise_error(RuntimeError, "Cannot convert '10 m' to Integer unless unitless.  Use Unit#scalar") }
+  context 'when converting to scalars' do
+    it { expect(RubyUnits::Unit.new('10').to_i).to be_a(Integer) }
+    it { expect { RubyUnits::Unit.new('10 m').to_i }.to raise_error(RuntimeError, "Cannot convert '10 m' to Integer unless unitless.  Use Unit#scalar") }
 
-    specify { expect(RubyUnits::Unit.new('10.0').to_f).to be_kind_of(Float) }
-    specify { expect { RubyUnits::Unit.new('10.0 m').to_f }.to raise_error(RuntimeError, "Cannot convert '10 m' to Float unless unitless.  Use Unit#scalar") }
+    it { expect(RubyUnits::Unit.new('10.0').to_f).to be_a(Float) }
+    it { expect { RubyUnits::Unit.new('10.0 m').to_f }.to raise_error(RuntimeError, "Cannot convert '10 m' to Float unless unitless.  Use Unit#scalar") }
 
-    specify { expect(RubyUnits::Unit.new('1+1i').to_c).to be_kind_of(Complex) }
-    specify { expect { RubyUnits::Unit.new('1+1i m').to_c }.to raise_error(RuntimeError, "Cannot convert '1.0+1.0i m' to Complex unless unitless.  Use Unit#scalar") }
+    it { expect(RubyUnits::Unit.new('1+1i').to_c).to be_a(Complex) }
+    it { expect { RubyUnits::Unit.new('1+1i m').to_c }.to raise_error(RuntimeError, "Cannot convert '1+1i m' to Complex unless unitless.  Use Unit#scalar") }
 
-    specify { expect(RubyUnits::Unit.new('3/7').to_r).to be_kind_of(Rational) }
-    specify { expect { RubyUnits::Unit.new('3/7 m').to_r }.to raise_error(RuntimeError, "Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }
+    it { expect(RubyUnits::Unit.new('3/7').to_r).to be_a(Rational) }
+    it { expect { RubyUnits::Unit.new('3/7 m').to_r }.to raise_error(RuntimeError, "Cannot convert '3/7 m' to Rational unless unitless.  Use Unit#scalar") }
   end
 
   context 'absolute value (#abs)' do

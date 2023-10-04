@@ -51,41 +51,50 @@ module RubyUnits
     @unit_match_regex = nil
     UNITY              = '<1>'.freeze
     UNITY_ARRAY        = [UNITY].freeze
+
+    SIGN_REGEX = /(?:[+-])?/.freeze # +, -, or nothing
+
+    # regex for matching an integer number but not a fraction
+    INTEGER_DIGITS_REGEX = %r{(?<!/)\d+(?!/)}.freeze # 1, 2, 3, but not 1/2 or -1
+    INTEGER_REGEX = /(#{SIGN_REGEX}#{INTEGER_DIGITS_REGEX})/.freeze # -1, 1, +1, but not 1/2
+    UNSIGNED_INTEGER_REGEX = /((?<!-)#{INTEGER_DIGITS_REGEX})/.freeze # 1, 2, 3, but not -1
+    DIGITS_REGEX = /\d+/.freeze # 0, 1, 2, 3
+    DECIMAL_REGEX = /\d*[.]?#{DIGITS_REGEX}/.freeze # 1, 0.1, .1
+    # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
+    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?} # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
+    # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
+    #   -123.4E+5, -123.4e-5, etc.
+    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
-    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(\d+)\s*(?:"|in|inch(?:es)?)/.freeze
-    FEET_INCH_REGEX    = /(\d+)\s*#{FEET_INCH_UNITS_REGEX}/.freeze
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(?<inches>#{RATIONAL_NUMBER}|#{SCI_NUMBER})\s*(?:"|in|inch(?:es)?)/.freeze
+    FEET_INCH_REGEX    = /(?<feet>#{INTEGER_REGEX})\s*#{FEET_INCH_UNITS_REGEX}/.freeze
     # ideally we would like to generate this regex from the alias for a 'pound'
     # and 'ounce', but they aren't defined at the point in the code where we
     # need this regex.
-    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(\d+)\s*(?:ozs?|ounces?)/.freeze
-    LBS_OZ_REGEX       = /(\d+)\s*#{LBS_OZ_UNIT_REGEX}/.freeze
+    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(?<oz>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:ozs?|ounces?)/.freeze
+    LBS_OZ_REGEX       = /(?<pounds>#{INTEGER_REGEX})\s*#{LBS_OZ_UNIT_REGEX}/.freeze
     # ideally we would like to generate this regex from the alias for a 'stone'
     # and 'pound', but they aren't defined at the point in the code where we
     # need this regex. also note that the plural of 'stone' is still 'stone',
     # but we accept 'stones' anyway.
-    STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(\d+)\s*(?:#|lbs?|pounds?|pound-mass)*/.freeze
-    STONE_LB_REGEX     = /(\d+)\s*#{STONE_LB_UNIT_REGEX}/.freeze
+    STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(?<pounds>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:#|lbs?|pounds?|pound-mass)*/.freeze
+    STONE_LB_REGEX     = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/.freeze
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
-    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:,(?<msec>\d+))?/.freeze
-    # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
-    #   -123.4E+5, -123.4e-5, etc.
-    SCI_NUMBER         = /([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)/.freeze
-    # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
-    RATIONAL_NUMBER    = %r{\(?([+-])?(\d+[ -])?(\d+)/(\d+)\)?}.freeze
+    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/.freeze
     # Complex numbers: 1+2i, 1.0+2.0i, -1-1i, etc.
-    COMPLEX_NUMBER     = /#{SCI_NUMBER}?#{SCI_NUMBER}i\b/.freeze
+    COMPLEX_NUMBER     = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/.freeze
     # Any Complex, Rational, or scientific number
     ANY_NUMBER         = /(#{COMPLEX_NUMBER}|#{RATIONAL_NUMBER}|#{SCI_NUMBER})/.freeze
     ANY_NUMBER_REGEX   = /(?:#{ANY_NUMBER})?\s?([^-\d.].*)?/.freeze
-    NUMBER_REGEX       = /#{SCI_NUMBER}*\s*(.+)?/.freeze
+    NUMBER_REGEX       = /(?<scalar>#{SCI_NUMBER}*)\s*(?<unit>.+)?/.freeze # a number followed by a unit
     UNIT_STRING_REGEX  = %r{#{SCI_NUMBER}*\s*([^/]*)/*(.+)*}.freeze
     TOP_REGEX          = /([^ *]+)(?:\^|\*\*)([\d-]+)/.freeze
     BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/.freeze
     NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/.freeze
-    COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(.+)?/.freeze
-    RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(.+)?/.freeze
+    COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/.freeze
+    RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/.freeze
     KELVIN             = ['<kelvin>'].freeze
     FAHRENHEIT         = ['<fahrenheit>'].freeze
     RANKINE            = ['<rankine>'].freeze
@@ -646,22 +655,29 @@ module RubyUnits
     #
     # @note Rational scalars that are equal to an integer will be represented as integers (i.e, 6/1 => 6, 4/2 => 2, etc..)
     # @param [Symbol] target_units
+    # @param [Float] precision - the precision to use when converting to a rational
     # @return [String]
-    def to_s(target_units = nil)
+    def to_s(target_units = nil, precision: 0.0001)
       out = @output[target_units]
       return out if out
 
       separator = RubyUnits.configuration.separator
       case target_units
       when :ft
-        inches = convert_to('in').scalar.to_int
-        out    = "#{(inches / 12).truncate}'#{(inches % 12).round}\""
+        feet, inches = convert_to('in').scalar.abs.divmod(12)
+        improper, frac = inches.divmod(1)
+        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        out = "#{negative? ? '-' : nil}#{feet}'#{improper}#{frac}\""
       when :lbs
-        ounces = convert_to('oz').scalar.to_int
-        out    = "#{(ounces / 16).truncate}#{separator}lbs, #{(ounces % 16).round}#{separator}oz"
+        pounds, ounces = convert_to('oz').scalar.abs.divmod(16)
+        improper, frac = ounces.divmod(1)
+        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        out  = "#{negative? ? '-' : nil}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
       when :stone
-        pounds = convert_to('lbs').scalar.to_int
-        out = "#{(pounds / 14).truncate}#{separator}stone, #{(pounds % 14).round}#{separator}lb"
+        stone, pounds = convert_to('lbs').scalar.abs.divmod(14)
+        improper, frac = pounds.divmod(1)
+        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        out = "#{negative? ? '-' : nil}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
@@ -1565,27 +1581,43 @@ module RubyUnits
       unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
 
-      unit_string.gsub!(/[%'"#]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound')
-
-      if defined?(Complex) && unit_string =~ COMPLEX_NUMBER
-        real, imaginary, unit_s = unit_string.scan(COMPLEX_REGEX)[0]
-        result                  = self.class.new(unit_s || '1') * Complex(real.to_f, imaginary.to_f)
+      unit_string.gsub!(/[%'"#_,]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound', '_' => '', ',' => '')
+      if unit_string.start_with?(COMPLEX_NUMBER)
+        match = unit_string.match(COMPLEX_REGEX)
+        real = Float(match[:real]) if match[:real]
+        imaginary = Float(match[:imaginary])
+        unit_s = match[:unit]
+        real = real.to_i if real.to_i == real
+        imaginary = imaginary.to_i if imaginary.to_i == imaginary
+        complex = Complex(real || 0, imaginary)
+        complex = complex.to_i if complex.imaginary.zero? && complex.real == complex.real.to_i
+        result = self.class.new(unit_s || 1) * complex
         copy(result)
         return
       end
 
-      if defined?(Rational) && unit_string =~ RATIONAL_NUMBER
-        sign, proper, numerator, denominator, unit_s = unit_string.scan(RATIONAL_REGEX)[0]
-        sign = sign == '-' ? -1 : 1
-        rational = sign * (proper.to_i + Rational(numerator.to_i, denominator.to_i))
-        result = self.class.new(unit_s || '1') * rational
+      if unit_string.start_with?(RATIONAL_NUMBER)
+        match = unit_string.match(RATIONAL_REGEX)
+        numerator = Integer(match[:numerator])
+        denominator = Integer(match[:denominator])
+        raise ArgumentError, 'Improper fractions must have a whole number part' if !match[:proper].nil? && !match[:proper].match?(/^#{INTEGER_REGEX}$/)
+
+        proper = match[:proper].to_i
+        unit_s = match[:unit]
+        rational = if proper.negative?
+                     (proper - Rational(numerator, denominator))
+                   else
+                     (proper + Rational(numerator, denominator))
+                   end
+        rational = rational.to_int if rational.to_int == rational
+        result = self.class.new(unit_s || 1) * rational
         copy(result)
         return
       end
 
-      unit_string =~ NUMBER_REGEX
-      unit = self.class.cached.get(Regexp.last_match(2))
-      mult = Regexp.last_match(1).nil? ? 1.0 : Regexp.last_match(1).to_f
+      match = unit_string.match(NUMBER_REGEX)
+      unit = self.class.cached.get(match[:unit])
+      mult = match[:scalar] == '' ? 1.0 : match[:scalar].to_f
       mult = mult.to_int if mult.to_int == mult
 
       if unit
@@ -1600,46 +1632,65 @@ module RubyUnits
       end
       # ... and then strip the remaining brackets for x*y*z
       unit_string.gsub!(/[<>]/, '')
-      if unit_string =~ TIME_REGEX
-        hours, minutes, seconds, microseconds = unit_string.scan(TIME_REGEX)[0]
-        raise ArgumentError, 'Invalid Duration' if [hours, minutes, seconds, microseconds].all?(&:nil?)
 
-        result = self.class.new("#{hours || 0} h") +
+      if (match = unit_string.match(TIME_REGEX))
+        hours = match[:hour]
+        minutes = match[:min]
+        seconds = match[:sec]
+        milliseconds = match[:msec]
+        raise ArgumentError, 'Invalid Duration' if [hours, minutes, seconds, milliseconds].all?(&:nil?)
+
+        result = self.class.new("#{hours || 0} hours") +
                  self.class.new("#{minutes || 0} minutes") +
                  self.class.new("#{seconds || 0} seconds") +
-                 self.class.new("#{microseconds || 0} usec")
+                 self.class.new("#{milliseconds || 0} milliseconds")
         copy(result)
         return
       end
 
       # Special processing for unusual unit strings
       # feet -- 6'5"
-      feet, inches = unit_string.scan(FEET_INCH_REGEX)[0]
-      if feet && inches
-        result = self.class.new("#{feet} ft") + self.class.new("#{inches} inches")
+      if (match = unit_string.match(FEET_INCH_REGEX))
+        feet = Integer(match[:feet])
+        inches = match[:inches]
+        result = if feet.negative?
+                   self.class.new("#{feet} ft") - self.class.new("#{inches} inches")
+                 else
+                   self.class.new("#{feet} ft") + self.class.new("#{inches} inches")
+                 end
         copy(result)
         return
       end
 
       # weight -- 8 lbs 12 oz
-      pounds, oz = unit_string.scan(LBS_OZ_REGEX)[0]
-      if pounds && oz
-        result = self.class.new("#{pounds} lbs") + self.class.new("#{oz} oz")
+      if (match = unit_string.match(LBS_OZ_REGEX))
+        pounds = Integer(match[:pounds])
+        oz = match[:oz]
+        result = if pounds.negative?
+                   self.class.new("#{pounds} lbs") - self.class.new("#{oz} oz")
+                 else
+                   self.class.new("#{pounds} lbs") + self.class.new("#{oz} oz")
+                 end
         copy(result)
         return
       end
 
       # stone -- 3 stone 5, 2 stone, 14 stone 3 pounds, etc.
-      stone, pounds = unit_string.scan(STONE_LB_REGEX)[0]
-      if stone && pounds
-        result = self.class.new("#{stone} stone") + self.class.new("#{pounds} lbs")
+      if (match = unit_string.match(STONE_LB_REGEX))
+        stone = Integer(match[:stone])
+        pounds = match[:pounds]
+        result = if stone.negative?
+                   self.class.new("#{stone} stone") - self.class.new("#{pounds} lbs")
+                 else
+                   self.class.new("#{stone} stone") + self.class.new("#{pounds} lbs")
+                 end
         copy(result)
         return
       end
 
       # more than one per.  I.e., "1 m/s/s"
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string =~ /\s[02-9]/
+      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized #{unit_string}") if unit_string =~ /\s[02-9]/
 
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
       top.scan(TOP_REGEX).each do |item|
