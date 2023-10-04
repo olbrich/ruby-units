@@ -61,10 +61,10 @@ module RubyUnits
     DIGITS_REGEX = /\d+/.freeze # 0, 1, 2, 3
     DECIMAL_REGEX = /\d*[.]?#{DIGITS_REGEX}/.freeze # 1, 0.1, .1
     # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
-    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?}.freeze # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
+    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?} # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
     # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
     #   -123.4E+5, -123.4e-5, etc.
-    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/.freeze
+    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
@@ -83,11 +83,6 @@ module RubyUnits
     STONE_LB_REGEX     = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/.freeze
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
     TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/.freeze
-    # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
-    #   -123.4E+5, -123.4e-5, etc.
-    SCI_NUMBER         = /([+-]?\d*[.]?\d+(?:[Ee][+-]?)?\d*)/.freeze
-    # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
-    RATIONAL_NUMBER    = %r{\(?([+-])?(\d+[ -])?(\d+)/(\d+)\)?}.freeze
     # Complex numbers: 1+2i, 1.0+2.0i, -1-1i, etc.
     COMPLEX_NUMBER     = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/.freeze
     # Any Complex, Rational, or scientific number

@@ -597,14 +597,14 @@ RSpec.describe 'Create some simple units' do
     end
   end
 
-  describe RubyUnits::Unit.new("1:23:45,67") do
+  describe RubyUnits::Unit.new("1:23:45.67") do
     it { is_expected.to be_an_instance_of Unit }
 
     describe '#scalar' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to be === 5025000067/3600000000r }
+      it { is_expected.to be === 5025067/3600000r }
     end
 
     describe '#units' do
