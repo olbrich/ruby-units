@@ -554,6 +554,80 @@ RSpec.describe 'Create some simple units' do
   end
 
   # Time
+  describe RubyUnits::Unit.new("1:00") do
+    it { is_expected.to be_an_instance_of Unit }
+
+    describe '#scalar' do
+      subject { super().scalar }
+
+      it { is_expected.to be_a(Numeric) }
+      it { is_expected.to be === 1 }
+    end
+
+    describe '#units' do
+      subject { super().units }
+
+      it { is_expected.to eq('h') }
+    end
+
+    it { is_expected.not_to be_temperature }
+    it { is_expected.not_to be_degree }
+    it { is_expected.not_to be_base }
+    it { is_expected.not_to be_unitless }
+    it { is_expected.not_to be_zero }
+  end
+
+  describe RubyUnits::Unit.new("1:23") do
+    it { is_expected.to be_an_instance_of Unit }
+
+    describe '#scalar' do
+      subject { super().scalar }
+
+      it { is_expected.to be_a(Numeric) }
+      it { is_expected.to be === 83/60r }
+    end
+
+    describe '#units' do
+      subject { super().units }
+
+      it { is_expected.to eq('h') }
+    end
+  end
+
+  describe RubyUnits::Unit.new("1:23:45") do
+    it { is_expected.to be_an_instance_of Unit }
+
+    describe '#scalar' do
+      subject { super().scalar }
+
+      it { is_expected.to be_a(Numeric) }
+      it { is_expected.to be === 67/48r }
+    end
+
+    describe '#units' do
+      subject { super().units }
+
+      it { is_expected.to eq('h') }
+    end
+  end
+
+  describe RubyUnits::Unit.new("1:23:45,67") do
+    it { is_expected.to be_an_instance_of Unit }
+
+    describe '#scalar' do
+      subject { super().scalar }
+
+      it { is_expected.to be_a(Numeric) }
+      it { is_expected.to be === 5025000067/3600000000r }
+    end
+
+    describe '#units' do
+      subject { super().units }
+
+      it { is_expected.to eq('h') }
+    end
+  end
+
   describe RubyUnits::Unit.new(Time.now) do
     it { is_expected.to be_an_instance_of Unit }
 
