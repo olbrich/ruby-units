@@ -1581,7 +1581,9 @@ module RubyUnits
       unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
       unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
 
-      unit_string.gsub!(/[%'"#_,]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound', '_' => '', ',' => '')
+      unit_string.gsub!(/(\d)[_,](\d)/, '\1\2') # remove underscores and commas in numbers
+
+      unit_string.gsub!(/[%'"#]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound')
       if unit_string.start_with?(COMPLEX_NUMBER)
         match = unit_string.match(COMPLEX_REGEX)
         real = Float(match[:real]) if match[:real]
