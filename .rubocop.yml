@@ -24,3 +24,5 @@ Style/FormatString:
   Enabled: false
 Style/DateTime:
   Enabled: false
+Metrics/ClassLength:
+  Enabled: false
