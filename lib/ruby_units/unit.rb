@@ -1,6 +1,6 @@
 require 'date'
 module RubyUnits
-  # Copyright 2006-2023
+  # Copyright 2006-2024
   # @author Kevin C. Olbrich, Ph.D.
   # @see https://github.com/olbrich/ruby-units
   #
@@ -164,6 +164,17 @@ module RubyUnits
     }.freeze
 
     # Class Methods
+
+    # Callback triggered when a subclass is created. This properly sets up the internal variables, and copies
+    # definitions from the parent class.
+    #
+    # @param [Class] subclass
+    def self.inherited(subclass)
+      super
+      subclass.definitions = definitions.dup
+      subclass.instance_variable_set(:@kinds, @kinds.dup)
+      subclass.setup
+    end
 
     # setup internal arrays and hashes
     # @return [Boolean]

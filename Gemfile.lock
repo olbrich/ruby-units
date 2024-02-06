@@ -175,6 +175,7 @@ GEM
 PLATFORMS
   arm64-darwin-21
   arm64-darwin-22
+  arm64-darwin-23
   java
   universal-java-11
   universal-java-18
@@ -203,4 +204,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   2.4.19
+   2.5.3
