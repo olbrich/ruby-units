@@ -670,7 +670,7 @@ module RubyUnits
     # @param format [Symbol] Set to :exponential to force all units to be displayed in exponential format
     #
     # @return [String]
-    def to_s(target_units = nil, precision: 0.0001, format: nil)
+    def to_s(target_units = nil, precision: 0.0001, format: RubyUnits.configuration.format)
       out = @output[target_units]
       return out if out
 
@@ -1302,7 +1302,7 @@ module RubyUnits
         od = output_denominator
              .uniq
              .map { [_1, output_denominator.count(_1)] }
-             .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{-power}" : '')) }
+             .map { |element, power| (element.to_s.strip + (power > 0 ? "^#{-power}" : '')) }
         (on + od).join('*').strip
       else
         od  = output_denominator
