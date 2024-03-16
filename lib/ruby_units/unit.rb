@@ -1486,12 +1486,22 @@ module RubyUnits
       [self.class.new(other), self]
     end
 
-    # returns a new unit that has been scaled to be more in line with typical usage.
+    # Returns a new unit that has been scaled to be more in line with typical usage. This is highly opinionated and not
+    # based on any standard. It is intended to be used to make the units more human readable.
+    #
+    # Some key points:
+    # * Units containing 'kg' will be returned as is. The prefix in 'kg' makes this an odd case.
+    # * It use `centi` instead of `milli` when the scalar is between 0.01 and 0.001
+    #
+    # @return [Unit]
     def best_prefix
       return to_base if scalar.zero?
+      return self if units.include?('kg')
 
       best_prefix = if kind == :information
                       self.class.prefix_values.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
+                    elsif ((1/100r)..(1/10r)).cover?(base_scalar)
+                      self.class.prefix_values.key(1/100r)
                     else
                       self.class.prefix_values.key(10**((::Math.log10(base_scalar) / 3.0).floor * 3))
                     end
