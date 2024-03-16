@@ -27,7 +27,8 @@ end
 
 RubyUnits::Unit.define('naut-mile') do |naut|
   naut.definition = RubyUnits::Unit.new('1852 m')
-  naut.aliases    = %w[nmi M NM]
+  naut.aliases    = %w[nmi NM]
+  # Don't use the 'M' abbreviation here since it conflicts with 'Molar'
 end
 
 # on land
@@ -71,7 +72,9 @@ end
 
 RubyUnits::Unit.define('pica') do |pica|
   pica.definition = RubyUnits::Unit.new('1/72 ft')
-  pica.aliases    = %w[P pica picas]
+  pica.aliases    = %w[pica picas]
+  # Don't use 'P' as an abbreviation since it conflicts with 'Poise'
+  # Don't use 'pc' as an abbreviation since it conflicts with 'parsec'
 end
 
 RubyUnits::Unit.define('point') do |point|
