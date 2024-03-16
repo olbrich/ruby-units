@@ -2170,6 +2170,14 @@ describe 'Unit Math' do
         expect(unit.round(3, half: :down)).to eq(RubyUnits::Unit.new('1.234 m'))
       end
     end
+
+    context 'with a unit containing a centi-prefix' do
+      subject(:unit) { RubyUnits::Unit.new('1.2345 cm^2') }
+
+      it 'rounds correctly for squared unit' do
+        expect(unit.round).to eq(RubyUnits::Unit.new('1 cm^2'))
+      end
+    end
   end
 
   context '#truncate' do
