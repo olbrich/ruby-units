@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-units (4.0.2)
+    ruby-units (4.0.3)
 
 GEM
   remote: https://rubygems.org/
