@@ -2262,10 +2262,17 @@ describe 'Unit Math' do
     specify { expect(RubyUnits::Unit.new('23 m').div(RubyUnits::Unit.new('2 m'))).to eq(11) }
   end
 
-  context '#best_prefix' do
-    specify { expect(RubyUnits::Unit.new('1024 KiB').best_prefix).to eq(RubyUnits::Unit.new('1 MiB')) }
-    specify { expect(RubyUnits::Unit.new('1000 m').best_prefix).to eq(RubyUnits::Unit.new('1 km')) }
-    specify { expect { RubyUnits::Unit.new('0 m').best_prefix }.to_not raise_error }
+  describe '#best_prefix' do
+    it { expect(RubyUnits::Unit.new('1024 KiB').best_prefix).to have_attributes(scalar: 1, units: 'MiB') }
+    it { expect(RubyUnits::Unit.new('1000 m').best_prefix).to have_attributes(scalar: 1, units: 'km') }
+    it { expect(RubyUnits::Unit.new('1/1000 m').best_prefix).to have_attributes(scalar: 1.0, units: 'mm') }
+    it { expect(RubyUnits::Unit.new('1/100000 m').best_prefix).to have_attributes(scalar: 10, units: 'um') }
+    it { expect(RubyUnits::Unit.new('0 m').best_prefix).to have_attributes(scalar: 0, units: 'm') }
+    it { expect(RubyUnits::Unit.new('1000 kg').best_prefix).to have_attributes(scalar: 1000, units: 'kg') }
+    it { expect(RubyUnits::Unit.new('1_000_000 kg').best_prefix).to have_attributes(scalar: 1_000_000, units: 'kg') }
+    it { expect(RubyUnits::Unit.new('1/100 m').best_prefix).to have_attributes(scalar: 1, units: 'cm') }
+    it { expect(RubyUnits::Unit.new('1/10 m').best_prefix).to have_attributes(scalar: 10, units: 'cm') }
+    it { expect(RubyUnits::Unit.new('0.234 s').best_prefix).to have_attributes(scalar: 234, units: 'ms') }
   end
 
   context 'Time helper functions' do
