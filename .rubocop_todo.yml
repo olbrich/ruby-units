@@ -40,12 +40,6 @@ RSpec/BeforeAfterAll:
     - '**/spec/support/**/*.rb'
     - 'spec/ruby_units/temperature_spec.rb'
 
-# Offense count: 16
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/ContextMethod:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 95
 # Configuration parameters: Prefixes, AllowedPatterns.
 # Prefixes: when, with, without

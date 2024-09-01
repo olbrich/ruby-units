@@ -2038,7 +2038,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#power' do
+  describe '#power' do
     subject { RubyUnits::Unit.new('1 m') }
     it 'raises an exception when passed a Float argument' do
       expect { subject.power(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
@@ -2059,7 +2059,7 @@ describe 'Unit Math' do
     specify { expect(subject.power(2)).to eq(RubyUnits::Unit.new('1 m^2')) }
   end
 
-  context '#root' do
+  describe '#root' do
     subject { RubyUnits::Unit.new('1 m') }
     it 'raises an exception when passed a Float argument' do
       expect { subject.root(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
@@ -2081,7 +2081,7 @@ describe 'Unit Math' do
     specify { expect(RubyUnits::Unit.new('1 m^2').root(2)).to eq(RubyUnits::Unit.new('1 m')) }
   end
 
-  context '#inverse' do
+  describe '#inverse' do
     specify { expect(RubyUnits::Unit.new('1 m').inverse).to eq(RubyUnits::Unit.new('1 1/m')) }
     specify { expect { RubyUnits::Unit.new('100 tempK').inverse }.to raise_error(ArgumentError, 'Cannot divide with temperatures') }
   end
@@ -2114,7 +2114,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#ceil' do
+  describe '#ceil' do
     context 'of a unitless unit' do
       it 'returns the ceil of the scalar' do
         expect(RubyUnits::Unit.new('10.1').ceil).to eq(11)
@@ -2134,7 +2134,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#floor' do
+  describe '#floor' do
     context 'of a unitless unit' do
       specify 'returns the floor of the scalar' do
         expect(RubyUnits::Unit.new('10.1').floor).to eq(10)
@@ -2154,7 +2154,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#round' do
+  describe '#round' do
     context 'of a unitless unit' do
       specify 'returns the round of the scalar' do
         expect(RubyUnits::Unit.new('10.5').round).to eq(11)
@@ -2182,7 +2182,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#truncate' do
+  describe '#truncate' do
     context 'of a unitless unit' do
       specify 'returns the truncate of the scalar' do
         expect(RubyUnits::Unit.new('10.5').truncate).to eq(10)
@@ -2208,7 +2208,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#zero?' do
+  describe '#zero?' do
     it 'is true when the scalar is zero on the base scale' do
       expect(RubyUnits::Unit.new('0')).to be_zero
       expect(RubyUnits::Unit.new('0 mm')).to be_zero
@@ -2222,7 +2222,7 @@ describe 'Unit Math' do
     end
   end
 
-  context '#succ' do
+  describe '#succ' do
     specify { expect(RubyUnits::Unit.new('1').succ).to eq(RubyUnits::Unit.new('2')) }
     specify { expect(RubyUnits::Unit.new('1 mm').succ).to eq(RubyUnits::Unit.new('2 mm')) }
     specify { expect(RubyUnits::Unit.new('1 mm').next).to eq(RubyUnits::Unit.new('2 mm')) }
@@ -2230,7 +2230,7 @@ describe 'Unit Math' do
     specify { expect { RubyUnits::Unit.new('1.5 mm').succ }.to raise_error(ArgumentError, 'Non Integer Scalar') }
   end
 
-  context '#pred' do
+  describe '#pred' do
     specify { expect(RubyUnits::Unit.new('1').pred).to eq(RubyUnits::Unit.new('0')) }
     specify { expect(RubyUnits::Unit.new('1 mm').pred).to eq(RubyUnits::Unit.new('0 mm')) }
     specify { expect(RubyUnits::Unit.new('-1 mm').pred).to eq(RubyUnits::Unit.new('-2 mm')) }
@@ -2260,7 +2260,7 @@ describe 'Unit Math' do
     it { expect { RubyUnits::Unit.new('1 km').quo(RubyUnits::Unit.new('0 s')) }.to raise_error(ZeroDivisionError) }
   end
 
-  context '#div' do
+  describe '#div' do
     specify { expect(RubyUnits::Unit.new('23 m').div(RubyUnits::Unit.new('2 m'))).to eq(11) }
   end
 
@@ -2284,7 +2284,7 @@ describe 'Unit Math' do
       allow(Date).to receive(:today).and_return(Date.civil(2011, 10, 16))
     end
 
-    context '#since' do
+    describe '#since' do
       specify { expect(RubyUnits::Unit.new('min').since(Time.utc(2001, 4, 1, 0, 0, 0))).to eq(RubyUnits::Unit.new('5544000 min')) }
       specify { expect(RubyUnits::Unit.new('min').since(DateTime.civil(2001, 4, 1, 0, 0, 0))).to eq(RubyUnits::Unit.new('5544000 min')) }
       specify { expect(RubyUnits::Unit.new('min').since(Date.civil(2001, 4, 1))).to eq(RubyUnits::Unit.new('5544000 min')) }
@@ -2292,7 +2292,7 @@ describe 'Unit Math' do
       specify { expect { RubyUnits::Unit.new('min').since(nil) }.to raise_error(ArgumentError, 'Must specify a Time, Date, or DateTime') }
     end
 
-    context '#before' do
+    describe '#before' do
       specify { expect(RubyUnits::Unit.new('5 min').before(Time.now)).to eq(Time.utc(2011, 10, 15, 23, 55)) }
       specify { expect(RubyUnits::Unit.new('5 min').before(DateTime.now)).to eq(DateTime.civil(2011, 10, 15, 23, 55)) }
       specify { expect(RubyUnits::Unit.new('5 min').before(Date.today)).to eq(DateTime.civil(2011, 10, 15, 23, 55)) }
@@ -2300,13 +2300,13 @@ describe 'Unit Math' do
       specify { expect { RubyUnits::Unit.new('5 min').before('12:00') }.to raise_error(ArgumentError, 'Must specify a Time, Date, or DateTime') }
     end
 
-    context '#ago' do
+    describe '#ago' do
       specify { expect(RubyUnits::Unit.new('5 min').ago).to be_a Time }
       specify { expect(RubyUnits::Unit.new('10000 y').ago).to be_a Time }
       specify { expect(RubyUnits::Unit.new('1 year').ago).to eq(Time.utc(2010, 10, 16)) }
     end
 
-    context '#until' do
+    describe '#until' do
       specify { expect(RubyUnits::Unit.new('min').until(Date.civil(2011, 10, 17))).to eq(RubyUnits::Unit.new('1440 min')) }
       specify { expect(RubyUnits::Unit.new('min').until(DateTime.civil(2011, 10, 21))).to eq(RubyUnits::Unit.new('7200 min')) }
       specify { expect(RubyUnits::Unit.new('min').until(Time.utc(2011, 10, 21))).to eq(RubyUnits::Unit.new('7200 min')) }
@@ -2314,7 +2314,7 @@ describe 'Unit Math' do
       specify { expect { RubyUnits::Unit.new('5 min').until('12:00') }.to raise_error(ArgumentError, 'Must specify a Time, Date, or DateTime') }
     end
 
-    context '#from' do
+    describe '#from' do
       specify { expect(RubyUnits::Unit.new('1 day').from(Date.civil(2011, 10, 17))).to eq(Date.civil(2011, 10, 18)) }
       specify { expect(RubyUnits::Unit.new('5 min').from(DateTime.civil(2011, 10, 21))).to eq(DateTime.civil(2011, 10, 21, 0, 5)) }
       specify { expect(RubyUnits::Unit.new('5 min').from(Time.utc(2011, 10, 21))).to eq(Time.utc(2011, 10, 21, 0, 5)) }
