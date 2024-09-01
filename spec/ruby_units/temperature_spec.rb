@@ -65,6 +65,7 @@ RSpec.describe 'temperatures' do
         subject { super().kind }
         it { is_expected.to eq(:temperature) }
       end
+
       it { is_expected.to be_temperature }
       it { is_expected.to be_degree }
       it { is_expected.not_to be_base }

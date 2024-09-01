@@ -526,6 +526,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:temperature) }
     end
+
     it { is_expected.to be_temperature }
     it { is_expected.to be_degree }
     it { is_expected.not_to be_base }
@@ -635,6 +636,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:time) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.to be_base }
@@ -670,6 +672,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:temperature) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.to be_degree }
     it { is_expected.not_to be_base }
@@ -699,6 +702,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:unitless) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -734,6 +738,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:angle) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -769,6 +774,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:angle) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.to be_base }
@@ -804,6 +810,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:unitless) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -839,6 +846,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:mass) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.to be_base }
@@ -883,6 +891,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to be_nil }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.to be_base }
@@ -956,6 +965,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:time) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -992,6 +1002,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:time) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -1027,6 +1038,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:speed) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -1042,6 +1054,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().temperature_scale }
       it { is_expected.to be_nil }
     end
+
     it { expect(subject.convert_to('in/s')).to be_within(RubyUnits::Unit.new('0.0001 in/s')).of(RubyUnits::Unit.new('1.0043269330917 in/s')) }
   end
 
@@ -1063,6 +1076,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:capacitance) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -1097,6 +1111,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:radiation) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.to be_base }
@@ -1131,6 +1146,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:radiation) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.to be_base }
@@ -1171,6 +1187,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().kind }
       it { is_expected.to eq(:unitless) }
     end
+
     it { is_expected.not_to be_temperature }
     it { is_expected.not_to be_degree }
     it { is_expected.not_to be_base }
@@ -1457,6 +1474,7 @@ describe Unit do
           subject { super().kind }
           it { is_expected.to eq(:time) }
         end
+
         it { is_expected.not_to be_temperature }
         it { is_expected.not_to be_degree }
         it { is_expected.not_to be_base }
@@ -1514,6 +1532,7 @@ describe Unit do
           subject { super().kind }
           it { is_expected.to eq(:volume) }
         end
+
         it { is_expected.not_to be_temperature }
         it { is_expected.not_to be_degree }
         it { is_expected.not_to be_base }
