@@ -77,11 +77,6 @@ RSpec/DescribedClass:
     - 'spec/ruby_units/complex_spec.rb'
     - 'spec/ruby_units/unit_spec.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/EmptyLineAfterFinalLet:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 114
 # This cop supports safe autocorrection (--autocorrect).

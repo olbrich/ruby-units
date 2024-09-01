@@ -2388,6 +2388,7 @@ describe 'Equations with Units' do
     let(:v) { RubyUnits::Unit.new('1 m^3') }
     let(:n) { RubyUnits::Unit.new('1 mole') }
     let(:r) { RubyUnits::Unit.new('8.31451 J/mol*degK') }
+
     specify { expect(((p * v) / (n * r)).convert_to('tempK')).to be_within(RubyUnits::Unit.new('0.1 degK')).of(RubyUnits::Unit.new('12027.2 tempK')) }
   end
 end
