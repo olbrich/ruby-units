@@ -41,6 +41,7 @@ module RubyUnits
     attr_reader :format
 
     def initialize
+      self.format = :rational
       self.separator = true
     end
 

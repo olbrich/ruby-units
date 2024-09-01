@@ -296,14 +296,15 @@ Configuration options can be set like:
 
 ```ruby
 RubyUnits.configure do |config|
+  config.format = :rational
   config.separator = false
 end
 ```
 
-Currently there is only one configuration you can set:
-
-1. separator (true/false): should a space be used to separate the scalar from
-   the unit part during output.
+| Option    | Description                                                                                                            | Valid Values              | Default     |
+|-----------|------------------------------------------------------------------------------------------------------------------------|---------------------------|-------------|
+| format    | Only used for output formatting. `:rational` is formatted like `3 m/s^2`. `:exponential` is formatted like `3 m*s^-2`. | `:rational, :exponential` | `:rational` |
+| separator | Use a space separator for output. `true` is formatted like `3 m/s`, `false` is like `3m/s`.                            | `true, false`             | `true`      |
 
 ### NOTES
 
