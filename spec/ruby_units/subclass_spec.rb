@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe 'Subclass' do
   subject(:subclass) { Class.new(RubyUnits::Unit) }
 

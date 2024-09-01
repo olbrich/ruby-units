@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'date'
 module RubyUnits
   # Copyright 2006-2024
@@ -61,10 +63,10 @@ module RubyUnits
     DIGITS_REGEX = /\d+/.freeze # 0, 1, 2, 3
     DECIMAL_REGEX = /\d*[.]?#{DIGITS_REGEX}/.freeze # 1, 0.1, .1
     # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
-    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?} # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
+    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?}.freeze # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
     # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
     #   -123.4E+5, -123.4e-5, etc.
-    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/
+    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/.freeze
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
@@ -521,7 +523,7 @@ module RubyUnits
         copy(options[0])
         return
       when Hash
-        @scalar      = (options[0][:scalar] || 1)
+        @scalar      = options[0][:scalar] || 1
         @numerator   = options[0][:numerator] || UNITY_ARRAY
         @denominator = options[0][:denominator] || UNITY_ARRAY
         @signature   = options[0][:signature]
@@ -763,7 +765,7 @@ module RubyUnits
     # false, even if the units are "unitless" like 'radians, each, etc'
     # @return [Boolean]
     def unitless?
-      (@numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY)
+      @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
     end
 
     # Compare two Unit objects. Throws an exception if they are not of compatible types.
@@ -875,12 +877,10 @@ module RubyUnits
         elsif self =~ other
           raise ArgumentError, 'Cannot add two temperatures' if [self, other].all?(&:temperature?)
 
-          if [self, other].any?(&:temperature?)
-            if temperature?
-              self.class.new(scalar: (scalar + other.convert_to(temperature_scale).scalar), numerator: @numerator, denominator: @denominator, signature: @signature)
-            else
-              self.class.new(scalar: (other.scalar + convert_to(other.temperature_scale).scalar), numerator: other.numerator, denominator: other.denominator, signature: other.signature)
-            end
+          if temperature?
+            self.class.new(scalar: (scalar + other.convert_to(temperature_scale).scalar), numerator: @numerator, denominator: @denominator, signature: @signature)
+          elsif other.temperature?
+            self.class.new(scalar: (other.scalar + convert_to(other.temperature_scale).scalar), numerator: other.numerator, denominator: other.denominator, signature: other.signature)
           else
             self.class.new(scalar: (base_scalar + other.base_scalar), numerator: base.numerator, denominator: base.denominator, signature: @signature).convert_to(self)
           end
@@ -1302,7 +1302,7 @@ module RubyUnits
         od = output_denominator
              .uniq
              .map { [_1, output_denominator.count(_1)] }
-             .map { |element, power| (element.to_s.strip + (power > 0 ? "^#{-power}" : '')) }
+             .map { |element, power| (element.to_s.strip + (power.positive? ? "^#{-power}" : '')) }
         (on + od).join('*').strip
       else
         od  = output_denominator

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RubyUnits::Unit < Numeric
   # Handle the definition of units
   class Definition

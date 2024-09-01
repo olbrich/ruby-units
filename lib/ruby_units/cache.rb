@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RubyUnits
   # Performance optimizations to avoid creating units unnecessarily
   class Cache

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe 'temperatures' do
   describe 'redefine display name' do
     before(:all) do

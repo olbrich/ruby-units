@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # require_relative this file to avoid creating an class alias from Unit to RubyUnits::Unit
 require_relative 'version'
 require_relative 'configuration'

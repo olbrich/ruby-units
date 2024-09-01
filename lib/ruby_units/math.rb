@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RubyUnits
   # Math will convert unit objects to radians and then attempt to use the value for
   # trigonometric functions.

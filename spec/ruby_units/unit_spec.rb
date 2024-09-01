@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'yaml'
 
 RSpec.describe Unit.base_units do

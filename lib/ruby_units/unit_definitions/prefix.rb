@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 {
   'googol' => [%w[googol],             1e100],
   'yobi'   => [%w[Yi Yobi yobi],       2**80],

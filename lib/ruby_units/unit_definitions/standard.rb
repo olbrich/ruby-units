@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # length units
 
 RubyUnits::Unit.define('inch') do |inch|

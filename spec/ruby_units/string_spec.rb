@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe RubyUnits::String do
   describe 'Unit creation from strings' do
     specify { expect('1 mm'.to_unit).to have_attributes(scalar: 1, units: 'mm', kind: :length) }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RubyUnits
   # Extra methods for [::Numeric] to allow it to be used as a [RubyUnits::Unit]
   module Numeric

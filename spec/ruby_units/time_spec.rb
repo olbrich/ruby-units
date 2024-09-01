@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe RubyUnits::Time do
   let(:now) { Time.at(1_303_656_390, in: '-04:00') }
 

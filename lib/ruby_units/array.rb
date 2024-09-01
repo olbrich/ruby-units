@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module RubyUnits
   # Extra methods for [::Array] to support conversion to [RubyUnits::Unit]
   module Array

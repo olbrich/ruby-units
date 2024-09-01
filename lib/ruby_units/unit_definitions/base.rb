@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # seed the cache
 RubyUnits::Unit.new('1')
 

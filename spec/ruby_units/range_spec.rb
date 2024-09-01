@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Range do
   describe 'of integer units' do
     subject { (RubyUnits::Unit.new('1 mm')..RubyUnits::Unit.new('3 mm')) }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 # These are gems that are only used for local development and don't need to be included at runtime or for running tests.

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe RubyUnits::Date do
   subject(:date_unit) { date.to_unit }
 

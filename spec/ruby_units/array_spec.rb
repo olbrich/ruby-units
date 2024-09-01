@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe RubyUnits::Array do
   subject(:array_unit) { array.to_unit }
 

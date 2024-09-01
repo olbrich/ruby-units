@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Complex do
   subject { Complex(1.0, -1.0).to_unit }
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe RubyUnits::Math do
   describe '#sqrt' do
     specify { expect(Math.sqrt(RubyUnits::Unit.new('1 mm^6'))).to eq(RubyUnits::Unit.new('1 mm^3')) }
