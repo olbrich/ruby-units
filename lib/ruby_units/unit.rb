@@ -1504,7 +1504,7 @@ module RubyUnits
     #
     # Some key points:
     # * Units containing 'kg' will be returned as is. The prefix in 'kg' makes this an odd case.
-    # * It use `centi` instead of `milli` when the scalar is between 0.01 and 0.001
+    # * It will use `centi` instead of `milli` when the scalar is between 0.01 and 0.001
     #
     # @return [Unit]
     def best_prefix
