@@ -4,9 +4,11 @@ require 'yaml'
 
 RSpec.describe Unit.base_units do
   it { is_expected.to be_a Array }
+
   it 'has 14 elements' do
     expect(subject.size).to eq(14)
   end
+
   %w[kilogram meter second ampere degK tempK mole candela each dollar steradian radian decibel byte].each do |u|
     it { is_expected.to include(RubyUnits::Unit.new(u)) }
   end
@@ -856,6 +858,7 @@ RSpec.describe 'Create some simple units' do
 
   describe RubyUnits::Unit.new('6/1 lbs') do
     it { is_expected.to be_an_instance_of Unit }
+
     describe '#to_s' do
       subject { super().to_s }
       it { is_expected.to eq '6 lbs' }
@@ -2043,12 +2046,15 @@ describe 'Unit Math' do
     it 'raises an exception when passed a Float argument' do
       expect { subject.power(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
+
     it 'raises an exception when passed a Rational argument' do
       expect { subject.power(Rational(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
+
     it 'raises an exception when passed a Complex argument' do
       expect { subject.power(Complex(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
+
     it 'raises an exception when called on a temperature unit' do
       expect { RubyUnits::Unit.new('100 tempC').power(2) }.to raise_error(ArgumentError, 'Cannot raise a temperature to a power')
     end
@@ -2064,12 +2070,15 @@ describe 'Unit Math' do
     it 'raises an exception when passed a Float argument' do
       expect { subject.root(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
+
     it 'raises an exception when passed a Rational argument' do
       expect { subject.root(Rational(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
+
     it 'raises an exception when passed a Complex argument' do
       expect { subject.root(Complex(1, 2)) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
+
     it 'raises an exception when called on a temperature unit' do
       expect { RubyUnits::Unit.new('100 tempC').root(2) }.to raise_error(ArgumentError, 'Cannot take the root of a temperature')
     end
