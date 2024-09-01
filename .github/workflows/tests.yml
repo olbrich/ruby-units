@@ -19,7 +19,7 @@ jobs:
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
@@ -29,21 +29,25 @@ jobs:
   coverage:
     needs: test
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
     - name: Publish code coverage
-      uses: paambaati/codeclimate-action@v2.7.5
+      uses: paambaati/codeclimate-action@v9
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
         coverageCommand: bundle exec rake
   yard:
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
