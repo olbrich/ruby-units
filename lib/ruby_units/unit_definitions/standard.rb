@@ -204,7 +204,7 @@ RubyUnits::Unit.define('hectare') do |hectare|
 end
 
 RubyUnits::Unit.define('acre') do |acre|
-  acre.definition = RubyUnits::Unit.new('1 mi')**2 / 640
+  acre.definition = (RubyUnits::Unit.new('1 mi')**2) / 640
   acre.aliases    = %w[acre acres]
 end
 
