@@ -7,13 +7,6 @@
 # versions of RuboCop, may require this file to be generated again.
 
 
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Layout/SpaceAfterComma:
-  Exclude:
-    - 'spec/benchmarks/bigdecimal.rb'
-    - 'spec/ruby_units/complex_spec.rb'
-
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.

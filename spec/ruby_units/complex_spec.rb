@@ -3,7 +3,7 @@
 RSpec.describe Complex do
   subject { Complex(1.0, -1.0).to_unit }
 
-  it { expect(Complex(1,1)).to respond_to :to_unit }
+  it { expect(Complex(1, 1)).to respond_to :to_unit }
   it { is_expected.to be_a Unit }
   it { expect(subject.scalar).to be_a Complex }
 
