@@ -17,9 +17,9 @@ group :optional do
   gem 'terminal-notifier'
   gem 'terminal-notifier-guard'
   gem 'webrick'
-  gem 'yard'
 end
 
 gem 'simplecov'
+gem 'yard'
 
 gemspec

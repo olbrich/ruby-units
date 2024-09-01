@@ -667,8 +667,10 @@ module RubyUnits
     # @note Rational scalars that are equal to an integer will be represented as integers (i.e, 6/1 => 6, 4/2 => 2, etc..)
     # @param [Symbol] target_units
     # @param [Float] precision - the precision to use when converting to a rational
+    # @param format [Symbol] Set to :exponential to force all units to be displayed in exponential format
+    #
     # @return [String]
-    def to_s(target_units = nil, precision: 0.0001)
+    def to_s(target_units = nil, precision: 0.0001, format: RubyUnits.configuration.format)
       out = @output[target_units]
       return out if out
 
@@ -696,26 +698,26 @@ module RubyUnits
               when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
                 begin
                   if Regexp.last_match(2) # unit specified, need to convert
-                    convert_to(Regexp.last_match(2)).to_s(Regexp.last_match(1))
+                    convert_to(Regexp.last_match(2)).to_s(Regexp.last_match(1), format: format)
                   else
-                    "#{Regexp.last_match(1) % @scalar}#{separator}#{Regexp.last_match(2) || units}".strip
+                    "#{Regexp.last_match(1) % @scalar}#{separator}#{Regexp.last_match(2) || units(format: format)}".strip
                   end
                 rescue StandardError # parse it like a strftime format string
                   (DateTime.new(0) + self).strftime(target_units)
                 end
               when /(\S+)/ # unit only 'mm' or '1/mm'
-                convert_to(Regexp.last_match(1)).to_s
+                convert_to(Regexp.last_match(1)).to_s(format: format)
               else
                 raise 'unhandled case'
               end
       else
         out = case @scalar
               when Complex
-                "#{@scalar}#{separator}#{units}"
+                "#{@scalar}#{separator}#{units(format: format)}"
               when Rational
-                "#{@scalar == @scalar.to_i ? @scalar.to_i : @scalar}#{separator}#{units}"
+                "#{@scalar == @scalar.to_i ? @scalar.to_i : @scalar}#{separator}#{units(format: format)}"
               else
-                "#{'%g' % @scalar}#{separator}#{units}"
+                "#{'%g' % @scalar}#{separator}#{units(format: format)}"
               end.strip
       end
       @output[target_units] = out
@@ -1266,8 +1268,10 @@ module RubyUnits
     # Returns the 'unit' part of the Unit object without the scalar
     #
     # @param with_prefix [Boolean] include prefixes in output
+    # @param format [Symbol] Set to :exponential to force all units to be displayed in exponential format
+    #
     # @return [String]
-    def units(with_prefix: true)
+    def units(with_prefix: true, format: nil)
       return '' if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
 
       output_numerator   = ['1']
@@ -1289,15 +1293,24 @@ module RubyUnits
         output_denominator = definitions.map { _1.map(&:display_name).join }
       end
 
-      on  = output_numerator
-            .uniq
-            .map { [_1, output_numerator.count(_1)] }
-            .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
-      od  = output_denominator
-            .uniq
-            .map { [_1, output_denominator.count(_1)] }
-            .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
-      "#{on.join('*')}#{od.empty? ? '' : "/#{od.join('*')}"}".strip
+      on = output_numerator
+           .uniq
+           .map { [_1, output_numerator.count(_1)] }
+           .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
+
+      if format == :exponential
+        od = output_denominator
+             .uniq
+             .map { [_1, output_denominator.count(_1)] }
+             .map { |element, power| (element.to_s.strip + (power > 0 ? "^#{-power}" : '')) }
+        (on + od).join('*').strip
+      else
+        od  = output_denominator
+              .uniq
+              .map { [_1, output_denominator.count(_1)] }
+              .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
+        "#{on.join('*')}#{od.empty? ? '' : "/#{od.join('*')}"}".strip
+      end
     end
 
     # negates the scalar of the Unit
@@ -1650,8 +1663,11 @@ module RubyUnits
         return self
       end
 
-      while unit_string.gsub!(/(<#{self.class.unit_regex})><(#{self.class.unit_regex}>)/, '\1*\2')
-        # collapse <x><y><z> into <x*y*z>...
+      while unit_string.gsub!(/<(#{self.class.prefix_regex})><(#{self.class.unit_regex})>/, '<\1\2>')
+        # replace <prefix><unit> with <prefixunit>
+      end
+      while unit_string.gsub!(/<#{self.class.unit_match_regex}><#{self.class.unit_match_regex}>/, '<\1\2>*<\3\4>')
+        # collapse <prefixunit><prefixunit> into <prefixunit>*<prefixunit>...
       end
       # ... and then strip the remaining brackets for x*y*z
       unit_string.gsub!(/[<>]/, '')

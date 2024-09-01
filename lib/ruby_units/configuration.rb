@@ -7,6 +7,7 @@ module RubyUnits
     @configuration ||= Configuration.new
   end
 
+  # Reset the configuration to the default values
   def self.reset
     @configuration = Configuration.new
   end
@@ -27,16 +28,43 @@ module RubyUnits
     # Used to separate the scalar from the unit when generating output. A value
     # of `true` will insert a single space, and `false` will prevent adding a
     # space to the string representation of a unit.
+    #
+    # @!attribute [rw] separator
+    #   @return [Boolean] whether to include a space between the scalar and the unit
     attr_reader :separator
 
+    # The style of format to use by default when generating output. When set to `:exponential`, all units will be
+    # represented in exponential notation instead of using a numerator and denominator.
+    #
+    # @!attribute [rw] format
+    #   @return [Symbol] the format to use when generating output (:rational or :exponential) (default: :rational)
+    attr_reader :format
+
     def initialize
+      self.format = :rational
       self.separator = true
     end
 
+    # Use a space for the separator to use when generating output.
+    #
+    # @param value [Boolean] whether to include a space between the scalar and the unit
+    # @return [void]
     def separator=(value)
       raise ArgumentError, "configuration 'separator' may only be true or false" unless [true, false].include?(value)
 
       @separator = value ? ' ' : nil
+    end
+
+    # Set the format to use when generating output.
+    # The `:rational` style will generate units string like `3 m/s^2` and the `:exponential` style will generate units
+    # like `3 m*s^-2`.
+    #
+    # @param value [Symbol] the format to use when generating output (:rational or :exponential)
+    # @return [void]
+    def format=(value)
+      raise ArgumentError, "configuration 'format' may only be :rational or :exponential" unless %i[rational exponential].include?(value)
+
+      @format = value
     end
   end
 end

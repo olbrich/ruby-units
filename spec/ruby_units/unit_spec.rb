@@ -2170,6 +2170,14 @@ describe 'Unit Math' do
         expect(unit.round(3, half: :down)).to eq(RubyUnits::Unit.new('1.234 m'))
       end
     end
+
+    context 'with a unit containing a centi-prefix' do
+      subject(:unit) { RubyUnits::Unit.new('1.2345 cm^2') }
+
+      it 'rounds correctly for squared unit' do
+        expect(unit.round).to eq(RubyUnits::Unit.new('1 cm^2'))
+      end
+    end
   end
 
   context '#truncate' do
@@ -2314,14 +2322,17 @@ describe 'Unit Math' do
   end
 end
 
-describe 'Unit Output formatting' do
-  context RubyUnits::Unit.new('10.5 m/s^2') do
-    specify { expect(subject.to_s).to eq('10.5 m/s^2') }
-    specify { expect(subject.to_s('%0.2f')).to eq('10.50 m/s^2') }
-    specify { expect(subject.to_s('%0.2e km/s^2')).to eq('1.05e-02 km/s^2') }
-    specify { expect(subject.to_s('km/s^2')).to eq('0.0105 km/s^2') }
-    specify { expect(subject.to_s(STDOUT)).to eq('10.5 m/s^2') }
-    specify { expect { subject.to_s('random string') }.to raise_error(ArgumentError, "'random' Unit not recognized") }
+describe '#to_s (Unit Output formatting)' do
+  describe '10.5 m/s^2' do
+    subject(:unit) { RubyUnits::Unit.new('10.5 m/s^2') }
+
+    it { expect(unit.to_s).to eq('10.5 m/s^2') }
+    it { expect(unit.to_s(format: :exponential)).to eq('10.5 m*s^-2') }
+    it { expect(unit.to_s('%0.2f')).to eq('10.50 m/s^2') }
+    it { expect(unit.to_s('%0.2e km/s^2')).to eq('1.05e-02 km/s^2') }
+    it { expect(unit.to_s('km/s^2')).to eq('0.0105 km/s^2') }
+    it { expect(unit.to_s(STDOUT)).to eq('10.5 m/s^2') }
+    it { expect { unit.to_s('random string') }.to raise_error(ArgumentError, "'random' Unit not recognized") }
   end
 
   context 'for a unit with a custom display_name' do
