@@ -317,6 +317,10 @@ calculations. This in turn can have a negative impact on performance. The design
 of ruby-units has emphasized accuracy over speed. YMMV if you are doing a lot of
 math involving units.
 
+## Support Policy
+
+Only currently maintained versions of ruby and jruby are supported.
+
 ## License
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Folbrich%2Fruby-units.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Folbrich%2Fruby-units?ref=badge_large)
