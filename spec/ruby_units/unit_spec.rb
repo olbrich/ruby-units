@@ -2257,7 +2257,7 @@ describe 'Unit Math' do
   describe '#quo' do
     it { expect(RubyUnits::Unit.new('5 mm').quo(RubyUnits::Unit.new('2 mm'))).to eq(2.5) }
     it { expect(RubyUnits::Unit.new('1 km').quo(RubyUnits::Unit.new('2 s'))).to eq(RubyUnits::Unit.new('1/2 km/s')) }
-    it { expect { RubyUnits::Unit.new('1 km').quo(RubyUnits::Unit.new('0 s'))}.to raise_error(ZeroDivisionError) }
+    it { expect { RubyUnits::Unit.new('1 km').quo(RubyUnits::Unit.new('0 s')) }.to raise_error(ZeroDivisionError) }
   end
 
   context '#div' do

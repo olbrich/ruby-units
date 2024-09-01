@@ -24,7 +24,7 @@ a = [
   [0.85, "gal"]
 ]
 
-b = a.map {|ns, nu| Unit.new(ns.to_d, nu)}
+b = a.map { |ns, nu| Unit.new(ns.to_d, nu) }
 
 result = RubyProf.profile(merge_fibers: true) do
   puts b.reduce(:+)
