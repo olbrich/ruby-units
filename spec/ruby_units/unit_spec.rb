@@ -2301,8 +2301,8 @@ describe 'Unit Math' do
     end
 
     context '#ago' do
-      specify { expect(RubyUnits::Unit.new('5 min').ago).to be_kind_of Time }
-      specify { expect(RubyUnits::Unit.new('10000 y').ago).to be_kind_of Time }
+      specify { expect(RubyUnits::Unit.new('5 min').ago).to be_a Time }
+      specify { expect(RubyUnits::Unit.new('10000 y').ago).to be_a Time }
       specify { expect(RubyUnits::Unit.new('1 year').ago).to eq(Time.utc(2010, 10, 16)) }
     end
 
