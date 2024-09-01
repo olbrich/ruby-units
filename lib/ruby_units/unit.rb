@@ -1653,8 +1653,11 @@ module RubyUnits
         return self
       end
 
-      while unit_string.gsub!(/(<#{self.class.unit_regex})><(#{self.class.unit_regex}>)/, '\1*\2')
-        # collapse <x><y><z> into <x*y*z>...
+      while unit_string.gsub!(/<(#{self.class.prefix_regex})><(#{self.class.unit_regex})>/, '<\1\2>')
+        # replace <prefix><unit> with <prefixunit>
+      end
+      while unit_string.gsub!(/<#{self.class.unit_match_regex}><#{self.class.unit_match_regex}>/, '<\1\2>*<\3\4>')
+        # collapse <prefixunit><prefixunit> into <prefixunit>*<prefixunit>...
       end
       # ... and then strip the remaining brackets for x*y*z
       unit_string.gsub!(/[<>]/, '')
