@@ -2516,8 +2516,8 @@ describe 'Unit hash method' do
     let(:kg_unit) { RubyUnits::Unit.new('2.2 kg') }
     let(:lb_unit) { RubyUnits::Unit.new('2.2 lbs') }
 
-    specify { expect(kg_unit).to_not eq(lb_unit) }
-    specify { expect(kg_unit.hash).to_not eq(lb_unit.hash) }
+    specify { expect(kg_unit).not_to eq(lb_unit) }
+    specify { expect(kg_unit.hash).not_to eq(lb_unit.hash) }
     specify { expect([kg_unit, lb_unit].uniq.size).to eq(2) }
   end
 end
