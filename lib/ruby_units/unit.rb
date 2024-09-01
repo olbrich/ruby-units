@@ -1613,7 +1613,7 @@ module RubyUnits
     def parse(passed_unit_string = '0')
       unit_string = passed_unit_string.dup
       unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
-      unit_string.gsub!("\u00b0".force_encoding('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
+      unit_string.gsub!("\u00b0".encode('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
 
       unit_string.gsub!(/(\d)[_,](\d)/, '\1\2') # remove underscores and commas in numbers
 
