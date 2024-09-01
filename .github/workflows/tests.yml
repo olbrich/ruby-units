@@ -28,7 +28,9 @@ jobs:
       run: bundle exec rake
   coverage:
     needs: test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: optional
     steps:
     - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
@@ -41,7 +43,9 @@ jobs:
       with:
         coverageCommand: bundle exec rake
   yard:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: optional
     steps:
     - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
