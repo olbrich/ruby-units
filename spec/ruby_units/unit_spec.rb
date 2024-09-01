@@ -2475,6 +2475,8 @@ describe '#to_s (Unit Output formatting)' do
   end
 
   context 'for a unit with a custom display_name' do
+    subject { RubyUnits::Unit.new('8 cups') }
+
     around do |example|
       RubyUnits::Unit.redefine!('cup') do |cup|
         cup.display_name = 'cupz'
@@ -2484,8 +2486,6 @@ describe '#to_s (Unit Output formatting)' do
         cup.display_name = cup.aliases.first
       end
     end
-
-    subject { RubyUnits::Unit.new('8 cups') }
 
     it { is_expected.to have_attributes(to_s: '8 cupz') }
   end

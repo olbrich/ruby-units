@@ -95,12 +95,6 @@ RSpec/InstanceVariable:
     - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/LeadingSubject:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
 RSpec/MultipleDescribes:
   Exclude:
     - 'spec/ruby_units/unit_spec.rb'
