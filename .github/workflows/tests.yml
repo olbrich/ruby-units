@@ -19,8 +19,8 @@ jobs:
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v4.1.7
-    - uses: ruby/setup-ruby@v1.190.0
+    - uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
@@ -28,23 +28,23 @@ jobs:
       run: bundle exec rake
   coverage:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4.1.7
-    - uses: ruby/setup-ruby@v1.190.0
+    - uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
     - name: Publish code coverage
-      uses: paambaati/codeclimate-action@v9.0.0
+      uses: paambaati/codeclimate-action@v9
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
         coverageCommand: bundle exec rake
   yard:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4.1.7
-    - uses: ruby/setup-ruby@v1.190.0
+    - uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
     - name: Build YARD docs
