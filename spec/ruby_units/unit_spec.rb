@@ -1507,7 +1507,7 @@ describe Unit do
 
   describe '#definition' do
     context 'The requested unit is defined' do
-      before(:each) do
+      before do
         @definition = Unit.definition('mph')
       end
 
@@ -1532,7 +1532,7 @@ describe Unit do
 
   describe '#define' do
     describe 'a new unit' do
-      before(:each) do
+      before do
         # do this because the unit is not defined at the time this file is parsed, so it fails
         @jiffy = Unit.define('jiffy') do |jiffy|
           jiffy.scalar = Rational(1, 100)
@@ -1542,7 +1542,7 @@ describe Unit do
         end
       end
 
-      after(:each) do
+      after do
         Unit.undefine!('jiffy')
       end
 
@@ -1595,14 +1595,14 @@ describe Unit do
     end
 
     describe 'an existing unit again' do
-      before(:each) do
+      before do
         @cups = Unit.definition('cup')
         @original_display_name = @cups.display_name
         @cups.display_name = 'cupz'
         Unit.define(@cups)
       end
 
-      after(:each) do
+      after do
         Unit.redefine!('cup') do |cup|
           cup.display_name = @original_display_name
         end
@@ -1649,7 +1649,7 @@ describe Unit do
   end
 
   describe '#redefine!' do
-    before(:each) do
+    before do
       @jiffy = Unit.define('jiffy') do |jiffy|
         jiffy.scalar = (1 / 100)
         jiffy.aliases = %w[jif]
@@ -1662,7 +1662,7 @@ describe Unit do
       end
     end
 
-    after(:each) do
+    after do
       Unit.undefine!('jiffy')
     end
 
@@ -1670,7 +1670,7 @@ describe Unit do
   end
 
   describe '#undefine!' do
-    before(:each) do
+    before do
       @jiffy = Unit.define('jiffy') do |jiffy|
         jiffy.scalar = (1 / 100)
         jiffy.aliases = %w[jif]

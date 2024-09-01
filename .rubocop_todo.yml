@@ -82,14 +82,6 @@ RSpec/DescribedClass:
 RSpec/ExampleLength:
   Max: 7
 
-# Offense count: 8
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: implicit, each, example
-RSpec/HookArgument:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 2
 # Configuration parameters: Max, AllowedIdentifiers, AllowedPatterns.
 RSpec/IndexedLet:
