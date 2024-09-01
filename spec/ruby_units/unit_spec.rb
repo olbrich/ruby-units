@@ -1986,18 +1986,18 @@ describe 'Unit Math' do
     end
 
     context 'exponentiating (**)' do
-      specify 'a temperature raises an execption' do
+      specify 'a temperature raises an exception' do
         expect { RubyUnits::Unit.new('100 tempK')**2 }.to raise_error(ArgumentError, 'Cannot raise a temperature to a power')
       end
 
       context RubyUnits::Unit.new('0 m') do
-        it { expect(subject**1).to eq(subject) }
+        it { expect(subject**1).to eq(subject) } # rubocop:disable Lint/UselessNumericOperation
         it { expect(subject**2).to eq(subject) }
       end
 
       context RubyUnits::Unit.new('1 m') do
         it { expect(subject**0).to eq(1) }
-        it { expect(subject**1).to eq(subject) }
+        it { expect(subject**1).to eq(subject) } # rubocop:disable Lint/UselessNumericOperation
         it { expect(subject**-1).to eq(1 / subject) }
         it { expect(subject**2).to eq(RubyUnits::Unit.new('1 m^2')) }
         it { expect(subject**-2).to eq(RubyUnits::Unit.new('1 1/m^2')) }
