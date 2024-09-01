@@ -1482,15 +1482,15 @@ describe Unit do
   end
 
   describe '#defined?' do
-    it 'should return true when asked about a defined unit' do
+    it 'returns true when asked about a defined unit' do
       expect(Unit.defined?('meter')).to be_truthy
     end
 
-    it 'should return true when asked about an alias for a unit' do
+    it 'returns true when asked about an alias for a unit' do
       expect(Unit.defined?('m')).to be_truthy
     end
 
-    it 'should return false when asked about a unit that is not defined' do
+    it 'returns false when asked about a unit that is not defined' do
       expect(Unit.defined?('doohickey')).to be_falsey
     end
   end
@@ -1511,7 +1511,7 @@ describe Unit do
         @definition = Unit.definition('mph')
       end
 
-      it 'should return a Unit::Definition' do
+      it 'returns a Unit::Definition' do
         expect(@definition).to be_instance_of(Unit::Definition)
       end
 
@@ -1524,7 +1524,7 @@ describe Unit do
     end
 
     context 'The requested unit is not defined' do
-      it 'should return nil' do
+      it 'returns nil' do
         expect(Unit.definition('doohickey')).to be_nil
       end
     end
@@ -1589,7 +1589,7 @@ describe Unit do
         end
       end
 
-      it 'should register the new unit' do
+      it 'registers the new unit' do
         expect(Unit.defined?('jiffy')).to be_truthy
       end
     end
@@ -1688,7 +1688,7 @@ describe Unit do
       expect { RubyUnits::Unit.new('1 jiffy') }.to raise_exception(ArgumentError)
     end
 
-    it 'should return true when undefining an unknown unit' do
+    it 'returns true when undefining an unknown unit' do
       expect(Unit.defined?('unknown')).to be_falsey
       expect(Unit.undefine!('unknown')).to be_truthy
     end
