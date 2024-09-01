@@ -1918,7 +1918,7 @@ describe 'Unit Math' do
       end
 
       context 'a unitless unit from another unitless unit' do
-        specify { expect(RubyUnits::Unit.new('1') - RubyUnits::Unit.new('2')).to eq -1 }
+        specify { expect(RubyUnits::Unit.new('1') - RubyUnits::Unit.new('2')).to eq(-1) }
       end
     end
 

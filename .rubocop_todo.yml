@@ -8,12 +8,6 @@
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
-Lint/AmbiguousOperator:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
 Lint/AmbiguousOperatorPrecedence:
   Exclude:
     - 'lib/ruby_units/unit_definitions/standard.rb'
