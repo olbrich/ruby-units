@@ -53,16 +53,19 @@ RSpec.describe 'temperatures' do
 
       describe '#scalar' do
         subject { super().scalar }
+
         it { is_expected.to be_within(0.001).of 100 }
       end
 
       describe '#units' do
         subject { super().units }
+
         it { is_expected.to eq('tC') }
       end
 
       describe '#kind' do
         subject { super().kind }
+
         it { is_expected.to eq(:temperature) }
       end
 
@@ -74,11 +77,13 @@ RSpec.describe 'temperatures' do
 
       describe '#base' do
         subject { super().base }
+
         it { is_expected.to be_within(RubyUnits::Unit.new('0.01 degK')).of RubyUnits::Unit.new('373.15 tempK') }
       end
 
       describe '#temperature_scale' do
         subject { super().temperature_scale }
+
         it { is_expected.to eq('degC') }
       end
     end

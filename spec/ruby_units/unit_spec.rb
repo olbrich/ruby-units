@@ -47,6 +47,7 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to eq(subject) }
     end
   end
@@ -514,16 +515,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_within(0.001).of 100 }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('tempC') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:temperature) }
     end
 
@@ -535,11 +539,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_within(RubyUnits::Unit.new('0.01 degK')).of RubyUnits::Unit.new('373.15 tempK') }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to eq('degC') }
     end
   end
@@ -624,16 +630,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_a(Numeric) }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('s') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:time) }
     end
 
@@ -645,11 +654,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a(Numeric) }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -660,16 +671,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_within(0.001).of 100 }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('degC') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:temperature) }
     end
 
@@ -680,6 +694,7 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_within(RubyUnits::Unit.new('0.01 degK')).of RubyUnits::Unit.new('100 degK') }
     end
   end
@@ -690,16 +705,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('%') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:unitless) }
     end
 
@@ -711,11 +729,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a(Numeric) }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -726,16 +746,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('deg') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:angle) }
     end
 
@@ -747,11 +770,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a(Numeric) }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -762,16 +787,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('rad') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:angle) }
     end
 
@@ -783,11 +811,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -798,16 +828,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('doz') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:unitless) }
     end
 
@@ -819,11 +852,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -834,16 +869,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Rational }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('kg') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:mass) }
     end
 
@@ -855,11 +893,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -869,6 +909,7 @@ RSpec.describe 'Create some simple units' do
 
     describe '#to_s' do
       subject { super().to_s }
+
       it { is_expected.to eq '6 lbs' }
     end
   end
@@ -879,16 +920,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Rational }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('kg/m') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to be_nil }
     end
 
@@ -900,11 +944,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -915,17 +961,20 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Numeric }
       it { is_expected.to eq(12.0 / 6.0) }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq 'mg/ml' }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq :density }
     end
 
@@ -937,11 +986,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -953,16 +1004,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Rational }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('h') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:time) }
     end
 
@@ -974,11 +1028,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -990,16 +1046,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to eq 60 }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('min') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:time) }
     end
 
@@ -1011,11 +1070,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -1026,16 +1087,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('apc/ufortnight') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:speed) }
     end
 
@@ -1047,11 +1111,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
 
@@ -1064,16 +1130,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('F') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:capacitance) }
     end
 
@@ -1085,11 +1154,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -1099,16 +1170,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('m^2/s^2') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:radiation) }
     end
 
@@ -1120,11 +1194,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -1134,16 +1210,19 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('m^2/s^2') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:radiation) }
     end
 
@@ -1155,11 +1234,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -1170,21 +1251,25 @@ RSpec.describe 'Create some simple units' do
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to be_an Integer }
     end
 
     describe '#scalar' do
       subject { super().scalar }
+
       it { is_expected.to eq(1e6) }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('cells') }
     end
 
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:unitless) }
     end
 
@@ -1196,11 +1281,13 @@ RSpec.describe 'Create some simple units' do
 
     describe '#base' do
       subject { super().base }
+
       it { is_expected.to be_a Numeric }
     end
 
     describe '#temperature_scale' do
       subject { super().temperature_scale }
+
       it { is_expected.to be_nil }
     end
   end
@@ -1209,6 +1296,7 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 mm') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:length) }
     end
   end
@@ -1217,6 +1305,7 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 cd') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:luminous_power) }
     end
   end
@@ -1225,6 +1314,7 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 min') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:time) }
     end
   end
@@ -1233,6 +1323,7 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 ft') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:length) }
     end
   end
@@ -1241,6 +1332,7 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 doz') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:unitless) }
     end
   end
@@ -1249,11 +1341,13 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 <meter>/<second>') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:speed) }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('m/s') }
     end
   end
@@ -1261,11 +1355,13 @@ RSpec.describe 'Create some simple units' do
   describe RubyUnits::Unit.new('1 <kilogram><meter>/<second><second><second>') do
     describe '#kind' do
       subject { super().kind }
+
       it { is_expected.to eq(:yank) }
     end
 
     describe '#units' do
       subject { super().units }
+
       it { is_expected.to eq('kg*m/s^3') }
     end
   end
@@ -1404,6 +1500,7 @@ describe Unit do
 
     describe '#to_yaml' do
       subject { super().to_yaml }
+
       it { is_expected.to match(%r{--- !ruby\/object:RubyUnits::Unit}) }
     end
   end
@@ -1457,21 +1554,25 @@ describe Unit do
 
         describe '#scalar' do
           subject { super().scalar }
+
           it { is_expected.to eq(1e6) }
         end
 
         describe '#scalar' do
           subject { super().scalar }
+
           it { is_expected.to be_an Integer }
         end
 
         describe '#units' do
           subject { super().units }
+
           it { is_expected.to eq('jif') }
         end
 
         describe '#kind' do
           subject { super().kind }
+
           it { is_expected.to eq(:time) }
         end
 
@@ -1483,6 +1584,7 @@ describe Unit do
 
         describe '#base' do
           subject { super().base }
+
           it { is_expected.to eq(RubyUnits::Unit.new('10000 s')) }
         end
       end
@@ -1515,21 +1617,25 @@ describe Unit do
 
         describe '#scalar' do
           subject { super().scalar }
+
           it { is_expected.to eq(1) }
         end
 
         describe '#scalar' do
           subject { super().scalar }
+
           it { is_expected.to be_an Integer }
         end
 
         describe '#units' do
           subject { super().units }
+
           it { is_expected.to eq('cupz') }
         end
 
         describe '#kind' do
           subject { super().kind }
+
           it { is_expected.to eq(:volume) }
         end
 
@@ -1593,6 +1699,7 @@ describe Unit do
 
     describe '#clone' do
       subject { super().clone }
+
       it { is_expected.to be === subject }
     end
   end
@@ -2062,6 +2169,7 @@ describe 'Unit Math' do
 
   describe '#power' do
     subject { RubyUnits::Unit.new('1 m') }
+
     it 'raises an exception when passed a Float argument' do
       expect { subject.power(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end
@@ -2086,6 +2194,7 @@ describe 'Unit Math' do
 
   describe '#root' do
     subject { RubyUnits::Unit.new('1 m') }
+
     it 'raises an exception when passed a Float argument' do
       expect { subject.root(1.5) }.to raise_error(ArgumentError, 'Exponent must an Integer')
     end

@@ -78,13 +78,6 @@ RSpec/DescribedClass:
     - 'spec/ruby_units/unit_spec.rb'
 
 
-# Offense count: 114
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/EmptyLineAfterSubject:
-  Exclude:
-    - 'spec/ruby_units/temperature_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 8
 # Configuration parameters: CountAsOne.
 RSpec/ExampleLength:
