@@ -148,15 +148,6 @@ RSpec/SpecFilePathFormat:
     - '**/spec/routing/**/*'
     - 'spec/ruby_units/utf-8/unit_spec.rb'
 
-# Offense count: 27
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowOnConstant, AllowOnSelfClass.
-Style/CaseEquality:
-  Exclude:
-    - 'lib/ruby_units/unit.rb'
-    - 'spec/ruby_units/complex_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: EnforcedStyle.

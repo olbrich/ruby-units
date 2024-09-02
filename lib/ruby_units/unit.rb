@@ -851,7 +851,7 @@ module RubyUnits
       else
         begin
           x, y = coerce(other)
-          x === y
+          x.same_as?(y)
         rescue ArgumentError
           false
         end
@@ -1145,8 +1145,8 @@ module RubyUnits
     # @raise [ArgumentError] when target unit is incompatible
     def convert_to(other)
       return self if other.nil?
-      return self if TrueClass === other
-      return self if FalseClass === other
+      return self if other.is_a?(TrueClass)
+      return self if other.is_a?(FalseClass)
 
       if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && other =~ self.class.temp_regex)
         raise ArgumentError, 'Receiver is not a temperature unit' unless degree?

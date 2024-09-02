@@ -8,7 +8,6 @@ RSpec.describe Complex do
   it { expect(subject.scalar).to be_a Complex }
 
   it { is_expected.to eq('1-1i'.to_unit) }
-  it { is_expected.to be === '1-1i'.to_unit }
 
   # Complex numbers are a bit strange. Technically you can't really compare them
   # using :<=>, and Ruby < 2.7 does not implement this method for them so it

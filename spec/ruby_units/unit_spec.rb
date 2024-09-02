@@ -23,7 +23,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === 0 }
+      it { is_expected.to eq(0) }
       it { is_expected.to be_an Integer }
     end
 
@@ -60,7 +60,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === 1 }
+      it { is_expected.to eq(1) }
       it { is_expected.to be_an Integer }
     end
 
@@ -97,7 +97,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === 1 }
+      it { is_expected.to eq(1) }
       it { is_expected.to be_an Integer }
     end
 
@@ -134,7 +134,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === Rational(1, 2) }
+      it { is_expected.to eq(1/2r) }
       it { is_expected.to be_a Rational }
     end
 
@@ -171,7 +171,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === 0.5 }
+      it { is_expected.to eq(0.5) }
       it { is_expected.to be_a Float }
     end
 
@@ -208,7 +208,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === Complex(1, 1) }
+      it { is_expected.to eq(Complex(1, 1)) }
       it { is_expected.to be_a Complex }
     end
 
@@ -244,7 +244,7 @@ RSpec.describe 'Create some simple units' do
     describe '#scalar' do
       subject { super().scalar }
 
-      it { is_expected.to be === Complex(1, 1) }
+      it { is_expected.to eq(Complex(1, 1)) }
       it { is_expected.to be_a Complex }
     end
 
@@ -558,7 +558,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to be === 1 }
+      it { is_expected.to eq(1) }
     end
 
     describe '#units' do
@@ -581,7 +581,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to be === 83/60r }
+      it { is_expected.to eq(83/60r) }
     end
 
     describe '#units' do
@@ -598,7 +598,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to be === 67/48r }
+      it { is_expected.to eq(67/48r) }
     end
 
     describe '#units' do
@@ -615,7 +615,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to be === 5025067/3600000r }
+      it { is_expected.to eq(5025067/3600000r) }
     end
 
     describe '#units' do
@@ -1520,7 +1520,7 @@ describe Unit do
       specify { expect(@definition.numerator).to eq(['<meter>']) }
       specify { expect(@definition.denominator).to eq(['<second>']) }
       specify { expect(@definition.kind).to eq(:speed) }
-      specify { expect(@definition.scalar).to be === 0.44704 }
+      specify { expect(@definition.scalar).to eq(0.44704) }
     end
 
     context 'The requested unit is not defined' do
@@ -1700,7 +1700,7 @@ describe Unit do
     describe '#clone' do
       subject { super().clone }
 
-      it { is_expected.to be === subject }
+      it { is_expected.to be_same_as(subject) }
     end
   end
 
@@ -1763,26 +1763,26 @@ describe 'Unit Comparisons' do
   end
 
   context 'Equivalence' do
-    context 'units and scalars are the exactly the same' do
-      specify { expect(RubyUnits::Unit.new('1 m')).to be === RubyUnits::Unit.new('1 m') }
+    context 'units and scalars are exactly the same' do
+      specify { expect(RubyUnits::Unit.new('1 m') === RubyUnits::Unit.new('1 m')).to be true } # rubocop:disable Style/CaseEquality
       specify { expect(RubyUnits::Unit.new('1 m')).to be_same RubyUnits::Unit.new('1 m') }
       specify { expect(RubyUnits::Unit.new('1 m')).to be_same_as RubyUnits::Unit.new('1 m') }
     end
 
     context 'units are compatible but not identical' do
-      specify { expect(RubyUnits::Unit.new('1000 m')).not_to be === RubyUnits::Unit.new('1 km') }
+      specify { expect(RubyUnits::Unit.new('1000 m') === RubyUnits::Unit.new('1 km')).to be false } # rubocop:disable Style/CaseEquality
       specify { expect(RubyUnits::Unit.new('1000 m')).not_to be_same RubyUnits::Unit.new('1 km') }
       specify { expect(RubyUnits::Unit.new('1000 m')).not_to be_same_as RubyUnits::Unit.new('1 km') }
     end
 
     context 'units are not compatible' do
-      specify { expect(RubyUnits::Unit.new('1000 m')).not_to be === RubyUnits::Unit.new('1 hour') }
+      specify { expect(RubyUnits::Unit.new('1000 m') === RubyUnits::Unit.new('1 hour')).to be false } # rubocop:disable Style/CaseEquality
       specify { expect(RubyUnits::Unit.new('1000 m')).not_to be_same RubyUnits::Unit.new('1 hour') }
       specify { expect(RubyUnits::Unit.new('1000 m')).not_to be_same_as RubyUnits::Unit.new('1 hour') }
     end
 
     context 'scalars are different' do
-      specify { expect(RubyUnits::Unit.new('1 m')).not_to be === RubyUnits::Unit.new('2 m') }
+      specify { expect(RubyUnits::Unit.new('1 m') === RubyUnits::Unit.new('2 m')).to be false } # rubocop:disable Style/CaseEquality
       specify { expect(RubyUnits::Unit.new('1 m')).not_to be_same RubyUnits::Unit.new('2 m') }
       specify { expect(RubyUnits::Unit.new('1 m')).not_to be_same_as RubyUnits::Unit.new('2 m') }
     end
@@ -1871,15 +1871,15 @@ describe 'Unit Conversions' do
   # see #203
   context 'when the unit scalar is an Integer' do
     it 'the conversion is done accurately' do
-      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to be === 100663125/67108864r
+      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to eq(100663125/67108864r)
     end
 
     it 'the converted unit has an Integer scalar if the initial unit has an Integer scalar and the scalar is equivalent to an integer' do
-      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to be === 2000
+      expect(RubyUnits::Unit.new('2 m').convert_to('mm').scalar).to eq(2000)
     end
 
     it 'the scalar becomes a Rational when necessary to preserve accuracy' do
-      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to be === 2500/381r
+      expect(RubyUnits::Unit.new(2, 'm').convert_to('ft').scalar).to eq(2500/381r)
     end
   end
 
@@ -1889,7 +1889,7 @@ describe 'Unit Conversions' do
     # even though the result is numerically equivalent to an Integer, we leave
     # it alone
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to be === 2000.0
+      expect(unit.convert_to('mm').scalar).to eq(2000.0)
     end
   end
 
@@ -1897,7 +1897,7 @@ describe 'Unit Conversions' do
     subject(:unit) { RubyUnits::Unit.new(2.0 + 1.0i, 'm') }
 
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to be === 2000.0 + 1000.0i
+      expect(unit.convert_to('mm').scalar).to eq(2000.0 + 1000.0i)
     end
   end
 
@@ -1905,7 +1905,7 @@ describe 'Unit Conversions' do
     subject(:unit) { RubyUnits::Unit.new(2r, 'm') }
 
     it 'preserves the scalar type' do
-      expect(unit.convert_to('mm').scalar).to be === 2000r
+      expect(unit.convert_to('mm').scalar).to eq(2000r)
     end
   end
 
