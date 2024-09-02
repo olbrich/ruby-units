@@ -38,7 +38,7 @@ module RubyUnits
     # @return [Numeric, RubyUnits::Unit]
     def asin(number)
       if number.is_a?(RubyUnits::Unit)
-        [super(number), "radian"].to_unit
+        [super, "radian"].to_unit
       else
         super
       end
@@ -54,7 +54,7 @@ module RubyUnits
     # @return [Numeric, RubyUnits::Unit]
     def acos(number)
       if number.is_a?(RubyUnits::Unit)
-        [super(number), "radian"].to_unit
+        [super, "radian"].to_unit
       else
         super
       end
@@ -100,7 +100,7 @@ module RubyUnits
     # @return [RubyUnits::Unit] if argument is a unit
     def atan(number)
       if number.is_a?(RubyUnits::Unit)
-        [super(number), "radian"].to_unit
+        [super, "radian"].to_unit
       else
         super
       end
