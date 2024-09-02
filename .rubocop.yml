@@ -15,16 +15,12 @@ Style/StringLiterals:
   EnforcedStyle: double_quotes
 Layout/LineLength:
   Enabled: false
-Style/SingleLineBlockParams:
-  Enabled: false
 Naming/FileName:
   Exclude:
     - 'lib/ruby-units.rb'
 Naming/MethodParameterName:
   Enabled: false
 Style/FormatString:
-  Enabled: false
-Style/DateTime:
   Enabled: false
 Metrics/ClassLength:
   Enabled: false
