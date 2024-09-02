@@ -185,12 +185,6 @@ Style/OptionalBooleanParameter:
 
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
-Style/RedundantParentheses:
-  Exclude:
-    - 'lib/ruby_units/definition.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
 Style/RedundantRegexpEscape:
   Exclude:
     - 'spec/ruby_units/unit_spec.rb'

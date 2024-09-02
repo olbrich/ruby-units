@@ -37,7 +37,7 @@ class RubyUnits::Unit < Numeric
     def initialize(name, definition = [])
       yield self if block_given?
       self.name     ||= name.gsub(/[<>]/, '')
-      @aliases      ||= (definition[0] || [name])
+      @aliases      ||= definition[0] || [name]
       @scalar       ||= definition[1]
       @kind         ||= definition[2]
       @numerator    ||= definition[3] || RubyUnits::Unit::UNITY_ARRAY
