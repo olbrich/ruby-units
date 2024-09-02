@@ -12,11 +12,11 @@ RSpec.describe RubyUnits::Date do
   it { is_expected.to have_attributes(scalar: date.ajd, units: 'd', kind: :time) }
 
   describe 'offsets' do
-    specify { expect(date + '5 days'.to_unit).to eq(::Date.new(2011, 4, 6)) }
-    specify { expect(date - '5 days'.to_unit).to eq(::Date.new(2011, 3, 27)) }
+    specify { expect(date + '5 days'.to_unit).to eq(Date.new(2011, 4, 6)) }
+    specify { expect(date - '5 days'.to_unit).to eq(Date.new(2011, 3, 27)) }
     # 2012 is a leap year...
-    specify { expect(date + '1 year'.to_unit).to eq(::Date.new(2012, 3, 31)) }
-    specify { expect(date - '1 year'.to_unit).to eq(::Date.new(2010, 4, 1)) }
+    specify { expect(date + '1 year'.to_unit).to eq(Date.new(2012, 3, 31)) }
+    specify { expect(date - '1 year'.to_unit).to eq(Date.new(2010, 4, 1)) }
     # adding Time or Date objects to a Duration don't make any sense, so raise
     # an error.
     specify { expect { date_unit + Date.new(2011, 4, 1) }.to raise_error(ArgumentError, 'Date and Time objects represent fixed points in time and cannot be added to a Unit') }

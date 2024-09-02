@@ -183,12 +183,6 @@ Style/OptionalBooleanParameter:
   Exclude:
     - 'lib/ruby_units/date.rb'
 
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantConstantBase:
-  Exclude:
-    - 'spec/ruby_units/date_spec.rb'
-
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).
 Style/RedundantFreeze:
