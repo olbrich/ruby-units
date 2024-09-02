@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'date'
+require "date"
 
 module RubyUnits
   # Extra methods for [::Date] to allow it to be used as a [RubyUnits::Unit]
@@ -13,8 +13,8 @@ module RubyUnits
     def +(other)
       case other
       when RubyUnits::Unit
-        other = other.convert_to('d').round if %w[y decade century].include? other.units
-        super(other.convert_to('day').scalar)
+        other = other.convert_to("d").round if %w[y decade century].include? other.units
+        super(other.convert_to("day").scalar)
       else
         super
       end
@@ -28,8 +28,8 @@ module RubyUnits
     def -(other)
       case other
       when RubyUnits::Unit
-        other = other.convert_to('d').round if %w[y decade century].include? other.units
-        super(other.convert_to('day').scalar)
+        other = other.convert_to("d").round if %w[y decade century].include? other.units
+        super(other.convert_to("day").scalar)
       else
         super
       end

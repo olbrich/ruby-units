@@ -54,7 +54,7 @@ module RubyUnits
     def separator=(value)
       raise ArgumentError, "configuration 'separator' may only be true or false" unless [true, false].include?(value)
 
-      @separator = value ? ' ' : nil
+      @separator = value ? " " : nil
     end
 
     # Set the format to use when generating output.

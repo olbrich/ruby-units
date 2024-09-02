@@ -11,6 +11,8 @@ AllCops:
     - bin/*
 Style/CaseEquality:
   Enabled: true
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
 Layout/LineLength:
   Enabled: false
 Style/SingleLineBlockParams:

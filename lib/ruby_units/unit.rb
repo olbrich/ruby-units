@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'date'
+require "date"
 module RubyUnits
   # Copyright 2006-2024
   # @author Kevin C. Olbrich, Ph.D.
@@ -51,7 +51,7 @@ module RubyUnits
     self.unit_values = {}
     @unit_regex = nil
     @unit_match_regex = nil
-    UNITY              = '<1>'
+    UNITY              = "<1>"
     UNITY_ARRAY        = [UNITY].freeze
 
     SIGN_REGEX = /(?:[+-])?/.freeze # +, -, or nothing
@@ -97,10 +97,10 @@ module RubyUnits
     NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/.freeze
     COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/.freeze
     RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/.freeze
-    KELVIN             = ['<kelvin>'].freeze
-    FAHRENHEIT         = ['<fahrenheit>'].freeze
-    RANKINE            = ['<rankine>'].freeze
-    CELSIUS            = ['<celsius>'].freeze
+    KELVIN             = ["<kelvin>"].freeze
+    FAHRENHEIT         = ["<fahrenheit>"].freeze
+    RANKINE            = ["<rankine>"].freeze
+    CELSIUS            = ["<celsius>"].freeze
     @temp_regex = nil
     SIGNATURE_VECTOR = %i[
       length
@@ -229,7 +229,7 @@ module RubyUnits
     #   RubyUnits::Unit.define(unit_definition)
     def self.define(unit_definition, &block)
       if block_given?
-        raise ArgumentError, 'When using the block form of RubyUnits::Unit.define, pass the name of the unit' unless unit_definition.is_a?(String)
+        raise ArgumentError, "When using the block form of RubyUnits::Unit.define, pass the name of the unit" unless unit_definition.is_a?(String)
 
         unit_definition = RubyUnits::Unit::Definition.new(unit_definition, &block)
       end
@@ -247,7 +247,7 @@ module RubyUnits
     #   redefined
     # @return (see RubyUnits::Unit.define)
     def self.redefine!(name, &_block)
-      raise ArgumentError, 'A block is required to redefine a unit' unless block_given?
+      raise ArgumentError, "A block is required to redefine a unit" unless block_given?
 
       unit_definition = definition(name)
       raise(ArgumentError, "'#{name}' Unit not recognized") unless unit_definition
@@ -358,7 +358,7 @@ module RubyUnits
         when RATIONAL_NUMBER
           # We use this method instead of relying on `to_r` because it does not
           # handle improper fractions correctly.
-          sign = Regexp.last_match(1) == '-' ? -1 : 1
+          sign = Regexp.last_match(1) == "-" ? -1 : 1
           n = Regexp.last_match(2).to_i
           f = Rational(Regexp.last_match(3).to_i, Regexp.last_match(4).to_i)
           sign * (n + f)
@@ -373,7 +373,7 @@ module RubyUnits
     # Unit names are reverse sorted by length so the regexp matcher will prefer longer and more specific names
     # @return [String]
     def self.unit_regex
-      @unit_regex ||= unit_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
+      @unit_regex ||= unit_map.keys.sort_by { [_1.length, _1] }.reverse.join("|")
     end
 
     # return a regex used to match units
@@ -386,7 +386,7 @@ module RubyUnits
     # @return [String]
     # @private
     def self.prefix_regex
-      @prefix_regex ||= prefix_map.keys.sort_by { [_1.length, _1] }.reverse.join('|')
+      @prefix_regex ||= prefix_map.keys.sort_by { [_1.length, _1] }.reverse.join("|")
     end
 
     # Generates (and memoizes) a regexp matching any of the temperature units or their aliases.
@@ -399,7 +399,7 @@ module RubyUnits
           d = definition(unit)
           d && d.aliases
         end.flatten.compact
-        regex_str = aliases.empty? ? '(?!x)x' : aliases.join('|')
+        regex_str = aliases.empty? ? "(?!x)x" : aliases.join("|")
         Regexp.new "(?:#{regex_str})"
       end
     end
@@ -493,7 +493,7 @@ module RubyUnits
       @unit_name   = nil
       @signature   = nil
       @output      = {}
-      raise ArgumentError, 'Invalid Unit Format' if options[0].nil?
+      raise ArgumentError, "Invalid Unit Format" if options[0].nil?
 
       if options.size == 2
         # options[0] is the scalar
@@ -535,23 +535,23 @@ module RubyUnits
         @numerator = @denominator = UNITY_ARRAY
       when Time
         @scalar      = options[0].to_f
-        @numerator   = ['<second>']
+        @numerator   = ["<second>"]
         @denominator = UNITY_ARRAY
       when DateTime, Date
         @scalar      = options[0].ajd
-        @numerator   = ['<day>']
+        @numerator   = ["<day>"]
         @denominator = UNITY_ARRAY
       when /^\s*$/
-        raise ArgumentError, 'No Unit Specified'
+        raise ArgumentError, "No Unit Specified"
       when String
         parse(options[0])
       else
-        raise ArgumentError, 'Invalid Unit Format'
+        raise ArgumentError, "Invalid Unit Format"
       end
       update_base_scalar
-      raise ArgumentError, 'Temperatures must not be less than absolute zero' if temperature? && base_scalar.negative?
+      raise ArgumentError, "Temperatures must not be less than absolute zero" if temperature? && base_scalar.negative?
 
-      unary_unit = units || ''
+      unary_unit = units || ""
       if options.first.instance_of?(String)
         _opt_scalar, opt_units = self.class.parse_into_numbers_and_units(options[0])
         if !(self.class.cached.keys.include?(opt_units) ||
@@ -611,9 +611,9 @@ module RubyUnits
       if self.class.unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
         @signature = self.class.kinds.key(:temperature)
         base = if temperature?
-                 convert_to('tempK')
+                 convert_to("tempK")
                elsif degree?
-                 convert_to('degK')
+                 convert_to("degK")
                end
         return base
       end
@@ -679,24 +679,24 @@ module RubyUnits
       separator = RubyUnits.configuration.separator
       case target_units
       when :ft
-        feet, inches = convert_to('in').scalar.abs.divmod(12)
+        feet, inches = convert_to("in").scalar.abs.divmod(12)
         improper, frac = inches.divmod(1)
-        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
         out = "#{negative? ? '-' : nil}#{feet}'#{improper}#{frac}\""
       when :lbs
-        pounds, ounces = convert_to('oz').scalar.abs.divmod(16)
+        pounds, ounces = convert_to("oz").scalar.abs.divmod(16)
         improper, frac = ounces.divmod(1)
-        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
         out  = "#{negative? ? '-' : nil}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
       when :stone
-        stone, pounds = convert_to('lbs').scalar.abs.divmod(14)
+        stone, pounds = convert_to("lbs").scalar.abs.divmod(14)
         improper, frac = pounds.divmod(1)
-        frac = frac.zero? ? '' : "-#{frac.rationalize(precision)}"
+        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
         out = "#{negative? ? '-' : nil}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
-                ''
+                ""
               when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
                 begin
                   if Regexp.last_match(2) # unit specified, need to convert
@@ -710,7 +710,7 @@ module RubyUnits
               when /(\S+)/ # unit only 'mm' or '1/mm'
                 convert_to(Regexp.last_match(1)).to_s(format: format)
               else
-                raise 'unhandled case'
+                raise "unhandled case"
               end
       else
         out = case @scalar
@@ -875,7 +875,7 @@ module RubyUnits
         if zero?
           other.dup
         elsif self =~ other
-          raise ArgumentError, 'Cannot add two temperatures' if [self, other].all?(&:temperature?)
+          raise ArgumentError, "Cannot add two temperatures" if [self, other].all?(&:temperature?)
 
           if temperature?
             self.class.new(scalar: (scalar + other.convert_to(temperature_scale).scalar), numerator: @numerator, denominator: @denominator, signature: @signature)
@@ -888,7 +888,7 @@ module RubyUnits
           raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Date, Time
-        raise ArgumentError, 'Date and Time objects represent fixed points in time and cannot be added to a Unit'
+        raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be added to a Unit"
       else
         x, y = coerce(other)
         y + x
@@ -914,9 +914,9 @@ module RubyUnits
           if [self, other].all?(&:temperature?)
             self.class.new(scalar: (base_scalar - other.base_scalar), numerator: KELVIN, denominator: UNITY_ARRAY, signature: @signature).convert_to(temperature_scale)
           elsif temperature?
-            self.class.new(scalar: (base_scalar - other.base_scalar), numerator: ['<tempK>'], denominator: UNITY_ARRAY, signature: @signature).convert_to(self)
+            self.class.new(scalar: (base_scalar - other.base_scalar), numerator: ["<tempK>"], denominator: UNITY_ARRAY, signature: @signature).convert_to(self)
           elsif other.temperature?
-            raise ArgumentError, 'Cannot subtract a temperature from a differential degree unit'
+            raise ArgumentError, "Cannot subtract a temperature from a differential degree unit"
           else
             self.class.new(scalar: (base_scalar - other.base_scalar), numerator: base.numerator, denominator: base.denominator, signature: @signature).convert_to(self)
           end
@@ -924,7 +924,7 @@ module RubyUnits
           raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Time
-        raise ArgumentError, 'Date and Time objects represent fixed points in time and cannot be subtracted from a Unit'
+        raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be subtracted from a Unit"
       else
         x, y = coerce(other)
         y - x
@@ -938,7 +938,7 @@ module RubyUnits
     def *(other)
       case other
       when Unit
-        raise ArgumentError, 'Cannot multiply by temperatures' if [other, self].any?(&:temperature?)
+        raise ArgumentError, "Cannot multiply by temperatures" if [other, self].any?(&:temperature?)
 
         opts = self.class.eliminate_terms(@scalar * other.scalar, @numerator + other.numerator, @denominator + other.denominator)
         opts[:signature] = @signature + other.signature
@@ -961,7 +961,7 @@ module RubyUnits
       case other
       when Unit
         raise ZeroDivisionError if other.zero?
-        raise ArgumentError, 'Cannot divide with temperatures' if [other, self].any?(&:temperature?)
+        raise ArgumentError, "Cannot divide with temperatures" if [other, self].any?(&:temperature?)
 
         sc = Rational(@scalar, other.scalar)
         sc = sc.numerator if sc.denominator == 1
@@ -1037,7 +1037,7 @@ module RubyUnits
     # @raise [ArgumentError] when attempting to raise to a complex number
     # @raise [ArgumentError] when an invalid exponent is passed
     def **(other)
-      raise ArgumentError, 'Cannot raise a temperature to a power' if temperature?
+      raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
 
       if other.is_a?(Numeric)
         return inverse if other == -1
@@ -1053,13 +1053,13 @@ module RubyUnits
         return self**other.to_i if other == other.to_i
 
         valid = (1..9).map { Rational(1, _1) }
-        raise ArgumentError, 'Not a n-th root (1..9), use 1/n' unless valid.include? other.abs
+        raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
 
         root(Rational(1, other).to_int)
       when Complex
-        raise ArgumentError, 'exponentiation of complex numbers is not supported.'
+        raise ArgumentError, "exponentiation of complex numbers is not supported."
       else
-        raise ArgumentError, 'Invalid Exponent'
+        raise ArgumentError, "Invalid Exponent"
       end
     end
 
@@ -1069,8 +1069,8 @@ module RubyUnits
     # @raise [ArgumentError] when attempting to raise a temperature to a power
     # @raise [ArgumentError] when n is not an integer
     def power(n)
-      raise ArgumentError, 'Cannot raise a temperature to a power' if temperature?
-      raise ArgumentError, 'Exponent must an Integer' unless n.is_a?(Integer)
+      raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
+      raise ArgumentError, "Exponent must an Integer" unless n.is_a?(Integer)
       return inverse if n == -1
       return 1 if n.zero?
       return self if n == 1
@@ -1087,15 +1087,15 @@ module RubyUnits
     # @raise [ArgumentError] when n is not an integer
     # @raise [ArgumentError] when n is 0
     def root(n)
-      raise ArgumentError, 'Cannot take the root of a temperature' if temperature?
-      raise ArgumentError, 'Exponent must an Integer' unless n.is_a?(Integer)
-      raise ArgumentError, '0th root undefined' if n.zero?
+      raise ArgumentError, "Cannot take the root of a temperature" if temperature?
+      raise ArgumentError, "Exponent must an Integer" unless n.is_a?(Integer)
+      raise ArgumentError, "0th root undefined" if n.zero?
       return self if n == 1
       return root(n.abs).inverse if n.negative?
 
       vec = unit_signature_vector
       vec = vec.map { _1 % n }
-      raise ArgumentError, 'Illegal root' unless vec.max.zero?
+      raise ArgumentError, "Illegal root" unless vec.max.zero?
 
       num = @numerator.dup
       den = @denominator.dup
@@ -1117,7 +1117,7 @@ module RubyUnits
     # returns inverse of Unit (1/unit)
     # @return [Unit]
     def inverse
-      self.class.new('1') / self
+      self.class.new("1") / self
     end
 
     # convert to a specified unit string or to the same units as another Unit
@@ -1149,7 +1149,7 @@ module RubyUnits
       return self if other.is_a?(FalseClass)
 
       if (other.is_a?(Unit) && other.temperature?) || (other.is_a?(String) && other =~ self.class.temp_regex)
-        raise ArgumentError, 'Receiver is not a temperature unit' unless degree?
+        raise ArgumentError, "Receiver is not a temperature unit" unless degree?
 
         start_unit = units
         # @type [String]
@@ -1159,30 +1159,30 @@ module RubyUnits
                       when String
                         other
                       else
-                        raise ArgumentError, 'Unknown target units'
+                        raise ArgumentError, "Unknown target units"
                       end
         return self if target_unit == start_unit
 
         # @type [Numeric]
         @base_scalar ||= case self.class.unit_map[start_unit]
-                         when '<tempC>'
+                         when "<tempC>"
                            @scalar + 273.15
-                         when '<tempK>'
+                         when "<tempK>"
                            @scalar
-                         when '<tempF>'
+                         when "<tempF>"
                            (@scalar + 459.67).to_r * Rational(5, 9)
-                         when '<tempR>'
+                         when "<tempR>"
                            @scalar.to_r * Rational(5, 9)
                          end
         # @type [Numeric]
         q = case self.class.unit_map[target_unit]
-            when '<tempC>'
+            when "<tempC>"
               @base_scalar - 273.15
-            when '<tempK>'
+            when "<tempK>"
               @base_scalar
-            when '<tempF>'
+            when "<tempF>"
               (@base_scalar.to_r * Rational(9, 5)) - 459.67r
-            when '<tempR>'
+            when "<tempR>"
               @base_scalar.to_r * Rational(9, 5)
             end
         self.class.new("#{q} #{target_unit}")
@@ -1194,7 +1194,7 @@ module RubyUnits
                  when String
                    self.class.new(other)
                  else
-                   raise ArgumentError, 'Unknown target units'
+                   raise ArgumentError, "Unknown target units"
                  end
         return self if target.units == units
 
@@ -1272,9 +1272,9 @@ module RubyUnits
     #
     # @return [String]
     def units(with_prefix: true, format: nil)
-      return '' if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
+      return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
 
-      output_numerator   = ['1']
+      output_numerator   = ["1"]
       output_denominator = []
       num                = @numerator.clone.compact
       den                = @denominator.clone.compact
@@ -1296,19 +1296,19 @@ module RubyUnits
       on = output_numerator
            .uniq
            .map { [_1, output_numerator.count(_1)] }
-           .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
+           .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : "")) }
 
       if format == :exponential
         od = output_denominator
              .uniq
              .map { [_1, output_denominator.count(_1)] }
-             .map { |element, power| (element.to_s.strip + (power.positive? ? "^#{-power}" : '')) }
-        (on + od).join('*').strip
+             .map { |element, power| (element.to_s.strip + (power.positive? ? "^#{-power}" : "")) }
+        (on + od).join("*").strip
       else
         od  = output_denominator
               .uniq
               .map { [_1, output_denominator.count(_1)] }
-              .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : '')) }
+              .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : "")) }
         "#{on.join('*')}#{od.empty? ? '' : "/#{od.join('*')}"}".strip
       end
     end
@@ -1372,7 +1372,7 @@ module RubyUnits
     # @return [Unit]
     # @raise [ArgumentError] when scalar is not equal to an integer
     def succ
-      raise ArgumentError, 'Non Integer Scalar' unless @scalar == @scalar.to_i
+      raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
 
       self.class.new(@scalar.to_i.succ, @numerator, @denominator)
     end
@@ -1384,7 +1384,7 @@ module RubyUnits
     # @return [Unit]
     # @raise [ArgumentError] when scalar is not equal to an integer
     def pred
-      raise ArgumentError, 'Non Integer Scalar' unless @scalar == @scalar.to_i
+      raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
 
       self.class.new(@scalar.to_i.pred, @numerator, @denominator)
     end
@@ -1401,12 +1401,12 @@ module RubyUnits
     # defined by DateTime
     # @return [::DateTime]
     def to_datetime
-      DateTime.new!(convert_to('d').scalar)
+      DateTime.new!(convert_to("d").scalar)
     end
 
     # @return [Date]
     def to_date
-      Date.new0(convert_to('d').scalar)
+      Date.new0(convert_to("d").scalar)
     end
 
     # true if scalar is zero
@@ -1432,7 +1432,7 @@ module RubyUnits
           time_point.to_datetime - self
         end)
       else
-        raise ArgumentError, 'Must specify a Time, Date, or DateTime'
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1445,11 +1445,11 @@ module RubyUnits
     def since(time_point)
       case time_point
       when Time
-        self.class.new(::Time.now - time_point, 'second').convert_to(self)
+        self.class.new(::Time.now - time_point, "second").convert_to(self)
       when DateTime, Date
-        self.class.new(::DateTime.now - time_point, 'day').convert_to(self)
+        self.class.new(::DateTime.now - time_point, "day").convert_to(self)
       else
-        raise ArgumentError, 'Must specify a Time, Date, or DateTime'
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1459,11 +1459,11 @@ module RubyUnits
     def until(time_point)
       case time_point
       when Time
-        self.class.new(time_point - ::Time.now, 'second').convert_to(self)
+        self.class.new(time_point - ::Time.now, "second").convert_to(self)
       when DateTime, Date
-        self.class.new(time_point - ::DateTime.now, 'day').convert_to(self)
+        self.class.new(time_point - ::DateTime.now, "day").convert_to(self)
       else
-        raise ArgumentError, 'Must specify a Time, Date, or DateTime'
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1480,7 +1480,7 @@ module RubyUnits
           time_point.to_datetime + self
         end)
       else
-        raise ArgumentError, 'Must specify a Time, Date, or DateTime'
+        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1509,7 +1509,7 @@ module RubyUnits
     # @return [Unit]
     def best_prefix
       return to_base if scalar.zero?
-      return self if units.include?('kg')
+      return self if units.include?("kg")
 
       best_prefix = if kind == :information
                       self.class.prefix_values.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
@@ -1567,7 +1567,7 @@ module RubyUnits
         index = SIGNATURE_VECTOR.index(definition.kind)
         vector[index] -= 1 if index
       end
-      raise ArgumentError, 'Power out of range (-20 < net power of a unit < 20)' if vector.any? { _1.abs >= 20 }
+      raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { _1.abs >= 20 }
 
       vector
     end
@@ -1610,14 +1610,14 @@ module RubyUnits
     #  8 lbs 8 oz -- recognized as 8 lbs + 8 ounces
     # @return [nil,RubyUnits::Unit]
     # @todo This should either be a separate class or at least a class method
-    def parse(passed_unit_string = '0')
+    def parse(passed_unit_string = "0")
       unit_string = passed_unit_string.dup
       unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
-      unit_string.gsub!("\u00b0".encode('utf-8'), 'deg') if unit_string.encoding == Encoding::UTF_8
+      unit_string.gsub!("\u00b0".encode("utf-8"), "deg") if unit_string.encoding == Encoding::UTF_8
 
       unit_string.gsub!(/(\d)[_,](\d)/, '\1\2') # remove underscores and commas in numbers
 
-      unit_string.gsub!(/[%'"#]/, '%' => 'percent', "'" => 'feet', '"' => 'inch', '#' => 'pound')
+      unit_string.gsub!(/[%'"#]/, "%" => "percent", "'" => "feet", '"' => "inch", "#" => "pound")
       if unit_string.start_with?(COMPLEX_NUMBER)
         match = unit_string.match(COMPLEX_REGEX)
         real = Float(match[:real]) if match[:real]
@@ -1636,7 +1636,7 @@ module RubyUnits
         match = unit_string.match(RATIONAL_REGEX)
         numerator = Integer(match[:numerator])
         denominator = Integer(match[:denominator])
-        raise ArgumentError, 'Improper fractions must have a whole number part' if !match[:proper].nil? && !match[:proper].match?(/^#{INTEGER_REGEX}$/)
+        raise ArgumentError, "Improper fractions must have a whole number part" if !match[:proper].nil? && !match[:proper].match?(/^#{INTEGER_REGEX}$/)
 
         proper = match[:proper].to_i
         unit_s = match[:unit]
@@ -1653,7 +1653,7 @@ module RubyUnits
 
       match = unit_string.match(NUMBER_REGEX)
       unit = self.class.cached.get(match[:unit])
-      mult = match[:scalar] == '' ? 1.0 : match[:scalar].to_f
+      mult = match[:scalar] == "" ? 1.0 : match[:scalar].to_f
       mult = mult.to_int if mult.to_int == mult
 
       if unit
@@ -1670,14 +1670,14 @@ module RubyUnits
         # collapse <prefixunit><prefixunit> into <prefixunit>*<prefixunit>...
       end
       # ... and then strip the remaining brackets for x*y*z
-      unit_string.gsub!(/[<>]/, '')
+      unit_string.gsub!(/[<>]/, "")
 
       if (match = unit_string.match(TIME_REGEX))
         hours = match[:hour]
         minutes = match[:min]
         seconds = match[:sec]
         milliseconds = match[:msec]
-        raise ArgumentError, 'Invalid Duration' if [hours, minutes, seconds, milliseconds].all?(&:nil?)
+        raise ArgumentError, "Invalid Duration" if [hours, minutes, seconds, milliseconds].all?(&:nil?)
 
         result = self.class.new("#{hours || 0} hours") +
                  self.class.new("#{minutes || 0} minutes") +
@@ -1728,7 +1728,7 @@ module RubyUnits
       end
 
       # more than one per.  I.e., "1 m/s/s"
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count('/') > 1
+      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count("/") > 1
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized #{unit_string}") if unit_string =~ /\s[02-9]/
 
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
@@ -1739,7 +1739,7 @@ module RubyUnits
           top.gsub!(/#{item[0]}(\^|\*\*)#{n}/) { x * n }
         elsif n.negative?
           bottom = "#{bottom} #{x * -n}"
-          top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, '')
+          top.gsub!(/#{item[0]}(\^|\*\*)#{n}/, "")
         end
       end
       if bottom
@@ -1768,7 +1768,7 @@ module RubyUnits
 
       # eliminate all known terms from this string.  This is a quick check to see if the passed unit
       # contains terms that are not defined.
-      used = "#{top} #{bottom}".to_s.gsub(self.class.unit_match_regex, '').gsub(%r{[\d*, "'_^/$]}, '')
+      used = "#{top} #{bottom}".to_s.gsub(self.class.unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
       @numerator = @numerator.map do |item|

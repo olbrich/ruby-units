@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'time'
+require "time"
 
 module RubyUnits
   # Extra methods for converting [String] objects to [RubyUnits::Unit] objects
