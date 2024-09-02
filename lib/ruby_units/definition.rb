@@ -75,7 +75,6 @@ class RubyUnits::Unit < Numeric
       @kind        = base.kind
       @numerator   = base.numerator
       @denominator = base.denominator
-      self
     end
 
     # is this definition for a prefix?
