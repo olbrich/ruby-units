@@ -31,14 +31,14 @@ module RubyUnits
     # @param angle [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def sin(angle)
-      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to('radian').scalar) : super
+      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to("radian").scalar) : super
     end
 
     # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric, RubyUnits::Unit]
     def asin(number)
       if number.is_a?(RubyUnits::Unit)
-        [super(number), 'radian'].to_unit
+        [super, "radian"].to_unit
       else
         super
       end
@@ -47,14 +47,14 @@ module RubyUnits
     # @param angle [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def cos(angle)
-      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to('radian').scalar) : super
+      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to("radian").scalar) : super
     end
 
     # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric, RubyUnits::Unit]
     def acos(number)
       if number.is_a?(RubyUnits::Unit)
-        [super(number), 'radian'].to_unit
+        [super, "radian"].to_unit
       else
         super
       end
@@ -63,25 +63,25 @@ module RubyUnits
     # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def sinh(number)
-      number.is_a?(RubyUnits::Unit) ? super(number.convert_to('radian').scalar) : super
+      number.is_a?(RubyUnits::Unit) ? super(number.convert_to("radian").scalar) : super
     end
 
     # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def cosh(number)
-      number.is_a?(RubyUnits::Unit) ? super(number.convert_to('radian').scalar) : super
+      number.is_a?(RubyUnits::Unit) ? super(number.convert_to("radian").scalar) : super
     end
 
     # @param angle [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def tan(angle)
-      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to('radian').scalar) : super
+      angle.is_a?(RubyUnits::Unit) ? super(angle.convert_to("radian").scalar) : super
     end
 
     # @param number [Numeric, RubyUnits::Unit]
     # @return [Numeric]
     def tanh(number)
-      number.is_a?(RubyUnits::Unit) ? super(number.convert_to('radian').scalar) : super
+      number.is_a?(RubyUnits::Unit) ? super(number.convert_to("radian").scalar) : super
     end
 
     # @param x [Numeric, RubyUnits::Unit]
@@ -100,7 +100,7 @@ module RubyUnits
     # @return [RubyUnits::Unit] if argument is a unit
     def atan(number)
       if number.is_a?(RubyUnits::Unit)
-        [super(number), 'radian'].to_unit
+        [super, "radian"].to_unit
       else
         super
       end
@@ -112,10 +112,10 @@ module RubyUnits
     # @return [RubyUnits::Unit] if parameters are units
     # @raise [ArgumentError] if parameters are not numbers or compatible units
     def atan2(x, y)
-      raise ArgumentError, 'Incompatible RubyUnits::Units' if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && !x.compatible?(y)
+      raise ArgumentError, "Incompatible RubyUnits::Units" if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && !x.compatible?(y)
 
       if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && x.compatible?(y)
-        [super(x.base_scalar, y.base_scalar), 'radian'].to_unit
+        [super(x.base_scalar, y.base_scalar), "radian"].to_unit
       else
         super
       end

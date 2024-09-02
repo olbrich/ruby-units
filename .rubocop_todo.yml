@@ -6,62 +6,10 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Layout/SpaceAfterComma:
-  Exclude:
-    - 'spec/benchmarks/bigdecimal.rb'
-    - 'spec/ruby_units/complex_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceBeforeBlockBraces:
-  Exclude:
-    - 'spec/benchmarks/bigdecimal.rb'
-
-# Offense count: 3
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Exclude:
-    - 'spec/benchmarks/bigdecimal.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Lint/AmbiguousOperator:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Lint/AmbiguousOperatorPrecedence:
-  Exclude:
-    - 'lib/ruby_units/unit_definitions/standard.rb'
-
 # Offense count: 2
 Lint/BinaryOperatorWithIdenticalOperands:
   Exclude:
     - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Lint/UselessNumericOperation:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AutoCorrect, CheckForMethodsWithNoSideEffects.
-Lint/Void:
-  Exclude:
-    - 'lib/ruby_units/definition.rb'
 
 # Offense count: 2
 # Configuration parameters: EnforcedStyle, CheckMethodNames, CheckSymbols, AllowedIdentifiers, AllowedPatterns.
@@ -84,21 +32,6 @@ RSpec/BeforeAfterAll:
     - '**/spec/rails_helper.rb'
     - '**/spec/support/**/*.rb'
     - 'spec/ruby_units/temperature_spec.rb'
-
-# Offense count: 3
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: be_a, be_kind_of
-RSpec/ClassCheck:
-  Exclude:
-    - 'spec/ruby_units/math_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 16
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/ContextMethod:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 95
 # Configuration parameters: Prefixes, AllowedPatterns.
@@ -137,55 +70,10 @@ RSpec/DescribedClass:
     - 'spec/ruby_units/complex_spec.rb'
     - 'spec/ruby_units/unit_spec.rb'
 
-# Offense count: 9
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowConsecutiveOneLiners.
-RSpec/EmptyLineAfterExample:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 20
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/EmptyLineAfterExampleGroup:
-  Exclude:
-    - 'spec/ruby_units/temperature_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/EmptyLineAfterFinalLet:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 114
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/EmptyLineAfterSubject:
-  Exclude:
-    - 'spec/ruby_units/temperature_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 8
 # Configuration parameters: CountAsOne.
 RSpec/ExampleLength:
   Max: 7
-
-# Offense count: 11
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: CustomTransform, IgnoredWords, DisallowedExamples.
-# DisallowedExamples: works
-RSpec/ExampleWording:
-  Exclude:
-    - 'spec/ruby_units/bugs_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-    - 'spec/ruby_units/utf-8/unit_spec.rb'
-
-# Offense count: 8
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: implicit, each, example
-RSpec/HookArgument:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 2
 # Configuration parameters: Max, AllowedIdentifiers, AllowedPatterns.
@@ -196,12 +84,6 @@ RSpec/IndexedLet:
 # Offense count: 11
 # Configuration parameters: AssignmentOnly.
 RSpec/InstanceVariable:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/LeadingSubject:
   Exclude:
     - 'spec/ruby_units/unit_spec.rb'
 
@@ -227,14 +109,6 @@ RSpec/NamedSubject:
 # Configuration parameters: AllowedGroups.
 RSpec/NestedGroups:
   Max: 5
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: not_to, to_not
-RSpec/NotToNot:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 6
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -267,15 +141,6 @@ RSpec/SpecFilePathFormat:
     - '**/spec/routing/**/*'
     - 'spec/ruby_units/utf-8/unit_spec.rb'
 
-# Offense count: 27
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowOnConstant, AllowOnSelfClass.
-Style/CaseEquality:
-  Exclude:
-    - 'lib/ruby_units/unit.rb'
-    - 'spec/ruby_units/complex_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: EnforcedStyle.
@@ -283,16 +148,6 @@ Style/CaseEquality:
 Style/ClassAndModuleChildren:
   Exclude:
     - 'lib/ruby_units/definition.rb'
-
-# Offense count: 3
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Keywords, RequireColon.
-# Keywords: TODO, FIXME, OPTIMIZE, HACK, REVIEW, NOTE
-Style/CommentAnnotation:
-  Exclude:
-    - 'Guardfile'
-    - 'spec/ruby_units/temperature_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 1
 # Configuration parameters: AllowedConstants.
@@ -309,12 +164,6 @@ Style/GlobalStdStream:
     - 'spec/benchmarks/bigdecimal.rb'
     - 'spec/ruby_units/unit_spec.rb'
 
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Strict, AllowedNumbers, AllowedPatterns.
-Style/NumericLiterals:
-  MinDigits: 10
-
 # Offense count: 1
 Style/OpenStructUse:
   Exclude:
@@ -326,31 +175,6 @@ Style/OpenStructUse:
 Style/OptionalBooleanParameter:
   Exclude:
     - 'lib/ruby_units/date.rb'
-
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantConstantBase:
-  Exclude:
-    - 'spec/ruby_units/date_spec.rb'
-
-# Offense count: 2
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantFreeze:
-  Exclude:
-    - 'lib/ruby_units/unit.rb'
-    - 'lib/ruby_units/version.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantParentheses:
-  Exclude:
-    - 'lib/ruby_units/definition.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantRegexpEscape:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
 
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -367,19 +191,3 @@ Style/StringConcatenation:
     - 'spec/ruby_units/bugs_spec.rb'
     - 'spec/ruby_units/unit_spec.rb'
     - 'spec/ruby_units/utf-8/unit_spec.rb'
-
-# Offense count: 20
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiterals:
-  Exclude:
-    - 'spec/benchmarks/bigdecimal.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/SuperArguments:
-  Exclude:
-    - 'lib/ruby_units/math.rb'
-    - 'lib/ruby_units/time.rb'

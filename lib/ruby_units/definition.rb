@@ -36,8 +36,8 @@ class RubyUnits::Unit < Numeric
     #
     def initialize(name, definition = [])
       yield self if block_given?
-      self.name     ||= name.gsub(/[<>]/, '')
-      @aliases      ||= (definition[0] || [name])
+      self.name     ||= name.gsub(/[<>]/, "")
+      @aliases      ||= definition[0] || [name]
       @scalar       ||= definition[1]
       @kind         ||= definition[2]
       @numerator    ||= definition[3] || RubyUnits::Unit::UNITY_ARRAY
@@ -57,7 +57,7 @@ class RubyUnits::Unit < Numeric
     # @param name_value [String]
     # @return [String]
     def name=(name_value)
-      @name = name_value.gsub(/[<>]/, '')
+      @name = name_value.gsub(/[<>]/, "")
     end
 
     # alias array must contain the name of the unit and entries must be unique
@@ -75,7 +75,6 @@ class RubyUnits::Unit < Numeric
       @kind        = base.kind
       @numerator   = base.numerator
       @denominator = base.denominator
-      self
     end
 
     # is this definition for a prefix?

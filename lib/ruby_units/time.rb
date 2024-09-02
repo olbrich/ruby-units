@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'time'
+require "time"
 
 module RubyUnits
   # Time math is handled slightly differently.  The difference is considered to be an exact duration if
@@ -19,15 +19,15 @@ module RubyUnits
         case args.first
         when RubyUnits::Unit
           options = args.last.is_a?(Hash) ? args.pop : kwargs
-          secondary_unit = args[2] || 'microsecond'
+          secondary_unit = args[2] || "microsecond"
           case args[1]
           when Numeric
-            super((args.first + RubyUnits::Unit.new(args[1], secondary_unit.to_s)).convert_to('second').scalar, **options)
+            super((args.first + RubyUnits::Unit.new(args[1], secondary_unit.to_s)).convert_to("second").scalar, **options)
           else
-            super(args.first.convert_to('second').scalar, **options)
+            super(args.first.convert_to("second").scalar, **options)
           end
         else
-          super(*args, **kwargs)
+          super
         end
       end
 
@@ -54,9 +54,9 @@ module RubyUnits
     def +(other)
       case other
       when RubyUnits::Unit
-        other = other.convert_to('d').round.convert_to('s') if %w[y decade century].include? other.units
+        other = other.convert_to("d").round.convert_to("s") if %w[y decade century].include? other.units
         begin
-          super(other.convert_to('s').scalar)
+          super(other.convert_to("s").scalar)
         rescue RangeError
           to_datetime + other
         end
@@ -70,9 +70,9 @@ module RubyUnits
     def -(other)
       case other
       when RubyUnits::Unit
-        other = other.convert_to('d').round.convert_to('s') if %w[y decade century].include? other.units
+        other = other.convert_to("d").round.convert_to("s") if %w[y decade century].include? other.units
         begin
-          super(other.convert_to('s').scalar)
+          super(other.convert_to("s").scalar)
         rescue RangeError
           public_send(:to_datetime) - other
         end

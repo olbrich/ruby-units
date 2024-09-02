@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative '../spec_helper'
-require 'bigdecimal'
-require 'bigdecimal/util'
-require 'benchmark'
-require 'ruby-prof'
+require_relative "../spec_helper"
+require "bigdecimal"
+require "bigdecimal/util"
+require "benchmark"
+require "ruby-prof"
 a = [
   [2.025, "gal"],
   [5.575, "gal"],
@@ -24,7 +24,7 @@ a = [
   [0.85, "gal"]
 ]
 
-b = a.map{|ns,nu| Unit.new(ns.to_d, nu)}
+b = a.map { |ns, nu| Unit.new(ns.to_d, nu) }
 
 result = RubyProf.profile(merge_fibers: true) do
   puts b.reduce(:+)

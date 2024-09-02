@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'simplecov'
-require 'bundler/setup'
+require "simplecov"
+require "bundler/setup"
 Bundler.require(:development, :test)
-require 'rspec/core'
+require "rspec/core"
 
 SimpleCov.start do
-  add_filter '/spec/'
-  add_filter '/test/'
-  skip_token 'nocov_19'
+  add_filter "/spec/"
+  add_filter "/test/"
+  skip_token "nocov_19"
 end
 
 RSpec.configure do |config|
@@ -17,4 +17,4 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 end
 
-require_relative '../lib/ruby-units'
+require_relative "../lib/ruby-units"

@@ -9,11 +9,9 @@ AllCops:
   Exclude:
     - ruby-units.gemspec
     - bin/*
-Style/CaseEquality:
-  Enabled: true
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
 Layout/LineLength:
-  Enabled: false
-Style/SingleLineBlockParams:
   Enabled: false
 Naming/FileName:
   Exclude:
@@ -21,8 +19,6 @@ Naming/FileName:
 Naming/MethodParameterName:
   Enabled: false
 Style/FormatString:
-  Enabled: false
-Style/DateTime:
   Enabled: false
 Metrics/ClassLength:
   Enabled: false
