@@ -51,7 +51,7 @@ module RubyUnits
     self.unit_values = {}
     @unit_regex = nil
     @unit_match_regex = nil
-    UNITY              = '<1>'.freeze
+    UNITY              = '<1>'
     UNITY_ARRAY        = [UNITY].freeze
 
     SIGN_REGEX = /(?:[+-])?/.freeze # +, -, or nothing
