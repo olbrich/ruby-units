@@ -615,7 +615,7 @@ RSpec.describe 'Create some simple units' do
       subject { super().scalar }
 
       it { is_expected.to be_a(Numeric) }
-      it { is_expected.to eq(5025067/3600000r) }
+      it { is_expected.to eq(5_025_067/3600000r) }
     end
 
     describe '#units' do
@@ -1871,7 +1871,7 @@ describe 'Unit Conversions' do
   # see #203
   context 'when the unit scalar is an Integer' do
     it 'the conversion is done accurately' do
-      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to eq(100663125/67108864r)
+      expect(RubyUnits::Unit.new('1610610000 bytes').convert_to('GiB').scalar).to eq(100_663_125/67108864r)
     end
 
     it 'the converted unit has an Integer scalar if the initial unit has an Integer scalar and the scalar is equivalent to an integer' do
