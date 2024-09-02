@@ -156,16 +156,6 @@ Style/ClassAndModuleChildren:
   Exclude:
     - 'lib/ruby_units/definition.rb'
 
-# Offense count: 3
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Keywords, RequireColon.
-# Keywords: TODO, FIXME, OPTIMIZE, HACK, REVIEW, NOTE
-Style/CommentAnnotation:
-  Exclude:
-    - 'Guardfile'
-    - 'spec/ruby_units/temperature_spec.rb'
-    - 'spec/ruby_units/unit_spec.rb'
-
 # Offense count: 1
 # Configuration parameters: AllowedConstants.
 Style/Documentation:

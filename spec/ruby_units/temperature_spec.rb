@@ -89,7 +89,7 @@ RSpec.describe 'temperatures' do
     end
 
     context 'between temperature scales' do
-      # note that 'temp' units are for temperature readings on a scale, while 'deg' units are used to represent
+      # NOTE: that 'temp' units are for temperature readings on a scale, while 'deg' units are used to represent
       # differences between temperatures, offsets, or other differential temperatures.
 
       specify { expect(RubyUnits::Unit.new('100 tC')).to be_within(RubyUnits::Unit.new('0.001 degK')).of(RubyUnits::Unit.new('373.15 tempK')) }
