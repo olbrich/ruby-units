@@ -184,12 +184,6 @@ Style/OptionalBooleanParameter:
     - 'lib/ruby_units/date.rb'
 
 # Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantRegexpEscape:
-  Exclude:
-    - 'spec/ruby_units/unit_spec.rb'
-
-# Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: AllowSend.
 Style/SendWithLiteralMethodName:

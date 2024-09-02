@@ -1501,7 +1501,7 @@ describe Unit do
     describe '#to_yaml' do
       subject { super().to_yaml }
 
-      it { is_expected.to match(%r{--- !ruby\/object:RubyUnits::Unit}) }
+      it { is_expected.to match(%r{--- !ruby/object:RubyUnits::Unit}) }
     end
   end
 
