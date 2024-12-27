@@ -6,6 +6,7 @@ source "https://rubygems.org"
 # The CI process will not install them.
 group :optional do
   gem "debug", ">= 1.0.0", platform: :mri
+  gem "gem-ctags"
   gem "guard-rspec"
   gem "pry"
   gem "redcarpet", platform: :mri # redcarpet doesn't support jruby
@@ -21,6 +22,9 @@ group :optional do
   gem "webrick"
 end
 
+gem "bigdecimal"
+gem "rake"
+gem "rspec", "~> 3.0"
 gem "simplecov"
 gem "yard"
 
