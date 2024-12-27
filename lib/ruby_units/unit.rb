@@ -397,7 +397,7 @@ module RubyUnits
         temp_units = %w[tempK tempC tempF tempR degK degC degF degR]
         aliases = temp_units.map do |unit|
           d = definition(unit)
-          d && d.aliases
+          d&.aliases
         end.flatten.compact
         regex_str = aliases.empty? ? "(?!x)x" : aliases.join("|")
         Regexp.new "(?:#{regex_str})"

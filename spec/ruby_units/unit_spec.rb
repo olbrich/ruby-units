@@ -2125,7 +2125,7 @@ describe "Unit Math" do
       end
 
       context RubyUnits::Unit.new("1 m") do
-        it { expect(subject**0).to eq(1) }
+        it { expect(subject**0).to eq(1) } # rubocop:disable Lint/NumericOperationWithConstantResult
         it { expect(subject**1).to eq(subject) } # rubocop:disable Lint/UselessNumericOperation
         it { expect(subject**-1).to eq(1 / subject) }
         it { expect(subject**2).to eq(RubyUnits::Unit.new("1 m^2")) }

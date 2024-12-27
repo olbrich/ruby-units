@@ -25,6 +25,7 @@ GEM
     ffi (1.17.0-x86_64-darwin)
     ffi (1.17.0-x86_64-linux-gnu)
     formatador (1.1.0)
+    gem-ctags (1.0.9)
     guard (2.19.0)
       formatador (>= 0.2.4)
       listen (>= 2.7, < 4.0)
@@ -189,6 +190,7 @@ PLATFORMS
 DEPENDENCIES
   bigdecimal
   debug (>= 1.0.0)
+  gem-ctags
   guard-rspec
   pry
   rake

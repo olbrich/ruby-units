@@ -93,10 +93,10 @@ class RubyUnits::Unit < Numeric
     # units are base units if the scalar is one, and the unit is defined in terms of itself.
     # @return [Boolean]
     def base?
-      (denominator     == RubyUnits::Unit::UNITY_ARRAY) &&
-        (numerator       != RubyUnits::Unit::UNITY_ARRAY) &&
-        (numerator.size  == 1) &&
-        (scalar          == 1) &&
+      (denominator == RubyUnits::Unit::UNITY_ARRAY) &&
+        (numerator != RubyUnits::Unit::UNITY_ARRAY) &&
+        (numerator.size == 1) &&
+        (scalar == 1) &&
         (numerator.first == self.name)
     end
   end
