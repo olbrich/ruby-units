@@ -21,6 +21,7 @@ group :optional do
   gem "webrick"
 end
 
+gem "bigdecimal"
 gem "simplecov"
 gem "yard"
 
