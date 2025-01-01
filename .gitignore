@@ -9,3 +9,4 @@
 /bin/
 # rspec failure tracking
 .rspec_status
+tags

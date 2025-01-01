@@ -20,6 +20,7 @@ GEM
     diff-lcs (1.5.1)
     docile (1.4.1)
     e2mmap (0.1.0)
+    ffi (1.17.0-aarch64-linux-gnu)
     ffi (1.17.0-arm64-darwin)
     ffi (1.17.0-java)
     ffi (1.17.0-x86_64-darwin)
@@ -61,6 +62,8 @@ GEM
     lumberjack (1.2.10)
     method_source (1.1.0)
     nenv (0.3.0)
+    nokogiri (1.18.0-aarch64-linux-gnu)
+      racc (~> 1.4)
     nokogiri (1.18.0-arm64-darwin)
       racc (~> 1.4)
     nokogiri (1.18.0-java)
@@ -177,6 +180,7 @@ GEM
     yard (0.9.37)
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin-21
   arm64-darwin-22
   arm64-darwin-23
