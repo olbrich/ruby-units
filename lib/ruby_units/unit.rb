@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "date"
+require "bigdecimal"
+
 module RubyUnits
   # Copyright 2006-2024
   # @author Kevin C. Olbrich, Ph.D.
@@ -363,7 +365,7 @@ module RubyUnits
           f = Rational(Regexp.last_match(3).to_i, Regexp.last_match(4).to_i)
           sign * (n + f)
         else
-          num.to_f
+          BigDecimal(num)
         end,
         unit.to_s.strip
       ]
@@ -681,18 +683,18 @@ module RubyUnits
       when :ft
         feet, inches = convert_to("in").scalar.abs.divmod(12)
         improper, frac = inches.divmod(1)
-        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
-        out = "#{negative? ? '-' : nil}#{feet}'#{improper}#{frac}\""
+        frac = frac.zero? ? "" : "-#{frac.to_r}"
+        out = "#{negative? ? '-' : nil}#{feet.to_i}'#{improper.to_i}#{frac}\""
       when :lbs
         pounds, ounces = convert_to("oz").scalar.abs.divmod(16)
         improper, frac = ounces.divmod(1)
-        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
-        out  = "#{negative? ? '-' : nil}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
+        frac = frac.zero? ? "" : "-#{frac.to_r}"
+        out  = "#{negative? ? '-' : nil}#{pounds.to_i}#{separator}lbs #{ounces.to_i}#{frac}#{separator}oz"
       when :stone
         stone, pounds = convert_to("lbs").scalar.abs.divmod(14)
         improper, frac = pounds.divmod(1)
-        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
-        out = "#{negative? ? '-' : nil}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
+        frac = frac.zero? ? "" : "-#{frac.to_r}"
+        out = "#{negative? ? '-' : nil}#{stone.to_i}#{separator}stone #{improper}#{frac}#{separator}lbs"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
@@ -1653,7 +1655,7 @@ module RubyUnits
 
       match = unit_string.match(NUMBER_REGEX)
       unit = self.class.cached.get(match[:unit])
-      mult = match[:scalar] == "" ? 1.0 : match[:scalar].to_f
+      mult = match[:scalar] == "" ? 1.0 : BigDecimal(match[:scalar])
       mult = mult.to_int if mult.to_int == mult
 
       if unit
@@ -1748,7 +1750,7 @@ module RubyUnits
         bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
       end
 
-      @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
+      @scalar = BigDecimal(@scalar) unless @scalar.nil? || @scalar.empty?
       @scalar = 1 unless @scalar.is_a? Numeric
       @scalar = @scalar.to_int if @scalar.to_int == @scalar
 
