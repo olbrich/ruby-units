@@ -125,7 +125,7 @@ module RubyUnits
     # @return [Numeric]
     def log10(number)
       if number.is_a?(RubyUnits::Unit)
-        super(number.to_f)
+        super(number.scalar)
       else
         super
       end
@@ -136,7 +136,7 @@ module RubyUnits
     # @return [Numeric]
     def log(number, base = ::Math::E)
       if number.is_a?(RubyUnits::Unit)
-        super(number.to_f, base)
+        super(number.scalar, base)
       else
         super
       end
