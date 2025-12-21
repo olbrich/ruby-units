@@ -19,7 +19,7 @@ jobs:
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.1
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
@@ -32,7 +32,7 @@ jobs:
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.1
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
@@ -47,7 +47,7 @@ jobs:
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.1
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
