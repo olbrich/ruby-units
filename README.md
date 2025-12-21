@@ -302,7 +302,7 @@ end
 ```
 
 | Option    | Description                                                                                                            | Valid Values              | Default     |
-|-----------|------------------------------------------------------------------------------------------------------------------------|---------------------------|-------------|
+| --------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------- |
 | format    | Only used for output formatting. `:rational` is formatted like `3 m/s^2`. `:exponential` is formatted like `3 m*s^-2`. | `:rational, :exponential` | `:rational` |
 | separator | Use a space separator for output. `true` is formatted like `3 m/s`, `false` is like `3m/s`.                            | `true, false`             | `true`      |
 

@@ -2,7 +2,7 @@
 
 require "date"
 module RubyUnits
-  # Copyright 2006-2024
+  # Copyright 2006-2026
   # @author Kevin C. Olbrich, Ph.D.
   # @see https://github.com/olbrich/ruby-units
   #
