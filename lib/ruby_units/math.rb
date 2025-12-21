@@ -112,9 +112,9 @@ module RubyUnits
     # @return [RubyUnits::Unit] if parameters are units
     # @raise [ArgumentError] if parameters are not numbers or compatible units
     def atan2(x, y)
-      raise ArgumentError, "Incompatible RubyUnits::Units" if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && !x.compatible?(y)
+      raise ArgumentError, "Incompatible RubyUnits::Units" if x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit) && !x.compatible?(y)
 
-      if (x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit)) && x.compatible?(y)
+      if x.is_a?(RubyUnits::Unit) && y.is_a?(RubyUnits::Unit) && x.compatible?(y)
         [super(x.base_scalar, y.base_scalar), "radian"].to_unit
       else
         super

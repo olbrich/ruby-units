@@ -180,7 +180,7 @@ module RubyUnits
 
     # setup internal arrays and hashes
     # @return [Boolean]
-    def self.setup
+    def self.setup # rubocop:disable Naming/PredicateMethod
       clear_cache
       self.prefix_values = {}
       self.prefix_map = {}
@@ -275,7 +275,7 @@ module RubyUnits
     end
 
     # @return [Boolean]
-    def self.clear_cache
+    def self.clear_cache # rubocop:disable Naming/PredicateMethod
       cached.clear
       base_unit_cache.clear
       new(1)
@@ -556,7 +556,7 @@ module RubyUnits
         _opt_scalar, opt_units = self.class.parse_into_numbers_and_units(options[0])
         if !(self.class.cached.keys.include?(opt_units) ||
                 (opt_units =~ %r{\D/[\d+.]+}) ||
-                (opt_units =~ %r{(#{self.class.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+/-})) && (opt_units && !opt_units.empty?)
+                (opt_units =~ %r{(#{self.class.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+/-})) && opt_units && !opt_units.empty?
           self.class.cached.set(opt_units, scalar == 1 ? self : opt_units.to_unit)
         end
       end
@@ -682,17 +682,17 @@ module RubyUnits
         feet, inches = convert_to("in").scalar.abs.divmod(12)
         improper, frac = inches.divmod(1)
         frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
-        out = "#{negative? ? '-' : nil}#{feet}'#{improper}#{frac}\""
+        out = "#{'-' if negative?}#{feet}'#{improper}#{frac}\""
       when :lbs
         pounds, ounces = convert_to("oz").scalar.abs.divmod(16)
         improper, frac = ounces.divmod(1)
         frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
-        out  = "#{negative? ? '-' : nil}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
+        out  = "#{'-' if negative?}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
       when :stone
         stone, pounds = convert_to("lbs").scalar.abs.divmod(14)
         improper, frac = pounds.divmod(1)
         frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
-        out = "#{negative? ? '-' : nil}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
+        out = "#{'-' if negative?}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
       when String
         out = case target_units.strip
               when /\A\s*\Z/ # whitespace only
@@ -1309,7 +1309,7 @@ module RubyUnits
               .uniq
               .map { [_1, output_denominator.count(_1)] }
               .map { |element, power| (element.to_s.strip + (power > 1 ? "^#{power}" : "")) }
-        "#{on.join('*')}#{od.empty? ? '' : "/#{od.join('*')}"}".strip
+        "#{on.join('*')}#{"/#{od.join('*')}" unless od.empty?}".strip
       end
     end
 
@@ -1768,7 +1768,7 @@ module RubyUnits
 
       # eliminate all known terms from this string.  This is a quick check to see if the passed unit
       # contains terms that are not defined.
-      used = "#{top} #{bottom}".to_s.gsub(self.class.unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
+      used = "#{top} #{bottom}".gsub(self.class.unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
       @numerator = @numerator.map do |item|
