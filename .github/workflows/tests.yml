@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4', 'jruby-9.4']
+        ruby: ['3.2', '3.3', '3.4', 'jruby-9.4', 'jruby-10.0']
     env:
       BUNDLE_WITHOUT: optional
     steps:
@@ -26,22 +26,23 @@ jobs:
         bundler-cache: true
     - name: Tests for Ruby ${{ matrix.ruby }}
       run: bundle exec rake
-  coverage:
-    needs: test
-    runs-on: ubuntu-latest
-    env:
-      BUNDLE_WITHOUT: optional
-    steps:
-    - uses: actions/checkout@v6.0.1
-    - uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
-    - name: Publish code coverage
-      uses: paambaati/codeclimate-action@v9
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      with:
-        coverageCommand: bundle exec rake
+  # CodeClimate has become qlth.sh, this integration is currently broken.
+  # coverage:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     BUNDLE_WITHOUT: optional
+  #   steps:
+  #   - uses: actions/checkout@v6.0.1
+  #   - uses: ruby/setup-ruby@v1
+  #     with:
+  #       bundler-cache: true
+  #   - name: Publish code coverage
+  #     uses: paambaati/codeclimate-action@v9
+  #     env:
+  #       CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  #     with:
+  #       coverageCommand: bundle exec rake
   yard:
     runs-on: ubuntu-latest
     env:
