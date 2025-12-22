@@ -8,7 +8,7 @@ RSpec.describe RubyUnits::String do
     specify { expect("1 m".convert_to("ft")).to be_within(RubyUnits::Unit.new("0.01 ft")).of RubyUnits::Unit.new("3.28084 ft") }
   end
 
-  describe "% (format)S" do
+  describe "% (format)" do
     subject(:unit) { RubyUnits::Unit.new("1.23456 m/s^2") }
 
     specify { expect("%0.2f" % 1.23).to eq("1.23") }
