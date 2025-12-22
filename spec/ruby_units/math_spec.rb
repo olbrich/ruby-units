@@ -25,7 +25,7 @@ RSpec.describe RubyUnits::Math do
     end
 
     context "with 'PI/4 radians' unit" do
-      subject(:angle) { RubyUnits::Unit.new((Math::PI / 4), "radians") }
+      subject(:angle) { RubyUnits::Unit.new(Math::PI / 4, "radians") }
 
       specify { expect(Math.sin(angle)).to be_within(0.01).of(0.70710678) }
       specify { expect(Math.cos(angle)).to be_within(0.01).of(0.70710678) }

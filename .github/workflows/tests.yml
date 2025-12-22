@@ -26,6 +26,10 @@ jobs:
         bundler-cache: true
     - name: Tests for Ruby ${{ matrix.ruby }}
       run: bundle exec rake
+    - uses: qltysh/qlty-action/coverage@v2
+      with:
+        token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+        files: coverage/.resultset.json
   # CodeClimate has become qlth.sh, this integration is currently broken.
   # coverage:
   #   needs: test
@@ -43,6 +47,7 @@ jobs:
   #       CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   #     with:
   #       coverageCommand: bundle exec rake
+
   yard:
     runs-on: ubuntu-latest
     env:
