@@ -727,7 +727,8 @@ module RubyUnits
     end
 
     # Normally pretty prints the unit, but if you really want to see the guts of it, pass ':dump'
-    # @deprecated
+    # @deprecated The dump parameter is deprecated. Use the default inspect behavior for debugging.
+    # @param dump [Symbol, nil] pass :dump to see internal structure (deprecated)
     # @return [String]
     def inspect(dump = nil)
       return super() if dump
@@ -1014,8 +1015,11 @@ module RubyUnits
     end
     alias modulo %
 
-    # @param [Object] other
-    # @return [Unit]
+    # Divide two units and return quotient as a float or complex.
+    # Similar to division but ensures floating point result.
+    #
+    # @param other [Numeric, Unit]
+    # @return [Float, Complex, Unit]
     # @raise [ZeroDivisionError] if other is zero
     def quo(other)
       self / other
@@ -1063,8 +1067,10 @@ module RubyUnits
       end
     end
 
-    # returns the unit raised to the n-th power
-    # @param [Integer] n
+    # Raise a unit to a power.
+    # Returns the unit raised to the n-th power.
+    #
+    # @param n [Integer] the exponent (must be an integer)
     # @return [Unit]
     # @raise [ArgumentError] when attempting to raise a temperature to a power
     # @raise [ArgumentError] when n is not an integer
@@ -1080,8 +1086,10 @@ module RubyUnits
     end
 
     # Calculates the n-th root of a unit
-    # if n < 0, returns 1/unit^(1/n)
-    # @param [Integer] n
+    # Returns the nth root of a unit.
+    # If n < 0, returns 1/unit^(1/n)
+    #
+    # @param n [Integer] the root degree (must be an integer, cannot be 0)
     # @return [Unit]
     # @raise [ArgumentError] when attempting to take the root of a temperature
     # @raise [ArgumentError] when n is not an integer
@@ -1267,9 +1275,9 @@ module RubyUnits
 
     # Returns the 'unit' part of the Unit object without the scalar
     #
-    # @param with_prefix [Boolean] include prefixes in output
-    # @param format [Symbol] Set to :exponential to force all units to be displayed in exponential format
-    #
+    # @param with_prefix [Boolean] include prefixes in output (default: true)
+    # @param format [Symbol] Set to :exponential to force exponential notation (e.g., 'm*s^-2'),
+    #   or :rational for rational notation (e.g., 'm/s^2'). Defaults to configuration setting.
     # @return [String]
     def units(with_prefix: true, format: nil)
       return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
@@ -1367,8 +1375,11 @@ module RubyUnits
       self.class.new(@scalar.truncate(*args), @numerator, @denominator)
     end
 
-    # returns next unit in a range.  '1 mm'.to_unit.succ #=> '2 mm'.to_unit
-    # only works when the scalar is an integer
+    # Returns next unit in a range. Increments the scalar by 1.
+    # Only works when the scalar is an integer.
+    # This is used primarily to make ranges work.
+    #
+    # @example '1 mm'.to_unit.succ #=> '2 mm'.to_unit
     # @return [Unit]
     # @raise [ArgumentError] when scalar is not equal to an integer
     def succ
@@ -1379,8 +1390,11 @@ module RubyUnits
 
     alias next succ
 
-    # returns previous unit in a range.  '2 mm'.to_unit.pred #=> '1 mm'.to_unit
-    # only works when the scalar is an integer
+    # Returns previous unit in a range. Decrements the scalar by 1.
+    # Only works when the scalar is an integer.
+    # This is used primarily to make ranges work.
+    #
+    # @example '2 mm'.to_unit.pred #=> '1 mm'.to_unit
     # @return [Unit]
     # @raise [ArgumentError] when scalar is not equal to an integer
     def pred
@@ -1416,13 +1430,22 @@ module RubyUnits
     end
 
     # @example '5 min'.to_unit.ago
-    # @return [Unit]
+    # Returns the time that was this duration ago from now.
+    # Alias for #before with default time of Time.now
+    #
+    # @example '5 min'.to_unit.ago #=> Time 5 minutes ago
+    # @return [Time, DateTime]
     def ago
       before
     end
 
-    # @example '5 min'.before(time)
-    # @return [Unit]
+    # Returns the time that was this duration before the given time point.
+    #
+    # @example '5 min'.to_unit.before(time) #=> Time 5 minutes before time
+    # @example '5 min'.to_unit.before #=> Time 5 minutes ago
+    # @param time_point [Time, Date, DateTime] the reference time (defaults to Time.now)
+    # @return [Time, Date, DateTime]
+    # @raise [ArgumentError] when time_point is not a Time, Date, or DateTime
     def before(time_point = ::Time.now)
       case time_point
       when Time, Date, DateTime
@@ -1506,6 +1529,10 @@ module RubyUnits
     # * Units containing 'kg' will be returned as is. The prefix in 'kg' makes this an odd case.
     # * It will use `centi` instead of `milli` when the scalar is between 0.01 and 0.001
     #
+    # @example
+    #   Unit.new('1000 m').best_prefix  #=> '1 km'.to_unit
+    #   Unit.new('0.5 m').best_prefix   #=> '50 cm'.to_unit
+    #   Unit.new('1500 W').best_prefix  #=> '1.5 kW'.to_unit
     # @return [Unit]
     def best_prefix
       return to_base if scalar.zero?

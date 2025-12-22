@@ -81,11 +81,15 @@ Unit#*()      # Multiply.
 Unit#/()      # Divide.
 Unit#**()     # Exponentiate.  Exponent must be an integer, can be positive,  negative, or zero
 Unit#inverse  # Returns 1/unit
-Unit#abs      # Returns absolute value of the unit quantity.  Strips off the  units
+Unit#abs      # Returns absolute value of the unit quantity.  Units are preserved
 Unit#ceil     # rounds quantity to next highest integer
 Unit#floor    # rounds quantity down to next lower integer
 Unit#round    # rounds quantity to nearest integer
+Unit#truncate # truncates quantity to an integer
 Unit#to_int   # returns the quantity as an integer
+Unit#divmod   # divide and return quotient and remainder
+Unit#remainder# returns remainder of division
+Unit#quo      # returns quotient as a float or complex
 ```
 
 Unit will coerce other objects into a Unit if used in a formula. This means...
@@ -260,6 +264,8 @@ end
 2. `base_scalar` will return the scalar in base units (SI)
 3. `units` will return the name of the units (without the scalar)
 4. `base` will return the unit converted to base units (SI)
+5. `best_prefix` will return a new unit scaled with an appropriate prefix for
+   human readability (e.g., '1000 m' becomes '1 km')
 
 ### Storing in a database
 

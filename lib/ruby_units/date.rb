@@ -45,7 +45,9 @@ module RubyUnits
       other ? RubyUnits::Unit.new(self).convert_to(other) : RubyUnits::Unit.new(self)
     end
 
-    # @deprecated
+    # @deprecated The dump parameter is deprecated and will be removed in a future version.
+    # @param dump [Boolean] if true, use default inspect; if false, use to_s (deprecated behavior)
+    # @return [String]
     def inspect(dump = false)
       dump ? super : to_s
     end
