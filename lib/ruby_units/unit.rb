@@ -325,7 +325,10 @@ module RubyUnits
       end
       num = UNITY_ARRAY if num.empty?
       den = UNITY_ARRAY if den.empty?
-      { scalar: q, numerator: num.flatten, denominator: den.flatten }
+      scalar = q
+      numerator = num.flatten
+      denominator = den.flatten
+      { scalar:, numerator:, denominator: }
     end
 
     # Creates a new unit from the current one with all common terms eliminated.
@@ -1339,17 +1342,17 @@ module RubyUnits
 
     # ceil of a unit
     # @return [Numeric,Unit]
-    def ceil(*args)
-      return @scalar.ceil(*args) if unitless?
+    def ceil(...)
+      return @scalar.ceil(...) if unitless?
 
-      self.class.new(@scalar.ceil(*args), @numerator, @denominator)
+      self.class.new(@scalar.ceil(...), @numerator, @denominator)
     end
 
     # @return [Numeric,Unit]
-    def floor(*args)
-      return @scalar.floor(*args) if unitless?
+    def floor(...)
+      return @scalar.floor(...) if unitless?
 
-      self.class.new(@scalar.floor(*args), @numerator, @denominator)
+      self.class.new(@scalar.floor(...), @numerator, @denominator)
     end
 
     # Round the unit according to the rules of the scalar's class. Call this
@@ -1362,17 +1365,17 @@ module RubyUnits
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').to_s('%0.1f') #=> 21.9 m/min
     #
     # @return [Numeric,Unit]
-    def round(*args, **kwargs)
-      return @scalar.round(*args, **kwargs) if unitless?
+    def round(...)
+      return @scalar.round(...) if unitless?
 
-      self.class.new(@scalar.round(*args, **kwargs), @numerator, @denominator)
+      self.class.new(@scalar.round(...), @numerator, @denominator)
     end
 
     # @return [Numeric, Unit]
-    def truncate(*args)
-      return @scalar.truncate(*args) if unitless?
+    def truncate(...)
+      return @scalar.truncate(...) if unitless?
 
-      self.class.new(@scalar.truncate(*args), @numerator, @denominator)
+      self.class.new(@scalar.truncate(...), @numerator, @denominator)
     end
 
     # Returns next unit in a range. Increments the scalar by 1.

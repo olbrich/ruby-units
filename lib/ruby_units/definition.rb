@@ -79,15 +79,11 @@ class RubyUnits::Unit < Numeric
 
     # is this definition for a prefix?
     # @return [Boolean]
-    def prefix?
-      kind == :prefix
-    end
+    def prefix? = kind == :prefix
 
     # Is this definition the unity definition?
     # @return [Boolean]
-    def unity?
-      prefix? && scalar == 1
-    end
+    def unity? = prefix? && scalar == 1
 
     # is this a base unit?
     # units are base units if the scalar is one, and the unit is defined in terms of itself.
