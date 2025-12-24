@@ -544,7 +544,7 @@ module RubyUnits
         @scalar      = date.ajd
         @numerator   = ["<day>"]
         @denominator = UNITY_ARRAY
-      in /^\s*$/ => empty
+      in /^\s*$/ => _empty
         raise ArgumentError, "No Unit Specified"
       in String => str
         parse(str)
@@ -1341,6 +1341,8 @@ module RubyUnits
     end
 
     # ceil of a unit
+    # Forwards all arguments to the scalar's ceil method
+    # @param args [Array] arguments to pass to the scalar's ceil method (e.g., number of decimal digits)
     # @return [Numeric,Unit]
     def ceil(...)
       return @scalar.ceil(...) if unitless?
@@ -1348,6 +1350,9 @@ module RubyUnits
       self.class.new(scalar: @scalar.ceil(...), numerator: @numerator, denominator: @denominator)
     end
 
+    # Floor of a unit
+    # Forwards all arguments to the scalar's floor method
+    # @param args [Array] arguments to pass to the scalar's floor method (e.g., number of decimal digits)
     # @return [Numeric,Unit]
     def floor(...)
       return @scalar.floor(...) if unitless?
@@ -1360,10 +1365,12 @@ module RubyUnits
     # Rational, etc..). Because unit conversions can often result in Rational
     # scalars (to preserve precision), it may be advisable to use +to_s+ to
     # format output instead of using +round+.
+    # Forwards all arguments to the scalar's round method
     # @example
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').round(1) #=> 2187/100 m/min
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').to_s('%0.1f') #=> 21.9 m/min
     #
+    # @param args [Array] arguments to pass to the scalar's round method (e.g., number of decimal digits, mode)
     # @return [Numeric,Unit]
     def round(...)
       return @scalar.round(...) if unitless?
@@ -1371,6 +1378,9 @@ module RubyUnits
       self.class.new(scalar: @scalar.round(...), numerator: @numerator, denominator: @denominator)
     end
 
+    # Truncate the unit according to the scalar's truncate method
+    # Forwards all arguments to the scalar's truncate method
+    # @param args [Array] arguments to pass to the scalar's truncate method (e.g., number of decimal digits)
     # @return [Numeric, Unit]
     def truncate(...)
       return @scalar.truncate(...) if unitless?
