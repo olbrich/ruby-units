@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# These are gems used by qlty to perform code quality checks.
+# They are installed by the qlty cli tool and are included for local development, but are not installed in CI.
+
+gem "rubocop"
+gem "rubocop-rake"
+gem "rubocop-rspec"

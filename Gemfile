@@ -10,9 +10,6 @@ group :optional do
   gem "guard-rspec"
   gem "pry"
   gem "redcarpet", platform: :mri # redcarpet doesn't support jruby
-  gem "rubocop"
-  gem "rubocop-rake"
-  gem "rubocop-rspec"
   gem "ruby-maven", platform: :jruby
   gem "ruby-prof", platform: :mri
   gem "simplecov-html"
@@ -20,6 +17,7 @@ group :optional do
   gem "terminal-notifier"
   gem "terminal-notifier-guard"
   gem "webrick"
+  eval_gemfile("Gemfile.qlty")
 end
 
 gem "bigdecimal"
