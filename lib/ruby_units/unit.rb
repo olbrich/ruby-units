@@ -1337,7 +1337,7 @@ module RubyUnits
     def abs
       return @scalar.abs if unitless?
 
-      self.class.new(@scalar.abs, @numerator, @denominator)
+      self.class.new(scalar: @scalar.abs, numerator: @numerator, denominator: @denominator)
     end
 
     # ceil of a unit
@@ -1345,14 +1345,14 @@ module RubyUnits
     def ceil(...)
       return @scalar.ceil(...) if unitless?
 
-      self.class.new(@scalar.ceil(...), @numerator, @denominator)
+      self.class.new(scalar: @scalar.ceil(...), numerator: @numerator, denominator: @denominator)
     end
 
     # @return [Numeric,Unit]
     def floor(...)
       return @scalar.floor(...) if unitless?
 
-      self.class.new(@scalar.floor(...), @numerator, @denominator)
+      self.class.new(scalar: @scalar.floor(...), numerator: @numerator, denominator: @denominator)
     end
 
     # Round the unit according to the rules of the scalar's class. Call this
@@ -1368,14 +1368,14 @@ module RubyUnits
     def round(...)
       return @scalar.round(...) if unitless?
 
-      self.class.new(@scalar.round(...), @numerator, @denominator)
+      self.class.new(scalar: @scalar.round(...), numerator: @numerator, denominator: @denominator)
     end
 
     # @return [Numeric, Unit]
     def truncate(...)
       return @scalar.truncate(...) if unitless?
 
-      self.class.new(@scalar.truncate(...), @numerator, @denominator)
+      self.class.new(scalar: @scalar.truncate(...), numerator: @numerator, denominator: @denominator)
     end
 
     # Returns next unit in a range. Increments the scalar by 1.
@@ -1388,7 +1388,7 @@ module RubyUnits
     def succ
       raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
 
-      self.class.new(@scalar.to_i.succ, @numerator, @denominator)
+      self.class.new(scalar: @scalar.to_i.succ, numerator: @numerator, denominator: @denominator)
     end
 
     alias next succ
@@ -1403,7 +1403,7 @@ module RubyUnits
     def pred
       raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
 
-      self.class.new(@scalar.to_i.pred, @numerator, @denominator)
+      self.class.new(scalar: @scalar.to_i.pred, numerator: @numerator, denominator: @denominator)
     end
 
     # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.
