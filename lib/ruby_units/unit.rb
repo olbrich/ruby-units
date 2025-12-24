@@ -522,32 +522,32 @@ module RubyUnits
       end
 
       case options[0]
-      when Unit
-        copy(options[0])
+      in Unit => unit
+        copy(unit)
         return
-      when Hash
-        @scalar      = options[0][:scalar] || 1
-        @numerator   = options[0][:numerator] || UNITY_ARRAY
-        @denominator = options[0][:denominator] || UNITY_ARRAY
-        @signature   = options[0][:signature]
-      when Array
-        initialize(*options[0])
+      in Hash => hash
+        @scalar      = hash[:scalar] || 1
+        @numerator   = hash[:numerator] || UNITY_ARRAY
+        @denominator = hash[:denominator] || UNITY_ARRAY
+        @signature   = hash[:signature]
+      in Array => array
+        initialize(*array)
         return
-      when Numeric
-        @scalar    = options[0]
+      in Numeric => num
+        @scalar    = num
         @numerator = @denominator = UNITY_ARRAY
-      when Time
-        @scalar      = options[0].to_f
+      in Time => time
+        @scalar      = time.to_f
         @numerator   = ["<second>"]
         @denominator = UNITY_ARRAY
-      when DateTime, Date
-        @scalar      = options[0].ajd
+      in DateTime | Date => date
+        @scalar      = date.ajd
         @numerator   = ["<day>"]
         @denominator = UNITY_ARRAY
-      when /^\s*$/
+      in /^\s*$/ => empty
         raise ArgumentError, "No Unit Specified"
-      when String
-        parse(options[0])
+      in String => str
+        parse(str)
       else
         raise ArgumentError, "Invalid Unit Format"
       end
