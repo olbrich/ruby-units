@@ -325,7 +325,10 @@ module RubyUnits
       end
       num = UNITY_ARRAY if num.empty?
       den = UNITY_ARRAY if den.empty?
-      { scalar: q, numerator: num.flatten, denominator: den.flatten }
+      scalar = q
+      numerator = num.flatten
+      denominator = den.flatten
+      { scalar:, numerator:, denominator: }
     end
 
     # Creates a new unit from the current one with all common terms eliminated.
@@ -519,32 +522,32 @@ module RubyUnits
       end
 
       case options[0]
-      when Unit
-        copy(options[0])
+      in Unit => unit
+        copy(unit)
         return
-      when Hash
-        @scalar      = options[0][:scalar] || 1
-        @numerator   = options[0][:numerator] || UNITY_ARRAY
-        @denominator = options[0][:denominator] || UNITY_ARRAY
-        @signature   = options[0][:signature]
-      when Array
-        initialize(*options[0])
+      in Hash => hash
+        @scalar      = hash[:scalar] || 1
+        @numerator   = hash[:numerator] || UNITY_ARRAY
+        @denominator = hash[:denominator] || UNITY_ARRAY
+        @signature   = hash[:signature]
+      in Array => array
+        initialize(*array)
         return
-      when Numeric
-        @scalar    = options[0]
+      in Numeric => num
+        @scalar    = num
         @numerator = @denominator = UNITY_ARRAY
-      when Time
-        @scalar      = options[0].to_f
+      in Time => time
+        @scalar      = time.to_f
         @numerator   = ["<second>"]
         @denominator = UNITY_ARRAY
-      when DateTime, Date
-        @scalar      = options[0].ajd
+      in DateTime | Date => date
+        @scalar      = date.ajd
         @numerator   = ["<day>"]
         @denominator = UNITY_ARRAY
-      when /^\s*$/
+      in /^\s*$/ => _empty
         raise ArgumentError, "No Unit Specified"
-      when String
-        parse(options[0])
+      in String => str
+        parse(str)
       else
         raise ArgumentError, "Invalid Unit Format"
       end
@@ -1334,22 +1337,25 @@ module RubyUnits
     def abs
       return @scalar.abs if unitless?
 
-      self.class.new(@scalar.abs, @numerator, @denominator)
+      self.class.new(scalar: @scalar.abs, numerator: @numerator, denominator: @denominator)
     end
 
     # ceil of a unit
+    # Forwards all arguments to the scalar's ceil method
     # @return [Numeric,Unit]
-    def ceil(*args)
-      return @scalar.ceil(*args) if unitless?
+    def ceil(...)
+      return @scalar.ceil(...) if unitless?
 
-      self.class.new(@scalar.ceil(*args), @numerator, @denominator)
+      self.class.new(scalar: @scalar.ceil(...), numerator: @numerator, denominator: @denominator)
     end
 
+    # Floor of a unit
+    # Forwards all arguments to the scalar's floor method
     # @return [Numeric,Unit]
-    def floor(*args)
-      return @scalar.floor(*args) if unitless?
+    def floor(...)
+      return @scalar.floor(...) if unitless?
 
-      self.class.new(@scalar.floor(*args), @numerator, @denominator)
+      self.class.new(scalar: @scalar.floor(...), numerator: @numerator, denominator: @denominator)
     end
 
     # Round the unit according to the rules of the scalar's class. Call this
@@ -1357,22 +1363,25 @@ module RubyUnits
     # Rational, etc..). Because unit conversions can often result in Rational
     # scalars (to preserve precision), it may be advisable to use +to_s+ to
     # format output instead of using +round+.
+    # Forwards all arguments to the scalar's round method
     # @example
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').round(1) #=> 2187/100 m/min
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').to_s('%0.1f') #=> 21.9 m/min
     #
     # @return [Numeric,Unit]
-    def round(*args, **kwargs)
-      return @scalar.round(*args, **kwargs) if unitless?
+    def round(...)
+      return @scalar.round(...) if unitless?
 
-      self.class.new(@scalar.round(*args, **kwargs), @numerator, @denominator)
+      self.class.new(scalar: @scalar.round(...), numerator: @numerator, denominator: @denominator)
     end
 
+    # Truncate the unit according to the scalar's truncate method
+    # Forwards all arguments to the scalar's truncate method
     # @return [Numeric, Unit]
-    def truncate(*args)
-      return @scalar.truncate(*args) if unitless?
+    def truncate(...)
+      return @scalar.truncate(...) if unitless?
 
-      self.class.new(@scalar.truncate(*args), @numerator, @denominator)
+      self.class.new(scalar: @scalar.truncate(...), numerator: @numerator, denominator: @denominator)
     end
 
     # Returns next unit in a range. Increments the scalar by 1.
@@ -1385,7 +1394,7 @@ module RubyUnits
     def succ
       raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
 
-      self.class.new(@scalar.to_i.succ, @numerator, @denominator)
+      self.class.new(scalar: @scalar.to_i.succ, numerator: @numerator, denominator: @denominator)
     end
 
     alias next succ
@@ -1400,7 +1409,7 @@ module RubyUnits
     def pred
       raise ArgumentError, "Non Integer Scalar" unless @scalar == @scalar.to_i
 
-      self.class.new(@scalar.to_i.pred, @numerator, @denominator)
+      self.class.new(scalar: @scalar.to_i.pred, numerator: @numerator, denominator: @denominator)
     end
 
     # Tries to make a Time object from current unit.  Assumes the current unit hold the duration in seconds from the epoch.

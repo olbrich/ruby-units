@@ -25,6 +25,8 @@ manipulations to ensure an accurate result.
 
 ## Installation
 
+This package requires Ruby 3.2 or later.
+
 This package may be installed using:
 
 ```bash
@@ -52,6 +54,7 @@ unit = "1 mm".to_unit                # convert string object
 unit = object.to_unit                # convert any object using object.to_s
 unit = Unit.new('1/4 cup')           # Rational number
 unit = Unit.new('1+1i mm')           # Complex Number
+unit = Unit.new(scalar: 1.5, numerator: ["<meter>"], denominator: ["<second>"])  # keyword arguments
 ```
 
 ### Rules

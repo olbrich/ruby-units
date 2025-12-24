@@ -3,6 +3,32 @@
 require "spec_helper"
 
 describe RubyUnits::Configuration do
+  describe "#initialize" do
+    it "accepts keyword arguments for separator and format" do
+      config = described_class.new(separator: false, format: :exponential)
+      expect(config.separator).to be_nil
+      expect(config.format).to eq :exponential
+    end
+
+    it "uses default values when no arguments are provided" do
+      config = described_class.new
+      expect(config.separator).to eq " "
+      expect(config.format).to eq :rational
+    end
+
+    it "accepts additional keyword arguments for forward compatibility" do
+      expect { described_class.new(separator: true, unknown_option: "value") }.not_to raise_error
+    end
+
+    it "validates separator value" do
+      expect { described_class.new(separator: "invalid") }.to raise_error(ArgumentError)
+    end
+
+    it "validates format value" do
+      expect { described_class.new(format: :invalid) }.to raise_error(ArgumentError)
+    end
+  end
+
   describe ".separator" do
     context "when set to true" do
       it "has a space between the scalar and the unit" do

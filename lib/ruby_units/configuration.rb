@@ -42,9 +42,15 @@ module RubyUnits
     #   @return [Symbol] the format to use when generating output (:rational or :exponential) (default: :rational)
     attr_reader :format
 
-    def initialize
-      self.format = :rational
-      self.separator = true
+    # Initialize configuration with keyword arguments
+    #
+    # @param separator [Boolean] whether to include a space between the scalar and the unit (default: true)
+    # @param format [Symbol] the format to use when generating output (default: :rational)
+    # @param _options [Hash] additional keyword arguments (ignored, for forward compatibility)
+    # @return [Configuration] a new configuration instance
+    def initialize(separator: true, format: :rational, **_options)
+      self.separator = separator
+      self.format = format
     end
 
     # Use a space for the separator to use when generating output.

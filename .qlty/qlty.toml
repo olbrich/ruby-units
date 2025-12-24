@@ -77,3 +77,13 @@ threshold = 5
 [[source]]
 name = "default"
 default = true
+
+[[plugin]]
+name = "rubocop"
+package_file = "Gemfile.qlty"
+package_filters = ["rubocop"]
+config_files = [".rubocop.yml", ".rubocop_todo.yml"]
+
+[[plugin]]
+name = "reek"
+mode = "comment"
