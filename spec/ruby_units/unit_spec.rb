@@ -273,6 +273,43 @@ RSpec.describe "Create some simple units" do
     end
   end
 
+  # keyword arguments
+  describe RubyUnits::Unit.new(scalar: 1.5, numerator: ["<meter>"], denominator: ["<second>"]) do
+    it { is_expected.to be_a Numeric }
+    it { is_expected.to be_an_instance_of Unit }
+
+    describe "#scalar" do
+      subject { super().scalar }
+
+      it { is_expected.to eq(1.5) }
+      it { is_expected.to be_a Float }
+    end
+
+    describe "#units" do
+      subject { super().units }
+
+      it { is_expected.to eq("m/s") }
+    end
+
+    describe "#kind" do
+      subject { super().kind }
+
+      it { is_expected.to eq(:speed) }
+    end
+
+    it { is_expected.not_to be_temperature }
+    it { is_expected.not_to be_degree }
+    it { is_expected.to be_base }
+    it { is_expected.not_to be_unitless }
+    it { is_expected.not_to be_zero }
+
+    describe "#base" do
+      subject { super().base }
+
+      it { is_expected.to eq(subject) }
+    end
+  end
+
   # scalar and unit
   describe RubyUnits::Unit.new("1 mm") do
     it { is_expected.to be_a Numeric }
