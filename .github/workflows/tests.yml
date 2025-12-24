@@ -30,23 +30,6 @@ jobs:
       with:
         token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         files: coverage/.resultset.json
-  # CodeClimate has become qlth.sh, this integration is currently broken.
-  # coverage:
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     BUNDLE_WITHOUT: optional
-  #   steps:
-  #   - uses: actions/checkout@v6.0.1
-  #   - uses: ruby/setup-ruby@v1
-  #     with:
-  #       bundler-cache: true
-  #   - name: Publish code coverage
-  #     uses: paambaati/codeclimate-action@v9
-  #     env:
-  #       CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-  #     with:
-  #       coverageCommand: bundle exec rake
 
   yard:
     runs-on: ubuntu-latest

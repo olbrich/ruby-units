@@ -1342,7 +1342,6 @@ module RubyUnits
 
     # ceil of a unit
     # Forwards all arguments to the scalar's ceil method
-    # @param args [Array] arguments to pass to the scalar's ceil method (e.g., number of decimal digits)
     # @return [Numeric,Unit]
     def ceil(...)
       return @scalar.ceil(...) if unitless?
@@ -1352,7 +1351,6 @@ module RubyUnits
 
     # Floor of a unit
     # Forwards all arguments to the scalar's floor method
-    # @param args [Array] arguments to pass to the scalar's floor method (e.g., number of decimal digits)
     # @return [Numeric,Unit]
     def floor(...)
       return @scalar.floor(...) if unitless?
@@ -1370,7 +1368,6 @@ module RubyUnits
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').round(1) #=> 2187/100 m/min
     #   RubyUnits::Unit.new('21870 mm/min').convert_to('m/min').to_s('%0.1f') #=> 21.9 m/min
     #
-    # @param args [Array] arguments to pass to the scalar's round method (e.g., number of decimal digits, mode)
     # @return [Numeric,Unit]
     def round(...)
       return @scalar.round(...) if unitless?
@@ -1380,7 +1377,6 @@ module RubyUnits
 
     # Truncate the unit according to the scalar's truncate method
     # Forwards all arguments to the scalar's truncate method
-    # @param args [Array] arguments to pass to the scalar's truncate method (e.g., number of decimal digits)
     # @return [Numeric, Unit]
     def truncate(...)
       return @scalar.truncate(...) if unitless?

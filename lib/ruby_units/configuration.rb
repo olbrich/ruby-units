@@ -46,7 +46,7 @@ module RubyUnits
     #
     # @param separator [Boolean] whether to include a space between the scalar and the unit (default: true)
     # @param format [Symbol] the format to use when generating output (default: :rational)
-    # @param **_options [Hash] additional keyword arguments (ignored, for forward compatibility)
+    # @param _options [Hash] additional keyword arguments (ignored, for forward compatibility)
     # @return [Configuration] a new configuration instance
     def initialize(separator: true, format: :rational, **_options)
       self.separator = separator
