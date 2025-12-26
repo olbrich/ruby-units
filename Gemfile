@@ -10,6 +10,7 @@ group :optional do
   gem "guard-rspec"
   gem "pry"
   gem "redcarpet", platform: :mri # redcarpet doesn't support jruby
+  gem "reek"
   gem "ruby-maven", platform: :jruby
   gem "ruby-prof", platform: :mri
   gem "simplecov-html"
