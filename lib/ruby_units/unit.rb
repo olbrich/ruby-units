@@ -431,12 +431,13 @@ module RubyUnits
     def self.use_definition(definition)
       @unit_match_regex = nil # invalidate the unit match regex
       @temp_regex = nil # invalidate the temp regex
+      @special_format_regex = nil # invalidate the special format regex
       if definition.prefix?
         prefix_values[definition.name] = definition.scalar
         definition.aliases.each { prefix_map[_1] = definition.name }
         @prefix_regex = nil # invalidate the prefix regex
       else
-        unit_values[definition.name]          = {}
+        unit_values[definition.name] = {}
         unit_values[definition.name][:scalar] = definition.scalar
         unit_values[definition.name][:numerator] = definition.numerator if definition.numerator
         unit_values[definition.name][:denominator] = definition.denominator if definition.denominator
@@ -1594,8 +1595,6 @@ module RubyUnits
     # @return [void]
     def parse_single_arg(arg)
       case arg
-      in NilClass
-        raise_no_unit_specified
       in Unit => unit
         copy(unit)
       in Hash => hash
@@ -1620,15 +1619,9 @@ module RubyUnits
     # @return [void]
     # @raise [ArgumentError] if string is empty
     def parse_string_arg(str)
-      raise_no_unit_specified if str.strip.empty?
-      parse_string(str)
-    end
+      raise ArgumentError, "No Unit Specified" if str.strip.empty?
 
-    # Raise a standardized error for missing unit specification
-    # @return [void]
-    # @raise [ArgumentError] always
-    def raise_no_unit_specified
-      raise ArgumentError, "No Unit Specified"
+      parse_string(str)
     end
 
     # Parse two arguments (scalar and unit string)
@@ -1759,7 +1752,7 @@ module RubyUnits
       unary_unit = units || ""
 
       # Cache units parsed from strings if they meet criteria
-      cache_parsed_string_unit(options[0]) if options.first.instance_of?(String)
+      cache_parsed_string_unit(options[0]) if options.first.is_a?(String)
 
       # Cache unary units if not already cached and not temperature units
       cache_unary_unit(unary_unit)
@@ -1771,7 +1764,6 @@ module RubyUnits
     def cache_parsed_string_unit(option_string)
       _opt_scalar, opt_units = self.class.parse_into_numbers_and_units(option_string)
       return unless opt_units && !opt_units.empty?
-      return if should_skip_caching?(opt_units)
 
       self.class.cached.set(opt_units, scalar == 1 ? self : opt_units.to_unit)
     end
@@ -1780,25 +1772,9 @@ module RubyUnits
     # @param [String] unary_unit
     # @return [void]
     def cache_unary_unit(unary_unit)
-      return if self.class.cached.keys.include?(unary_unit)
-      return if unary_unit =~ self.class.temp_regex
+      return if unary_unit == ""
 
       self.class.cached.set(unary_unit, scalar == 1 ? self : unary_unit.to_unit)
-    end
-
-    # Determine if a unit string should skip caching
-    # @param [String] unit_string
-    # @return [Boolean]
-    def should_skip_caching?(unit_string)
-      self.class.cached.keys.include?(unit_string) ||
-        special_format_unit?(unit_string)
-    end
-
-    # Check if unit string is a special format that shouldn't be cached
-    # @param [String] unit_string
-    # @return [Boolean]
-    def special_format_unit?(unit_string)
-      unit_string =~ self.class.special_format_regex
     end
 
     # Freeze all instance variables
