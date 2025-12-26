@@ -54,54 +54,55 @@ module RubyUnits
     UNITY              = "<1>"
     UNITY_ARRAY        = [UNITY].freeze
 
-    SIGN_REGEX = /(?:[+-])?/.freeze # +, -, or nothing
+    SIGN_REGEX = /(?:[+-])?/ # +, -, or nothing
 
     # regex for matching an integer number but not a fraction
-    INTEGER_DIGITS_REGEX = %r{(?<!/)\d+(?!/)}.freeze # 1, 2, 3, but not 1/2 or -1
-    INTEGER_REGEX = /(#{SIGN_REGEX}#{INTEGER_DIGITS_REGEX})/.freeze # -1, 1, +1, but not 1/2
-    UNSIGNED_INTEGER_REGEX = /((?<!-)#{INTEGER_DIGITS_REGEX})/.freeze # 1, 2, 3, but not -1
-    DIGITS_REGEX = /\d+/.freeze # 0, 1, 2, 3
-    DECIMAL_REGEX = /\d*[.]?#{DIGITS_REGEX}/.freeze # 1, 0.1, .1
+    INTEGER_DIGITS_REGEX = %r{(?<!/)\d+(?!/)} # 1, 2, 3, but not 1/2 or -1
+    INTEGER_REGEX = /(#{SIGN_REGEX}#{INTEGER_DIGITS_REGEX})/ # -1, 1, +1, but not 1/2
+    UNSIGNED_INTEGER_REGEX = /((?<!-)#{INTEGER_DIGITS_REGEX})/ # 1, 2, 3, but not -1
+    DIGITS_REGEX = /\d+/ # 0, 1, 2, 3
+    DECIMAL_REGEX = /\d*[.]?#{DIGITS_REGEX}/ # 1, 0.1, .1
     # Rational number, including improper fractions: 1 2/3, -1 2/3, 5/3, etc.
-    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?}.freeze # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
+    RATIONAL_NUMBER = %r{\(?(?:(?<proper>#{SIGN_REGEX}#{DECIMAL_REGEX})[ -])?(?<numerator>#{SIGN_REGEX}#{DECIMAL_REGEX})/(?<denominator>#{SIGN_REGEX}#{DECIMAL_REGEX})\)?} # 1 2/3, -1 2/3, 5/3, 1-2/3, (1/2) etc.
     # Scientific notation: 1, -1, +1, 1.2, +1.2, -1.2, 123.4E5, +123.4e5,
     #   -123.4E+5, -123.4e-5, etc.
-    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/.freeze
+    SCI_NUMBER = /([+-]?\d*[.]?\d+(?:[Ee][+-]?\d+(?![.]))?)/
     # ideally we would like to generate this regex from the alias for a 'feet'
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
-    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(?<inches>#{RATIONAL_NUMBER}|#{SCI_NUMBER})\s*(?:"|in|inch(?:es)?)/.freeze
-    FEET_INCH_REGEX    = /(?<feet>#{INTEGER_REGEX})\s*#{FEET_INCH_UNITS_REGEX}/.freeze
+    FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(?<inches>#{RATIONAL_NUMBER}|#{SCI_NUMBER})\s*(?:"|in|inch(?:es)?)/
+    FEET_INCH_REGEX    = /(?<feet>#{INTEGER_REGEX})\s*#{FEET_INCH_UNITS_REGEX}/
     # ideally we would like to generate this regex from the alias for a 'pound'
     # and 'ounce', but they aren't defined at the point in the code where we
     # need this regex.
-    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(?<oz>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:ozs?|ounces?)/.freeze
-    LBS_OZ_REGEX       = /(?<pounds>#{INTEGER_REGEX})\s*#{LBS_OZ_UNIT_REGEX}/.freeze
+    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(?<oz>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:ozs?|ounces?)/
+    LBS_OZ_REGEX       = /(?<pounds>#{INTEGER_REGEX})\s*#{LBS_OZ_UNIT_REGEX}/
     # ideally we would like to generate this regex from the alias for a 'stone'
     # and 'pound', but they aren't defined at the point in the code where we
     # need this regex. also note that the plural of 'stone' is still 'stone',
     # but we accept 'stones' anyway.
-    STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(?<pounds>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:#|lbs?|pounds?|pound-mass)*/.freeze
-    STONE_LB_REGEX     = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/.freeze
+    STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(?<pounds>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:#|lbs?|pounds?|pound-mass)*/
+    STONE_LB_REGEX     = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
-    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/.freeze
+    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/
     # Complex numbers: 1+2i, 1.0+2.0i, -1-1i, etc.
-    COMPLEX_NUMBER     = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/.freeze
+    COMPLEX_NUMBER     = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/
     # Any Complex, Rational, or scientific number
-    ANY_NUMBER         = /(#{COMPLEX_NUMBER}|#{RATIONAL_NUMBER}|#{SCI_NUMBER})/.freeze
-    ANY_NUMBER_REGEX   = /(?:#{ANY_NUMBER})?\s?([^-\d.].*)?/.freeze
-    NUMBER_REGEX       = /(?<scalar>#{SCI_NUMBER}*)\s*(?<unit>.+)?/.freeze # a number followed by a unit
-    UNIT_STRING_REGEX  = %r{#{SCI_NUMBER}*\s*([^/]*)/*(.+)*}.freeze
-    TOP_REGEX          = /([^ *]+)(?:\^|\*\*)([\d-]+)/.freeze
-    BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/.freeze
-    NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/.freeze
-    COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/.freeze
-    RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/.freeze
+    ANY_NUMBER         = /(#{COMPLEX_NUMBER}|#{RATIONAL_NUMBER}|#{SCI_NUMBER})/
+    ANY_NUMBER_REGEX   = /(?:#{ANY_NUMBER})?\s?([^-\d.].*)?/
+    NUMBER_REGEX       = /(?<scalar>#{SCI_NUMBER}*)\s*(?<unit>.+)?/ # a number followed by a unit
+    UNIT_STRING_REGEX  = %r{#{SCI_NUMBER}*\s*([^/]*)/*(.+)*}
+    TOP_REGEX          = /([^ *]+)(?:\^|\*\*)([\d-]+)/
+    BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
+    NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
+    COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/
+    RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/
     KELVIN             = ["<kelvin>"].freeze
     FAHRENHEIT         = ["<fahrenheit>"].freeze
     RANKINE            = ["<rankine>"].freeze
     CELSIUS            = ["<celsius>"].freeze
     @temp_regex = nil
+    @special_format_regex = nil
     SIGNATURE_VECTOR = %i[
       length
       time
@@ -214,9 +215,10 @@ module RubyUnits
     end
 
     # @param  [RubyUnits::Unit::Definition, String] unit_definition
-    # @param  [Proc] block
     # @return [RubyUnits::Unit::Definition]
     # @raise  [ArgumentError] when passed a non-string if using the block form
+    # @yield [definition] Optional block to configure the unit definition (only used when unit_definition is a String)
+    # @yieldparam definition [RubyUnits::Unit::Definition] the definition being created
     # Unpack a unit definition and add it to the array of defined units
     #
     # @example Block form
@@ -227,11 +229,11 @@ module RubyUnits
     # @example RubyUnits::Unit::Definition form
     #   unit_definition = RubyUnits::Unit::Definition.new("foobar") {|foobar| foobar.definition = RubyUnits::Unit.new("1 baz")}
     #   RubyUnits::Unit.define(unit_definition)
-    def self.define(unit_definition, &block)
+    def self.define(unit_definition, &)
       if block_given?
         raise ArgumentError, "When using the block form of RubyUnits::Unit.define, pass the name of the unit" unless unit_definition.is_a?(String)
 
-        unit_definition = RubyUnits::Unit::Definition.new(unit_definition, &block)
+        unit_definition = RubyUnits::Unit::Definition.new(unit_definition, &)
       end
       definitions[unit_definition.name] = unit_definition
       use_definition(unit_definition)
@@ -241,12 +243,11 @@ module RubyUnits
     # Get the definition for a unit and allow it to be redefined
     #
     # @param [String] name Name of unit to redefine
-    # @param [Proc] _block
     # @raise [ArgumentError] if a block is not given
-    # @yieldparam [RubyUnits::Unit::Definition] the definition of the unit being
-    #   redefined
+    # @yield [definition] Block to modify the unit definition
+    # @yieldparam definition [RubyUnits::Unit::Definition] the definition of the unit being redefined
     # @return (see RubyUnits::Unit.define)
-    def self.redefine!(name, &_block)
+    def self.redefine!(name, &)
       raise ArgumentError, "A block is required to redefine a unit" unless block_given?
 
       unit_definition = definition(name)
@@ -407,6 +408,23 @@ module RubyUnits
       end
     end
 
+    # Generates (and memoizes) a regexp matching special format units that should not be cached.
+    #
+    # @return [Regexp]
+    def self.special_format_regex
+      @special_format_regex ||= Regexp.union(
+        %r{\D/[\d+.]+},
+        temp_regex,
+        STONE_LB_UNIT_REGEX,
+        LBS_OZ_UNIT_REGEX,
+        FEET_INCH_UNITS_REGEX,
+        /%/,
+        TIME_REGEX,
+        /i\s?(.+)?/,
+        %r{&plusmn;|\+/-}
+      )
+    end
+
     # inject a definition into the internal array and set it up for use
     #
     # @param definition [RubyUnits::Unit::Definition]
@@ -491,82 +509,9 @@ module RubyUnits
     # @raise [ArgumentError] if no unit is specified
     # @raise [ArgumentError] if an invalid unit is specified
     def initialize(*options)
-      @scalar      = nil
-      @base_scalar = nil
-      @unit_name   = nil
-      @signature   = nil
-      @output      = {}
-      raise ArgumentError, "Invalid Unit Format" if options[0].nil?
-
-      if options.size == 2
-        # options[0] is the scalar
-        # options[1] is a unit string
-        cached = self.class.cached.get(options[1])
-        if cached.nil?
-          initialize("#{options[0]} #{options[1]}")
-        else
-          copy(cached * options[0])
-        end
-        return
-      end
-      if options.size == 3
-        options[1] = options[1].join if options[1].is_a?(Array)
-        options[2] = options[2].join if options[2].is_a?(Array)
-        cached = self.class.cached.get("#{options[1]}/#{options[2]}")
-        if cached.nil?
-          initialize("#{options[0]} #{options[1]}/#{options[2]}")
-        else
-          copy(cached) * options[0]
-        end
-        return
-      end
-
-      case options[0]
-      in Unit => unit
-        copy(unit)
-        return
-      in Hash => hash
-        @scalar      = hash[:scalar] || 1
-        @numerator   = hash[:numerator] || UNITY_ARRAY
-        @denominator = hash[:denominator] || UNITY_ARRAY
-        @signature   = hash[:signature]
-      in Array => array
-        initialize(*array)
-        return
-      in Numeric => num
-        @scalar    = num
-        @numerator = @denominator = UNITY_ARRAY
-      in Time => time
-        @scalar      = time.to_f
-        @numerator   = ["<second>"]
-        @denominator = UNITY_ARRAY
-      in DateTime | Date => date
-        @scalar      = date.ajd
-        @numerator   = ["<day>"]
-        @denominator = UNITY_ARRAY
-      in /^\s*$/ => _empty
-        raise ArgumentError, "No Unit Specified"
-      in String => str
-        parse(str)
-      else
-        raise ArgumentError, "Invalid Unit Format"
-      end
-      update_base_scalar
-      raise ArgumentError, "Temperatures must not be less than absolute zero" if temperature? && base_scalar.negative?
-
-      unary_unit = units || ""
-      if options.first.instance_of?(String)
-        _opt_scalar, opt_units = self.class.parse_into_numbers_and_units(options[0])
-        if !(self.class.cached.keys.include?(opt_units) ||
-                (opt_units =~ %r{\D/[\d+.]+}) ||
-                (opt_units =~ %r{(#{self.class.temp_regex})|(#{STONE_LB_UNIT_REGEX})|(#{LBS_OZ_UNIT_REGEX})|(#{FEET_INCH_UNITS_REGEX})|%|(#{TIME_REGEX})|i\s?(.+)?|&plusmn;|\+/-})) && opt_units && !opt_units.empty?
-          self.class.cached.set(opt_units, scalar == 1 ? self : opt_units.to_unit)
-        end
-      end
-      unless self.class.cached.keys.include?(unary_unit) || (unary_unit =~ self.class.temp_regex)
-        self.class.cached.set(unary_unit, scalar == 1 ? self : unary_unit.to_unit)
-      end
-      [@scalar, @numerator, @denominator, @base_scalar, @signature, @base].each(&:freeze)
+      initialize_instance_variables
+      parse_array(options)
+      finalize_initialization(options)
       super()
     end
 
@@ -1614,8 +1559,252 @@ module RubyUnits
     # @param [Unit] other
     # @private
     def initialize_copy(other)
-      @numerator   = other.numerator.dup
+      @numerator = other.numerator.dup
       @denominator = other.denominator.dup
+    end
+
+    # Initialize instance variables to their default values
+    # @return [void]
+    def initialize_instance_variables
+      @scalar = nil
+      @base_scalar = nil
+      @unit_name = nil
+      @signature = nil
+      @output = {}
+    end
+
+    # Parse options based on the number of arguments
+    # @param [Array] options
+    # @return [void]
+    def parse_array(options)
+      case options
+      in [first] if first
+        parse_single_arg(first)
+      in [first, String => second] if first
+        parse_two_args(first, second)
+      in [first, String | Array => second, String | Array => third] if first
+        parse_three_args(first, second, third)
+      else
+        raise ArgumentError, "Invalid Unit Format"
+      end
+    end
+
+    # Parse a single argument
+    # @param [Unit,Hash,Array,Numeric,Time,Date,DateTime,String] arg
+    # @return [void]
+    def parse_single_arg(arg)
+      case arg
+      in NilClass
+        raise_no_unit_specified
+      in Unit => unit
+        copy(unit)
+      in Hash => hash
+        parse_hash(hash)
+      in Array => array
+        parse_array(array)
+      in Numeric => number
+        parse_numeric(number)
+      in Time => time
+        parse_time(time)
+      in DateTime | Date => date
+        parse_date(date)
+      in String => str
+        parse_string_arg(str)
+      else
+        raise ArgumentError, "Invalid Unit Format"
+      end
+    end
+
+    # Parse and validate a string argument
+    # @param [String] str
+    # @return [void]
+    # @raise [ArgumentError] if string is empty
+    def parse_string_arg(str)
+      raise_no_unit_specified if str.strip.empty?
+      parse_string(str)
+    end
+
+    # Raise a standardized error for missing unit specification
+    # @return [void]
+    # @raise [ArgumentError] always
+    def raise_no_unit_specified
+      raise ArgumentError, "No Unit Specified"
+    end
+
+    # Parse two arguments (scalar and unit string)
+    # @param [Numeric] scalar
+    # @param [String] unit_string
+    # @return [void]
+    def parse_two_args(scalar, unit_string)
+      cached = self.class.cached.get(unit_string)
+      if cached
+        copy(cached * scalar)
+      else
+        parse_string("#{scalar} #{unit_string}")
+      end
+    end
+
+    # Parse three arguments (scalar, numerator, denominator)
+    # @param [Numeric] scalar
+    # @param [String,Array] numerator
+    # @param [String,Array] denominator
+    # @return [void]
+    def parse_three_args(scalar, numerator, denominator)
+      unit_str = "#{Array(numerator).join}/#{Array(denominator).join}"
+
+      cached = self.class.cached.get(unit_str)
+      if cached
+        copy(cached * scalar)
+      else
+        parse_string("#{scalar} #{unit_str}")
+      end
+    end
+
+    # Parse a hash argument
+    # WARNING: if you pass a signature, it will be accepted without validation against the units
+    # @param [Hash] hash
+    # @return [void]
+    def parse_hash(hash)
+      @scalar = validate_scalar(hash.fetch(:scalar, 1))
+      @numerator = validate_unit_array(hash.fetch(:numerator, UNITY_ARRAY), :numerator)
+      @denominator = validate_unit_array(hash.fetch(:denominator, UNITY_ARRAY), :denominator)
+      @signature = validate_signature(hash[:signature])
+    end
+
+    # Validate scalar parameter
+    # @param [Object] value
+    # @return [Numeric]
+    # @raise [ArgumentError] if value is not numeric
+    def validate_scalar(value)
+      raise ArgumentError, ":scalar must be numeric" unless value.is_a?(Numeric)
+
+      value
+    end
+
+    # Validate unit array parameter (numerator or denominator)
+    # @param [Object] value
+    # @param [Symbol] param_name
+    # @return [Array<String>]
+    # @raise [ArgumentError] if value is not an array of strings
+    def validate_unit_array(value, param_name)
+      raise ArgumentError, ":#{param_name} must be an Array<String>" unless value.is_a?(Array) && value.all?(String)
+
+      value
+    end
+
+    # Validate signature parameter
+    # @param [Object] value
+    # @return [Integer, nil]
+    # @raise [ArgumentError] if value is not an integer
+    def validate_signature(value)
+      raise ArgumentError, ":signature must be an Integer" if value && !value.is_a?(Integer)
+
+      value
+    end
+
+    # Parse a numeric argument
+    # @param [Numeric] num
+    # @return [void]
+    def parse_numeric(num)
+      @scalar = num
+      @numerator = @denominator = UNITY_ARRAY
+    end
+
+    # Parse a Time argument
+    # @param [Time] time
+    # @return [void]
+    def parse_time(time)
+      @scalar = time.to_f
+      @numerator = ["<second>"]
+      @denominator = UNITY_ARRAY
+    end
+
+    # Parse a Date or DateTime argument
+    # @param [Date,DateTime] date
+    # @return [void]
+    def parse_date(date)
+      @scalar = date.ajd
+      @numerator = ["<day>"]
+      @denominator = UNITY_ARRAY
+    end
+
+    # Parse a string argument
+    # @param [String] str
+    # @return [void]
+    def parse_string(str)
+      parse(str)
+    end
+
+    # Finalize initialization by updating base scalar, validating, caching, and freezing
+    # @param [Array] options original options passed to initialize
+    # @return [void]
+    def finalize_initialization(options)
+      update_base_scalar
+      validate_temperature
+      cache_unit_if_needed(options)
+      freeze_instance_variables
+    end
+
+    # Validate that temperatures are not below absolute zero
+    # @return [void]
+    # @raise [ArgumentError] if temperature is below absolute zero
+    def validate_temperature
+      raise ArgumentError, "Temperatures must not be less than absolute zero" if temperature? && base_scalar.negative?
+    end
+
+    # Cache the unit if it meets caching criteria
+    # @param [Array] options original options passed to initialize
+    # @return [void]
+    def cache_unit_if_needed(options)
+      unary_unit = units || ""
+
+      # Cache units parsed from strings if they meet criteria
+      cache_parsed_string_unit(options[0]) if options.first.instance_of?(String)
+
+      # Cache unary units if not already cached and not temperature units
+      cache_unary_unit(unary_unit)
+    end
+
+    # Cache a unit parsed from a string if it meets criteria
+    # @param [String] option_string
+    # @return [void]
+    def cache_parsed_string_unit(option_string)
+      _opt_scalar, opt_units = self.class.parse_into_numbers_and_units(option_string)
+      return unless opt_units && !opt_units.empty?
+      return if should_skip_caching?(opt_units)
+
+      self.class.cached.set(opt_units, scalar == 1 ? self : opt_units.to_unit)
+    end
+
+    # Cache a unary unit if appropriate
+    # @param [String] unary_unit
+    # @return [void]
+    def cache_unary_unit(unary_unit)
+      return if self.class.cached.keys.include?(unary_unit)
+      return if unary_unit =~ self.class.temp_regex
+
+      self.class.cached.set(unary_unit, scalar == 1 ? self : unary_unit.to_unit)
+    end
+
+    # Determine if a unit string should skip caching
+    # @param [String] unit_string
+    # @return [Boolean]
+    def should_skip_caching?(unit_string)
+      self.class.cached.keys.include?(unit_string) ||
+        special_format_unit?(unit_string)
+    end
+
+    # Check if unit string is a special format that shouldn't be cached
+    # @param [String] unit_string
+    # @return [Boolean]
+    def special_format_unit?(unit_string)
+      unit_string =~ self.class.special_format_regex
+    end
+
+    # Freeze all instance variables
+    # @return [void]
+    def freeze_instance_variables
+      [@scalar, @numerator, @denominator, @base_scalar, @signature, @base].each(&:freeze)
     end
 
     # calculates the unit signature id for use in comparing compatible units and simplification
