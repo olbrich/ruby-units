@@ -101,6 +101,25 @@ module RubyUnits
     FAHRENHEIT         = ["<fahrenheit>"].freeze
     RANKINE            = ["<rankine>"].freeze
     CELSIUS            = ["<celsius>"].freeze
+
+    # Temperature conversion constants
+    CELSIUS_OFFSET_TO_KELVIN = 273.15 # offset to convert Celsius to Kelvin
+    FAHRENHEIT_OFFSET_TO_RANKINE = 459.67 # offset to convert Fahrenheit to Rankine
+    RATIO_5_9 = Rational(5, 9).freeze # 5/9 ratio for temperature conversions
+    RATIO_9_5 = Rational(9, 5).freeze # 9/5 ratio for temperature conversions
+
+    # Valid fractional exponents for root operations (1/1 through 1/9)
+    VALID_ROOT_EXPONENTS = (1..9).map { Rational(1, _1) }.freeze
+
+    # Centesimal constants for prefix calculations
+    CENTESIMAL_VALUE = Rational(1, 100).freeze # 1/100
+    DECILE_VALUE = Rational(1, 10).freeze # 1/10
+
+    # Imperial/US customary unit conversion constants
+    INCHES_IN_FOOT = 12
+    OUNCES_IN_POUND = 16
+    POUNDS_IN_STONE = 14
+
     @temp_regex = nil
     @special_format_regex = nil
     SIGNATURE_VECTOR = %i[
@@ -435,16 +454,20 @@ module RubyUnits
       @temp_regex = nil # invalidate the temp regex
       @special_format_regex = nil # invalidate the special format regex
       definition_name = definition.name
+      definition_aliases = definition.aliases
       if definition.prefix?
         prefix_values[definition_name] = definition.scalar
-        definition.aliases.each { prefix_map[_1] = definition_name }
+        definition_aliases.each { prefix_map[_1] = definition_name }
         @prefix_regex = nil # invalidate the prefix regex
       else
         unit_value = unit_values[definition_name] = {}
-        unit_value[:scalar] = definition.scalar
-        unit_value[:numerator] = definition.numerator if definition.numerator
-        unit_value[:denominator] = definition.denominator if definition.denominator
-        definition.aliases.each { unit_map[_1] = definition_name }
+        definition_scalar = definition.scalar
+        definition_numerator = definition.numerator
+        definition_denominator = definition.denominator
+        unit_value[:scalar] = definition_scalar
+        unit_value[:numerator] = definition_numerator if definition_numerator
+        unit_value[:denominator] = definition_denominator if definition_denominator
+        definition_aliases.each { unit_map[_1] = definition_name }
         @unit_regex = nil # invalidate the unit regex
       end
     end
@@ -585,9 +608,12 @@ module RubyUnits
         else
           unit_value = unit_vals[num_unit]
           if unit_value
-            conversion_factor *= unit_value[:scalar]
-            num << unit_value[:numerator] if unit_value[:numerator]
-            den << unit_value[:denominator] if unit_value[:denominator]
+            unit_scalar = unit_value[:scalar]
+            unit_numerator = unit_value[:numerator]
+            unit_denominator = unit_value[:denominator]
+            conversion_factor *= unit_scalar
+            num << unit_numerator if unit_numerator
+            den << unit_denominator if unit_denominator
           end
         end
       end
@@ -598,9 +624,12 @@ module RubyUnits
         else
           unit_value = unit_vals[num_unit]
           if unit_value
-            conversion_factor /= unit_value[:scalar]
-            den << unit_value[:numerator] if unit_value[:numerator]
-            num << unit_value[:denominator] if unit_value[:denominator]
+            unit_scalar = unit_value[:scalar]
+            unit_numerator = unit_value[:numerator]
+            unit_denominator = unit_value[:denominator]
+            conversion_factor /= unit_scalar
+            den << unit_numerator if unit_numerator
+            num << unit_denominator if unit_denominator
           end
         end
       end
@@ -638,22 +667,29 @@ module RubyUnits
       out = @output[target_units]
       return out if out
 
-      separator = RubyUnits.configuration.separator
+      config = RubyUnits.configuration
+      separator = config.separator
       case target_units
       when :ft
-        feet, inches = convert_to("in").scalar.abs.divmod(12)
+        feet, inches = convert_to("in").scalar.abs.divmod(INCHES_IN_FOOT)
         improper, frac = inches.divmod(1)
-        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
+        is_frac_zero = frac.zero?
+        rationalized_frac = is_frac_zero ? "" : frac.rationalize(precision)
+        frac = is_frac_zero ? "" : "-#{rationalized_frac}"
         out = "#{'-' if negative?}#{feet}'#{improper}#{frac}\""
       when :lbs
-        pounds, ounces = convert_to("oz").scalar.abs.divmod(16)
+        pounds, ounces = convert_to("oz").scalar.abs.divmod(OUNCES_IN_POUND)
         improper, frac = ounces.divmod(1)
-        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
+        is_frac_zero = frac.zero?
+        rationalized_frac = is_frac_zero ? "" : frac.rationalize(precision)
+        frac = is_frac_zero ? "" : "-#{rationalized_frac}"
         out  = "#{'-' if negative?}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
       when :stone
-        stone, pounds = convert_to("lbs").scalar.abs.divmod(14)
+        stone, pounds = convert_to("lbs").scalar.abs.divmod(POUNDS_IN_STONE)
         improper, frac = pounds.divmod(1)
-        frac = frac.zero? ? "" : "-#{frac.rationalize(precision)}"
+        is_frac_zero = frac.zero?
+        rationalized_frac = is_frac_zero ? "" : frac.rationalize(precision)
+        frac = is_frac_zero ? "" : "-#{rationalized_frac}"
         out = "#{'-' if negative?}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
       when String
         out = case target_units.strip
@@ -661,10 +697,12 @@ module RubyUnits
                 ""
               when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
                 begin
-                  if Regexp.last_match(2) # unit specified, need to convert
-                    convert_to(Regexp.last_match(2)).to_s(Regexp.last_match(1), format: format)
+                  format_str = Regexp.last_match(1)
+                  target_unit = Regexp.last_match(2)
+                  if target_unit # unit specified, need to convert
+                    convert_to(target_unit).to_s(format_str, format: format)
                   else
-                    "#{Regexp.last_match(1) % @scalar}#{separator}#{Regexp.last_match(2) || units(format: format)}".strip
+                    "#{format_str % @scalar}#{separator}#{target_unit || units(format: format)}".strip
                   end
                 rescue StandardError # parse it like a strftime format string
                   (DateTime.new(0) + self).strftime(target_units)
@@ -675,13 +713,15 @@ module RubyUnits
                 raise "unhandled case"
               end
       else
+        unit_str = units(format: format)
         out = case @scalar
               when Complex
-                "#{@scalar}#{separator}#{units(format: format)}"
+                "#{@scalar}#{separator}#{unit_str}"
               when Rational
-                "#{@scalar == @scalar.to_i ? @scalar.to_i : @scalar}#{separator}#{units(format: format)}"
+                scalar_as_int = @scalar.to_i
+                "#{@scalar == scalar_as_int ? scalar_as_int : @scalar}#{separator}#{unit_str}"
               else
-                "#{'%g' % @scalar}#{separator}#{units(format: format)}"
+                "#{'%g' % @scalar}#{separator}#{unit_str}"
               end.strip
       end
       @output[target_units] = out
@@ -1016,8 +1056,7 @@ module RubyUnits
         other_as_int = other.to_i
         return self**other_as_int if other == other_as_int
 
-        valid = (1..9).map { Rational(1, _1) }
-        raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
+        raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless VALID_ROOT_EXPONENTS.include? other.abs
 
         root(Rational(1, other).to_int)
       when Complex
@@ -1138,31 +1177,29 @@ module RubyUnits
 
         # @type [Numeric]
         unit_map = unit_class.unit_map
-        ratio_5_9 = Rational(5, 9)
-        ratio_9_5 = Rational(9, 5)
         scalar_rational = @scalar.to_r
         @base_scalar ||= case unit_map[start_unit]
                          when "<tempC>"
-                           @scalar + 273.15
+                           @scalar + CELSIUS_OFFSET_TO_KELVIN
                          when "<tempK>"
                            @scalar
                          when "<tempF>"
-                           (@scalar + 459.67).to_r * ratio_5_9
+                           (@scalar + FAHRENHEIT_OFFSET_TO_RANKINE).to_r * RATIO_5_9
                          when "<tempR>"
-                           scalar_rational * ratio_5_9
+                           scalar_rational * RATIO_5_9
                          end
         # @type [Numeric]
         base_scalar_rational = @base_scalar.to_r
-        base_times_ratio_9_5 = base_scalar_rational * ratio_9_5
+        base_times_ratio_nine_fifths = base_scalar_rational * RATIO_9_5
         result_scalar = case unit_map[target_unit]
                         when "<tempC>"
-                          @base_scalar - 273.15
+                          @base_scalar - CELSIUS_OFFSET_TO_KELVIN
                         when "<tempK>"
                           @base_scalar
                         when "<tempF>"
-                          base_times_ratio_9_5 - 459.67r
+                          base_times_ratio_nine_fifths - FAHRENHEIT_OFFSET_TO_RANKINE
                         when "<tempR>"
-                          base_times_ratio_9_5
+                          base_times_ratio_nine_fifths
                         end
         unit_class.new("#{result_scalar} #{target_unit}")
       else
@@ -1345,18 +1382,20 @@ module RubyUnits
     #
     # @return [Numeric,Unit]
     def round(...)
-      return @scalar.round(...) if unitless?
+      rounded_scalar = @scalar.round(...)
+      return rounded_scalar if unitless?
 
-      with_new_scalar(@scalar.round(...))
+      with_new_scalar(rounded_scalar)
     end
 
     # Truncate the unit according to the scalar's truncate method
     # Forwards all arguments to the scalar's truncate method
     # @return [Numeric, Unit]
     def truncate(...)
-      return @scalar.truncate(...) if unitless?
+      truncated_scalar = @scalar.truncate(...)
+      return truncated_scalar if unitless?
 
-      with_new_scalar(@scalar.truncate(...))
+      with_new_scalar(truncated_scalar)
     end
 
     # Returns next unit in a range. Increments the scalar by 1.
@@ -1523,12 +1562,11 @@ module RubyUnits
       return self if units.include?("kg")
 
       prefix_vals = unit_class.prefix_values
-      centesimal_value = 1/100r
-      centesimal_range = centesimal_value..(1/10r)
+      centesimal_range = CENTESIMAL_VALUE..DECILE_VALUE
       best_prefix = if kind == :information
                       prefix_vals.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
                     elsif centesimal_range.cover?(base_scalar)
-                      prefix_vals.key(centesimal_value)
+                      prefix_vals.key(CENTESIMAL_VALUE)
                     else
                       prefix_vals.key(10**((::Math.log10(base_scalar) / 3.0).floor * 3))
                     end
@@ -1574,12 +1612,20 @@ module RubyUnits
       # it's possible to have a kind that misses the array... kinds like :counting
       # are more like prefixes, so don't use them to calculate the vector
       @numerator.map { unit_class.definition(_1) }.each do |definition|
-        index = SIGNATURE_VECTOR.index(definition.kind)
-        vector[index] += 1 if index
+        kind = definition.kind
+        index = SIGNATURE_VECTOR.index(kind)
+        if index
+          current_value = vector[index]
+          vector[index] = current_value + 1
+        end
       end
       @denominator.map { unit_class.definition(_1) }.each do |definition|
-        index = SIGNATURE_VECTOR.index(definition.kind)
-        vector[index] -= 1 if index
+        kind = definition.kind
+        index = SIGNATURE_VECTOR.index(kind)
+        if index
+          current_value = vector[index]
+          vector[index] = current_value - 1
+        end
       end
       raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { _1.abs >= 20 }
 
@@ -1930,7 +1976,8 @@ module RubyUnits
       while unit_string.gsub!(/<(#{unit_class.prefix_regex})><(#{unit_class.unit_regex})>/, '<\1\2>')
         # replace <prefix><unit> with <prefixunit>
       end
-      while unit_string.gsub!(/<#{unit_class.unit_match_regex}><#{unit_class.unit_match_regex}>/, '<\1\2>*<\3\4>')
+      unit_match_regex = unit_class.unit_match_regex
+      while unit_string.gsub!(/<#{unit_match_regex}><#{unit_match_regex}>/, '<\1\2>*<\3\4>')
         # collapse <prefixunit><prefixunit> into <prefixunit>*<prefixunit>...
       end
       # ... and then strip the remaining brackets for x*y*z
@@ -1997,13 +2044,14 @@ module RubyUnits
 
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
       top.scan(TOP_REGEX).each do |item|
+        unit_part = item[0]
         exponent = item[1].to_i
-        unit_with_space = "#{item[0]} "
+        unit_with_space = "#{unit_part} "
         if exponent >= 0
-          top.gsub!(/#{item[0]}(\^|\*\*)#{exponent}/) { unit_with_space * exponent }
+          top.gsub!(/#{unit_part}(\^|\*\*)#{exponent}/) { unit_with_space * exponent }
         elsif exponent.negative?
           bottom = "#{bottom} #{unit_with_space * -exponent}"
-          top.gsub!(/#{item[0]}(\^|\*\*)#{exponent}/, "")
+          top.gsub!(/#{unit_part}(\^|\*\*)#{exponent}/, "")
         end
       end
       if bottom
@@ -2029,12 +2077,12 @@ module RubyUnits
 
       @numerator   ||= UNITY_ARRAY
       @denominator ||= UNITY_ARRAY
-      @numerator = top.scan(unit_class.unit_match_regex).delete_if(&:empty?).compact if top
-      @denominator = bottom.scan(unit_class.unit_match_regex).delete_if(&:empty?).compact if bottom
+      @numerator = top.scan(unit_match_regex).delete_if(&:empty?).compact if top
+      @denominator = bottom.scan(unit_match_regex).delete_if(&:empty?).compact if bottom
 
       # eliminate all known terms from this string.  This is a quick check to see if the passed unit
       # contains terms that are not defined.
-      used = "#{top} #{bottom}".gsub(unit_class.unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
+      used = "#{top} #{bottom}".gsub(unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
       prefix_map = unit_class.prefix_map
