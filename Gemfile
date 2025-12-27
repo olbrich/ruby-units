@@ -11,6 +11,7 @@ group :optional do
   gem "pry"
   gem "redcarpet", platform: :mri # redcarpet doesn't support jruby
   gem "reek"
+  gem "ruby-lsp"
   gem "ruby-maven", platform: :jruby
   gem "ruby-prof", platform: :mri
   gem "simplecov-html"
@@ -28,5 +29,3 @@ gem "simplecov"
 gem "yard"
 
 gemspec
-
-gem "ruby-lsp", "~> 0.26.4", group: :optional
