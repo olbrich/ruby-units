@@ -188,6 +188,10 @@ GEM
     rubocop-rspec (3.8.0)
       lint_roller (~> 1.1)
       rubocop (~> 1.81)
+    ruby-lsp (0.26.4)
+      language_server-protocol (~> 3.17.0)
+      prism (>= 1.2, < 2.0)
+      rbs (>= 3, < 5)
     ruby-maven (3.9.3)
       ruby-maven-libs (~> 3.9.9)
     ruby-maven-libs (3.9.9)
@@ -261,6 +265,7 @@ DEPENDENCIES
   rubocop
   rubocop-rake
   rubocop-rspec
+  ruby-lsp (~> 0.26.4)
   ruby-maven
   ruby-prof
   ruby-units!

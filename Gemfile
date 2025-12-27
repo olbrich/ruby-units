@@ -28,3 +28,5 @@ gem "simplecov"
 gem "yard"
 
 gemspec
+
+gem "ruby-lsp", "~> 0.26.4", group: :optional
