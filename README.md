@@ -1,9 +1,5 @@
 # Ruby Units
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/4e858d14a07dd453f748/maintainability.svg)](https://codeclimate.com/github/olbrich/ruby-units/maintainability)
-[![CodeClimate Status](https://api.codeclimate.com/v1/badges/4e858d14a07dd453f748/test_coverage.svg)](https://codeclimate.com/github/olbrich/ruby-units/test_coverage)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Folbrich%2Fruby-units.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Folbrich%2Fruby-units?ref=badge_shield)
-
 Kevin C. Olbrich, Ph.D.
 
 Project page:
@@ -306,14 +302,44 @@ Configuration options can be set like:
 ```ruby
 RubyUnits.configure do |config|
   config.format = :rational
-  config.separator = false
+  config.separator = :none
+  config.default_precision = 0.001
 end
 ```
 
-| Option    | Description                                                                                                            | Valid Values              | Default     |
-| --------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------- |
-| format    | Only used for output formatting. `:rational` is formatted like `3 m/s^2`. `:exponential` is formatted like `3 m*s^-2`. | `:rational, :exponential` | `:rational` |
-| separator | Use a space separator for output. `true` is formatted like `3 m/s`, `false` is like `3m/s`.                            | `true, false`             | `true`      |
+#### Configuration Options
+
+| Option              | Description                                                                                                            | Valid Values                | Default     |
+|---------------------|------------------------------------------------------------------------------------------------------------------------|-----------------------------|-------------|
+| `format`            | Only used for output formatting. `:rational` is formatted like `3 m/s^2`. `:exponential` is formatted like `3 m*s^-2`. | `:rational`, `:exponential` | `:rational` |
+| `separator`         | Use a space separator for output. `:space` is formatted like `3 m/s`, `:none` is like `3m/s`.                          | `:space`, `:none`           | `:space`    |
+| `default_precision` | The precision used when rationalizing fractional values in unit output.                                                | Any positive number         | `0.0001`    |
+
+#### Examples
+
+```ruby
+# Change output format to exponential notation
+RubyUnits.configure do |config|
+  config.format = :exponential
+end
+# => "1 m*s^-2"
+
+# Remove spaces between numbers and units
+RubyUnits.configure do |config|
+  config.separator = :none
+end
+# => "1m/s"
+
+# Adjust precision for rational number conversion
+RubyUnits.configure do |config|
+  config.default_precision = 0.001
+end
+
+# Reset to defaults
+RubyUnits.reset
+```
+
+**Note:** Boolean values (`true`/`false`) for `separator` are deprecated but still supported for backward compatibility. Use `:space` instead of `true` and `:none` instead of `false`.
 
 ### NOTES
 
