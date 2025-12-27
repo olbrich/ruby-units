@@ -472,6 +472,17 @@ module RubyUnits
       end
     end
 
+    # Format a fraction part with optional rationalization
+    # @param frac [Float] the fractional part
+    # @param precision [Float] the precision for rationalization
+    # @return [String] the formatted fraction string
+    def self.format_fraction(frac, precision: RubyUnits.configuration.default_precision)
+      return "" if frac.zero?
+
+      rationalized = frac.rationalize(precision)
+      "-#{rationalized}"
+    end
+
     include Comparable
 
     # @return [Numeric]
@@ -647,6 +658,98 @@ module RubyUnits
     # Generate human readable output.
     # If the name of a unit is passed, the unit will first be converted to the target unit before output.
     # some named conversions are available
+    # Format compound units (like feet/inches, lbs/oz, stone/lbs)
+    # @param whole [Numeric] the whole part
+    # @param part [Numeric] the fractional part
+    # @param precision [Float] precision for rationalization
+    # @param whole_unit [String] the unit for the whole part
+    # @param part_unit [String] the unit for the fractional part
+    # @return [String] formatted compound unit string
+    def format_compound_unit(whole, part, whole_unit, part_unit, precision: RubyUnits.configuration.default_precision)
+      separator = RubyUnits.configuration.separator
+      improper, frac = part.divmod(1)
+      frac_str = unit_class.format_fraction(frac, precision: precision)
+      sign = negative? ? "-" : ""
+      "#{sign}#{whole}#{separator}#{whole_unit} #{improper}#{frac_str}#{separator}#{part_unit}"
+    end
+
+    # Convert to string representation for feet/inches format
+    # @param precision [Float] precision for rationalization
+    # @return [String] formatted string
+    def to_feet_inches(precision: RubyUnits.configuration.default_precision)
+      feet, inches = convert_to("in").scalar.abs.divmod(INCHES_IN_FOOT)
+      improper, frac = inches.divmod(1)
+      frac_str = unit_class.format_fraction(frac, precision: precision)
+      sign = negative? ? "-" : ""
+      "#{sign}#{feet}'#{improper}#{frac_str}\""
+    end
+
+    # Convert to string representation for pounds/ounces format
+    # @param precision [Float] precision for rationalization
+    # @return [String] formatted string
+    def to_pounds_ounces(precision: RubyUnits.configuration.default_precision)
+      pounds, ounces = convert_to("oz").scalar.abs.divmod(OUNCES_IN_POUND)
+      format_compound_unit(pounds, ounces, "lbs", "oz", precision: precision)
+    end
+
+    # Convert to string representation for stone/pounds format
+    # @param precision [Float] precision for rationalization
+    # @return [String] formatted string
+    def to_stone_pounds(precision: RubyUnits.configuration.default_precision)
+      stone, pounds = convert_to("lbs").scalar.abs.divmod(POUNDS_IN_STONE)
+      format_compound_unit(stone, pounds, "stone", "lbs", precision: precision)
+    end
+
+    # Handle string target_units conversion
+    # @param target_units [String] the target units string
+    # @param format [Symbol] the format to use
+    # @return [String] formatted string
+    def convert_string_target(target_units, format)
+      case target_units.strip
+      when /\A\s*\Z/ # whitespace only
+        ""
+      when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
+        convert_with_format_string(Regexp.last_match(1), Regexp.last_match(2), target_units, format)
+      when /(\S+)/ # unit only 'mm' or '1/mm'
+        convert_to(Regexp.last_match(1)).to_s(format: format)
+      else
+        raise "unhandled case"
+      end
+    end
+
+    # Convert with a format string
+    # @param format_str [String] the format string
+    # @param target_unit [String, nil] the target unit
+    # @param original_target [String] the original target_units string (for strftime fallback)
+    # @param format [Symbol] the format to use
+    # @return [String] formatted string
+    def convert_with_format_string(format_str, target_unit, original_target, format)
+      if target_unit # unit specified, need to convert
+        convert_to(target_unit).to_s(format_str, format: format)
+      else
+        separator = RubyUnits.configuration.separator
+        "#{format_str % @scalar}#{separator}#{target_unit || units(format: format)}".strip
+      end
+    rescue StandardError # parse it like a strftime format string
+      (DateTime.new(0) + self).strftime(original_target)
+    end
+
+    # Format the scalar value
+    # @param unit_str [String] the unit string
+    # @return [String] formatted string
+    def format_scalar(unit_str)
+      separator = RubyUnits.configuration.separator
+      case @scalar
+      when Complex
+        "#{@scalar}#{separator}#{unit_str}"
+      when Rational
+        scalar_as_int = @scalar.to_i
+        "#{@scalar == scalar_as_int ? scalar_as_int : @scalar}#{separator}#{unit_str}"
+      else
+        "#{'%g' % @scalar}#{separator}#{unit_str}"
+      end.strip
+    end
+
     #
     # @example
     #  unit.to_s(:ft) - outputs in feet and inches (e.g., 6'4")
@@ -663,67 +766,23 @@ module RubyUnits
     # @param format [Symbol] Set to :exponential to force all units to be displayed in exponential format
     #
     # @return [String]
-    def to_s(target_units = nil, precision: 0.0001, format: RubyUnits.configuration.format)
+    def to_s(target_units = nil, precision: RubyUnits.configuration.default_precision, format: RubyUnits.configuration.format)
       out = @output[target_units]
       return out if out
 
-      config = RubyUnits.configuration
-      separator = config.separator
-      case target_units
-      when :ft
-        feet, inches = convert_to("in").scalar.abs.divmod(INCHES_IN_FOOT)
-        improper, frac = inches.divmod(1)
-        is_frac_zero = frac.zero?
-        rationalized_frac = is_frac_zero ? "" : frac.rationalize(precision)
-        frac = is_frac_zero ? "" : "-#{rationalized_frac}"
-        out = "#{'-' if negative?}#{feet}'#{improper}#{frac}\""
-      when :lbs
-        pounds, ounces = convert_to("oz").scalar.abs.divmod(OUNCES_IN_POUND)
-        improper, frac = ounces.divmod(1)
-        is_frac_zero = frac.zero?
-        rationalized_frac = is_frac_zero ? "" : frac.rationalize(precision)
-        frac = is_frac_zero ? "" : "-#{rationalized_frac}"
-        out  = "#{'-' if negative?}#{pounds}#{separator}lbs #{improper}#{frac}#{separator}oz"
-      when :stone
-        stone, pounds = convert_to("lbs").scalar.abs.divmod(POUNDS_IN_STONE)
-        improper, frac = pounds.divmod(1)
-        is_frac_zero = frac.zero?
-        rationalized_frac = is_frac_zero ? "" : frac.rationalize(precision)
-        frac = is_frac_zero ? "" : "-#{rationalized_frac}"
-        out = "#{'-' if negative?}#{stone}#{separator}stone #{improper}#{frac}#{separator}lbs"
-      when String
-        out = case target_units.strip
-              when /\A\s*\Z/ # whitespace only
-                ""
-              when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
-                begin
-                  format_str = Regexp.last_match(1)
-                  target_unit = Regexp.last_match(2)
-                  if target_unit # unit specified, need to convert
-                    convert_to(target_unit).to_s(format_str, format: format)
-                  else
-                    "#{format_str % @scalar}#{separator}#{target_unit || units(format: format)}".strip
-                  end
-                rescue StandardError # parse it like a strftime format string
-                  (DateTime.new(0) + self).strftime(target_units)
-                end
-              when /(\S+)/ # unit only 'mm' or '1/mm'
-                convert_to(Regexp.last_match(1)).to_s(format: format)
-              else
-                raise "unhandled case"
-              end
-      else
-        unit_str = units(format: format)
-        out = case @scalar
-              when Complex
-                "#{@scalar}#{separator}#{unit_str}"
-              when Rational
-                scalar_as_int = @scalar.to_i
-                "#{@scalar == scalar_as_int ? scalar_as_int : @scalar}#{separator}#{unit_str}"
-              else
-                "#{'%g' % @scalar}#{separator}#{unit_str}"
-              end.strip
-      end
+      out = case target_units
+            when :ft
+              to_feet_inches(precision: precision)
+            when :lbs
+              to_pounds_ounces(precision: precision)
+            when :stone
+              to_stone_pounds(precision: precision)
+            when String
+              convert_string_target(target_units, format)
+            else
+              format_scalar(units(format: format))
+            end
+
       @output[target_units] = out
       out
     end

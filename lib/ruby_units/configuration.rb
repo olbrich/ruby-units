@@ -42,15 +42,23 @@ module RubyUnits
     #   @return [Symbol] the format to use when generating output (:rational or :exponential) (default: :rational)
     attr_reader :format
 
+    # The default precision to use when rationalizing fractional values in unit output.
+    #
+    # @!attribute [rw] default_precision
+    #   @return [Float] the precision to use when converting to a rational (default: 0.0001)
+    attr_reader :default_precision
+
     # Initialize configuration with keyword arguments
     #
     # @param separator [Boolean] whether to include a space between the scalar and the unit (default: true)
     # @param format [Symbol] the format to use when generating output (default: :rational)
+    # @param default_precision [Float] the precision to use when converting to a rational (default: 0.0001)
     # @param _options [Hash] additional keyword arguments (ignored, for forward compatibility)
     # @return [Configuration] a new configuration instance
-    def initialize(separator: true, format: :rational, **_options)
+    def initialize(separator: true, format: :rational, default_precision: 0.0001, **_options)
       self.separator = separator
       self.format = format
+      self.default_precision = default_precision
     end
 
     # Use a space for the separator to use when generating output.
@@ -73,6 +81,16 @@ module RubyUnits
       raise ArgumentError, "configuration 'format' may only be :rational or :exponential" unless %i[rational exponential].include?(value)
 
       @format = value
+    end
+
+    # Set the default precision to use when rationalizing fractional values.
+    #
+    # @param value [Float] the precision to use when converting to a rational
+    # @return [void]
+    def default_precision=(value)
+      raise ArgumentError, "configuration 'default_precision' must be a positive number" unless value.is_a?(Numeric) && value.positive?
+
+      @default_precision = value
     end
   end
 end
