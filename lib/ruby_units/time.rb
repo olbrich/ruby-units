@@ -20,8 +20,7 @@ module RubyUnits
       #   Time.at(Unit.new("1 h"), 500, :millisecond)  #=> Time 1 hour + 500 ms after epoch
       #
       # @param [Array<RubyUnits::Unit, Numeric, Symbol, Hash>] args Arguments passed to Time.at
-      # @param [Hash] kwargs Keyword arguments (e.g., in: timezone)
-      # @return [::Time] A Time object representing the duration since epoch
+      # @return [::Time] A Time object at that many seconds since epoch
       def at(*args, **)
         first_arg = args.first
         return super unless first_arg.is_a?(RubyUnits::Unit)
@@ -84,7 +83,7 @@ module RubyUnits
     #   Time.now.to_unit('hour')  #=> Unit in hours since epoch
     #
     # @param other [String, RubyUnits::Unit, nil] Optional target unit for conversion
-    # @return [RubyUnits::Unit] A Unit object representing the time as a duration
+    # @return [RubyUnits::Unit] A Unit object representing the seconds since epoch
     def to_unit(other = nil)
       unit = RubyUnits::Unit.new(self)
       other ? unit.convert_to(other) : unit

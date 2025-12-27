@@ -323,9 +323,9 @@ module RubyUnits
       second.nil? ? new(first) : new(first).convert_to(second)
     end
 
-    # @param q [Numeric] quantity
-    # @param n [Array] numerator
-    # @param d [Array] denominator
+    # @param scalar [Numeric] quantity
+    # @param numerator_units [Array] numerator
+    # @param denominator_units [Array] denominator
     # @return [Hash]
     def self.eliminate_terms(scalar, numerator_units, denominator_units)
       working_numerator = numerator_units.dup
@@ -1033,7 +1033,7 @@ module RubyUnits
     # Raise a unit to a power.
     # Returns the unit raised to the n-th power.
     #
-    # @param n [Integer] the exponent (must be an integer)
+    # @param exponent [Integer] the exponent (must be an integer)
     # @return [Unit]
     # @raise [ArgumentError] when attempting to raise a temperature to a power
     # @raise [ArgumentError] when exponent is not an integer
@@ -1052,7 +1052,7 @@ module RubyUnits
 
     # Calculates the n-th root of a unit
     # Returns the nth root of a unit.
-    # If n < 0, returns 1/unit^(1/n)
+    # If exponent < 0, returns 1/unit^(1/exponent)
     #
     # @param exponent [Integer] the root degree (must be an integer, cannot be 0)
     # @return [Unit]
