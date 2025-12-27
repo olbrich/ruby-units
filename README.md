@@ -142,6 +142,21 @@ Unit.new("100 kg").to_s(:lbs)     # returns 220 lbs, 7 oz
 Unit.new("100 kg").to_s(:stone)   # returns 15 stone, 10 lb
 ```
 
+You can also use Ruby's standard string formatting operator (`%`) with units:
+
+```ruby
+'%0.2f' % '1 mm'.to_unit          # "1.00 mm"
+'%0.2f in' % '1 mm'.to_unit       # "0.04 in" - format and convert
+'%.2e' % '1000 m'.to_unit         # "1.00e+03 m" - scientific notation
+```
+
+Strings can be converted to units using the `convert_to` method:
+
+```ruby
+'10 mm'.convert_to('cm')          # converts directly to centimeters
+'100 km/h'.convert_to('m/s')      # converts compound units
+```
+
 ### Time Helpers
 
 Ruby-units extends the `Time`, `Date`, and `DateTime` classes to support unit-based arithmetic,
