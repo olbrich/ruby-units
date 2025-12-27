@@ -324,7 +324,7 @@ module RubyUnits
     # @return [Unit]
     def self.parse(input)
       first, second = input.scan(/(.+)\s(?:in|to|as)\s(.+)/i).first
-      second.nil? ? new(first) : new(first).convert_to(second)
+      second ? new(first).convert_to(second) : new(first)
     end
 
     # @param scalar [Numeric] quantity
@@ -383,7 +383,7 @@ module RubyUnits
 
       [
         case num
-        when nil # This happens when no number is passed and we are parsing a pure unit string
+        when NilClass # This happens when no number is passed and we are parsing a pure unit string
           1
         when COMPLEX_NUMBER
           num.to_c
@@ -609,7 +609,7 @@ module RubyUnits
       end
 
       cached_unit = unit_class.base_unit_cache.get(units)
-      return cached_unit * scalar unless cached_unit.nil?
+      return cached_unit * scalar if cached_unit
 
       num = []
       den = []
@@ -745,7 +745,7 @@ module RubyUnits
     def <=>(other)
       raise NoMethodError, "undefined method `<=>' for #{base_scalar.inspect}" unless base_scalar.respond_to?(:<=>)
 
-      if other.nil?
+      if other.is_a?(NilClass)
         base_scalar <=> nil
       elsif !temperature? && other.respond_to?(:zero?) && other.zero?
         base_scalar <=> 0
@@ -1124,7 +1124,7 @@ module RubyUnits
     # @raise [ArgumentError] when target unit is unknown
     # @raise [ArgumentError] when target unit is incompatible
     def convert_to(other)
-      return self if other.nil?
+      return self if other.is_a?(NilClass)
       return self if other.is_a?(TrueClass)
       return self if other.is_a?(FalseClass)
 
@@ -1949,7 +1949,7 @@ module RubyUnits
     # @see http://doi.ieeecomputersociety.org/10.1109/32.403789
     # @return [Array]
     def unit_signature
-      return @signature unless @signature.nil?
+      return @signature if @signature
 
       vector = unit_signature_vector
       vector.each_with_index { |item, index| vector[index] = item * (20**index) }
@@ -2002,7 +2002,7 @@ module RubyUnits
         numerator = Integer(match[:numerator])
         denominator = Integer(match[:denominator])
         proper_string = match[:proper]
-        raise ArgumentError, "Improper fractions must have a whole number part" if !proper_string.nil? && !proper_string.match?(/^#{INTEGER_REGEX}$/)
+        raise ArgumentError, "Improper fractions must have a whole number part" if proper_string && !proper_string.match?(/^#{INTEGER_REGEX}$/)
 
         proper = proper_string.to_i
         unit_s = match[:unit]
@@ -2121,12 +2121,12 @@ module RubyUnits
         bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
       end
 
-      @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
+      @scalar = @scalar.to_f unless !@scalar || @scalar.empty?
       @scalar = 1 unless @scalar.is_a? Numeric
       scalar_as_int = @scalar.to_int
       @scalar = scalar_as_int if scalar_as_int == @scalar
 
-      bottom_scalar = 1 if bottom_scalar.nil? || bottom_scalar.empty?
+      bottom_scalar = 1 if !bottom_scalar || bottom_scalar.empty?
       bottom_scalar_as_int = bottom_scalar.to_i
       bottom_scalar = if bottom_scalar_as_int == bottom_scalar
                         bottom_scalar_as_int
