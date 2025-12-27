@@ -152,6 +152,9 @@ allowing you to add or subtract durations from time objects naturally.
 ```ruby
 Time.now + Unit.new("10 min")   #=> 10 minutes from now
 Time.now - Unit.new("2 hours")  #=> 2 hours ago
+
+Date.today + Unit.new("1 week")  #=> 7 days from today
+Date.today - Unit.new("30 days") #=> 30 days ago
 ```
 
 **Important:** When adding or subtracting large time units (years, decades, centuries),
@@ -169,7 +172,7 @@ For more precise durations, use smaller units (hours, minutes, seconds):
 Time.now + Unit.new("24 hours")  #=> Exactly 24 hours from now
 ```
 
-#### Converting Time to Units
+#### Converting Time and Date to Units
 
 You can convert `Time` objects to units representing the duration since the Unix epoch:
 
@@ -177,6 +180,14 @@ You can convert `Time` objects to units representing the duration since the Unix
 Time.now.to_unit              #=> Duration in seconds since epoch
 Time.now.to_unit('hours')     #=> Duration in hours since epoch
 Time.now.to_unit('days')      #=> Duration in days since epoch
+```
+
+You can convert `Date` objects to units representing days since the Julian calendar start:
+
+```ruby
+Date.today.to_unit            #=> Duration in days since Julian calendar start
+Date.today.to_unit('week')    #=> Duration in weeks since Julian calendar start
+Date.today.to_unit('year')    #=> Duration in years since Julian calendar start
 ```
 
 #### Creating Time from Units
