@@ -234,13 +234,37 @@ It is possible to define new units or redefine existing ones.
 
 #### Define New Unit
 
-The easiest approach is to define a unit in terms of other units.
+The easiest approach is to define a unit in terms of other units using the block form.
 
 ```ruby
 Unit.define("foobar") do |foobar|
   foobar.definition   = Unit.new("1 foo") * Unit.new("1 bar")   # anything that results in a Unit object
-  foobar.aliases      = %w{foobar fb}                   # array of synonyms for the unit
-  foobar.display_name = "Foobar"                        # How unit is displayed when output
+  foobar.aliases      = %w{foobar fb}                            # array of synonyms for the unit
+  foobar.display_name = "Foobar"                                 # How unit is displayed when output
+end
+```
+
+You can also create a unit definition directly and pass it to `Unit.define`:
+
+```ruby
+unit_definition = Unit::Definition.new("foobar") do |foobar|
+  foobar.definition = Unit.new("1 baz")
+  foobar.aliases = %w{foobar fb}
+  foobar.display_name = "Foobar"
+end
+Unit.define(unit_definition)
+```
+
+For more control, you can set the unit attributes explicitly:
+
+```ruby
+Unit.define("electron-volt") do |ev|
+  ev.aliases      = %w{eV electron-volt electron_volt}
+  ev.scalar       = 1.602e-19
+  ev.kind         = :energy
+  ev.numerator    = %w{<kilogram> <meter> <meter>}
+  ev.denominator  = %w{<second> <second>}
+  ev.display_name = "electron-volt"
 end
 ```
 
