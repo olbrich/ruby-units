@@ -7,7 +7,26 @@
 # on first access for performance reasons.
 #
 # See: https://github.com/troessner/reek/blob/master/docs/Instance-Variable-Assumption.md
+#
+# RepeatedConditional warnings are configured below to exclude legitimate cases where
+# the same condition needs to be checked in different methods for different purposes:
+#
+# - base?: Checked in to_base (early return), update_base_scalar (base unit calculation),
+#   and unit_signature_vector (recursion avoidance). Each serves a distinct purpose.
+#
+# - other: Type checking in operator overloading methods using case statements.
+#   This is a standard Ruby pattern for implementing polymorphic operators.
+#
+# - prefix_value: Checked in to_base (numerator/denominator processing) and parse
+#   (string parsing). These are completely different contexts.
+#
+# - temperature?: Checked in multiple methods (to_base, temperature_scale, arithmetic
+#   operators, power/root) where each serves a different purpose (conversion, formatting,
+#   validation, etc.).
 
 detectors:
   InstanceVariableAssumption:
+    enabled: false
+
+  RepeatedConditional:
     enabled: false

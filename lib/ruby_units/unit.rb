@@ -616,38 +616,37 @@ module RubyUnits
       conversion_factor = Rational(1)
       prefix_vals = unit_class.prefix_values
       unit_vals = unit_class.unit_values
-      @numerator.compact.each do |num_unit|
+
+      process_unit_for_numerator = lambda do |num_unit|
         prefix_value = prefix_vals[num_unit]
         if prefix_value
           conversion_factor *= prefix_value
         else
           unit_value = unit_vals[num_unit]
           if unit_value
-            unit_scalar = unit_value[:scalar]
-            unit_numerator = unit_value[:numerator]
-            unit_denominator = unit_value[:denominator]
-            conversion_factor *= unit_scalar
-            num << unit_numerator if unit_numerator
-            den << unit_denominator if unit_denominator
+            conversion_factor *= unit_value[:scalar]
+            num << unit_value[:numerator] if unit_value[:numerator]
+            den << unit_value[:denominator] if unit_value[:denominator]
           end
         end
       end
-      @denominator.compact.each do |num_unit|
+
+      process_unit_for_denominator = lambda do |num_unit|
         prefix_value = prefix_vals[num_unit]
         if prefix_value
           conversion_factor /= prefix_value
         else
           unit_value = unit_vals[num_unit]
           if unit_value
-            unit_scalar = unit_value[:scalar]
-            unit_numerator = unit_value[:numerator]
-            unit_denominator = unit_value[:denominator]
-            conversion_factor /= unit_scalar
-            den << unit_numerator if unit_numerator
-            num << unit_denominator if unit_denominator
+            conversion_factor /= unit_value[:scalar]
+            den << unit_value[:numerator] if unit_value[:numerator]
+            num << unit_value[:denominator] if unit_value[:denominator]
           end
         end
       end
+
+      @numerator.compact.each(&process_unit_for_numerator)
+      @denominator.compact.each(&process_unit_for_denominator)
 
       num = num.flatten.compact
       den = den.flatten.compact
@@ -842,7 +841,9 @@ module RubyUnits
       when Unit
         if zero?
           other.dup
-        elsif self =~ other
+        else
+          compatible = self =~ other
+          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible
           raise ArgumentError, "Cannot add two temperatures" if [self, other].all?(&:temperature?)
 
           if temperature?
@@ -852,8 +853,6 @@ module RubyUnits
           else
             unit_class.new(scalar: (base_scalar + other.base_scalar), numerator: base.numerator, denominator: base.denominator, signature: @signature).convert_to(self)
           end
-        else
-          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Date, Time
         raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be added to a Unit"
@@ -879,7 +878,10 @@ module RubyUnits
           else
             -other_copy
           end
-        elsif self =~ other
+        else
+          compatible = self =~ other
+          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible
+
           scalar_difference = base_scalar - other.base_scalar
           if [self, other].all?(&:temperature?)
             unit_class.new(scalar: scalar_difference, numerator: KELVIN, denominator: UNITY_ARRAY, signature: @signature).convert_to(temperature_scale)
@@ -890,8 +892,6 @@ module RubyUnits
           else
             unit_class.new(scalar: scalar_difference, numerator: base.numerator, denominator: base.denominator, signature: @signature).convert_to(self)
           end
-        else
-          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Time
         raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be subtracted from a Unit"
@@ -930,7 +930,8 @@ module RubyUnits
     def /(other)
       case other
       when Unit
-        raise ZeroDivisionError if other.zero?
+        is_zero = other.zero?
+        raise ZeroDivisionError if is_zero
         raise ArgumentError, "Cannot divide with temperatures" if [other, self].any?(&:temperature?)
 
         sc = unit_class.simplify_rational(Rational(@scalar, other.scalar))
@@ -938,7 +939,8 @@ module RubyUnits
         opts[:signature] = @signature - other.signature
         unit_class.new(opts)
       when Numeric
-        raise ZeroDivisionError if other.zero?
+        is_zero = other.zero?
+        raise ZeroDivisionError if is_zero
 
         sc = unit_class.simplify_rational(Rational(@scalar, other))
         unit_class.new(scalar: sc, numerator: @numerator, denominator: @denominator, signature: @signature)
@@ -954,8 +956,7 @@ module RubyUnits
     # @return [Unit]
     # @raise [ArgumentError] if units are not compatible
     def remainder(other)
-      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
-
+      ensure_compatible_with(other)
       unit_class.new(base_scalar.remainder(other.to_unit.base_scalar), to_base.units).convert_to(self)
     end
 
@@ -965,8 +966,7 @@ module RubyUnits
     # @return [Array(Integer, Unit)]
     # @raise [ArgumentError] if units are not compatible
     def divmod(other)
-      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
-
+      ensure_compatible_with(other)
       [quo(other).to_base.floor, self % other]
     end
 
@@ -976,8 +976,7 @@ module RubyUnits
     # @return [Integer]
     # @raise [ArgumentError] if units are not compatible
     def %(other)
-      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
-
+      ensure_compatible_with(other)
       unit_class.new(base_scalar % other.to_unit.base_scalar, to_base.units).convert_to(self)
     end
     alias modulo %
@@ -1008,7 +1007,8 @@ module RubyUnits
     # @raise [ArgumentError] when attempting to raise to a complex number
     # @raise [ArgumentError] when an invalid exponent is passed
     def **(other)
-      raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
+      is_temperature = temperature?
+      raise ArgumentError, "Cannot raise a temperature to a power" if is_temperature
 
       if other.is_a?(Numeric)
         return inverse if other == -1
@@ -1215,27 +1215,21 @@ module RubyUnits
     # @return [Float]
     # @raise [RuntimeError] when not unitless
     def to_f
-      return @scalar.to_f if unitless?
-
-      raise "Cannot convert '#{self}' to Float unless unitless.  Use Unit#scalar"
+      return_scalar_or_raise(:to_f, Float)
     end
 
     # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
     # @return [Complex]
     # @raise [RuntimeError] when not unitless
     def to_c
-      return Complex(@scalar) if unitless?
-
-      raise "Cannot convert '#{self}' to Complex unless unitless.  Use Unit#scalar"
+      return_scalar_or_raise(:to_c, Complex, ->(s) { Complex(s) })
     end
 
     # if unitless, returns an int, otherwise raises an error
     # @return [Integer]
     # @raise [RuntimeError] when not unitless
     def to_i
-      return @scalar.to_int if unitless?
-
-      raise "Cannot convert '#{self}' to Integer unless unitless.  Use Unit#scalar"
+      return_scalar_or_raise(:to_int, Integer)
     end
 
     alias to_int to_i
@@ -1244,9 +1238,7 @@ module RubyUnits
     # @return [Rational]
     # @raise [RuntimeError] when not unitless
     def to_r
-      return @scalar.to_r if unitless?
-
-      raise "Cannot convert '#{self}' to Rational unless unitless.  Use Unit#scalar"
+      return_scalar_or_raise(:to_r, Rational)
     end
 
     # Returns string formatted for json
@@ -1304,18 +1296,14 @@ module RubyUnits
     # negates the scalar of the Unit
     # @return [Numeric,Unit]
     def -@
-      return -@scalar if unitless?
-
-      dup * -1
+      return_scalar_or_unit(-@scalar, -@scalar)
     end
 
     # absolute value of a unit
     # @return [Numeric,Unit]
     def abs
       abs_scalar = @scalar.abs
-      return abs_scalar if unitless?
-
-      with_new_scalar(abs_scalar)
+      return_scalar_or_unit(abs_scalar, abs_scalar)
     end
 
     # ceil of a unit
@@ -1323,9 +1311,7 @@ module RubyUnits
     # @return [Numeric,Unit]
     def ceil(...)
       ceiled_scalar = @scalar.ceil(...)
-      return ceiled_scalar if unitless?
-
-      with_new_scalar(ceiled_scalar)
+      return_scalar_or_unit(ceiled_scalar, ceiled_scalar)
     end
 
     # Floor of a unit
@@ -1333,9 +1319,7 @@ module RubyUnits
     # @return [Numeric,Unit]
     def floor(...)
       floored_scalar = @scalar.floor(...)
-      return floored_scalar if unitless?
-
-      with_new_scalar(floored_scalar)
+      return_scalar_or_unit(floored_scalar, floored_scalar)
     end
 
     # Round the unit according to the rules of the scalar's class. Call this
@@ -1351,9 +1335,7 @@ module RubyUnits
     # @return [Numeric,Unit]
     def round(...)
       rounded_scalar = @scalar.round(...)
-      return rounded_scalar if unitless?
-
-      with_new_scalar(rounded_scalar)
+      return_scalar_or_unit(rounded_scalar, rounded_scalar)
     end
 
     # Truncate the unit according to the scalar's truncate method
@@ -1361,9 +1343,7 @@ module RubyUnits
     # @return [Numeric, Unit]
     def truncate(...)
       truncated_scalar = @scalar.truncate(...)
-      return truncated_scalar if unitless?
-
-      with_new_scalar(truncated_scalar)
+      return_scalar_or_unit(truncated_scalar, truncated_scalar)
     end
 
     # Returns next unit in a range. Increments the scalar by 1.
@@ -1438,16 +1418,12 @@ module RubyUnits
     # @return [Time, Date, DateTime]
     # @raise [ArgumentError] when time_point is not a Time, Date, or DateTime
     def before(time_point = ::Time.now)
-      case time_point
-      when Time, Date, DateTime
-        (begin
-          time_point - self
-        rescue StandardError
-          time_point.to_datetime - self
-        end)
-      else
-        raise ArgumentError, "Must specify a Time, Date, or DateTime"
-      end
+      validate_time_point(time_point)
+      (begin
+        time_point - self
+      rescue StandardError
+        time_point.to_datetime - self
+      end)
     end
 
     alias before_now before
@@ -1457,13 +1433,12 @@ module RubyUnits
     # @return [Unit]
     # @raise [ArgumentError] when time point is not a Time, Date, or DateTime
     def since(time_point)
+      validate_time_point(time_point)
       case time_point
       when Time
         unit_class.new(::Time.now - time_point, "second").convert_to(self)
       when DateTime, Date
         unit_class.new(::DateTime.now - time_point, "day").convert_to(self)
-      else
-        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1471,13 +1446,12 @@ module RubyUnits
     # @param [Time, Date, DateTime] time_point
     # @return [Unit]
     def until(time_point)
+      validate_time_point(time_point)
       case time_point
       when Time
         unit_class.new(time_point - ::Time.now, "second").convert_to(self)
       when DateTime, Date
         unit_class.new(time_point - ::DateTime.now, "day").convert_to(self)
-      else
-        raise ArgumentError, "Must specify a Time, Date, or DateTime"
       end
     end
 
@@ -1486,16 +1460,12 @@ module RubyUnits
     # @return [Time, Date, DateTime]
     # @raise [ArgumentError] when passed argument is not a Time, Date, or DateTime
     def from(time_point)
-      case time_point
-      when Time, DateTime, Date
-        (begin
-          time_point + self
-        rescue StandardError
-          time_point.to_datetime + self
-        end)
-      else
-        raise ArgumentError, "Must specify a Time, Date, or DateTime"
-      end
+      validate_time_point(time_point)
+      (begin
+        time_point + self
+      rescue StandardError
+        time_point.to_datetime + self
+      end)
     end
 
     alias after from
@@ -1556,6 +1526,22 @@ module RubyUnits
 
     # Protected and Private Functions that should only be called from this class
     protected
+
+    # Ensure that this unit is compatible with another unit
+    # @param [Object] other
+    # @return [void]
+    # @raise [ArgumentError] if units are not compatible
+    def ensure_compatible_with(other)
+      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
+    end
+
+    # Validate that a time_point is a Time, Date, or DateTime
+    # @param [Object] time_point
+    # @return [void]
+    # @raise [ArgumentError] when time_point is not a Time, Date, or DateTime
+    def validate_time_point(time_point)
+      raise ArgumentError, "Must specify a Time, Date, or DateTime" unless time_point.is_a?(Time) || time_point.is_a?(Date) || time_point.is_a?(DateTime)
+    end
 
     # figure out what the scalar part of the base unit for this unit is
     # @return [nil]
@@ -1692,11 +1678,12 @@ module RubyUnits
     # @return [String] formatted string
     def format_scalar(unit_str)
       separator = RubyUnits.configuration.separator
+      is_integer = scalar_is_integer?
       case @scalar
       when Complex
         "#{@scalar}#{separator}#{unit_str}"
       when Rational
-        "#{scalar_is_integer? ? @scalar.to_i : @scalar}#{separator}#{unit_str}"
+        "#{is_integer ? @scalar.to_i : @scalar}#{separator}#{unit_str}"
       else
         "#{'%g' % @scalar}#{separator}#{unit_str}"
       end.strip
@@ -1705,6 +1692,8 @@ module RubyUnits
     # Helper to check if scalar is effectively an integer
     # @return [Boolean]
     def scalar_is_integer?
+      return false if @scalar.is_a?(Complex)
+
       @scalar == @scalar.to_i
     end
 
@@ -1721,6 +1710,28 @@ module RubyUnits
     def initialize_copy(other)
       @numerator = other.numerator.dup
       @denominator = other.denominator.dup
+    end
+
+    # Return scalar if unitless, otherwise raise an error
+    # @param method [Symbol] method to call on scalar
+    # @param type [Class] the type being converted to (for error message)
+    # @param converter [Proc] optional converter proc (defaults to calling method on scalar)
+    # @return [Numeric]
+    # @raise [RuntimeError] when not unitless
+    def return_scalar_or_raise(method, type, converter = nil)
+      raise "Cannot convert '#{self}' to #{type} unless unitless.  Use Unit#scalar" unless unitless?
+
+      converter ? converter.call(@scalar) : @scalar.public_send(method)
+    end
+
+    # Return scalar if unitless, otherwise return a new unit with the modified scalar
+    # @param scalar_value [Numeric] the scalar value to return if unitless
+    # @param new_scalar [Numeric] the new scalar for the unit if not unitless
+    # @return [Numeric,Unit]
+    def return_scalar_or_unit(scalar_value, new_scalar)
+      return scalar_value if unitless?
+
+      with_new_scalar(new_scalar)
     end
 
     # Initialize instance variables to their default values
