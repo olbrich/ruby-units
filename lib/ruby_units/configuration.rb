@@ -5,10 +5,6 @@
 # with associated units of measurement.
 module RubyUnits
   class << self
-    # @api private
-    # :reek:Attribute
-    attr_writer :configuration
-
     # Get or initialize the configuration
     # @return [Configuration] the configuration instance
     def configuration
@@ -32,7 +28,44 @@ module RubyUnits
     yield configuration
   end
 
-  # Holds actual configuration values for RubyUnits
+  # Configuration class for RubyUnits
+  #
+  # This class manages global configuration settings that control how units are
+  # formatted and represented throughout the RubyUnits library. It provides a
+  # centralized way to customize output behavior without modifying individual
+  # Unit instances.
+  #
+  # == Configuration Options
+  #
+  # [separator]
+  #   Controls the spacing between numeric values and unit strings in output.
+  #   - `:space` (default): Adds a single space (e.g., "5 m")
+  #   - `:none`: No space is added (e.g., "5m")
+  #
+  # [format]
+  #   Determines the notation style for unit representation.
+  #   - `:rational` (default): Uses numerator/denominator notation (e.g., "3 m/s^2")
+  #   - `:exponential`: Uses exponential notation (e.g., "3 m*s^-2")
+  #
+  # [default_precision]
+  #   Sets the precision level when converting fractional unit values to rationals.
+  #   Default is 0.0001. Must be a positive number.
+  #
+  # == Usage
+  #
+  #   # Access global configuration
+  #   config = RubyUnits.configuration
+  #
+  #   # Configure via block
+  #   RubyUnits.configure do |config|
+  #     config.separator = :none
+  #     config.format = :exponential
+  #     config.default_precision = 0.0001
+  #   end
+  #
+  #   # Reset to defaults
+  #   RubyUnits.reset
+  #
   class Configuration
     # Used to separate the scalar from the unit when generating output. A value
     # of `:space` will insert a single space, and `:none` will prevent adding a
