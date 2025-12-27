@@ -3,7 +3,7 @@
 module RubyUnits
   # Performance optimizations to avoid creating units unnecessarily
   class Cache
-    attr_accessor :data
+    attr_reader :data
 
     def initialize
       clear

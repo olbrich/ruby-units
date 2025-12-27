@@ -27,22 +27,26 @@ module RubyUnits
     class << self
       # return a list of all defined units
       # @return [Hash{Symbol=>RubyUnits::Units::Definition}]
-      attr_accessor :definitions
+      attr_reader :definitions
 
       # @return [Hash{Symbol => String}] the list of units and their prefixes
-      attr_accessor :prefix_values
+      attr_reader :prefix_values
 
       # @return [Hash{Symbol => String}]
-      attr_accessor :prefix_map
+      attr_reader :prefix_map
 
       # @return [Hash{Symbol => String}]
-      attr_accessor :unit_map
+      attr_reader :unit_map
 
       # @return [Hash{Symbol => String}]
-      attr_accessor :unit_values
+      attr_reader :unit_values
 
       # @return [Hash{Integer => Symbol}]
       attr_reader :kinds
+
+      private
+
+      attr_writer :definitions, :prefix_values, :prefix_map, :unit_map, :unit_values
     end
     self.definitions = {}
     self.prefix_values = {}
@@ -200,7 +204,7 @@ module RubyUnits
     # @param [Class] subclass
     def self.inherited(subclass)
       super
-      subclass.definitions = definitions.dup
+      subclass.send(:definitions=, definitions.dup)
       subclass.instance_variable_set(:@kinds, @kinds.dup)
       subclass.setup
     end
@@ -486,31 +490,31 @@ module RubyUnits
     include Comparable
 
     # @return [Numeric]
-    attr_accessor :scalar
+    attr_reader :scalar
 
     # @return [Array]
-    attr_accessor :numerator
+    attr_reader :numerator
 
     # @return [Array]
-    attr_accessor :denominator
+    attr_reader :denominator
 
     # @return [Integer]
-    attr_accessor :signature
+    attr_reader :signature
 
     # @return [Numeric]
-    attr_accessor :base_scalar
+    attr_reader :base_scalar
 
     # @return [Array]
-    attr_accessor :base_numerator
+    attr_reader :base_numerator
 
     # @return [Array]
-    attr_accessor :base_denominator
+    attr_reader :base_denominator
 
     # @return [String]
-    attr_accessor :output
+    attr_reader :output
 
     # @return [String]
-    attr_accessor :unit_name
+    attr_reader :unit_name
 
     # Used to copy one unit to another
     # @param from [RubyUnits::Unit] Unit to copy definition from
