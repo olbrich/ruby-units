@@ -865,10 +865,11 @@ module RubyUnits
       case other
       when Unit
         if zero?
+          other_copy = other.dup
           if other.zero?
-            other.dup * -1 # preserve Units class
+            other_copy * -1 # preserve Units class
           else
-            -other.dup
+            -other_copy
           end
         elsif self =~ other
           scalar_difference = base_scalar - other.base_scalar
@@ -1012,7 +1013,8 @@ module RubyUnits
       when Integer
         power(other)
       when Float
-        return self**other.to_i if other == other.to_i
+        other_as_int = other.to_i
+        return self**other_as_int if other == other_as_int
 
         valid = (1..9).map { Rational(1, _1) }
         raise ArgumentError, "Not a n-th root (1..9), use 1/n" unless valid.include? other.abs
@@ -1071,13 +1073,15 @@ module RubyUnits
       items_to_remove_per_unit = exponent - 1
       @numerator.uniq.each do |item|
         count = result_numerator.count(item)
-        removals = ((count / exponent) * items_to_remove_per_unit).to_int
+        count_over_exponent = count / exponent
+        removals = (count_over_exponent * items_to_remove_per_unit).to_int
         removals.times { result_numerator.delete_at(result_numerator.index(item)) }
       end
 
       @denominator.uniq.each do |item|
         count = result_denominator.count(item)
-        removals = ((count / exponent) * items_to_remove_per_unit).to_int
+        count_over_exponent = count / exponent
+        removals = (count_over_exponent * items_to_remove_per_unit).to_int
         removals.times { result_denominator.delete_at(result_denominator.index(item)) }
       end
       unit_class.new(scalar: @scalar**Rational(1, exponent), numerator: result_numerator, denominator: result_denominator)
@@ -1134,26 +1138,31 @@ module RubyUnits
 
         # @type [Numeric]
         unit_map = unit_class.unit_map
+        ratio_5_9 = Rational(5, 9)
+        ratio_9_5 = Rational(9, 5)
+        scalar_rational = @scalar.to_r
         @base_scalar ||= case unit_map[start_unit]
                          when "<tempC>"
                            @scalar + 273.15
                          when "<tempK>"
                            @scalar
                          when "<tempF>"
-                           (@scalar + 459.67).to_r * Rational(5, 9)
+                           (@scalar + 459.67).to_r * ratio_5_9
                          when "<tempR>"
-                           @scalar.to_r * Rational(5, 9)
+                           scalar_rational * ratio_5_9
                          end
         # @type [Numeric]
+        base_scalar_rational = @base_scalar.to_r
+        base_times_ratio_9_5 = base_scalar_rational * ratio_9_5
         result_scalar = case unit_map[target_unit]
                         when "<tempC>"
                           @base_scalar - 273.15
                         when "<tempK>"
                           @base_scalar
                         when "<tempF>"
-                          (@base_scalar.to_r * Rational(9, 5)) - 459.67r
+                          base_times_ratio_9_5 - 459.67r
                         when "<tempR>"
-                          @base_scalar.to_r * Rational(9, 5)
+                          base_times_ratio_9_5
                         end
         unit_class.new("#{result_scalar} #{target_unit}")
       else
@@ -1174,17 +1183,23 @@ module RubyUnits
         unit_vals = unit_class.unit_values
         to_scalar = ->(unit_array) { unit_array.map { prefix_vals[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : unit_vals[_1][:scalar] }.compact }
 
+        target_num = target.numerator
+        target_den = target.denominator
         source_numerator_values   = to_scalar.call(@numerator)
         source_denominator_values = to_scalar.call(@denominator)
-        target_numerator_values   = to_scalar.call(target.numerator)
-        target_denominator_values = to_scalar.call(target.denominator)
+        target_numerator_values   = to_scalar.call(target_num)
+        target_denominator_values = to_scalar.call(target_den)
         # @type [Rational, Numeric]
-        conversion_scalar = @scalar.is_a?(Integer) ? @scalar.to_r : @scalar
+        scalar_is_integer = @scalar.is_a?(Integer)
+        conversion_scalar = scalar_is_integer ? @scalar.to_r : @scalar
         converted_value = conversion_scalar * (source_numerator_values + target_denominator_values).reduce(1, :*) / (target_numerator_values + source_denominator_values).reduce(1, :*)
         # Convert the scalar to an Integer if the result is equivalent to an
         # integer
-        converted_value = converted_value.to_i if @scalar.is_a?(Integer) && converted_value.to_i == converted_value
-        unit_class.new(scalar: converted_value, numerator: target.numerator, denominator: target.denominator, signature: target.signature)
+        if scalar_is_integer
+          converted_as_int = converted_value.to_i
+          converted_value = converted_as_int if converted_as_int == converted_value
+        end
+        unit_class.new(scalar: converted_value, numerator: target_num, denominator: target_den, signature: target.signature)
       end
     end
 
@@ -1292,27 +1307,30 @@ module RubyUnits
     # absolute value of a unit
     # @return [Numeric,Unit]
     def abs
-      return @scalar.abs if unitless?
+      abs_scalar = @scalar.abs
+      return abs_scalar if unitless?
 
-      with_new_scalar(@scalar.abs)
+      with_new_scalar(abs_scalar)
     end
 
     # ceil of a unit
     # Forwards all arguments to the scalar's ceil method
     # @return [Numeric,Unit]
     def ceil(...)
-      return @scalar.ceil(...) if unitless?
+      ceiled_scalar = @scalar.ceil(...)
+      return ceiled_scalar if unitless?
 
-      with_new_scalar(@scalar.ceil(...))
+      with_new_scalar(ceiled_scalar)
     end
 
     # Floor of a unit
     # Forwards all arguments to the scalar's floor method
     # @return [Numeric,Unit]
     def floor(...)
-      return @scalar.floor(...) if unitless?
+      floored_scalar = @scalar.floor(...)
+      return floored_scalar if unitless?
 
-      with_new_scalar(@scalar.floor(...))
+      with_new_scalar(floored_scalar)
     end
 
     # Round the unit according to the rules of the scalar's class. Call this
@@ -1505,11 +1523,12 @@ module RubyUnits
       return self if units.include?("kg")
 
       prefix_vals = unit_class.prefix_values
-      centesimal_range = (1/100r)..(1/10r)
+      centesimal_value = 1/100r
+      centesimal_range = centesimal_value..(1/10r)
       best_prefix = if kind == :information
                       prefix_vals.key(2**((::Math.log(base_scalar, 2) / 10.0).floor * 10))
                     elsif centesimal_range.cover?(base_scalar)
-                      prefix_vals.key(1/100r)
+                      prefix_vals.key(centesimal_value)
                     else
                       prefix_vals.key(10**((::Math.log10(base_scalar) / 3.0).floor * 3))
                     end
@@ -1854,13 +1873,18 @@ module RubyUnits
       unit_string.gsub!(/[%'"#]/, "%" => "percent", "'" => "feet", '"' => "inch", "#" => "pound")
       if unit_string.start_with?(COMPLEX_NUMBER)
         match = unit_string.match(COMPLEX_REGEX)
-        real = Float(match[:real]) if match[:real]
-        imaginary = Float(match[:imaginary])
+        real_str = match[:real]
+        imaginary_str = match[:imaginary]
+        real = Float(real_str) if real_str
+        imaginary = Float(imaginary_str)
         unit_s = match[:unit]
-        real = real.to_i if real.to_i == real
-        imaginary = imaginary.to_i if imaginary.to_i == imaginary
+        real_as_int = real.to_i if real
+        real = real_as_int if real_as_int == real
+        imaginary_as_int = imaginary.to_i
+        imaginary = imaginary_as_int if imaginary_as_int == imaginary
         complex = Complex(real || 0, imaginary)
-        complex = complex.to_i if complex.imaginary.zero? && complex.real == complex.real.to_i
+        complex_real = complex.real
+        complex = complex.to_i if complex.imaginary.zero? && complex_real == complex_real.to_i
         result = unit_class.new(unit_s || 1) * complex
         copy(result)
         return
@@ -1870,25 +1894,31 @@ module RubyUnits
         match = unit_string.match(RATIONAL_REGEX)
         numerator = Integer(match[:numerator])
         denominator = Integer(match[:denominator])
-        raise ArgumentError, "Improper fractions must have a whole number part" if !match[:proper].nil? && !match[:proper].match?(/^#{INTEGER_REGEX}$/)
+        proper_string = match[:proper]
+        raise ArgumentError, "Improper fractions must have a whole number part" if !proper_string.nil? && !proper_string.match?(/^#{INTEGER_REGEX}$/)
 
-        proper = match[:proper].to_i
+        proper = proper_string.to_i
         unit_s = match[:unit]
+        fraction = Rational(numerator, denominator)
         rational = if proper.negative?
-                     (proper - Rational(numerator, denominator))
+                     (proper - fraction)
                    else
-                     (proper + Rational(numerator, denominator))
+                     (proper + fraction)
                    end
-        rational = rational.to_int if rational.to_int == rational
+        rational_as_int = rational.to_int
+        rational = rational_as_int if rational_as_int == rational
         result = unit_class.new(unit_s || 1) * rational
         copy(result)
         return
       end
 
       match = unit_string.match(NUMBER_REGEX)
-      unit = unit_class.cached.get(match[:unit])
-      mult = match[:scalar] == "" ? 1.0 : match[:scalar].to_f
-      mult = mult.to_int if mult.to_int == mult
+      unit_str = match[:unit]
+      unit = unit_class.cached.get(unit_str)
+      scalar_str = match[:scalar]
+      mult = scalar_str == "" ? 1.0 : scalar_str.to_f
+      mult_as_int = mult.to_int
+      mult = mult_as_int if mult_as_int == mult
 
       if unit
         copy(unit)
@@ -1984,11 +2014,13 @@ module RubyUnits
 
       @scalar = @scalar.to_f unless @scalar.nil? || @scalar.empty?
       @scalar = 1 unless @scalar.is_a? Numeric
-      @scalar = @scalar.to_int if @scalar.to_int == @scalar
+      scalar_as_int = @scalar.to_int
+      @scalar = scalar_as_int if scalar_as_int == @scalar
 
       bottom_scalar = 1 if bottom_scalar.nil? || bottom_scalar.empty?
-      bottom_scalar = if bottom_scalar.to_i == bottom_scalar
-                        bottom_scalar.to_i
+      bottom_scalar_as_int = bottom_scalar.to_i
+      bottom_scalar = if bottom_scalar_as_int == bottom_scalar
+                        bottom_scalar_as_int
                       else
                         bottom_scalar.to_f
                       end
@@ -2005,13 +2037,19 @@ module RubyUnits
       used = "#{top} #{bottom}".gsub(unit_class.unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
       raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
 
-      @numerator = @numerator.map do |item|
-        unit_class.prefix_map[item[0]] ? [unit_class.prefix_map[item[0]], unit_class.unit_map[item[1]]] : [unit_class.unit_map[item[1]]]
-      end.flatten.compact.delete_if(&:empty?)
+      prefix_map = unit_class.prefix_map
+      unit_map = unit_class.unit_map
+      transform_units = lambda do |item|
+        prefix = item[0]
+        unit = item[1]
+        prefix_value = prefix_map[prefix]
+        unit_value = unit_map[unit]
+        prefix_value ? [prefix_value, unit_value] : [unit_value]
+      end
 
-      @denominator = @denominator.map do |item|
-        unit_class.prefix_map[item[0]] ? [unit_class.prefix_map[item[0]], unit_class.unit_map[item[1]]] : [unit_class.unit_map[item[1]]]
-      end.flatten.compact.delete_if(&:empty?)
+      @numerator = @numerator.map(&transform_units).flatten.compact.delete_if(&:empty?)
+
+      @denominator = @denominator.map(&transform_units).flatten.compact.delete_if(&:empty?)
 
       @numerator = UNITY_ARRAY if @numerator.empty?
       @denominator = UNITY_ARRAY if @denominator.empty?
