@@ -233,10 +233,68 @@ If time arithmetic would result in a date outside the valid range for the `Time`
 
 works so long as the starting point has an integer scalar
 
-### Math functions
+### Math Functions
 
-All Trig math functions (sin, cos, sinh, hypot...) can take a unit as their
-parameter. It will be converted to radians and then used if possible.
+Ruby-units extends the `Math` module to support Unit objects seamlessly. All trigonometric
+and mathematical functions work with units, handling conversions automatically.
+
+#### Supported Functions
+
+**Trigonometric Functions** (angles converted to radians automatically):
+- `sin`, `cos`, `tan` - Standard trigonometric functions
+- `sinh`, `cosh`, `tanh` - Hyperbolic trigonometric functions
+
+**Inverse Trigonometric Functions** (return angles in radians as Unit objects):
+- `asin`, `acos`, `atan` - Inverse trigonometric functions
+- `atan2` - Two-argument arctangent for full quadrant determination
+
+**Root Functions** (preserve dimensional analysis):
+- `sqrt` - Square root (e.g., √(4 m²) = 2 m)
+- `cbrt` - Cube root (e.g., ³√(27 m³) = 3 m)
+
+**Other Functions**:
+- `hypot` - Euclidean distance calculation with units
+- `log`, `log10` - Logarithmic functions (extract scalar from units)
+
+#### Examples
+
+```ruby
+# Trigonometric functions with angle units
+Math.sin(Unit.new("90 deg"))        #=> 1.0
+Math.cos(Unit.new("180 deg"))       #=> -1.0
+Math.tan(Unit.new("45 deg"))        #=> 1.0
+
+# Works with different angle units
+Math.sin(Unit.new("1.571 rad"))     #=> 1.0 (approximately π/2)
+Math.cos(Unit.new("3.14159 rad"))   #=> -1.0 (approximately π)
+
+# Inverse functions return Unit objects in radians
+Math.asin(0.5)                       #=> Unit.new("0.524 rad") (30°)
+Math.atan(1)                         #=> Unit.new("0.785 rad") (45°)
+Math.acos(0)                         #=> Unit.new("1.571 rad") (90°)
+
+# Root functions preserve dimensional analysis
+Math.sqrt(Unit.new("4 m^2"))        #=> Unit.new("2 m")
+Math.cbrt(Unit.new("27 m^3"))       #=> Unit.new("3 m")
+Math.sqrt(Unit.new("9 kg*m/s^2"))   #=> Unit.new("3 kg^(1/2)*m^(1/2)/s")
+
+# Hypot for distance calculations (Pythagorean theorem)
+Math.hypot(Unit.new("3 m"), Unit.new("4 m"))     #=> Unit.new("5 m")
+Math.hypot(Unit.new("30 cm"), Unit.new("40 cm")) #=> Unit.new("50 cm")
+
+# atan2 for converting Cartesian to polar coordinates
+Math.atan2(Unit.new("1 m"), Unit.new("1 m"))     #=> Unit.new("0.785 rad") (45°)
+Math.atan2(Unit.new("1 m"), Unit.new("0 m"))     #=> Unit.new("1.571 rad") (90°)
+
+# Logarithmic functions (units must be compatible for input)
+Math.log10(Unit.new("100"))         #=> 2.0
+Math.log(Unit.new("2.718"))         #=> 1.0 (natural log, approximately)
+Math.log(Unit.new("8"), 2)          #=> 3.0 (log base 2)
+```
+
+**Note:** Trigonometric functions expect angular units or dimensionless numbers. If you pass
+a Unit with dimensions (like meters), it will be converted to radians, which may produce
+unexpected results.
 
 ### Temperatures
 
