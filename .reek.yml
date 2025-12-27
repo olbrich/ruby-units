@@ -1,0 +1,13 @@
+# Reek configuration
+#
+# InstanceVariableAssumption is disabled because the Unit class uses a mix of
+# eager initialization (in initialize_instance_variables) and lazy initialization
+# (using defined? checks) for its instance variables. This is an intentional design
+# pattern where some variables are initialized immediately and others are computed
+# on first access for performance reasons.
+#
+# See: https://github.com/troessner/reek/blob/master/docs/Instance-Variable-Assumption.md
+
+detectors:
+  InstanceVariableAssumption:
+    enabled: false
