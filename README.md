@@ -144,18 +144,60 @@ Unit.new("100 kg").to_s(:stone)   # returns 15 stone, 10 lb
 
 ### Time Helpers
 
-`Time`, `Date`, and `DateTime` objects can have time units added or subtracted.
+Ruby-units extends the `Time`, `Date`, and `DateTime` classes to support unit-based arithmetic,
+allowing you to add or subtract durations from time objects naturally.
+
+#### Adding and Subtracting Durations
 
 ```ruby
-Time.now + Unit.new("10 min")
+Time.now + Unit.new("10 min")   #=> 10 minutes from now
+Time.now - Unit.new("2 hours")  #=> 2 hours ago
 ```
 
-Several helpers have also been defined. Note: If you include the 'Chronic' gem,
-you can specify times in natural language.
+**Important:** When adding or subtracting large time units (years, decades, centuries),
+the duration is first converted to days and rounded to maintain calendar accuracy.
+This means `1 year` is treated as approximately 365 days rather than an exact number of seconds.
 
 ```ruby
-Unit.new('min').since(DateTime.parse('9/18/06 3:00pm'))
+Time.now + Unit.new("1 year")    #=> Approximately 365 days from now
+Time.now - Unit.new("1 decade")  #=> Approximately 3650 days ago
 ```
+
+For more precise durations, use smaller units (hours, minutes, seconds):
+
+```ruby
+Time.now + Unit.new("24 hours")  #=> Exactly 24 hours from now
+```
+
+#### Converting Time to Units
+
+You can convert `Time` objects to units representing the duration since the Unix epoch:
+
+```ruby
+Time.now.to_unit              #=> Duration in seconds since epoch
+Time.now.to_unit('hours')     #=> Duration in hours since epoch
+Time.now.to_unit('days')      #=> Duration in days since epoch
+```
+
+#### Creating Time from Units
+
+Use `Time.at` to create a Time object from a duration unit:
+
+```ruby
+Time.at(Unit.new("1000 seconds"))           #=> Time 1000 seconds after epoch
+Time.at(Unit.new("1 hour"), 500, :ms)       #=> Time 1 hour + 500 milliseconds after epoch
+```
+
+#### Convenience Methods
+
+The `Time.in` method provides a shorthand for calculating future times:
+
+```ruby
+Time.in('5 min')    #=> 5 minutes from now
+Time.in('2 hours')  #=> 2 hours from now
+```
+
+#### Duration Formats
 
 Durations may be entered as 'HH:MM:SS, usec' and will be returned in 'hours'.
 
@@ -167,6 +209,21 @@ Unit.new('0:30:30')  #=> 0.5 h + 30 sec
 
 If only one ":" is present, it is interpreted as the separator between hours and
 minutes.
+
+#### Compatibility with Chronic
+
+Several helpers are available for working with natural language time parsing.
+Note: If you include the 'Chronic' gem, you can specify times in natural language.
+
+```ruby
+Unit.new('min').since(DateTime.parse('9/18/06 3:00pm'))
+```
+
+#### Range Errors and DateTime Fallback
+
+If time arithmetic would result in a date outside the valid range for the `Time` class
+(typically 1970-2038 on 32-bit systems), ruby-units automatically falls back to using
+`DateTime` objects to handle the calculation.
 
 ### Ranges
 
