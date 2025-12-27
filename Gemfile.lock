@@ -265,7 +265,7 @@ DEPENDENCIES
   rubocop
   rubocop-rake
   rubocop-rspec
-  ruby-lsp (~> 0.26.4)
+  ruby-lsp
   ruby-maven
   ruby-prof
   ruby-units!
