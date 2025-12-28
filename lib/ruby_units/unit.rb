@@ -1321,14 +1321,14 @@ module RubyUnits
     # @return [Numeric,Unit]
     def -@
       neg_scalar = -@scalar
-      return_scalar_or_unit(neg_scalar, neg_scalar)
+      return_scalar_or_unit(neg_scalar)
     end
 
     # absolute value of a unit
     # @return [Numeric,Unit]
     def abs
       abs_scalar = @scalar.abs
-      return_scalar_or_unit(abs_scalar, abs_scalar)
+      return_scalar_or_unit(abs_scalar)
     end
 
     # ceil of a unit
@@ -1336,7 +1336,7 @@ module RubyUnits
     # @return [Numeric,Unit]
     def ceil(...)
       ceiled_scalar = @scalar.ceil(...)
-      return_scalar_or_unit(ceiled_scalar, ceiled_scalar)
+      return_scalar_or_unit(ceiled_scalar)
     end
 
     # Floor of a unit
@@ -1344,7 +1344,7 @@ module RubyUnits
     # @return [Numeric,Unit]
     def floor(...)
       floored_scalar = @scalar.floor(...)
-      return_scalar_or_unit(floored_scalar, floored_scalar)
+      return_scalar_or_unit(floored_scalar)
     end
 
     # Round the unit according to the rules of the scalar's class. Call this
@@ -1360,7 +1360,7 @@ module RubyUnits
     # @return [Numeric,Unit]
     def round(...)
       rounded_scalar = @scalar.round(...)
-      return_scalar_or_unit(rounded_scalar, rounded_scalar)
+      return_scalar_or_unit(rounded_scalar)
     end
 
     # Truncate the unit according to the scalar's truncate method
@@ -1368,7 +1368,7 @@ module RubyUnits
     # @return [Numeric, Unit]
     def truncate(...)
       truncated_scalar = @scalar.truncate(...)
-      return_scalar_or_unit(truncated_scalar, truncated_scalar)
+      return_scalar_or_unit(truncated_scalar)
     end
 
     # Returns next unit in a range. Increments the scalar by 1.
@@ -1787,11 +1787,10 @@ module RubyUnits
 
     # Return the scalar if unitless, otherwise return a new unit with the modified scalar
     # This helper method is used by unary operations like #-@, #abs, #ceil, #floor, #round, #truncate
-    # @param scalar_value [Numeric] the scalar value to return if unitless
-    # @param new_scalar [Numeric] the new scalar value for the unit if not unitless
+    # @param new_scalar [Numeric] the new scalar value
     # @return [Numeric, Unit] the scalar if unitless, or a new unit with the modified scalar
-    def return_scalar_or_unit(scalar_value, new_scalar)
-      return scalar_value if unitless?
+    def return_scalar_or_unit(new_scalar)
+      return new_scalar if unitless?
 
       with_new_scalar(new_scalar)
     end
