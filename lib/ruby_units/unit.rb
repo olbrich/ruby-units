@@ -608,7 +608,8 @@ module RubyUnits
         return base
       end
 
-      cached_unit = unit_class.base_unit_cache.get(units)
+      base_cache = unit_class.base_unit_cache
+      cached_unit = base_cache.get(units)
       return cached_unit * scalar if cached_unit
 
       num = []
@@ -622,25 +623,27 @@ module RubyUnits
         if prefix_value
           conversion_factor *= prefix_value
         else
-          unit_value = unit_vals[num_unit]
-          if unit_value
-            conversion_factor *= unit_value[:scalar]
-            num << unit_value[:numerator] if unit_value[:numerator]
-            den << unit_value[:denominator] if unit_value[:denominator]
+          num_unit_value = unit_vals[num_unit]
+          if num_unit_value
+            unit_scalar, unit_numerator, unit_denominator = num_unit_value.values_at(:scalar, :numerator, :denominator)
+            conversion_factor *= unit_scalar
+            num << unit_numerator if unit_numerator
+            den << unit_denominator if unit_denominator
           end
         end
       end
 
-      process_unit_for_denominator = lambda do |num_unit|
-        prefix_value = prefix_vals[num_unit]
+      process_unit_for_denominator = lambda do |den_unit|
+        prefix_value = prefix_vals[den_unit]
         if prefix_value
           conversion_factor /= prefix_value
         else
-          unit_value = unit_vals[num_unit]
-          if unit_value
-            conversion_factor /= unit_value[:scalar]
-            den << unit_value[:numerator] if unit_value[:numerator]
-            num << unit_value[:denominator] if unit_value[:denominator]
+          den_unit_value = unit_vals[den_unit]
+          if den_unit_value
+            unit_scalar, unit_numerator, unit_denominator = den_unit_value.values_at(:scalar, :numerator, :denominator)
+            conversion_factor /= unit_scalar
+            den << unit_numerator if unit_numerator
+            num << unit_denominator if unit_denominator
           end
         end
       end
@@ -652,7 +655,7 @@ module RubyUnits
       den = den.flatten.compact
       num = UNITY_ARRAY if num.empty?
       base = unit_class.new(unit_class.eliminate_terms(conversion_factor, num, den))
-      unit_class.base_unit_cache.set(units, base)
+      base_cache.set(units, base)
       base * @scalar
     end
 
@@ -928,10 +931,11 @@ module RubyUnits
     # @raise [ZeroDivisionError] if divisor is zero
     # @raise [ArgumentError] if attempting to divide a temperature by another temperature
     def /(other)
+      # Guard against division by zero once to avoid duplicate calls
+      raise ZeroDivisionError if other.respond_to?(:zero?) && other.zero?
+
       case other
       when Unit
-        is_zero = other.zero?
-        raise ZeroDivisionError if is_zero
         raise ArgumentError, "Cannot divide with temperatures" if [other, self].any?(&:temperature?)
 
         sc = unit_class.simplify_rational(Rational(@scalar, other.scalar))
@@ -939,9 +943,6 @@ module RubyUnits
         opts[:signature] = @signature - other.signature
         unit_class.new(opts)
       when Numeric
-        is_zero = other.zero?
-        raise ZeroDivisionError if is_zero
-
         sc = unit_class.simplify_rational(Rational(@scalar, other))
         unit_class.new(scalar: sc, numerator: @numerator, denominator: @denominator, signature: @signature)
       else
@@ -1078,18 +1079,13 @@ module RubyUnits
       result_denominator = @denominator.dup
 
       items_to_remove_per_unit = exponent - 1
-      @numerator.uniq.each do |item|
-        count = result_numerator.count(item)
-        count_over_exponent = count / exponent
-        removals = (count_over_exponent * items_to_remove_per_unit).to_int
-        removals.times { result_numerator.delete_at(result_numerator.index(item)) }
-      end
-
-      @denominator.uniq.each do |item|
-        count = result_denominator.count(item)
-        count_over_exponent = count / exponent
-        removals = (count_over_exponent * items_to_remove_per_unit).to_int
-        removals.times { result_denominator.delete_at(result_denominator.index(item)) }
+      [[@numerator, result_numerator], [@denominator, result_denominator]].each do |source, result|
+        source.uniq.each do |item|
+          count = result.count(item)
+          count_over_exponent = count / exponent
+          removals = (count_over_exponent * items_to_remove_per_unit).to_int
+          removals.times { result.delete_at(result.index(item)) }
+        end
       end
       unit_class.new(scalar: @scalar**Rational(1, exponent), numerator: result_numerator, denominator: result_denominator)
     end
@@ -1296,7 +1292,8 @@ module RubyUnits
     # negates the scalar of the Unit
     # @return [Numeric,Unit]
     def -@
-      return_scalar_or_unit(-@scalar, -@scalar)
+      neg_scalar = -@scalar
+      return_scalar_or_unit(neg_scalar, neg_scalar)
     end
 
     # absolute value of a unit
@@ -1604,8 +1601,10 @@ module RubyUnits
     # @param part_unit [String] the unit for the fractional part
     # @param precision [Float] precision for rationalization
     # @return [String] formatted compound unit string
-    def format_compound_unit(whole, part, whole_unit, part_unit, precision: RubyUnits.configuration.default_precision)
-      separator = RubyUnits.configuration.separator
+    def format_compound_unit(whole, part, whole_unit, part_unit, precision: nil)
+      configuration = RubyUnits.configuration
+      precision ||= configuration.default_precision
+      separator = configuration.separator
       improper, frac = part.divmod(1)
       frac_str = unit_class.format_fraction(frac, precision: precision)
       sign = negative? ? "-" : ""
@@ -1647,10 +1646,10 @@ module RubyUnits
       case target_units.strip
       when /\A\s*\Z/ # whitespace only
         ""
-      when /(%[-+.\w#]+)\s*(.+)*/ # format string like '%0.2f in'
-        convert_with_format_string(Regexp.last_match(1), Regexp.last_match(2), target_units, format)
-      when /(\S+)/ # unit only 'mm' or '1/mm'
-        convert_to(Regexp.last_match(1)).to_s(format: format)
+      when /(?<format_str>%[-+.\w#]+)\s*(?<target_unit>.+)*/ # format string like '%0.2f in'
+        convert_with_format_string(Regexp.last_match("format_str"), Regexp.last_match("target_unit"), target_units, format)
+      when /(?<unit>\S+)/ # unit only 'mm' or '1/mm'
+        convert_to(Regexp.last_match("unit")).to_s(format: format)
       else
         raise "unhandled case"
       end
