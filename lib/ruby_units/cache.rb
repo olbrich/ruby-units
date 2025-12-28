@@ -20,6 +20,8 @@ module RubyUnits
     # @return [void]
     def set(key, value)
       key = key.to_unit.units unless key.is_a?(String)
+      return if should_skip_caching?(key)
+
       data[key] = value
     end
 
@@ -31,6 +33,10 @@ module RubyUnits
     # Reset the cache
     def clear
       @data = {}
+    end
+
+    def should_skip_caching?(key)
+      keys.include?(key) || key =~ RubyUnits::Unit.special_format_regex
     end
   end
 end
