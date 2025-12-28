@@ -47,13 +47,6 @@ module RubyUnits
       private
 
       attr_writer :definitions, :prefix_values, :prefix_map, :unit_map, :unit_values
-
-      # Helper to simplify a rational by returning numerator if denominator is 1
-      # @param [Rational] rational
-      # @return [Integer, Rational]
-      def simplify_rational(rational)
-        rational.denominator == 1 ? rational.numerator : rational
-      end
     end
     self.definitions = {}
     self.prefix_values = {}
@@ -523,6 +516,14 @@ module RubyUnits
 
       rationalized = frac.rationalize(precision)
       "-#{rationalized}"
+    end
+
+    # Helper to simplify a rational by returning numerator if denominator is 1
+    # @param [Rational] rational
+    # @return [Integer, Rational]
+    # @private
+    def self.simplify_rational(rational)
+      rational.denominator == 1 ? rational.numerator : rational
     end
 
     include Comparable
@@ -1559,19 +1560,6 @@ module RubyUnits
     # Protected and Private Functions that should only be called from this class
     protected
 
-    # figure out what the scalar part of the base unit for this unit is
-    # @return [nil]
-    def update_base_scalar
-      if base?
-        @base_scalar = @scalar
-        @signature   = unit_signature
-      else
-        base         = to_base
-        @base_scalar = base.scalar
-        @signature   = base.signature
-      end
-    end
-
     # calculates the unit signature vector used by unit_signature
     # @return [Array]
     # @raise [ArgumentError] when exponent associated with a unit is > 20 or < -20
@@ -1588,8 +1576,6 @@ module RubyUnits
       vector
     end
 
-    private
-
     # Internal helper for unit_signature_vector
     # Applies unit definitions from items to the signature vector with a sign
     # @param vector [Array<Integer>] signature accumulation array
@@ -1600,6 +1586,21 @@ module RubyUnits
         definition = unit_class.definition(item)
         index = SIGNATURE_VECTOR.index(definition.kind)
         vector[index] += sign if index
+      end
+    end
+
+    private
+
+    # figure out what the scalar part of the base unit for this unit is
+    # @return [nil]
+    def update_base_scalar
+      if base?
+        @base_scalar = @scalar
+        @signature   = unit_signature
+      else
+        base         = to_base
+        @base_scalar = base.scalar
+        @signature   = base.signature
       end
     end
 
