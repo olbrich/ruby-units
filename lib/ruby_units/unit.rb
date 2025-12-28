@@ -416,7 +416,6 @@ module RubyUnits
 
     # return a regexp fragment used to match prefixes
     # @return [String]
-    # @private
     def self.prefix_regex
       @prefix_regex ||= prefix_map.keys.sort_by { [_1.length, _1] }.reverse.join("|")
     end
@@ -1553,22 +1552,6 @@ module RubyUnits
     # Protected and Private Functions that should only be called from this class
     protected
 
-    # Ensure that this unit is compatible with another unit
-    # @param [Object] other
-    # @return [void]
-    # @raise [ArgumentError] if units are not compatible
-    def ensure_compatible_with(other)
-      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
-    end
-
-    # Validate that a time_point is a Time, Date, or DateTime
-    # @param [Object] time_point
-    # @return [void]
-    # @raise [ArgumentError] when time_point is not a Time, Date, or DateTime
-    def validate_time_point(time_point)
-      raise ArgumentError, "Must specify a Time, Date, or DateTime" unless time_point.is_a?(Time) || time_point.is_a?(Date) || time_point.is_a?(DateTime)
-    end
-
     # figure out what the scalar part of the base unit for this unit is
     # @return [nil]
     def update_base_scalar
@@ -1620,12 +1603,28 @@ module RubyUnits
       end
     end
 
+    # Ensure that this unit is compatible with another unit
+    # @param [Object] other the unit to check compatibility with
+    # @return [void]
+    # @raise [ArgumentError] if units are not compatible
+    def ensure_compatible_with(other)
+      raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
+    end
+
+    # Validate that a time_point is a Time, Date, or DateTime
+    # @param [Object] time_point the object to validate
+    # @return [void]
+    # @raise [ArgumentError] when time_point is not a Time, Date, or DateTime
+    def validate_time_point(time_point)
+      raise ArgumentError, "Must specify a Time, Date, or DateTime" unless time_point.is_a?(Time) || time_point.is_a?(Date) || time_point.is_a?(DateTime)
+    end
+
     # Helper methods for power operation
 
     # Validate that power operation is allowed
-    # @param exponent [Numeric] the exponent
+    # @param exponent [Numeric] the exponent value
     # @return [void]
-    # @raise [ArgumentError] if operation is not allowed
+    # @raise [ArgumentError] if operation is not allowed (temperature units or non-integer exponent)
     def validate_power_operation(exponent)
       raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
       raise ArgumentError, "Exponent must an Integer" unless exponent.is_a?(Integer)
@@ -1714,11 +1713,13 @@ module RubyUnits
     end
 
     # Convert with a format string
-    # @param format_str [String] the format string
-    # @param target_unit [String, nil] the target unit
-    # @param original_target [String] the original target_units string (for strftime fallback)
-    # @param format [Symbol] the format to use
-    # @return [String] formatted string
+    # Handles formatting of unit conversions with custom format strings or strftime patterns
+    # @param format_str [String] the format string (e.g., '%0.2f')
+    # @param target_unit [String, nil] the target unit to convert to, nil for no conversion
+    # @param original_target [String] the original target_units string for strftime fallback
+    # @param format [Symbol] the output format symbol
+    # @return [String] the formatted unit string
+    # @raise [StandardError] caught and handled by attempting strftime parsing
     def convert_with_format_string(format_str, target_unit, original_target, format)
       if target_unit # unit specified, need to convert
         convert_to(target_unit).to_s(format_str, format: format)
@@ -1730,9 +1731,10 @@ module RubyUnits
       (DateTime.new(0) + self).strftime(original_target)
     end
 
-    # Format the scalar value
-    # @param unit_str [String] the unit string
-    # @return [String] formatted string
+    # Format the scalar value with appropriate separator and unit string
+    # Handles Complex, Rational, and numeric scalars appropriately
+    # @param unit_str [String] the unit string to append
+    # @return [String] the formatted scalar with separator and unit string
     def format_scalar(unit_str)
       separator = RubyUnits.configuration.separator
       is_integer = scalar_is_integer?
@@ -1746,45 +1748,49 @@ module RubyUnits
       end.strip
     end
 
-    # Helper to check if scalar is effectively an integer
-    # @return [Boolean]
+    # Check if the scalar is effectively an integer
+    # Handles Complex numbers by returning false, and compares the scalar to its integer representation
+    # @return [Boolean] true if scalar equals its integer representation, false otherwise
     def scalar_is_integer?
       return false if @scalar.is_a?(Complex)
 
       @scalar == @scalar.to_i
     end
 
-    # Helper to create a new unit with modified scalar but same units
-    # @param [Numeric] new_scalar
-    # @return [Unit]
+    # Create a new unit with a modified scalar but the same units
+    # @param new_scalar [Numeric] the new scalar value for the unit
+    # @return [Unit] a new unit with the same numerator and denominator but different scalar
     def with_new_scalar(new_scalar)
       unit_class.new(scalar: new_scalar, numerator: @numerator, denominator: @denominator)
     end
 
-    # used by #dup to duplicate a Unit
-    # @param [Unit] other
-    # @private
+    # Initialize copy: used by #dup to duplicate a Unit
+    # Duplicates the numerator and denominator arrays to ensure deep copying
+    # @param other [Unit] the unit to copy from
     def initialize_copy(other)
       @numerator = other.numerator.dup
       @denominator = other.denominator.dup
+      super
     end
 
-    # Return scalar if unitless, otherwise raise an error
-    # @param method [Symbol] method to call on scalar
-    # @param type [Class] the type being converted to (for error message)
-    # @param converter [Proc] optional converter proc (defaults to calling method on scalar)
-    # @return [Numeric]
-    # @raise [RuntimeError] when not unitless
+    # Return the scalar if unitless, otherwise raise an error
+    # This helper method is used by conversion methods like #to_f, #to_i, #to_c, #to_r
+    # @param method [Symbol] the method to call on the scalar (e.g., :to_f, :to_i)
+    # @param type [Class] the type being converted to (used in error message)
+    # @param converter [Proc, nil] optional converter proc; if provided, called instead of method
+    # @return [Numeric] the scalar converted using the provided method or converter
+    # @raise [RuntimeError] when the unit is not unitless
     def return_scalar_or_raise(method, type, converter = nil)
       raise "Cannot convert '#{self}' to #{type} unless unitless.  Use Unit#scalar" unless unitless?
 
       converter ? converter.call(@scalar) : @scalar.public_send(method)
     end
 
-    # Return scalar if unitless, otherwise return a new unit with the modified scalar
+    # Return the scalar if unitless, otherwise return a new unit with the modified scalar
+    # This helper method is used by unary operations like #-@, #abs, #ceil, #floor, #round, #truncate
     # @param scalar_value [Numeric] the scalar value to return if unitless
-    # @param new_scalar [Numeric] the new scalar for the unit if not unitless
-    # @return [Numeric,Unit]
+    # @param new_scalar [Numeric] the new scalar value for the unit if not unitless
+    # @return [Numeric, Unit] the scalar if unitless, or a new unit with the modified scalar
     def return_scalar_or_unit(scalar_value, new_scalar)
       return scalar_value if unitless?
 
