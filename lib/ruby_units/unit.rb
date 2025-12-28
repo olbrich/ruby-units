@@ -454,26 +454,58 @@ module RubyUnits
     #
     # @param definition [RubyUnits::Unit::Definition]
     def self.use_definition(definition)
-      @unit_match_regex = nil # invalidate the unit match regex
-      @temp_regex = nil # invalidate the temp regex
-      @special_format_regex = nil # invalidate the special format regex
-      definition_name = definition.name
-      definition_aliases = definition.aliases
-      definition_scalar = definition.scalar
+      invalidate_regex_cache
       if definition.prefix?
-        prefix_values[definition_name] = definition_scalar
-        definition_aliases.each { prefix_map[_1] = definition_name }
-        @prefix_regex = nil # invalidate the prefix regex
+        register_prefix_definition(definition)
       else
-        unit_value = unit_values[definition_name] = {}
-        definition_numerator = definition.numerator
-        definition_denominator = definition.denominator
-        unit_value[:scalar] = definition_scalar
-        unit_value[:numerator] = definition_numerator if definition_numerator
-        unit_value[:denominator] = definition_denominator if definition_denominator
-        definition_aliases.each { unit_map[_1] = definition_name }
-        @unit_regex = nil # invalidate the unit regex
+        register_unit_definition(definition)
       end
+    end
+
+    # Invalidate regex cache for unit parsing
+    def self.invalidate_regex_cache
+      @unit_match_regex = nil
+      @temp_regex = nil
+      @special_format_regex = nil
+    end
+
+    # Register a prefix definition
+    # @param definition [RubyUnits::Unit::Definition]
+    def self.register_prefix_definition(definition)
+      definition_name = definition.name
+      prefix_values[definition_name] = definition.scalar
+      register_aliases(definition.aliases, definition_name, prefix_map)
+      @prefix_regex = nil
+    end
+
+    # Register a unit definition
+    # @param definition [RubyUnits::Unit::Definition]
+    def self.register_unit_definition(definition)
+      definition_name = definition.name
+      unit_value = create_unit_value(definition)
+      unit_values[definition_name] = unit_value
+      register_aliases(definition.aliases, definition_name, unit_map)
+      @unit_regex = nil
+    end
+
+    # Create a hash for unit value
+    # @param definition [RubyUnits::Unit::Definition]
+    # @return [Hash]
+    def self.create_unit_value(definition)
+      numerator = definition.numerator
+      denominator = definition.denominator
+      unit_value = { scalar: definition.scalar }
+      unit_value[:numerator] = numerator if numerator
+      unit_value[:denominator] = denominator if denominator
+      unit_value
+    end
+
+    # Register aliases for a definition
+    # @param aliases [Array] the aliases to register
+    # @param name [String] the canonical name
+    # @param map [Hash] the map to register aliases in
+    def self.register_aliases(aliases, name, map)
+      aliases.each { map[_1] = name }
     end
 
     # Format a fraction part with optional rationalization
