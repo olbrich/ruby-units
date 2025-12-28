@@ -1627,7 +1627,7 @@ module RubyUnits
     # @raise [ArgumentError] if operation is not allowed (temperature units or non-integer exponent)
     def validate_power_operation(exponent)
       raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
-      raise ArgumentError, "Exponent must an Integer" unless exponent.is_a?(Integer)
+      raise ArgumentError, "Exponent must be an Integer" unless exponent.is_a?(Integer)
     end
 
     # Handle special cases for power operation

@@ -2208,15 +2208,15 @@ describe "Unit Math" do
     subject { RubyUnits::Unit.new("1 m") }
 
     it "raises an exception when passed a Float argument" do
-      expect { subject.power(1.5) }.to raise_error(ArgumentError, "Exponent must an Integer")
+      expect { subject.power(1.5) }.to raise_error(ArgumentError, "Exponent must be an Integer")
     end
 
     it "raises an exception when passed a Rational argument" do
-      expect { subject.power(Rational(1, 2)) }.to raise_error(ArgumentError, "Exponent must an Integer")
+      expect { subject.power(Rational(1, 2)) }.to raise_error(ArgumentError, "Exponent must be an Integer")
     end
 
     it "raises an exception when passed a Complex argument" do
-      expect { subject.power(Complex(1, 2)) }.to raise_error(ArgumentError, "Exponent must an Integer")
+      expect { subject.power(Complex(1, 2)) }.to raise_error(ArgumentError, "Exponent must be an Integer")
     end
 
     it "raises an exception when called on a temperature unit" do

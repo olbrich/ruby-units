@@ -1,6 +1,6 @@
 # Reek configuration
 #
-# InstanceVariableAssumption is disabled because the Unit class uses a mix of
+# InstanceVariableAssumption is disabled for Unit class because it uses a mix of
 # eager initialization (in initialize_instance_variables) and lazy initialization
 # (using defined? checks) for its instance variables. This is an intentional design
 # pattern where some variables are initialized immediately and others are computed
@@ -8,8 +8,8 @@
 #
 # See: https://github.com/troessner/reek/blob/master/docs/Instance-Variable-Assumption.md
 #
-# RepeatedConditional warnings are configured below to exclude legitimate cases where
-# the same condition needs to be checked in different methods for different purposes:
+# RepeatedConditional warnings are excluded for Unit class where the same condition
+# needs to be checked in different methods for different purposes:
 #
 # - base?: Checked in to_base (early return), update_base_scalar (base unit calculation),
 #   and unit_signature_vector (recursion avoidance). Each serves a distinct purpose.
@@ -26,7 +26,9 @@
 
 detectors:
   InstanceVariableAssumption:
-    enabled: false
+    exclude:
+      - RubyUnits::Unit
 
   RepeatedConditional:
-    enabled: false
+    exclude:
+      - RubyUnits::Unit
