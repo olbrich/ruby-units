@@ -1246,7 +1246,7 @@ module RubyUnits
     # @return [Complex]
     # @raise [RuntimeError] when not unitless
     def to_c
-      return_scalar_or_raise(:to_c, Complex, ->(s) { Complex(s) })
+      return_scalar_or_raise(:to_c, Complex)
     end
 
     # if unitless, returns an int, otherwise raises an error
@@ -1777,13 +1777,12 @@ module RubyUnits
     # This helper method is used by conversion methods like #to_f, #to_i, #to_c, #to_r
     # @param method [Symbol] the method to call on the scalar (e.g., :to_f, :to_i)
     # @param type [Class] the type being converted to (used in error message)
-    # @param converter [Proc, nil] optional converter proc; if provided, called instead of method
-    # @return [Numeric] the scalar converted using the provided method or converter
+    # @return [Numeric] the scalar converted using the provided method
     # @raise [RuntimeError] when the unit is not unitless
-    def return_scalar_or_raise(method, type, converter = nil)
+    def return_scalar_or_raise(method, type)
       raise "Cannot convert '#{self}' to #{type} unless unitless.  Use Unit#scalar" unless unitless?
 
-      converter ? converter.call(@scalar) : @scalar.public_send(method)
+      @scalar.public_send(method)
     end
 
     # Return the scalar if unitless, otherwise return a new unit with the modified scalar
