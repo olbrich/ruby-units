@@ -2040,7 +2040,7 @@ module RubyUnits
     # @todo This should either be a separate class or at least a class method
     def parse(passed_unit_string = "0")
       unit_string = passed_unit_string.dup
-      unit_string = "#{Regexp.last_match(1)} USD" if unit_string =~ /\$\s*(#{NUMBER_REGEX})/
+      unit_string = "#{Regexp.last_match('usd')} USD" if unit_string =~ /\$\s*(?<usd>#{NUMBER_REGEX})/
       unit_string.gsub!("\u00b0".encode("utf-8"), "deg") if unit_string.encoding == Encoding::UTF_8
 
       unit_string.gsub!(/(\d)[_,](\d)/, '\1\2') # remove underscores and commas in numbers
@@ -2048,11 +2048,9 @@ module RubyUnits
       unit_string.gsub!(/[%'"#]/, "%" => "percent", "'" => "feet", '"' => "inch", "#" => "pound")
       if unit_string.start_with?(COMPLEX_NUMBER)
         match = unit_string.match(COMPLEX_REGEX)
-        real_str = match[:real]
-        imaginary_str = match[:imaginary]
+        real_str, imaginary_str, unit_s = match.values_at(:real, :imaginary, :unit)
         real = Float(real_str) if real_str
         imaginary = Float(imaginary_str)
-        unit_s = match[:unit]
         real_as_int = real.to_i if real
         real = real_as_int if real_as_int == real
         imaginary_as_int = imaginary.to_i
@@ -2060,20 +2058,17 @@ module RubyUnits
         complex = Complex(real || 0, imaginary)
         complex_real = complex.real
         complex = complex.to_i if complex.imaginary.zero? && complex_real == complex_real.to_i
-        result = unit_class.new(unit_s || 1) * complex
-        copy(result)
-        return
+        return copy(unit_class.new(unit_s || 1) * complex)
       end
 
       if unit_string.start_with?(RATIONAL_NUMBER)
         match = unit_string.match(RATIONAL_REGEX)
-        numerator = Integer(match[:numerator])
-        denominator = Integer(match[:denominator])
-        proper_string = match[:proper]
+        numerator_string, denominator_string, proper_string, unit_s = match.values_at(:numerator, :denominator, :proper, :unit)
+        numerator = Integer(numerator_string)
+        denominator = Integer(denominator_string)
         raise ArgumentError, "Improper fractions must have a whole number part" if proper_string && !proper_string.match?(/^#{INTEGER_REGEX}$/)
 
         proper = proper_string.to_i
-        unit_s = match[:unit]
         fraction = Rational(numerator, denominator)
         rational = if proper.negative?
                      (proper - fraction)
@@ -2082,15 +2077,12 @@ module RubyUnits
                    end
         rational_as_int = rational.to_int
         rational = rational_as_int if rational_as_int == rational
-        result = unit_class.new(unit_s || 1) * rational
-        copy(result)
-        return
+        return copy(unit_class.new(unit_s || 1) * rational)
       end
 
       match = unit_string.match(NUMBER_REGEX)
-      unit_str = match[:unit]
+      unit_str, scalar_str = match.values_at(:unit, :scalar)
       unit = unit_class.cached.get(unit_str)
-      scalar_str = match[:scalar]
       mult = scalar_str == "" ? 1.0 : scalar_str.to_f
       mult_as_int = mult.to_int
       mult = mult_as_int if mult_as_int == mult
@@ -2113,63 +2105,50 @@ module RubyUnits
       unit_string.gsub!(/[<>]/, "")
 
       if (match = unit_string.match(TIME_REGEX))
-        hours = match[:hour]
-        minutes = match[:min]
-        seconds = match[:sec]
-        milliseconds = match[:msec]
+        hours, minutes, seconds, milliseconds = match.values_at(:hour, :min, :sec, :msec)
         raise ArgumentError, "Invalid Duration" if [hours, minutes, seconds, milliseconds].all?(&:nil?)
 
-        result = unit_class.new("#{hours || 0} hours") +
-                 unit_class.new("#{minutes || 0} minutes") +
-                 unit_class.new("#{seconds || 0} seconds") +
-                 unit_class.new("#{milliseconds || 0} milliseconds")
-        copy(result)
-        return
+        return copy(unit_class.new("#{hours || 0} hours") +
+                    unit_class.new("#{minutes || 0} minutes") +
+                    unit_class.new("#{seconds || 0} seconds") +
+                    unit_class.new("#{milliseconds || 0} milliseconds"))
       end
 
-      # Special processing for unusual unit strings
       # feet -- 6'5"
       if (match = unit_string.match(FEET_INCH_REGEX))
-        feet = Integer(match[:feet])
-        inches = match[:inches]
-        result = if feet.negative?
-                   unit_class.new("#{feet} ft") - unit_class.new("#{inches} inches")
-                 else
-                   unit_class.new("#{feet} ft") + unit_class.new("#{inches} inches")
-                 end
-        copy(result)
-        return
+        feet_str, inches = match.values_at(:feet, :inches)
+        feet = Integer(feet_str)
+        return copy(if feet.negative?
+                      unit_class.new("#{feet} ft") - unit_class.new("#{inches} inches")
+                    else
+                      unit_class.new("#{feet} ft") + unit_class.new("#{inches} inches")
+                    end)
       end
 
       # weight -- 8 lbs 12 oz
       if (match = unit_string.match(LBS_OZ_REGEX))
-        pounds = Integer(match[:pounds])
-        oz = match[:oz]
-        result = if pounds.negative?
-                   unit_class.new("#{pounds} lbs") - unit_class.new("#{oz} oz")
-                 else
-                   unit_class.new("#{pounds} lbs") + unit_class.new("#{oz} oz")
-                 end
-        copy(result)
-        return
+        pounds_str, oz = match.values_at(:pounds, :oz)
+        pounds = Integer(pounds_str)
+        return copy(if pounds.negative?
+                      unit_class.new("#{pounds} lbs") - unit_class.new("#{oz} oz")
+                    else
+                      unit_class.new("#{pounds} lbs") + unit_class.new("#{oz} oz")
+                    end)
       end
 
       # stone -- 3 stone 5, 2 stone, 14 stone 3 pounds, etc.
       if (match = unit_string.match(STONE_LB_REGEX))
-        stone = Integer(match[:stone])
-        pounds = match[:pounds]
-        result = if stone.negative?
-                   unit_class.new("#{stone} stone") - unit_class.new("#{pounds} lbs")
-                 else
-                   unit_class.new("#{stone} stone") + unit_class.new("#{pounds} lbs")
-                 end
-        copy(result)
-        return
+        stone_str, pounds = match.values_at(:stone, :pounds)
+        stone = Integer(stone_str)
+        return copy(if stone.negative?
+                      unit_class.new("#{stone} stone") - unit_class.new("#{pounds} lbs")
+                    else
+                      unit_class.new("#{stone} stone") + unit_class.new("#{pounds} lbs")
+                    end)
       end
 
       # more than one per.  I.e., "1 m/s/s"
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") if unit_string.count("/") > 1
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized #{unit_string}") if unit_string =~ /\s[02-9]/
+      validate_unit_string_format(passed_unit_string, unit_string)
 
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
       top.scan(TOP_REGEX).each do |item|
@@ -2212,13 +2191,11 @@ module RubyUnits
       # eliminate all known terms from this string.  This is a quick check to see if the passed unit
       # contains terms that are not defined.
       used = "#{top} #{bottom}".gsub(unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
-      raise(ArgumentError, "'#{passed_unit_string}' Unit not recognized") unless used.empty?
+      invalid_unit(passed_unit_string) unless used.empty?
 
       prefix_map = unit_class.prefix_map
       unit_map = unit_class.unit_map
-      transform_units = lambda do |item|
-        prefix = item[0]
-        unit = item[1]
+      transform_units = lambda do |(prefix, unit)|
         prefix_value = prefix_map[prefix]
         unit_value = unit_map[unit]
         prefix_value ? [prefix_value, unit_value] : [unit_value]
@@ -2231,6 +2208,23 @@ module RubyUnits
       @numerator = UNITY_ARRAY if @numerator.empty?
       @denominator = UNITY_ARRAY if @denominator.empty?
       self
+    end
+
+    def validate_unit_string_format(passed_unit_string, unit_string)
+      slash_count = unit_string.count("/")
+      return if slash_count <= 1 && unit_string !~ /\s[02-9]/
+
+      if slash_count > 1
+        invalid_unit(passed_unit_string)
+      else
+        invalid_unit(passed_unit_string, unit_string)
+      end
+    end
+
+    def invalid_unit(unit_string, additional_info = nil)
+      error_msg = "'#{unit_string}' Unit not recognized"
+      error_msg += " #{additional_info}" if additional_info
+      raise ArgumentError, error_msg
     end
   end
 end
