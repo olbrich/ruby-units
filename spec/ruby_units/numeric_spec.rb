@@ -26,7 +26,7 @@ RSpec.describe RubyUnits::Numeric do
       end
 
       it "raises an exception if the unit is not unitless" do
-        expect { 0.1.to_unit("m") }.to raise_error(ArgumentError, "Incompatible Units ('0.1' not compatible with 'm')")
+        expect { 0.1.to_unit("m") }.to raise_error(ArgumentError, "Incompatible Units ('0.1' not compatible with '1 m')")
         expect { 0.1.to_unit(RubyUnits::Unit.new("1 m")) }.to raise_error(ArgumentError, "Incompatible Units ('0.1' not compatible with '1 m')")
       end
     end
