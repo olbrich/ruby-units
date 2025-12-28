@@ -462,6 +462,8 @@ module RubyUnits
     end
 
     # Invalidate regex cache for unit parsing
+    #
+    # @return [void]
     def self.invalidate_regex_cache
       @unit_match_regex = nil
       @temp_regex = nil
@@ -469,7 +471,9 @@ module RubyUnits
     end
 
     # Register a prefix definition
+    #
     # @param definition [RubyUnits::Unit::Definition]
+    # @return [void]
     def self.register_prefix_definition(definition)
       definition_name = definition.name
       prefix_values[definition_name] = definition.scalar
@@ -478,7 +482,9 @@ module RubyUnits
     end
 
     # Register a unit definition
+    #
     # @param definition [RubyUnits::Unit::Definition]
+    # @return [void]
     def self.register_unit_definition(definition)
       definition_name = definition.name
       unit_value = create_unit_value(definition)
@@ -500,9 +506,11 @@ module RubyUnits
     end
 
     # Register aliases for a definition
-    # @param aliases [Array] the aliases to register
+    #
+    # @param aliases [Array<String>] the aliases to register
     # @param name [String] the canonical name
     # @param map [Hash] the map to register aliases in
+    # @return [void]
     def self.register_aliases(aliases, name, map)
       aliases.each { map[_1] = name }
     end
@@ -1543,6 +1551,9 @@ module RubyUnits
     end
 
     # override hash method so objects with same values are considered equal
+    # override hash method so objects with same values are considered equal
+    #
+    # @return [Integer]
     def hash
       [
         @scalar,
@@ -2215,6 +2226,14 @@ module RubyUnits
       self
     end
 
+    # Validate the basic format of a parsed unit string.
+    # Ensures there is at most one '/' and that there are no stray digits
+    # in the unit portion (which indicate malformed input).
+    #
+    # @param passed_unit_string [String] the original string passed by the caller
+    # @param unit_string [String] the normalized unit portion being validated
+    # @return [void]
+    # @raise [ArgumentError] when the unit string is malformed
     def validate_unit_string_format(passed_unit_string, unit_string)
       slash_count = unit_string.count("/")
       return if slash_count <= 1 && unit_string !~ /\s[02-9]/
@@ -2226,6 +2245,11 @@ module RubyUnits
       end
     end
 
+    # Raise a standardized ArgumentError for an unrecognized unit string.
+    #
+    # @param unit_string [String] the (possibly invalid) unit text
+    # @param additional_info [String, nil] optional additional context to include
+    # @raise [ArgumentError]
     def invalid_unit(unit_string, additional_info = nil)
       error_msg = "'#{unit_string}' Unit not recognized"
       error_msg += " #{additional_info}" if additional_info
