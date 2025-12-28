@@ -96,8 +96,8 @@ module RubyUnits
     ANY_NUMBER_REGEX   = /(?:#{ANY_NUMBER})?\s?([^-\d.].*)?/
     NUMBER_REGEX       = /(?<scalar>#{SCI_NUMBER}*)\s*(?<unit>.+)?/ # a number followed by a unit
     UNIT_STRING_REGEX  = %r{#{SCI_NUMBER}*\s*([^/]*)/*(.+)*}
-    TOP_REGEX          = /([^ *]+)(?:\^|\*\*)([\d-]+)/
-    BOTTOM_REGEX       = /([^* ]+)(?:\^|\*\*)(\d+)/
+    TOP_REGEX          = /(?<unit_part>[^ *]+)(?:\^|\*\*)(?<exponent>[\d-]+)/
+    BOTTOM_REGEX       = /(?<unit_part>[^* ]+)(?:\^|\*\*)(?<exponent>\d+)/
     NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
     COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/
     RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/
@@ -2156,9 +2156,8 @@ module RubyUnits
       validate_unit_string_format(passed_unit_string, unit_string)
 
       @scalar, top, bottom = unit_string.scan(UNIT_STRING_REGEX)[0] # parse the string into parts
-      top.scan(TOP_REGEX).each do |item|
-        unit_part = item[0]
-        exponent = item[1].to_i
+      top.scan(TOP_REGEX).each do |(unit_part, exponent_string)|
+        exponent = exponent_string.to_i
         unit_with_space = "#{unit_part} "
         if exponent >= 0
           top.gsub!(/#{unit_part}(\^|\*\*)#{exponent}/) { unit_with_space * exponent }
@@ -2168,7 +2167,10 @@ module RubyUnits
         end
       end
       if bottom
-        bottom.gsub!(BOTTOM_REGEX) { "#{Regexp.last_match(1)} " * Regexp.last_match(2).to_i }
+        bottom.gsub!(BOTTOM_REGEX) do
+          unit_part, bottom_exponent_string = Regexp.last_match.values_at(:unit_part, :exponent)
+          "#{unit_part} " * bottom_exponent_string.to_i
+        end
         # Separate leading decimal from denominator, if any
         bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
       end
