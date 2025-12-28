@@ -978,19 +978,20 @@ module RubyUnits
     # @return [Unit]
     # @raise [ZeroDivisionError] if divisor is zero
     # @raise [ArgumentError] if attempting to divide a temperature by another temperature
+    # :reek:DuplicateMethodCall
     def /(other)
-      # Guard against division by zero once to avoid duplicate calls
-      raise ZeroDivisionError if other.respond_to?(:zero?) && other.zero?
-
       case other
       when Unit
         raise ArgumentError, "Cannot divide with temperatures" if [other, self].any?(&:temperature?)
+        raise ZeroDivisionError if other.zero?
 
         sc = unit_class.simplify_rational(Rational(@scalar, other.scalar))
         opts = unit_class.eliminate_terms(sc, @numerator + other.denominator, @denominator + other.numerator)
         opts[:signature] = @signature - other.signature
         unit_class.new(opts)
       when Numeric
+        raise ZeroDivisionError if other.zero?
+
         sc = unit_class.simplify_rational(Rational(@scalar, other))
         unit_class.new(scalar: sc, numerator: @numerator, denominator: @denominator, signature: @signature)
       else
