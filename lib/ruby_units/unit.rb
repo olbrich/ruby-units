@@ -47,6 +47,13 @@ module RubyUnits
       private
 
       attr_writer :definitions, :prefix_values, :prefix_map, :unit_map, :unit_values
+
+      # Helper to simplify a rational by returning numerator if denominator is 1
+      # @param [Rational] rational
+      # @return [Integer, Rational]
+      def simplify_rational(rational)
+        rational.denominator == 1 ? rational.numerator : rational
+      end
     end
     self.definitions = {}
     self.prefix_values = {}
@@ -1579,13 +1586,6 @@ module RubyUnits
       raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { _1.abs >= 20 }
 
       vector
-    end
-
-    # Helper to simplify a rational by returning numerator if denominator is 1
-    # @param [Rational] rational
-    # @return [Integer, Rational]
-    def self.simplify_rational(rational)
-      rational.denominator == 1 ? rational.numerator : rational
     end
 
     private
