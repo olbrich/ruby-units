@@ -794,8 +794,7 @@ module RubyUnits
       elsif !temperature? && other.respond_to?(:zero?) && other.zero?
         base_scalar <=> 0
       elsif other.instance_of?(Unit)
-        raise ArgumentError, "Incompatible Units ('#{units}' not compatible with '#{other.units}')" unless self =~ other
-
+        ensure_compatible_with(other)
         base_scalar <=> other.base_scalar
       else
         coerced_unit, coerced_other = coerce(other)
@@ -815,7 +814,7 @@ module RubyUnits
       if other.respond_to?(:zero?) && other.zero?
         zero?
       elsif other.instance_of?(Unit)
-        return false unless self =~ other
+        return false unless compatible_with?(other)
 
         base_scalar == other.base_scalar
       else
@@ -886,9 +885,7 @@ module RubyUnits
       when Unit
         if zero?
           other.dup
-        else
-          compatible = self =~ other
-          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible
+        elsif compatible_with?(other)
           raise ArgumentError, "Cannot add two temperatures" if [self, other].all?(&:temperature?)
 
           if temperature?
@@ -898,6 +895,8 @@ module RubyUnits
           else
             unit_class.new(scalar: (base_scalar + other.base_scalar), numerator: base.numerator, denominator: base.denominator, signature: @signature).convert_to(self)
           end
+        else
+          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Date, Time
         raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be added to a Unit"
@@ -923,10 +922,7 @@ module RubyUnits
           else
             -other_copy
           end
-        else
-          compatible = self =~ other
-          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible
-
+        elsif compatible_with?(other)
           scalar_difference = base_scalar - other.base_scalar
           if [self, other].all?(&:temperature?)
             unit_class.new(scalar: scalar_difference, numerator: KELVIN, denominator: UNITY_ARRAY, signature: @signature).convert_to(temperature_scale)
@@ -937,6 +933,8 @@ module RubyUnits
           else
             unit_class.new(scalar: scalar_difference, numerator: base.numerator, denominator: base.denominator, signature: @signature).convert_to(self)
           end
+        else
+          raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')"
         end
       when Time
         raise ArgumentError, "Date and Time objects represent fixed points in time and cannot be subtracted from a Unit"
@@ -1214,7 +1212,7 @@ module RubyUnits
                  end
         return self if target.units == units
 
-        raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless self =~ target
+        ensure_compatible_with(target)
 
         prefix_vals = unit_class.prefix_values
         unit_vals = unit_class.unit_values

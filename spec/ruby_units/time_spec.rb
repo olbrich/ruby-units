@@ -47,7 +47,7 @@ RSpec.describe RubyUnits::Time do
   describe ".in" do
     specify { expect(Time.in("5 min")).to have_attributes(to_s: "2011-04-24 10:51:30 -0400") }
     specify { expect(Time.in([5, "min"])).to have_attributes(to_s: "2011-04-24 10:51:30 -0400") }
-    specify { expect { Time.in(300) }.to raise_error(ArgumentError, "Incompatible Units ('300' not compatible with 's')") }
+    specify { expect { Time.in(300) }.to raise_error(ArgumentError, "Incompatible Units ('300' not compatible with '1 s')") }
   end
 
   describe "#to_unit" do

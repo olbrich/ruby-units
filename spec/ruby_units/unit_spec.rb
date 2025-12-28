@@ -1839,8 +1839,8 @@ describe "Unit Comparisons" do
     end
 
     context "incompatible units cannot be compared" do
-      specify { expect { RubyUnits::Unit.new("1 m") < RubyUnits::Unit.new("1 liter") }.to raise_error(ArgumentError, "Incompatible Units ('m' not compatible with 'l')") }
-      specify { expect { RubyUnits::Unit.new("1 kg") > RubyUnits::Unit.new("60 mph") }.to raise_error(ArgumentError, "Incompatible Units ('kg' not compatible with 'mph')") }
+      specify { expect { RubyUnits::Unit.new("1 m") < RubyUnits::Unit.new("1 liter") }.to raise_error(ArgumentError, "Incompatible Units ('1 m' not compatible with '1 l')") }
+      specify { expect { RubyUnits::Unit.new("1 kg") > RubyUnits::Unit.new("60 mph") }.to raise_error(ArgumentError, "Incompatible Units ('1 kg' not compatible with '60 mph')") }
     end
 
     context "with coercions should be valid" do
@@ -1860,7 +1860,7 @@ describe "Unit Conversions" do
   end
 
   context "between incompatible units" do
-    specify { expect { RubyUnits::Unit.new("1 s").convert_to("m") }.to raise_error(ArgumentError, "Incompatible Units ('1 s' not compatible with 'm')") }
+    specify { expect { RubyUnits::Unit.new("1 s").convert_to("m") }.to raise_error(ArgumentError, "Incompatible Units ('1 s' not compatible with '1 m')") }
   end
 
   context "given bad input" do
