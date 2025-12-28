@@ -677,7 +677,10 @@ module RubyUnits
     # @param format [Symbol] Set to :exponential to force all units to be displayed in exponential format
     #
     # @return [String]
-    def to_s(target_units = nil, precision: RubyUnits.configuration.default_precision, format: RubyUnits.configuration.format)
+    def to_s(target_units = nil, precision: nil, format: nil)
+      configuration = RubyUnits.configuration
+      precision ||= configuration.default_precision
+      format ||= configuration.format
       out = @output[target_units]
       return out if out
 
