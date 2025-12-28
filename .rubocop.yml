@@ -30,3 +30,5 @@ Metrics/PerceivedComplexity:
   Enabled: false
 Metrics/AbcSize:
   Enabled: false
+Layout/ExtraSpacing:
+  AllowForAlignment: false
