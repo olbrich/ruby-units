@@ -1551,7 +1551,6 @@ module RubyUnits
     end
 
     # override hash method so objects with same values are considered equal
-    # override hash method so objects with same values are considered equal
     #
     # @return [Integer]
     def hash
