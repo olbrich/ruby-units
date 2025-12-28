@@ -1562,22 +1562,8 @@ module RubyUnits
       vector = ::Array.new(SIGNATURE_VECTOR.size, 0)
       # it's possible to have a kind that misses the array... kinds like :counting
       # are more like prefixes, so don't use them to calculate the vector
-      @numerator.map { unit_class.definition(_1) }.each do |definition|
-        kind = definition.kind
-        index = SIGNATURE_VECTOR.index(kind)
-        if index
-          current_value = vector[index]
-          vector[index] = current_value + 1
-        end
-      end
-      @denominator.map { unit_class.definition(_1) }.each do |definition|
-        kind = definition.kind
-        index = SIGNATURE_VECTOR.index(kind)
-        if index
-          current_value = vector[index]
-          vector[index] = current_value - 1
-        end
-      end
+      apply_signature_items(vector, @numerator, 1)
+      apply_signature_items(vector, @denominator, -1)
       raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { _1.abs >= 20 }
 
       vector
@@ -1591,6 +1577,19 @@ module RubyUnits
     end
 
     private
+
+    # Internal helper for unit_signature_vector
+    # Applies unit definitions from items to the signature vector with a sign
+    # @param vector [Array<Integer>] signature accumulation array
+    # @param items [Array<String>] unit tokens (numerator or denominator)
+    # @param sign [Integer] +1 for numerator, -1 for denominator
+    def apply_signature_items(vector, items, sign)
+      items.each do |item|
+        definition = unit_class.definition(item)
+        index = SIGNATURE_VECTOR.index(definition.kind)
+        vector[index] += sign if index
+      end
+    end
 
     # String formatting helper methods for to_s
 
