@@ -1078,16 +1078,10 @@ module RubyUnits
     # @raise [ArgumentError] when attempting to raise a temperature to a power
     # @raise [ArgumentError] when exponent is not an integer
     def power(exponent)
-      raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
-      raise ArgumentError, "Exponent must an Integer" unless exponent.is_a?(Integer)
-      return inverse if exponent == -1
-      return 1 if exponent.zero?
-      return self if exponent == 1
+      validate_power_operation(exponent)
+      return special_power_case(exponent) if [-1, 0, 1].include?(exponent)
 
-      iterations = (exponent - 1).to_i.abs
-      return (1..iterations).inject(self) { |acc, _elem| acc * self } if exponent >= 0
-
-      (1..iterations).inject(self) { |acc, _elem| acc / self }
+      calculate_power_result(exponent)
     end
 
     # Calculates the n-th root of a unit
@@ -1624,6 +1618,36 @@ module RubyUnits
         index = SIGNATURE_VECTOR.index(definition.kind)
         vector[index] += sign if index
       end
+    end
+
+    # Helper methods for power operation
+
+    # Validate that power operation is allowed
+    # @param exponent [Numeric] the exponent
+    # @return [void]
+    # @raise [ArgumentError] if operation is not allowed
+    def validate_power_operation(exponent)
+      raise ArgumentError, "Cannot raise a temperature to a power" if temperature?
+      raise ArgumentError, "Exponent must an Integer" unless exponent.is_a?(Integer)
+    end
+
+    # Handle special cases for power operation
+    # @param exponent [Integer] the exponent
+    # @return [Unit, Numeric]
+    def special_power_case(exponent)
+      return inverse if exponent == -1
+      return 1 if exponent.zero?
+
+      self
+    end
+
+    # Calculate the result of raising to a power
+    # @param exponent [Integer] the exponent
+    # @return [Unit]
+    def calculate_power_result(exponent)
+      iterations = (exponent - 1).to_i.abs
+      operation = exponent >= 0 ? :* : :/
+      (1..iterations).inject(self) { |acc, _elem| acc.send(operation, self) }
     end
 
     # String formatting helper methods for to_s
