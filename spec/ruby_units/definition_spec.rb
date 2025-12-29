@@ -5,8 +5,8 @@ require_relative "../spec_helper"
 describe "Unit::Definition('eV')" do
   subject do
     Unit::Definition.new("eV") do |ev|
-      ev.aliases      = %w[eV electron-volt electron_volt]
-      ev.definition   = RubyUnits::Unit.new("1.602E-19 joule")
+      ev.aliases = %w[eV electron-volt electron_volt]
+      ev.definition = RubyUnits::Unit.new("1.602E-19 joule")
       ev.display_name = "electron-volt"
     end
   end

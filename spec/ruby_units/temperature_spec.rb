@@ -27,24 +27,24 @@ RSpec.describe "temperatures" do
     after(:all) do
       # define the temp units back to normal
       Unit.define("tempK") do |unit|
-        unit.scalar    = 1
+        unit.scalar = 1
         unit.numerator = %w[<tempK>]
-        unit.aliases   = %w[tempK]
-        unit.kind      = :temperature
+        unit.aliases = %w[tempK]
+        unit.kind = :temperature
       end
 
       Unit.define("tempC") do |tempc|
-        tempc.definition  = RubyUnits::Unit.new("1 tempK")
+        tempc.definition = RubyUnits::Unit.new("1 tempK")
       end
 
-      temp_convert_factor = Rational(2_501_999_792_983_609, 4_503_599_627_370_496) # approximates 1/1.8
+      temp_convert_factor = RubyUnits::Unit::RATIO_5_9
 
       Unit.define("tempF") do |tempf|
-        tempf.definition  = RubyUnits::Unit.new(temp_convert_factor, "tempK")
+        tempf.definition = RubyUnits::Unit.new(temp_convert_factor, "tempK")
       end
 
       Unit.define("tempR") do |tempr|
-        tempr.definition  = RubyUnits::Unit.new("1 tempF")
+        tempr.definition = RubyUnits::Unit.new("1 tempF")
       end
     end
 

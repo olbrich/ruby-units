@@ -28,6 +28,6 @@ guard :rspec, cmd: "bundle exec rspec" do
   rspec.spec_helper = "spec/spec_helper.rb"
 
   watch(%r{^spec/.+_spec\.rb$})
-  watch(%r{^lib/(.+)\.rb$})     { |m| rspec.spec.call(m[1]) }
-  watch(rspec.spec_helper)      { rspec.spec_dir }
+  watch(%r{^lib/(.+)\.rb$}) { |m| rspec.spec.call(m[1]) }
+  watch(rspec.spec_helper) { rspec.spec_dir }
 end

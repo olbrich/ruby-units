@@ -55,8 +55,8 @@ module RubyUnits
     self.unit_values = {}
     @unit_regex = nil
     @unit_match_regex = nil
-    UNITY              = "<1>"
-    UNITY_ARRAY        = [UNITY].freeze
+    UNITY = "<1>"
+    UNITY_ARRAY = [UNITY].freeze
 
     SIGN_REGEX = /(?:[+-])?/ # +, -, or nothing
 
@@ -75,36 +75,36 @@ module RubyUnits
     # and 'inches', but they aren't defined at the point in the code where we
     # need this regex.
     FEET_INCH_UNITS_REGEX = /(?:'|ft|feet)\s*(?<inches>#{RATIONAL_NUMBER}|#{SCI_NUMBER})\s*(?:"|in|inch(?:es)?)/
-    FEET_INCH_REGEX    = /(?<feet>#{INTEGER_REGEX})\s*#{FEET_INCH_UNITS_REGEX}/
+    FEET_INCH_REGEX = /(?<feet>#{INTEGER_REGEX})\s*#{FEET_INCH_UNITS_REGEX}/
     # ideally we would like to generate this regex from the alias for a 'pound'
     # and 'ounce', but they aren't defined at the point in the code where we
     # need this regex.
-    LBS_OZ_UNIT_REGEX  = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(?<oz>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:ozs?|ounces?)/
-    LBS_OZ_REGEX       = /(?<pounds>#{INTEGER_REGEX})\s*#{LBS_OZ_UNIT_REGEX}/
+    LBS_OZ_UNIT_REGEX = /(?:#|lbs?|pounds?|pound-mass)+[\s,]*(?<oz>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:ozs?|ounces?)/
+    LBS_OZ_REGEX = /(?<pounds>#{INTEGER_REGEX})\s*#{LBS_OZ_UNIT_REGEX}/
     # ideally we would like to generate this regex from the alias for a 'stone'
     # and 'pound', but they aren't defined at the point in the code where we
     # need this regex. also note that the plural of 'stone' is still 'stone',
     # but we accept 'stones' anyway.
     STONE_LB_UNIT_REGEX = /(?:sts?|stones?)+[\s,]*(?<pounds>#{RATIONAL_NUMBER}|#{UNSIGNED_INTEGER_REGEX})\s*(?:#|lbs?|pounds?|pound-mass)*/
-    STONE_LB_REGEX     = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/
+    STONE_LB_REGEX = /(?<stone>#{INTEGER_REGEX})\s*#{STONE_LB_UNIT_REGEX}/
     # Time formats: 12:34:56,78, (hh:mm:ss,msec) etc.
-    TIME_REGEX         = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/
+    TIME_REGEX = /(?<hour>\d+):(?<min>\d+):?(?:(?<sec>\d+))?(?:[.](?<msec>\d+))?/
     # Complex numbers: 1+2i, 1.0+2.0i, -1-1i, etc.
-    COMPLEX_NUMBER     = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/
+    COMPLEX_NUMBER = /(?<real>#{SCI_NUMBER})?(?<imaginary>#{SCI_NUMBER})i\b/
     # Any Complex, Rational, or scientific number
-    ANY_NUMBER         = /(#{COMPLEX_NUMBER}|#{RATIONAL_NUMBER}|#{SCI_NUMBER})/
-    ANY_NUMBER_REGEX   = /(?:#{ANY_NUMBER})?\s?([^-\d.].*)?/
-    NUMBER_REGEX       = /(?<scalar>#{SCI_NUMBER}*)\s*(?<unit>.+)?/ # a number followed by a unit
-    UNIT_STRING_REGEX  = %r{#{SCI_NUMBER}*\s*([^/]*)/*(.+)*}
-    TOP_REGEX          = /(?<unit_part>[^ *]+)(?:\^|\*\*)(?<exponent>[\d-]+)/
-    BOTTOM_REGEX       = /(?<unit_part>[^* ]+)(?:\^|\*\*)(?<exponent>\d+)/
-    NUMBER_UNIT_REGEX  = /#{SCI_NUMBER}?(.*)/
-    COMPLEX_REGEX      = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/
-    RATIONAL_REGEX     = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/
-    KELVIN             = ["<kelvin>"].freeze
-    FAHRENHEIT         = ["<fahrenheit>"].freeze
-    RANKINE            = ["<rankine>"].freeze
-    CELSIUS            = ["<celsius>"].freeze
+    ANY_NUMBER = /(#{COMPLEX_NUMBER}|#{RATIONAL_NUMBER}|#{SCI_NUMBER})/
+    ANY_NUMBER_REGEX = /(?:#{ANY_NUMBER})?\s?([^-\d.].*)?/
+    NUMBER_REGEX = /(?<scalar>#{SCI_NUMBER}*)\s*(?<unit>.+)?/ # a number followed by a unit
+    UNIT_STRING_REGEX = %r{#{SCI_NUMBER}*\s*([^/]*)/*(.+)*}
+    TOP_REGEX = /(?<unit_part>[^ *]+)(?:\^|\*\*)(?<exponent>[\d-]+)/
+    BOTTOM_REGEX = /(?<unit_part>[^* ]+)(?:\^|\*\*)(?<exponent>\d+)/
+    NUMBER_UNIT_REGEX = /#{SCI_NUMBER}?(.*)/
+    COMPLEX_REGEX = /#{COMPLEX_NUMBER}\s?(?<unit>.+)?/
+    RATIONAL_REGEX = /#{RATIONAL_NUMBER}\s?(?<unit>.+)?/
+    KELVIN = ["<kelvin>"].freeze
+    FAHRENHEIT = ["<fahrenheit>"].freeze
+    RANKINE = ["<rankine>"].freeze
+    CELSIUS = ["<celsius>"].freeze
 
     # Temperature conversion constants
     CELSIUS_OFFSET_TO_KELVIN = 273.15 # offset to convert Celsius to Kelvin
@@ -1229,9 +1229,9 @@ module RubyUnits
 
         target_num = target.numerator
         target_den = target.denominator
-        source_numerator_values   = to_scalar.call(@numerator)
+        source_numerator_values = to_scalar.call(@numerator)
         source_denominator_values = to_scalar.call(@denominator)
-        target_numerator_values   = to_scalar.call(target_num)
+        target_numerator_values = to_scalar.call(target_num)
         target_denominator_values = to_scalar.call(target_den)
         # @type [Rational, Numeric]
         scalar_is_integer = @scalar.is_a?(Integer)
@@ -1295,10 +1295,10 @@ module RubyUnits
     def units(with_prefix: true, format: nil)
       return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
 
-      output_numerator   = ["1"]
+      output_numerator = ["1"]
       output_denominator = []
-      num                = @numerator.clone.compact
-      den                = @denominator.clone.compact
+      num = @numerator.clone.compact
+      den = @denominator.clone.compact
 
       process_unit_array = lambda do |unit_array|
         definitions = unit_array.map { unit_class.definition(_1) }
@@ -1605,11 +1605,11 @@ module RubyUnits
     def update_base_scalar
       if base?
         @base_scalar = @scalar
-        @signature   = unit_signature
+        @signature = unit_signature
       else
-        base         = to_base
+        base = to_base
         @base_scalar = base.scalar
-        @signature   = base.signature
+        @signature = base.signature
       end
     end
 
@@ -2103,7 +2103,7 @@ module RubyUnits
 
       if unit
         copy(unit)
-        @scalar      *= mult
+        @scalar *= mult
         @base_scalar *= mult
         return self
       end
@@ -2199,7 +2199,7 @@ module RubyUnits
 
       @scalar /= bottom_scalar
 
-      @numerator   ||= UNITY_ARRAY
+      @numerator ||= UNITY_ARRAY
       @denominator ||= UNITY_ARRAY
       @numerator = top.scan(unit_match_regex).delete_if(&:empty?).compact if top
       @denominator = bottom.scan(unit_match_regex).delete_if(&:empty?).compact if bottom
