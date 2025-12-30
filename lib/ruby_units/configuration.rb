@@ -97,7 +97,7 @@ module RubyUnits
     #
     # When enabled, numeric strings parsed from unit inputs will be converted
     # to BigDecimal. The caller must require the BigDecimal library before
-    # enabling this mode (for example `require 'bigdecimal'; require 'bigdecimal/util'`).
+    # enabling this mode (for example `require 'bigdecimal'`).
     #
     # @!attribute [rw] use_bigdecimal
     #   @return [Boolean] whether to coerce numeric literals to BigDecimal (default: false)
@@ -191,12 +191,12 @@ module RubyUnits
     # @raise [MissingDependencyError] when enabling without requiring BigDecimal first
     # @example
     #   require 'bigdecimal'
-    #   require 'bigdecimal/util'
+    #   require 'bigdecimal/util' # for to_d method (optional)
     #   RubyUnits.configuration.use_bigdecimal = true
     def use_bigdecimal=(value)
       raise ArgumentError, "configuration 'use_bigdecimal' must be a boolean" unless [true, false].include?(value)
 
-      raise MissingDependencyError, "To enable use_bigdecimal, require 'bigdecimal' and 'bigdecimal/util' before setting RubyUnits.configuration.use_bigdecimal = true" if value && !defined?(BigDecimal)
+      raise MissingDependencyError, "To enable use_bigdecimal, require 'bigdecimal' before setting RubyUnits.configuration.use_bigdecimal = true" if value && !defined?(BigDecimal)
 
       @use_bigdecimal = value
     end

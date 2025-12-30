@@ -376,7 +376,7 @@ module RubyUnits
     # Coerce a string or numeric value into the configured numeric type.
     #
     # When `RubyUnits.configuration.use_bigdecimal` is true, numeric strings are
-    # converted to BigDecimal (the caller must require 'bigdecimal'/'bigdecimal/util').
+    # converted to BigDecimal (the caller must require 'bigdecimal').
     # Otherwise numeric strings are converted to Float. If the input is already
     # a Numeric it is returned unchanged.
     #
@@ -385,12 +385,12 @@ module RubyUnits
     # @raise [ArgumentError] if the value cannot be coerced by the underlying constructors
     # @example
     #   Unit.parse_number("3.14") #=> 3.14 (Float) unless use_bigdecimal is enabled
-    #   Unit.parse_number(2)       #=> 2 (unchanged)
+    #   Unit.parse_number(2)      #=> 2 (unchanged)
     def self.parse_number(value)
       return value if value.is_a?(Numeric)
 
       if RubyUnits.configuration.use_bigdecimal
-        BigDecimal(value.to_s)
+        BigDecimal(value)
       else
         Float(value)
       end
@@ -401,7 +401,7 @@ module RubyUnits
     #
     # The method first prefers `to_int` when available (exact integer
     # conversion). If not available it falls back to `to_i` and compares the
-    # converted integer to the original value. This works for Float, Rational,
+    # converted integer to the original value. This works for Float, Rational, Complex,
     # BigDecimal (if loaded), and Integer.
     #
     # @param value [Numeric] the numeric value to normalize
@@ -1311,9 +1311,7 @@ module RubyUnits
     # Convert the unit's scalar to BigDecimal. Raises if not unitless.
     #
     # Note: Using this method requires the BigDecimal class to be available
-    # (e.g., by requiring `'bigdecimal'` and `'bigdecimal/util'`). If BigDecimal
-    # is not loaded, callers should enable BigDecimal parsing via
-    # `RubyUnits.configuration.use_bigdecimal` and require the library beforehand.
+    # (e.g., by requiring `'bigdecimal'` and `'bigdecimal/util'`).
     #
     # @return [BigDecimal]
     # @raise [RuntimeError] when not unitless
