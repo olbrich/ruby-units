@@ -425,6 +425,10 @@ module RubyUnits
       else
         value
       end
+    rescue RangeError
+      # This can happen when a Complex number with a non-zero imaginary part is provided, or when value is Float::NAN or
+      # Float::INFINITY
+      value
     end
 
     # Parse a string consisting of a number and a unit string
@@ -1293,7 +1297,7 @@ module RubyUnits
         converted_value = conversion_scalar * (source_numerator_values + target_denominator_values).reduce(1, :*) / (target_numerator_values + source_denominator_values).reduce(1, :*)
         # Convert the scalar to an Integer if the result is equivalent to an
         # integer
-        converted_value = unit_class.normalize_to_i(converted_value) if scalar_is_integer
+        converted_value = unit_class.normalize_to_i(converted_value)
         unit_class.new(scalar: converted_value, numerator: target_num, denominator: target_den, signature: target.signature)
       end
     end
