@@ -414,17 +414,17 @@ module RubyUnits
     def self.normalize_to_i(value)
       return value unless value.is_a?(Numeric)
 
-      if value.respond_to?(:to_int)
-        int = value.to_int
-        return int if int == value
+      responds_to_int = value.respond_to?(:to_int)
+      if responds_to_int || value.respond_to?(:to_i)
+        int = if responds_to_int
+                value.to_int
+              else
+                value.to_i
+              end
+        int if int == value
+      else
+        value
       end
-
-      if value.respond_to?(:to_i)
-        int = value.to_i
-        return int if int == value
-      end
-
-      value
     end
 
     # Parse a string consisting of a number and a unit string
