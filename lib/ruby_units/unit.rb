@@ -421,7 +421,7 @@ module RubyUnits
               else
                 value.to_i
               end
-        int if int == value
+        int == value ? int : value
       else
         value
       end
