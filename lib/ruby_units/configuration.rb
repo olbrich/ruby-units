@@ -4,6 +4,9 @@
 # It allows for the creation, conversion, and mathematical operations on physical quantities
 # with associated units of measurement.
 module RubyUnits
+  # Raised when a requested feature cannot be enabled because a runtime
+  # dependency has not been loaded by the caller.
+  class MissingDependencyError < StandardError; end
   class << self
     # Get or initialize the configuration
     # @return [Configuration] the configuration instance
@@ -88,16 +91,66 @@ module RubyUnits
     #   @return [Numeric] the precision to use when converting to a rational (default: 0.0001)
     attr_reader :default_precision
 
-    # Initialize configuration with keyword arguments
+    # Whether to parse numeric literals as BigDecimal when parsing unit strings.
+    # This is an opt-in feature because BigDecimal has different performance
+    # and precision characteristics compared to Float. The default is `false`.
     #
-    # @param separator [Symbol, Boolean] the separator to use (:space or :none, true/false for backward compatibility) (default: :space)
-    # @param format [Symbol] the format to use when generating output (:rational or :exponential) (default: :rational)
-    # @param default_precision [Numeric] the precision to use when converting to a rational (default: 0.0001)
+    # When enabled, numeric strings parsed from unit inputs will be converted
+    # to BigDecimal. The caller must require the BigDecimal library before
+    # enabling this mode (for example `require 'bigdecimal'`).
+    #
+    # @!attribute [rw] use_bigdecimal
+    #   @return [Boolean] whether to coerce numeric literals to BigDecimal (default: false)
+    attr_reader :use_bigdecimal
+
+    # Initialize configuration with keyword arguments.
+    #
+    # Accepts keyword options to set initial configuration values. Each value
+    # is validated by the corresponding setter method; invalid values will
+    # raise an error (see @raise tags below). Boolean values for
+    # `separator` are accepted for backward compatibility but will emit a
+    # deprecation warning.
+    #
+    # @param opts [Hash] the keyword options hash
+    # @option opts [Symbol, Boolean] :separator One of `:space` or `:none`.
+    #   Boolean `true`/`false` are accepted for backward compatibility
+    #   (`true` -> `:space`, `false` -> `:none`) and will emit a deprecation
+    #   warning. Internally a `:space` separator is stored as a single space
+    #   string (" ") and `:none` is stored as `nil`. Default: `:space`.
+    # @option opts [Symbol] :format The output format, one of `:rational` or
+    #   `:exponential`. Default: `:rational`.
+    # @option opts [Numeric] :default_precision Positive numeric precision
+    #   used when rationalizing fractional values. Default: `0.0001`.
+    # @option opts [Boolean] :use_bigdecimal When `true`, numeric literals
+    #   parsed from unit input strings will be coerced to `BigDecimal`.
+    #   The caller must require the BigDecimal library before enabling this
+    #   option. Default: `false`.
+    #
+    # @raise [ArgumentError] If any provided value fails validation (invalid
+    #   `separator`, invalid `format`, non-positive `default_precision`, or
+    #   non-boolean `use_bigdecimal`).
+    # @raise [MissingDependencyError] If `use_bigdecimal` is enabled but the
+    #   `BigDecimal` library has not been required.
+    #
+    # @example
+    #   Configuration.new(
+    #     separator: :none,
+    #     format: :exponential,
+    #     default_precision: 1e-6,
+    #     use_bigdecimal: false
+    #   )
+    #
     # @return [Configuration] a new configuration instance
-    def initialize(separator: :space, format: :rational, default_precision: 0.0001)
+    def initialize(**opts)
+      separator = opts.fetch(:separator, :space)
+      format = opts.fetch(:format, :rational)
+      default_precision = opts.fetch(:default_precision, 0.0001)
+      use_bigdecimal = opts.fetch(:use_bigdecimal, false)
+
       self.separator = separator
       self.format = format
       self.default_precision = default_precision
+      self.use_bigdecimal = use_bigdecimal
     end
 
     # Set the separator to use when generating output.
@@ -154,6 +207,29 @@ module RubyUnits
       raise ArgumentError, "configuration 'default_precision' must be a positive number" unless value.is_a?(Numeric) && value.positive?
 
       @default_precision = value
+    end
+
+    # Enable or disable BigDecimal parsing for numeric literals.
+    #
+    # To enable BigDecimal parsing, the BigDecimal library must already be
+    # required by the application. If you attempt to enable this option
+    # without requiring BigDecimal first a `MissingDependencyError` will be
+    # raised to make the dependency requirement explicit.
+    #
+    # @param value [Boolean]
+    # @return [void]
+    # @raise [ArgumentError] if `value` is not a boolean
+    # @raise [MissingDependencyError] when enabling without requiring BigDecimal first
+    # @example
+    #   require 'bigdecimal'
+    #   require 'bigdecimal/util' # for to_d method (optional)
+    #   RubyUnits.configuration.use_bigdecimal = true
+    def use_bigdecimal=(value)
+      raise ArgumentError, "configuration 'use_bigdecimal' must be a boolean" unless [true, false].include?(value)
+
+      raise MissingDependencyError, "To enable use_bigdecimal, require 'bigdecimal' before setting RubyUnits.configuration.use_bigdecimal = true" if value && !defined?(BigDecimal)
+
+      @use_bigdecimal = value
     end
   end
 end

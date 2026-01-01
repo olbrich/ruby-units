@@ -32,3 +32,5 @@ Metrics/AbcSize:
   Enabled: false
 Layout/ExtraSpacing:
   AllowForAlignment: false
+RSpec/DescribeClass:
+  Enabled: false

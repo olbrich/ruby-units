@@ -35,8 +35,36 @@ describe RubyUnits::Configuration do
     end
   end
 
+  describe "#use_bigdecimal" do
+    it "validates boolean value" do
+      expect { described_class.new(use_bigdecimal: :maybe) }.to raise_error(ArgumentError)
+    end
+
+    it "raises when enabling without requiring bigdecimal" do
+      config = described_class.new
+      hide_const("BigDecimal")
+      expect { config.use_bigdecimal = true }.to raise_error(RubyUnits::MissingDependencyError, /require 'bigdecimal'/)
+    end
+
+    # NOTE: bigdecimal/util is required in spec_helper.rb for all specs,
+    it "allows enabling when bigdecimal is required" do
+      config = described_class.new
+      config.use_bigdecimal = true
+      expect(config.use_bigdecimal).to be true
+    end
+  end
+
   describe ".separator" do
     context "when set to :space" do
+      around do |example|
+        RubyUnits.reset
+        RubyUnits.configure do |config|
+          config.separator = :space
+        end
+        example.run
+        RubyUnits.reset
+      end
+
       it "has a space between the scalar and the unit" do
         expect(RubyUnits::Unit.new("1 m").to_s).to eq "1 m"
       end
@@ -86,6 +114,15 @@ describe RubyUnits::Configuration do
 
   describe ".format" do
     context "when set to :rational" do
+      around do |example|
+        RubyUnits.reset
+        RubyUnits.configure do |config|
+          config.format = :rational
+        end
+        example.run
+        RubyUnits.reset
+      end
+
       it "uses rational notation" do
         expect(RubyUnits::Unit.new("1 m/s^2").to_s).to eq "1 m/s^2"
       end

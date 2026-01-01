@@ -373,6 +373,64 @@ module RubyUnits
       @base_units ||= definitions.dup.select { |_, definition| definition.base? }.keys.map { new(_1) }
     end
 
+    # Coerce a string or numeric value into the configured numeric type.
+    #
+    # When `RubyUnits.configuration.use_bigdecimal` is true, numeric strings are
+    # converted to BigDecimal (the caller must require 'bigdecimal').
+    # Otherwise numeric strings are converted to Float. If the input is already
+    # a Numeric it is returned unchanged.
+    #
+    # @param value [String, Numeric] the value to coerce
+    # @return [Numeric] a Numeric instance (BigDecimal or Float) or the original Numeric
+    # @raise [ArgumentError] if the value cannot be coerced by the underlying constructors
+    # @example
+    #   Unit.parse_number("3.14") #=> 3.14 (Float) unless use_bigdecimal is enabled
+    #   Unit.parse_number(2)      #=> 2 (unchanged)
+    def self.parse_number(value)
+      return value if value.is_a?(Numeric)
+
+      if RubyUnits.configuration.use_bigdecimal
+        BigDecimal(value)
+      else
+        Float(value)
+      end
+    end
+
+    # Return an Integer when the provided numeric value is mathematically
+    # integral; otherwise return the original numeric value.
+    #
+    # The method first prefers `to_int` when available (exact integer
+    # conversion). If not available it falls back to `to_i` and compares the
+    # converted integer to the original value. This works for Float, Rational, Complex,
+    # BigDecimal (if loaded), and Integer.
+    #
+    # @param value [Numeric] the numeric value to normalize
+    # @return [Integer, Numeric] an `Integer` when the value is integral, otherwise the original numeric
+    # @example
+    #   Unit.normalize_to_i(2.0)           #=> 2
+    #   Unit.normalize_to_i(Rational(3,1)) #=> 3
+    #   Unit.normalize_to_i(3.5)           #=> 3.5
+    # :reek:ManualDispatch
+    def self.normalize_to_i(value)
+      return value unless value.is_a?(Numeric)
+
+      responds_to_int = value.respond_to?(:to_int)
+      if responds_to_int || value.respond_to?(:to_i)
+        int = if responds_to_int
+                value.to_int
+              else
+                value.to_i
+              end
+        int == value ? int : value
+      else
+        value
+      end
+    rescue RangeError
+      # This can happen when a Complex number with a non-zero imaginary part is provided, or when value is Float::NAN or
+      # Float::INFINITY
+      value
+    end
+
     # Parse a string consisting of a number and a unit string
     # NOTE: This does not properly handle units formatted like '12mg/6ml'
     #
@@ -395,7 +453,7 @@ module RubyUnits
           fractional_part = Rational(Regexp.last_match(3).to_i, Regexp.last_match(4).to_i)
           sign * (whole_part + fractional_part)
         else
-          num.to_f
+          parse_number(num)
         end,
         unit.to_s.strip
       ]
@@ -1239,10 +1297,7 @@ module RubyUnits
         converted_value = conversion_scalar * (source_numerator_values + target_denominator_values).reduce(1, :*) / (target_numerator_values + source_denominator_values).reduce(1, :*)
         # Convert the scalar to an Integer if the result is equivalent to an
         # integer
-        if scalar_is_integer
-          converted_as_int = converted_value.to_i
-          converted_value = converted_as_int if converted_as_int == converted_value
-        end
+        converted_value = unit_class.normalize_to_i(converted_value)
         unit_class.new(scalar: converted_value, numerator: target_num, denominator: target_den, signature: target.signature)
       end
     end
@@ -1255,6 +1310,17 @@ module RubyUnits
     # @raise [RuntimeError] when not unitless
     def to_f
       return_scalar_or_raise(:to_f, Float)
+    end
+
+    # Convert the unit's scalar to BigDecimal. Raises if not unitless.
+    #
+    # Note: Using this method requires the BigDecimal class to be available
+    # (e.g., by requiring `'bigdecimal'` and `'bigdecimal/util'`).
+    #
+    # @return [BigDecimal]
+    # @raise [RuntimeError] when not unitless
+    def to_d
+      return_scalar_or_raise(:to_d, BigDecimal)
     end
 
     # converts the unit back to a complex if it is unitless.  Otherwise raises an exception
@@ -2063,12 +2129,10 @@ module RubyUnits
       if unit_string.start_with?(COMPLEX_NUMBER)
         match = unit_string.match(COMPLEX_REGEX)
         real_str, imaginary_str, unit_s = match.values_at(:real, :imaginary, :unit)
-        real = Float(real_str) if real_str
-        imaginary = Float(imaginary_str)
-        real_as_int = real.to_i if real
-        real = real_as_int if real_as_int == real
-        imaginary_as_int = imaginary.to_i
-        imaginary = imaginary_as_int if imaginary_as_int == imaginary
+        real = unit_class.parse_number(real_str) if real_str
+        imaginary = unit_class.parse_number(imaginary_str)
+        real = unit_class.normalize_to_i(real) if real
+        imaginary = unit_class.normalize_to_i(imaginary)
         complex = Complex(real || 0, imaginary)
         complex_real = complex.real
         complex = complex.to_i if complex.imaginary.zero? && complex_real == complex_real.to_i
@@ -2089,17 +2153,19 @@ module RubyUnits
                    else
                      (proper + fraction)
                    end
-        rational_as_int = rational.to_int
-        rational = rational_as_int if rational_as_int == rational
+        rational = unit_class.normalize_to_i(rational)
         return copy(unit_class.new(unit_s || 1) * rational)
       end
 
       match = unit_string.match(NUMBER_REGEX)
       unit_str, scalar_str = match.values_at(:unit, :scalar)
       unit = unit_class.cached.get(unit_str)
-      mult = scalar_str == "" ? 1.0 : scalar_str.to_f
-      mult_as_int = mult.to_int
-      mult = mult_as_int if mult_as_int == mult
+      mult = if scalar_str == "" || scalar_str.nil?
+               unit_class.parse_number("1")
+             else
+               unit_class.parse_number(scalar_str)
+             end
+      mult = unit_class.normalize_to_i(mult)
 
       if unit
         copy(unit)
@@ -2184,17 +2250,16 @@ module RubyUnits
         bottom_scalar, bottom = bottom.scan(NUMBER_UNIT_REGEX)[0]
       end
 
-      @scalar = @scalar.to_f unless !@scalar || @scalar.empty?
+      @scalar = unit_class.parse_number(@scalar) if @scalar && !@scalar.empty?
       @scalar = 1 unless @scalar.is_a? Numeric
-      scalar_as_int = @scalar.to_int
-      @scalar = scalar_as_int if scalar_as_int == @scalar
+      @scalar = unit_class.normalize_to_i(@scalar)
 
-      bottom_scalar = 1 if !bottom_scalar || bottom_scalar.empty?
-      bottom_scalar_as_int = bottom_scalar.to_i
-      bottom_scalar = if bottom_scalar_as_int == bottom_scalar
-                        bottom_scalar_as_int
+      bottom_scalar = if !bottom_scalar || bottom_scalar.empty?
+                        1
+                      elsif bottom_scalar.match?(/^#{INTEGER_DIGITS_REGEX}$/)
+                        Integer(bottom_scalar)
                       else
-                        bottom_scalar.to_f
+                        unit_class.normalize_to_i(unit_class.parse_number(bottom_scalar))
                       end
 
       @scalar /= bottom_scalar

@@ -18,3 +18,4 @@ RSpec.configure do |config|
 end
 
 require_relative "../lib/ruby-units"
+require "bigdecimal/util"
