@@ -5,17 +5,17 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "ruby_units/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "ruby-units"
-  spec.version       = RubyUnits::Unit::VERSION
-  spec.authors       = ["Kevin Olbrich"]
-  spec.email         = ["kevin.olbrich@gmail.com"]
+  spec.name = "ruby-units"
+  spec.version = RubyUnits::Unit::VERSION
+  spec.authors = ["Kevin Olbrich"]
+  spec.email = ["kevin.olbrich@gmail.com"]
 
   spec.required_rubygems_version = ">= 2.0"
   spec.required_ruby_version = ">= 3.2"
-  spec.summary       = "Provides classes and methods to perform unit math and conversions"
-  spec.description   = "Provides classes and methods to perform unit math and conversions"
-  spec.homepage      = "https://github.com/olbrich/ruby-units"
-  spec.license       = "MIT"
+  spec.summary = "Provides classes and methods to perform unit math and conversions"
+  spec.description = "Provides classes and methods to perform unit math and conversions"
+  spec.homepage = "https://github.com/olbrich/ruby-units"
+  spec.license = "MIT"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/olbrich/ruby-units"
