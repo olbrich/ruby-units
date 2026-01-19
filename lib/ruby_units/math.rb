@@ -234,7 +234,7 @@ module RubyUnits
     # :reek:UncommunicativeMethodName
     def log10(number)
       if number.is_a?(RubyUnits::Unit)
-        super(number.to_f)
+        super(number.scalar)
       else
         super
       end
@@ -251,10 +251,10 @@ module RubyUnits
     # @example
     #   Math.log(Unit.new("2.718"))        #=> ~1.0 (natural log)
     #   Math.log(Unit.new("8"), 2)         #=> 3.0 (log base 2)
-    #   Math.log(Math::E)                   #=> 1.0
+    #   Math.log(Math::E)                  #=> 1.0
     def log(number, base = ::Math::E)
       if number.is_a?(RubyUnits::Unit)
-        super(number.to_f, base)
+        super(number.scalar, base)
       else
         super
       end
