@@ -36,7 +36,7 @@ module RubyUnits
     end
 
     def should_skip_caching?(key)
-      keys.include?(key) || key =~ RubyUnits::Unit.special_format_regex
+      data.key?(key) || key =~ RubyUnits::Unit.special_format_regex
     end
   end
 end

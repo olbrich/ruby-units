@@ -10,3 +10,10 @@
 /vendor/bundle/
 # rspec failure tracking
 .rspec_status
+.claude/settings.local.json
+
+# C extension build artifacts
+ext/ruby_units/*.o
+ext/ruby_units/*.so
+ext/ruby_units/Makefile
+lib/ruby_units/*.so

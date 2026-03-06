@@ -24,6 +24,7 @@ end
 
 gem "bigdecimal"
 gem "rake"
+gem "rake-compiler"
 gem "rspec", "~> 3.0"
 gem "simplecov"
 gem "yard"

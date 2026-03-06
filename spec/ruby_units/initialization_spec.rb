@@ -126,9 +126,10 @@ RSpec.describe "initialization" do
         expect(unit.units).to eq("m^2/s^2")
       end
 
-      it "raises error for array with nil first element" do
-        expect { RubyUnits::Unit.new([nil, "m"]) }
-          .to raise_error(ArgumentError, "Invalid Unit Format")
+      it "treats nil first element as scalar 1" do
+        unit = RubyUnits::Unit.new([nil, "m"])
+        expect(unit.scalar).to eq(1)
+        expect(unit.units).to eq("m")
       end
     end
   end
@@ -183,6 +184,18 @@ RSpec.describe "initialization" do
     it "raises ArgumentError for nil as single argument" do
       expect { RubyUnits::Unit.new(nil) }
         .to raise_error(ArgumentError, "Invalid Unit Format")
+    end
+
+    it "treats nil scalar in two-arg form as scalar 1" do
+      unit = RubyUnits::Unit.new(nil, "m")
+      expect(unit.scalar).to eq(1)
+      expect(unit.units).to eq("m")
+    end
+
+    it "treats nil scalar in two-arg form with compound unit" do
+      unit = RubyUnits::Unit.new(nil, "m/s")
+      expect(unit.scalar).to eq(1)
+      expect(unit.units).to eq("m/s")
     end
   end
 

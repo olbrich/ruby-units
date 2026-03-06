@@ -55,6 +55,8 @@ module RubyUnits
     self.unit_values = {}
     @unit_regex = nil
     @unit_match_regex = nil
+    @max_unit_name_length = 0
+    @max_prefix_name_length = 0
     UNITY = "<1>"
     UNITY_ARRAY = [UNITY].freeze
 
@@ -220,6 +222,8 @@ module RubyUnits
       @unit_regex = nil
       @unit_match_regex = nil
       @prefix_regex = nil
+      @max_unit_name_length = 0
+      @max_prefix_name_length = 0
 
       definitions.each_value do |definition|
         use_definition(definition)
@@ -332,32 +336,40 @@ module RubyUnits
     # @param denominator_units [Array] denominator
     # @return [Hash]
     def self.eliminate_terms(scalar, numerator_units, denominator_units)
-      working_numerator = numerator_units.dup
-      working_denominator = denominator_units.dup
-      working_numerator.delete(UNITY)
-      working_denominator.delete(UNITY)
+      return _c_eliminate_terms(scalar, numerator_units, denominator_units) if respond_to?(:_c_eliminate_terms)
 
       combined = ::Hash.new(0)
 
-      [[working_numerator, 1], [working_denominator, -1]].each do |array, increment|
-        array.chunk_while { |elt_before, _| definition(elt_before).prefix? }
-             .to_a
-             .each { combined[_1] += increment }
-      end
+      count_units(numerator_units, combined, 1)
+      count_units(denominator_units, combined, -1)
 
       result_numerator = []
       result_denominator = []
       combined.each do |key, value|
-        if value.positive?
-          value.times { result_numerator << key }
-        elsif value.negative?
-          value.abs.times { result_denominator << key }
+        if value > 0
+          value.times { result_numerator.concat(key) }
+        elsif value < 0
+          (-value).times { result_denominator.concat(key) }
         end
       end
+
       result_numerator = UNITY_ARRAY if result_numerator.empty?
       result_denominator = UNITY_ARRAY if result_denominator.empty?
 
-      { scalar:, numerator: result_numerator.flatten, denominator: result_denominator.flatten }
+      { scalar:, numerator: result_numerator, denominator: result_denominator }
+    end
+
+    private_class_method def self.count_units(unit_array, combined, increment)
+      current_group = []
+      unit_array.each do |token|
+        next if token == UNITY
+
+        current_group << token
+        unless definition(token)&.prefix?
+          combined[current_group] += increment
+          current_group = []
+        end
+      end
     end
 
     # Creates a new unit from the current one with all common terms eliminated.
@@ -385,6 +397,7 @@ module RubyUnits
     # @raise [ArgumentError] if the value cannot be coerced by the underlying constructors
     # @example
     #   Unit.parse_number("3.14") #=> 3.14 (Float) unless use_bigdecimal is enabled
+    #   Unit.parse_number("1")    #=> 1 (Integer)
     #   Unit.parse_number(2)      #=> 2 (unchanged)
     def self.parse_number(value)
       return value if value.is_a?(Numeric)
@@ -392,7 +405,9 @@ module RubyUnits
       if RubyUnits.configuration.use_bigdecimal
         BigDecimal(value)
       else
-        Float(value)
+        f = Float(value)
+        i = f.to_i
+        i == f ? i : f
       end
     end
 
@@ -413,6 +428,7 @@ module RubyUnits
     # :reek:ManualDispatch
     def self.normalize_to_i(value)
       return value unless value.is_a?(Numeric)
+      return value if value.is_a?(Float)
 
       responds_to_int = value.respond_to?(:to_int)
       if responds_to_int || value.respond_to?(:to_i)
@@ -507,11 +523,23 @@ module RubyUnits
       )
     end
 
+    # Batch-load definitions, deferring regex cache invalidation until the end.
+    #
+    # @yield block containing definition loading code
+    # @return [void]
+    def self.batch_define
+      @batch_loading = true
+      yield
+    ensure
+      @batch_loading = false
+      invalidate_regex_cache
+    end
+
     # inject a definition into the internal array and set it up for use
     #
     # @param definition [RubyUnits::Unit::Definition]
     def self.use_definition(definition)
-      invalidate_regex_cache
+      invalidate_regex_cache unless @batch_loading
       if definition.prefix?
         register_prefix_definition(definition)
       else
@@ -537,6 +565,7 @@ module RubyUnits
       prefix_values[definition_name] = definition.scalar
       register_aliases(definition.aliases, definition_name, prefix_map)
       @prefix_regex = nil
+      definition.aliases.each { |a| @max_prefix_name_length = a.length if a.length > @max_prefix_name_length }
     end
 
     # Register a unit definition
@@ -549,6 +578,7 @@ module RubyUnits
       unit_values[definition_name] = unit_value
       register_aliases(definition.aliases, definition_name, unit_map)
       @unit_regex = nil
+      definition.aliases.each { |a| @max_unit_name_length = a.length if a.length > @max_unit_name_length }
     end
 
     # Create a hash for unit value
@@ -571,6 +601,31 @@ module RubyUnits
     # @return [void]
     def self.register_aliases(aliases, name, map)
       aliases.each { map[_1] = name }
+    end
+
+    # Resolve a single unit token via hash-based longest-match lookup
+    # Returns an array of canonical names (e.g., ["<kilo>", "<gram>"]) or nil if not found
+    #
+    # @param token [String] the unit token to resolve (e.g., "kg", "meter", "km")
+    # @return [Array<String>, nil] array of canonical names, or nil if not found
+    def self.resolve_unit_token(token)
+      # Try direct unit match first (handles aliases like "kg", "meter", etc.)
+      unit_name = unit_map[token]
+      return [unit_name] if unit_name
+
+      # Try prefix+unit decomposition: longest prefix first
+      max_plen = [@max_prefix_name_length, token.length - 1].min
+      max_plen.downto(1) do |plen|
+        prefix_candidate = token[0, plen]
+        prefix_name = prefix_map[prefix_candidate]
+        next unless prefix_name
+
+        unit_candidate = token[plen..]
+        unit_name = unit_map[unit_candidate]
+        return [prefix_name, unit_name] if unit_name
+      end
+
+      nil
     end
 
     # Format a fraction part with optional rationalization
@@ -686,12 +741,8 @@ module RubyUnits
     def base?
       return @base if defined? @base
 
-      @base = (@numerator + @denominator)
-              .compact
-              .uniq
-              .map { unit_class.definition(_1) }
-              .all? { _1.unity? || _1.base? }
-      @base
+      @base = @numerator.all? { |t| t == UNITY || (d = unit_class.definition(t)) && (d.unity? || d.base?) } &&
+              @denominator.all? { |t| t == UNITY || (d = unit_class.definition(t)) && (d.unity? || d.base?) }
     end
 
     alias is_base? base?
@@ -703,14 +754,23 @@ module RubyUnits
     def to_base
       return self if base?
 
+      @base_unit ||= compute_to_base
+    end
+
+    alias base to_base
+
+    private
+
+    # Compute the base unit representation (called lazily by to_base)
+    # @return [Unit]
+    def compute_to_base
       if unit_class.unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
         @signature = unit_class.kinds.key(:temperature)
-        base = if temperature?
-                 convert_to("tempK")
-               elsif degree?
-                 convert_to("degK")
-               end
-        return base
+        if temperature?
+          return convert_to("tempK")
+        elsif degree?
+          return convert_to("degK")
+        end
       end
 
       base_cache = unit_class.base_unit_cache
@@ -723,7 +783,9 @@ module RubyUnits
       prefix_vals = unit_class.prefix_values
       unit_vals = unit_class.unit_values
 
-      process_unit_for_numerator = lambda do |num_unit|
+      @numerator.each do |num_unit|
+        next if num_unit == UNITY
+
         prefix_value = prefix_vals[num_unit]
         if prefix_value
           conversion_factor *= prefix_value
@@ -738,7 +800,9 @@ module RubyUnits
         end
       end
 
-      process_unit_for_denominator = lambda do |den_unit|
+      @denominator.each do |den_unit|
+        next if den_unit == UNITY
+
         prefix_value = prefix_vals[den_unit]
         if prefix_value
           conversion_factor /= prefix_value
@@ -753,9 +817,6 @@ module RubyUnits
         end
       end
 
-      @numerator.compact.each(&process_unit_for_numerator)
-      @denominator.compact.each(&process_unit_for_denominator)
-
       num = num.flatten.compact
       den = den.flatten.compact
       num = UNITY_ARRAY if num.empty?
@@ -764,7 +825,7 @@ module RubyUnits
       base * @scalar
     end
 
-    alias base to_base
+    public
 
     #
     # @example
@@ -951,6 +1012,8 @@ module RubyUnits
       when Unit
         if zero?
           other.dup
+        elsif @numerator == other.numerator && @denominator == other.denominator && !temperature? && !other.temperature?
+          unit_class.new(scalar: @scalar + other.scalar, numerator: @numerator, denominator: @denominator, signature: @signature)
         elsif compatible_with?(other)
           raise ArgumentError, "Cannot add two temperatures" if [self, other].all?(&:temperature?)
 
@@ -988,6 +1051,8 @@ module RubyUnits
           else
             -other_copy
           end
+        elsif @numerator == other.numerator && @denominator == other.denominator && !temperature? && !other.temperature?
+          unit_class.new(scalar: @scalar - other.scalar, numerator: @numerator, denominator: @denominator, signature: @signature)
         elsif compatible_with?(other)
           scalar_difference = base_scalar - other.base_scalar
           if [self, other].all?(&:temperature?)
@@ -1281,23 +1346,21 @@ module RubyUnits
 
         ensure_compatible_with(target)
 
-        prefix_vals = unit_class.prefix_values
-        unit_vals = unit_class.unit_values
-        to_scalar = ->(unit_array) { unit_array.map { prefix_vals[_1] || _1 }.map { _1.is_a?(Numeric) ? _1 : unit_vals[_1][:scalar] }.compact }
-
         target_num = target.numerator
         target_den = target.denominator
-        source_numerator_values = to_scalar.call(@numerator)
-        source_denominator_values = to_scalar.call(@denominator)
-        target_numerator_values = to_scalar.call(target_num)
-        target_denominator_values = to_scalar.call(target_den)
-        # @type [Rational, Numeric]
-        scalar_is_integer = @scalar.is_a?(Integer)
-        conversion_scalar = scalar_is_integer ? @scalar.to_r : @scalar
-        converted_value = conversion_scalar * (source_numerator_values + target_denominator_values).reduce(1, :*) / (target_numerator_values + source_denominator_values).reduce(1, :*)
-        # Convert the scalar to an Integer if the result is equivalent to an
-        # integer
-        converted_value = unit_class.normalize_to_i(converted_value)
+
+        if unit_class.respond_to?(:_c_convert_scalar)
+          converted_value = unit_class._c_convert_scalar(self, target)
+        else
+          # Compute conversion factor directly without intermediate arrays
+          numerator_factor = unit_array_scalar(@numerator) * unit_array_scalar(target_den)
+          denominator_factor = unit_array_scalar(target_num) * unit_array_scalar(@denominator)
+
+          scalar_is_integer = @scalar.is_a?(Integer)
+          conversion_scalar = scalar_is_integer ? @scalar.to_r : @scalar
+          converted_value = conversion_scalar * numerator_factor / denominator_factor
+          converted_value = unit_class.normalize_to_i(converted_value)
+        end
         unit_class.new(scalar: converted_value, numerator: target_num, denominator: target_den, signature: target.signature)
       end
     end
@@ -1360,6 +1423,9 @@ module RubyUnits
     # @return [String]
     def units(with_prefix: true, format: nil)
       return "" if @numerator == UNITY_ARRAY && @denominator == UNITY_ARRAY
+
+      # Fast path: use cached unit_name for default args (rational format, with prefix)
+      return @unit_name if @unit_name && with_prefix && format != :exponential
 
       output_numerator = ["1"]
       output_denominator = []
@@ -1672,10 +1738,103 @@ module RubyUnits
       if base?
         @base_scalar = @scalar
         @signature = unit_signature
-      else
+      elsif unit_class.unit_map[units] =~ /\A<(?:temp|deg)[CRF]>\Z/
         base = to_base
         @base_scalar = base.scalar
         @signature = base.signature
+      else
+        @base_scalar = compute_base_scalar_fast
+        @signature = compute_signature_fast
+      end
+    end
+
+    # Compute base_scalar without creating an intermediate Unit object
+    # @return [Numeric]
+    def compute_base_scalar_fast
+      factor = Rational(1)
+      prefix_vals = unit_class.prefix_values
+      unit_vals = unit_class.unit_values
+
+      @numerator.each do |token|
+        next if token == UNITY
+
+        pv = prefix_vals[token]
+        if pv
+          factor *= pv
+        else
+          uv = unit_vals[token]
+          factor *= uv[:scalar] if uv
+        end
+      end
+
+      @denominator.each do |token|
+        next if token == UNITY
+
+        pv = prefix_vals[token]
+        if pv
+          factor /= pv
+        else
+          uv = unit_vals[token]
+          factor /= uv[:scalar] if uv
+        end
+      end
+
+      @scalar * factor
+    end
+
+    # Compute signature without creating a base Unit object
+    # @return [Integer]
+    def compute_signature_fast
+      vector = ::Array.new(SIGNATURE_VECTOR.size, 0)
+      expand_tokens_to_signature(@numerator, vector, 1)
+      expand_tokens_to_signature(@denominator, vector, -1)
+      raise ArgumentError, "Power out of range (-20 < net power of a unit < 20)" if vector.any? { _1.abs >= 20 }
+
+      vector.each_with_index { |item, index| vector[index] = item * (20**index) }
+      vector.inject(0, :+)
+    end
+
+    # Expand unit tokens to their base units and accumulate signature vector
+    # @param tokens [Array<String>] unit tokens
+    # @param vector [Array<Integer>] signature vector to accumulate into
+    # @param sign [Integer] +1 for numerator, -1 for denominator
+    def expand_tokens_to_signature(tokens, vector, sign)
+      prefix_vals = unit_class.prefix_values
+      unit_vals = unit_class.unit_values
+
+      tokens.each do |token|
+        next if token == UNITY
+        next if prefix_vals.key?(token)
+
+        uv = unit_vals[token]
+        if uv
+          base_num = uv[:numerator]
+          base_den = uv[:denominator]
+          if base_num
+            base_num.each do |bt|
+              defn = unit_class.definition(bt)
+              next unless defn
+
+              idx = SIGNATURE_VECTOR.index(defn.kind)
+              vector[idx] += sign if idx
+            end
+          end
+          if base_den
+            base_den.each do |bt|
+              defn = unit_class.definition(bt)
+              next unless defn
+
+              idx = SIGNATURE_VECTOR.index(defn.kind)
+              vector[idx] -= sign if idx
+            end
+          end
+        else
+          defn = unit_class.definition(token)
+          if defn
+            idx = SIGNATURE_VECTOR.index(defn.kind)
+            vector[idx] += sign if idx
+          end
+        end
       end
     end
 
@@ -1685,6 +1844,26 @@ module RubyUnits
     # @raise [ArgumentError] if units are not compatible
     def ensure_compatible_with(other)
       raise ArgumentError, "Incompatible Units ('#{self}' not compatible with '#{other}')" unless compatible_with?(other)
+    end
+
+    # Compute the scalar product of a unit array (numerator or denominator tokens)
+    # without creating intermediate arrays.
+    # @param unit_array [Array<String>] array of canonical unit token names
+    # @return [Numeric] the accumulated scalar value
+    def unit_array_scalar(unit_array)
+      prefix_vals = unit_class.prefix_values
+      unit_vals = unit_class.unit_values
+      result = 1
+      unit_array.each do |token|
+        pv = prefix_vals[token]
+        if pv
+          result *= pv
+        else
+          uv = unit_vals[token]
+          result *= uv[:scalar] if uv && uv[:scalar]
+        end
+      end
+      result
     end
 
     # Validate that a time_point is a Time, Date, or DateTime
@@ -1888,8 +2067,12 @@ module RubyUnits
       case options
       in [first] if first
         parse_single_arg(first)
+      in [nil, String => second]
+        parse_single_arg(second)
       in [first, String => second] if first
         parse_two_args(first, second)
+      in [Numeric => scalar, Unit => unit_obj]
+        copy(unit_obj * scalar)
       in [first, String | Array => second, String | Array => third] if first
         parse_three_args(first, second, third)
       else
@@ -1936,11 +2119,12 @@ module RubyUnits
     # @param [String] unit_string
     # @return [void]
     def parse_two_args(scalar, unit_string)
-      cached = unit_class.cached.get(unit_string)
-      if cached
-        copy(cached * scalar)
+      if unit_string.strip.empty?
+        parse_numeric(scalar)
       else
-        parse_string("#{scalar} #{unit_string}")
+        cached = unit_class.cached.get(unit_string)
+        unit = cached || unit_class.new(unit_string)
+        copy(unit * scalar)
       end
     end
 
@@ -1956,7 +2140,7 @@ module RubyUnits
       if cached
         copy(cached * scalar)
       else
-        parse_string("#{scalar} #{unit_str}")
+        copy(unit_class.new(unit_str) * scalar)
       end
     end
 
@@ -1965,7 +2149,7 @@ module RubyUnits
     # @param [Hash] hash
     # @return [void]
     def parse_hash(hash)
-      @scalar = validate_scalar(hash.fetch(:scalar, 1))
+      @scalar = unit_class.normalize_to_i(validate_scalar(hash.fetch(:scalar, 1)))
       @numerator = validate_unit_array(hash.fetch(:numerator, UNITY_ARRAY), :numerator)
       @denominator = validate_unit_array(hash.fetch(:denominator, UNITY_ARRAY), :denominator)
       @signature = validate_signature(hash[:signature])
@@ -2039,6 +2223,10 @@ module RubyUnits
     # @param [Array] options original options passed to initialize
     # @return [void]
     def finalize_initialization(options)
+      # C finalize returns true on success, false if temperature tokens detected
+      if respond_to?(:_c_finalize, true) && _c_finalize(options[0])
+        return
+      end
       update_base_scalar
       validate_temperature
       cache_unit_if_needed(options)
@@ -2170,19 +2358,21 @@ module RubyUnits
       if unit
         copy(unit)
         @scalar *= mult
-        @base_scalar *= mult
+        # Temperature base_scalar involves an offset (e.g. 0°F = 255.37K),
+        # so linear scaling is incorrect. Let update_base_scalar recompute it.
+        if temperature?
+          @base_scalar = nil
+        else
+          @base_scalar *= mult
+        end
         return self
       end
 
-      while unit_string.gsub!(/<(#{unit_class.prefix_regex})><(#{unit_class.unit_regex})>/, '<\1\2>')
-        # replace <prefix><unit> with <prefixunit>
+      # Handle angle bracket format: insert separators between groups, then strip
+      if unit_string.include?("<")
+        unit_string.gsub!(">", "> ")
+        unit_string.gsub!(/[<>]/, "")
       end
-      unit_match_regex = unit_class.unit_match_regex
-      while unit_string.gsub!(/<#{unit_match_regex}><#{unit_match_regex}>/, '<\1\2>*<\3\4>')
-        # collapse <prefixunit><prefixunit> into <prefixunit>*<prefixunit>...
-      end
-      # ... and then strip the remaining brackets for x*y*z
-      unit_string.gsub!(/[<>]/, "")
 
       if (match = unit_string.match(TIME_REGEX))
         hours, minutes, seconds, milliseconds = match.values_at(:hour, :min, :sec, :msec)
@@ -2266,25 +2456,8 @@ module RubyUnits
 
       @numerator ||= UNITY_ARRAY
       @denominator ||= UNITY_ARRAY
-      @numerator = top.scan(unit_match_regex).delete_if(&:empty?).compact if top
-      @denominator = bottom.scan(unit_match_regex).delete_if(&:empty?).compact if bottom
-
-      # eliminate all known terms from this string.  This is a quick check to see if the passed unit
-      # contains terms that are not defined.
-      used = "#{top} #{bottom}".gsub(unit_match_regex, "").gsub(%r{[\d*, "'_^/$]}, "")
-      invalid_unit(passed_unit_string) unless used.empty?
-
-      prefix_map = unit_class.prefix_map
-      unit_map = unit_class.unit_map
-      transform_units = lambda do |(prefix, unit)|
-        prefix_value = prefix_map[prefix]
-        unit_value = unit_map[unit]
-        prefix_value ? [prefix_value, unit_value] : [unit_value]
-      end
-
-      @numerator = @numerator.map(&transform_units).flatten.compact.delete_if(&:empty?)
-
-      @denominator = @denominator.map(&transform_units).flatten.compact.delete_if(&:empty?)
+      @numerator = resolve_expression_tokens(top, passed_unit_string) if top
+      @denominator = resolve_expression_tokens(bottom, passed_unit_string) if bottom
 
       @numerator = UNITY_ARRAY if @numerator.empty?
       @denominator = UNITY_ARRAY if @denominator.empty?
@@ -2308,6 +2481,46 @@ module RubyUnits
       else
         invalid_unit(passed_unit_string, unit_string)
       end
+    end
+
+    # Resolve tokens in a unit expression string (numerator or denominator half)
+    # using hash-based lookup instead of regex scanning.
+    #
+    # @param expression [String] the expression string after exponent expansion (e.g., "kg m" or "s s")
+    # @param passed_unit_string [String] original input string for error messages
+    # @return [Array<String>] array of canonical unit names (e.g., ["<kilogram>", "<meter>"])
+    # @raise [ArgumentError] if an unknown unit token is encountered
+    def resolve_expression_tokens(expression, passed_unit_string)
+      result = []
+      tokens = expression.split(/[\s*]+/)
+      i = 0
+      while i < tokens.length
+        token = tokens[i]
+        i += 1
+        next if token.empty?
+        # Skip pure numeric tokens (like "1" in "1/mol") - they are not units
+        next if token.match?(/\A\d+\z/)
+
+        # Try multi-word match: greedily join consecutive tokens to find
+        # multi-word aliases like "square meter" or "short ton"
+        resolved = nil
+        matched_count = 0
+        max_lookahead = [tokens.length - (i - 1), 4].min # limit lookahead
+        max_lookahead.downto(1) do |n|
+          candidate = tokens[(i - 1), n].join(" ")
+          resolved = unit_class.resolve_unit_token(candidate)
+          if resolved
+            matched_count = n
+            break
+          end
+        end
+
+        invalid_unit(passed_unit_string) unless resolved
+        result.concat(resolved)
+        # Skip the extra tokens consumed by the multi-word match
+        i += matched_count - 1
+      end
+      result
     end
 
     # Raise a standardized ArgumentError for an unrecognized unit string.

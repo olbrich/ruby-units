@@ -1499,8 +1499,13 @@ describe "Unit handles attempts to create bad units" do
     expect { RubyUnits::Unit.new("-500/9 tempR") }.to raise_error(ArgumentError, "Temperatures must not be less than absolute zero")
   end
 
-  specify "no nil scalar" do
-    expect { RubyUnits::Unit.new(nil, "feet") }.to raise_error(ArgumentError, "Invalid Unit Format")
+  specify "nil scalar in two-arg form treated as scalar 1" do
+    unit = RubyUnits::Unit.new(nil, "feet")
+    expect(unit.scalar).to eq(1)
+    expect(unit.units).to eq("ft")
+  end
+
+  specify "nil scalar in three-arg form raises" do
     expect { RubyUnits::Unit.new(nil, "feet", "min") }.to raise_error(ArgumentError, "Invalid Unit Format")
   end
 
