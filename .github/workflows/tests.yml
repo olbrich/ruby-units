@@ -17,11 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4', '4.0', 'jruby-10.0']
+        ruby: ['3.3', '3.4', '4.0', 'jruby-10.0']
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v6.0.1
+    - uses: actions/checkout@v7.0.1
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
@@ -38,7 +38,7 @@ jobs:
     env:
       BUNDLE_WITHOUT: optional
     steps:
-    - uses: actions/checkout@v6.0.1
+    - uses: actions/checkout@v7.0.1
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
