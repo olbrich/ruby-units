@@ -51,6 +51,7 @@ GEM
       zeitwerk (~> 2.6)
     erb (6.0.7)
     erb (6.0.7-java)
+    ffi (1.17.4)
     ffi (1.17.4-arm64-darwin)
     ffi (1.17.4-java)
     ffi (1.17.4-x86_64-linux-gnu)
@@ -98,7 +99,11 @@ GEM
     logger (1.7.0)
     lumberjack (1.4.2)
     method_source (1.1.0)
+    mini_portile2 (2.8.9)
     nenv (0.3.0)
+    nokogiri (1.19.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.19.7-arm64-darwin)
       racc (~> 1.4)
     nokogiri (1.19.7-java)
@@ -300,4 +305,4 @@ DEPENDENCIES
   yard
 
 BUNDLED WITH
-   2.7.2
+  4.1.0
