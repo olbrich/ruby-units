@@ -21,7 +21,7 @@ manipulations to ensure an accurate result.
 
 ## Installation
 
-This package requires Ruby 3.2 or later.
+This package requires Ruby 3.3 or later.
 
 This package may be installed using:
 
